@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9CD5C745-9015-447E-89A5-809103DFD97D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FAnsi</RootNamespace>
+    <AssemblyName>FAnsi</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Connections\IManagedConnection.cs" />
+    <Compile Include="Connections\IManagedTransaction.cs" />
+    <Compile Include="Connections\ManagedConnection.cs" />
+    <Compile Include="Connections\ManagedTransaction.cs" />
+    <Compile Include="DatabaseType.cs" />
+    <Compile Include="Discovery\BulkCopy.cs" />
+    <Compile Include="Discovery\ConnectionStringDefaults\ConnectionStringKeywordAccumulator.cs" />
+    <Compile Include="Discovery\DatabaseColumnRequest.cs" />
+    <Compile Include="Discovery\DecimalSize.cs" />
+    <Compile Include="Discovery\DiscoveredColumn.cs" />
+    <Compile Include="Discovery\DiscoveredDatabase.cs" />
+    <Compile Include="Discovery\DiscoveredDatabaseHelper.cs" />
+    <Compile Include="Discovery\DiscoveredDataType.cs" />
+    <Compile Include="Discovery\DiscoveredParameter.cs" />
+    <Compile Include="Discovery\DiscoveredServer.cs" />
+    <Compile Include="Discovery\DiscoveredServerHelper.cs" />
+    <Compile Include="Discovery\DiscoveredStoredprocedure.cs" />
+    <Compile Include="Discovery\DiscoveredTable.cs" />
+    <Compile Include="Discovery\DiscoveredTableHelper.cs" />
+    <Compile Include="Discovery\DiscoveredTableValuedFunction.cs" />
+    <Compile Include="Discovery\Exceptions\AlterFailedException.cs" />
+    <Compile Include="Discovery\IBulkCopy.cs" />
+    <Compile Include="Discovery\IDiscoveredColumnHelper.cs" />
+    <Compile Include="Discovery\IDiscoveredDatabaseHelper.cs" />
+    <Compile Include="Discovery\IDiscoveredServerHelper.cs" />
+    <Compile Include="Discovery\IDiscoveredTableHelper.cs" />
+    <Compile Include="Discovery\QuerySyntax\IHasQuerySyntaxHelper.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Implementation\Implementation.cs" />
+    <Compile Include="Implementation\ImplementationManager.cs" />
+    <Compile Include="Implementation\IImplementation.cs" />
+    <Compile Include="Naming\IHasFullyQualifiedNameToo.cs" />
+    <Compile Include="Naming\IHasRuntimeName.cs" />
+    <Compile Include="Discovery\IMightNotExist.cs" />
+    <Compile Include="Discovery\ISupplementalColumnInformation.cs" />
+    <Compile Include="Discovery\QuerySyntaxHelper.cs" />
+    <Compile Include="Discovery\QuerySyntax\Aggregation\AxisIncrement.cs" />
+    <Compile Include="Discovery\QuerySyntax\Aggregation\IAggregateHelper.cs" />
+    <Compile Include="Discovery\QuerySyntax\Aggregation\IQueryAxis.cs" />
+    <Compile Include="Discovery\QuerySyntax\CustomLine.cs" />
+    <Compile Include="Discovery\QuerySyntax\CustomLineRole.cs" />
+    <Compile Include="Discovery\QuerySyntax\IQuerySyntaxHelper.cs" />
+    <Compile Include="Discovery\QuerySyntax\QueryComponent.cs" />
+    <Compile Include="Discovery\QuerySyntax\QuerySyntaxHelperFactory.cs" />
+    <Compile Include="Discovery\QuerySyntax\TopXResponse.cs" />
+    <Compile Include="Discovery\QuerySyntax\Update\IUpdateHelper.cs" />
+    <Compile Include="Discovery\QuerySyntax\Update\UpdateHelper.cs" />
+    <Compile Include="Discovery\TableCreation\CreateTableArgs.cs" />
+    <Compile Include="Discovery\TableCreation\IDatabaseColumnRequestAdjuster.cs" />
+    <Compile Include="Discovery\TypeTranslation\DatabaseTypeRequest.cs" />
+    <Compile Include="Discovery\TypeTranslation\DataTypeComputer.cs" />
+    <Compile Include="Discovery\TypeTranslation\DataTypeComputerException.cs" />
+    <Compile Include="Discovery\TypeTranslation\ITypeTranslater.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\BoolTypeDecider.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\DateTimeTypeDecider.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\DecideTypesForStrings.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\DecimalTypeDecider.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\IDecideTypesForStrings.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\IntTypeDecider.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\NeverGuessedTypeDecider.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\TimeSpanTypeDecider.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\TypeCompatibilityGroup.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeDeciders\TypeDeciderFactory.cs" />
+    <Compile Include="Discovery\TypeTranslation\TypeTranslater.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Discovery\TypeTranslation\README.md" />
+    <None Include="Discovery\TypeTranslation\TypeTranslation.cd" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
