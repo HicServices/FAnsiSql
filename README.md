@@ -21,27 +21,28 @@ If we wanted to target Microsoft Sql Server we might write something like:
 ```sql
 CREATE TABLE [FAnsiTests].[dbo].[MyTable]
 (
-	Name varchar(10),
-	DateOfBirth datetime2,
+	Name varchar(10) NULL,
+	DateOfBirth datetime2 NULL,
 );
 ```
 
 The same code on MySql would be:
+
 ```sql
 CREATE TABLE `FAnsiTests`.`MyTable`
 (
-`Name` varchar(5) NULL ,
-`DateOfBirth` datetime NULL 
+	`Name` varchar(5) NULL ,
+	`DateOfBirth` datetime NULL 
 );
 ```
 
-We have to change the escape character, we don't specify schema (dbo) and even the data types are different.
-
-More advanced features ([TOP X](https://www.w3schools.com/sql/sql_top.asp), [UPDATE from JOIN](https://stackoverflow.com/a/1293347/4824531) etc) vary even more by DBMS.
+We have to change the table qualifier, we don't specify schema (dbo) and even the data types are different.  The more advanced the feature, the more desperate the varied the implementations are (e.g. [TOP X](https://www.w3schools.com/sql/sql_top.asp), [UPDATE from JOIN](https://stackoverflow.com/a/1293347/4824531) etc).
 
 The goal of FAnsiSql is to abstract away cross DBMS differences and streamline common tasks while still allowing you to harness the power of executing raw SQL commands.
 
 ## Features
+
+FAnsiSql is built using only the core `System.Data.Common` abstract classes (e.g. `DBCommand`, `DBConnection` etc).  Wherever possible ANSI Sql is defined in the main project but virtual/abstract methods are used to allow custom DBMS specific implementations.  Each implementation ([Microsoft Sql](./Implementations/FAnsi.Implementations.MicrosoftSQL/README.md) / [MySql](./Implementations/FAnsi.Implementations.MySql/README.md)/ [Oracle](./Implementations/FAnsi.Implementations.Oracle/README.md)) is defined in a separate assembly (e.g. FAnsi.Implementations.MicrosoftSQL.dll) and is powered by a suitable backing library (e.g. [ODP.net](https://www.oracle.com/technetwork/topics/dotnet/index-085163.html) for Oracle).  Implementations are loaded using [Managed Extensibility Framework](https://docs.microsoft.com/en-us/dotnet/framework/mef/).
 
 - Database / Table Management (Discovery, Create, Drop, Script etc)
 - Bulk Insert
