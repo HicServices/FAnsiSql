@@ -21,6 +21,10 @@ namespace FAnsi.Implementations.Oracle
         
         public override int Upload(DataTable dt)
         {
+            //don't run an insert if there are 0 rows
+            if (dt.Rows.Count == 0)
+                return 0;
+
             int affectedRows = 0;
             
             var mapping = GetMapping(dt.Columns.Cast<DataColumn>());

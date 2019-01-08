@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using FAnsi;
 using FAnsi.Discovery;
@@ -86,6 +88,12 @@ namespace Fansi.Implementations.MicrosoftSQL
         public override string HowDoWeAchieveMd5(string selectSql)
         {
             return "CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary," + selectSql + ")),2)";
+        }
+
+        protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
+        {
+            //Value must be a DateTime even if DBParameter is of Type DbType.Time
+            return Convert.ToDateTime(timeSpan.ToString());
         }
 
         public override string EnsureWrappedImpl(string databaseOrTableName)

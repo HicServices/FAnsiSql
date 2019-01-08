@@ -79,6 +79,12 @@ namespace FAnsi.Implementations.Oracle
             throw new NotImplementedException();
         }
 
+        protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
+        {
+            //Value must be a DateTime even if DBParameter is of Type DbType.Time
+            return Convert.ToDateTime(timeSpan.ToString());
+        }
+
         public override string DatabaseTableSeparator
         {
             get { return "."; }

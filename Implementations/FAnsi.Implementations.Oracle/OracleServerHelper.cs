@@ -77,7 +77,7 @@ namespace FAnsi.Implementations.Oracle
 
         public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)
         {
-            throw new NotImplementedException();
+            return builder;
         }
 
         public override IDiscoveredDatabaseHelper GetDatabaseHelper()

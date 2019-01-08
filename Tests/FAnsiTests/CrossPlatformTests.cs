@@ -15,77 +15,7 @@ namespace FansiTests
     public class CrossPlatformTests:DatabaseTests
     {
         
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        public void TestTableCreation(DatabaseType type)
-        {
-            var database = GetTestDatabase(type);
-
-            var tbl = database.ExpectTable("CreatedTable");
-            
-            if(tbl.Exists())
-                tbl.Drop();
-
-            var syntaxHelper = database.Server.GetQuerySyntaxHelper();
-
-            database.CreateTable(tbl.GetRuntimeName(), new[]
-            {
-                new DatabaseColumnRequest("name", new DatabaseTypeRequest(typeof(string),10), false){IsPrimaryKey=true},
-                new DatabaseColumnRequest("foreignName", new DatabaseTypeRequest(typeof(string),7)){IsPrimaryKey=true},
-                new DatabaseColumnRequest("address", new DatabaseTypeRequest(typeof (string), 500)),
-                new DatabaseColumnRequest("dob", new DatabaseTypeRequest(typeof (DateTime)),false),
-                new DatabaseColumnRequest("score",
-                    new DatabaseTypeRequest(typeof (decimal), null, new DecimalSize(5, 3))) //<- e.g. 12345.123 
-
-            });
-
-            Assert.IsTrue(tbl.Exists());
-
-            var colsDictionary = tbl.DiscoverColumns().ToDictionary(k=>k.GetRuntimeName(),v=>v,StringComparer.InvariantCultureIgnoreCase);
-
-            var name = colsDictionary["name"];
-            Assert.AreEqual(10,name.DataType.GetLengthIfString());
-            Assert.AreEqual(false,name.AllowNulls);
-            Assert.AreEqual(typeof(string),syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(name.DataType.SQLType));
-            Assert.IsTrue(name.IsPrimaryKey);
-
-            var normalisedName = syntaxHelper.GetRuntimeName("foreignName"); //some database engines don't like capital letters?
-            var foreignName = colsDictionary[normalisedName];
-            Assert.AreEqual(false, foreignName.AllowNulls);//because it is part of the primary key we ignored the users request about nullability
-            Assert.AreEqual(7, foreignName.DataType.GetLengthIfString());
-            Assert.AreEqual(typeof(string), syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(foreignName.DataType.SQLType));
-            Assert.IsTrue(foreignName.IsPrimaryKey);
-
-            var address = colsDictionary["address"];
-            Assert.AreEqual(500, address.DataType.GetLengthIfString());
-            Assert.AreEqual(true, address.AllowNulls);
-            Assert.AreEqual(typeof(string), syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(address.DataType.SQLType));
-            Assert.IsFalse(address.IsPrimaryKey);
-
-            var dob = colsDictionary["dob"];
-            Assert.AreEqual(-1, dob.DataType.GetLengthIfString());
-            Assert.AreEqual(false, dob.AllowNulls);
-            Assert.AreEqual(typeof(DateTime), syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(dob.DataType.SQLType));
-            Assert.IsFalse(dob.IsPrimaryKey);
-
-            var score = colsDictionary["score"];
-            Assert.AreEqual(true, score.AllowNulls);
-            Assert.AreEqual(5,score.DataType.GetDecimalSize().NumbersBeforeDecimalPlace);
-            Assert.AreEqual(3, score.DataType.GetDecimalSize().NumbersAfterDecimalPlace);
-
-            Assert.AreEqual(typeof(decimal), syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(score.DataType.SQLType));
-            
-            //drop the database
-            database.ForceDrop();
-
-            //the database shouldn't exist anymore
-            Assert.IsFalse(database.Exists());
-
-            //and neither should the table
-            Assert.IsFalse(tbl.Exists());
-
-        }
+        
 
         
 
@@ -155,6 +85,40 @@ namespace FansiTests
             Assert.AreEqual(expectedTime, result.Rows[1][0]);
         }
 
+        /*
+        [Test]
+        public void TestOracleTimespans()
+        {
+            var db = GetTestDatabase(DatabaseType.Oracle);
+
+            using (var con = db.Server.GetConnection())
+            {
+                con.Open();
+
+                var cmd = db.Server.GetCommand("CREATE TABLE FANSITESTS.TimeTable (time_of_day timestamp)", con);
+                cmd.ExecuteNonQuery();
+
+
+                var cmd2 = db.Server.GetCommand("INSERT INTO FANSITESTS.TimeTable (time_of_day) VALUES (:time_of_day)", con);
+                
+                var param = cmd2.CreateParameter();
+                param.ParameterName = ":time_of_day";
+                param.DbType = DbType.Time;
+                param.Value = new DateTime(1,1,1,1, 1, 1);
+
+                cmd2.Parameters.Add(param); 
+                cmd2.ExecuteNonQuery();
+                
+                var tbl = db.ExpectTable("TimeTable");
+                Assert.IsTrue(tbl.Exists());
+
+                var result = tbl.GetDataTable();
+                
+                //Comes back as a DateTime, doesn't look like intervals are going to work either
+                tbl.Drop();
+            }
+        }
+        */
         [TestCase(DatabaseType.MicrosoftSQLServer, "13:11:10")]
         [TestCase(DatabaseType.MySql, "13:11:10")]
         [TestCase(DatabaseType.Oracle, "13:11:10")]
@@ -263,45 +227,52 @@ namespace FansiTests
             {
                 {parentIdFkCol, parentIdPkCol}
             },true);
-
-            using (var intoParent = tblParent.BeginBulkInsert())
+            try
             {
-                var dt = new DataTable();
-                dt.Columns.Add("ID");
-                dt.Columns.Add("Name");
+                using (var intoParent = tblParent.BeginBulkInsert())
+                {
+                    var dt = new DataTable();
+                    dt.Columns.Add("ID");
+                    dt.Columns.Add("Name");
 
-                dt.Rows.Add(1, "Bob");
-                dt.Rows.Add(2, "Frank");
+                    dt.Rows.Add(1, "Bob");
+                    dt.Rows.Add(2, "Frank");
 
-                intoParent.Upload(dt);
-            }
+                    intoParent.Upload(dt);
+                }
 
-            using (var con = tblChild.Database.Server.GetConnection())
-            {
-                con.Open();
+                using (var con = tblChild.Database.Server.GetConnection())
+                {
+                    con.Open();
 
-                var cmd = tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (100,'chucky')", con);
+                    var cmd = tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (100,'chucky')", con);
                 
-                //violation of fk
-                Assert.That(() => cmd.ExecuteNonQuery(), Throws.Exception);
+                    //violation of fk
+                    Assert.That(() => cmd.ExecuteNonQuery(), Throws.Exception);
 
-                tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,'chucky')", con).ExecuteNonQuery();
-                tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,'chucky2')", con).ExecuteNonQuery();
-            }
+                    tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,'chucky')", con).ExecuteNonQuery();
+                    tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,'chucky2')", con).ExecuteNonQuery();
+                }
             
-            Assert.AreEqual(2,tblParent.GetRowCount());
-            Assert.AreEqual(2, tblChild.GetRowCount());
+                Assert.AreEqual(2,tblParent.GetRowCount());
+                Assert.AreEqual(2, tblChild.GetRowCount());
 
-            using (var con = tblParent.Database.Server.GetConnection())
+                using (var con = tblParent.Database.Server.GetConnection())
+                {
+                    con.Open();
+
+                    var cmd = tblParent.Database.Server.GetCommand("DELETE FROM " + tblParent.GetFullyQualifiedName(), con);
+                    cmd.ExecuteNonQuery();
+                }
+            
+                Assert.AreEqual(0,tblParent.GetRowCount());
+                Assert.AreEqual(0, tblChild.GetRowCount());
+            }
+            finally
             {
-                con.Open();
-
-                var cmd = tblParent.Database.Server.GetCommand("DELETE FROM " + tblParent.GetFullyQualifiedName(), con);
-                cmd.ExecuteNonQuery();
+                tblChild.Drop();
+                tblParent.Drop();
             }
-            
-            Assert.AreEqual(0,tblParent.GetRowCount());
-            Assert.AreEqual(0, tblChild.GetRowCount());
         }
 
         [TestCase(DatabaseType.MySql,true)]
@@ -813,23 +784,5 @@ namespace FansiTests
             Assert.AreEqual(currentValue.Hour, databaseValue.Hour);
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer, "Latin1_General_CS_AS_KS_WS")]
-        [TestCase(DatabaseType.MySql, "latin1_german1_ci")]
-        //[TestCase(DatabaseType.Oracle, "BINARY_CI")] //Requires 12.2+ oracle https://www.experts-exchange.com/questions/29102764/SQL-Statement-to-create-case-insensitive-columns-and-or-tables-in-Oracle.html
-        public void CreateTable_CollationTest(DatabaseType type,string collation)
-        {
-            var database = GetTestDatabase(type);
-
-            var tbl = database.CreateTable("MyTable", new[]
-            {
-                new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100))
-                {
-                    AllowNulls = false,
-                    Collation = collation
-                }
-            });
-
-            Assert.AreEqual(collation, tbl.DiscoverColumn("Name").Collation);
-        }
     }
 }

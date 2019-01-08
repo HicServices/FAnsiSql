@@ -19,6 +19,18 @@ namespace FAnsi.Implementations.Oracle
             return "CLOB";
         }
 
+        protected override string GetTimeDataType()
+        {
+            return "TIMESTAMP";
+        }
+
+        protected override string GetBoolDataType()
+        {
+            //See:
+            //https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns
+            return "char(1)";
+        }
+
         protected override bool IsString(string sqlType)
         {
             if (sqlType.Equals("CLOB", StringComparison.InvariantCultureIgnoreCase))
@@ -33,6 +45,11 @@ namespace FAnsi.Implementations.Oracle
                 return int.MaxValue;
 
             return base.GetLengthIfString(sqlType);
+        }
+
+        protected override bool IsTime(string sqlType)
+        {
+            return sqlType.StartsWith("timestamp", StringComparison.CurrentCultureIgnoreCase) || base.IsTime(sqlType);
         }
 
         protected override string GetDateDateTimeDataType()

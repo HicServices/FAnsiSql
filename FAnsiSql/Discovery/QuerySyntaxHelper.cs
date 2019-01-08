@@ -328,9 +328,9 @@ namespace FAnsi.Discovery
                 {
                     var o = typeDeciderFactory.Create(cSharpType).Parse((string)value);
 
-                    //Apparently everyone in Microsoft hates TimeSpans - see test MicrosoftHatesDbTypeTime
-                    if (o is TimeSpan && DatabaseType == DatabaseType.MicrosoftSQLServer)
-                        o = Convert.ToDateTime(o.ToString());
+                    //Not all DBMS support DBParameter.Value = new TimeSpan(...);
+                    if (o is TimeSpan)
+                        o = FormatTimespanForDbParameter((TimeSpan) o);
 
                     p.Value = o;
 
@@ -339,6 +339,17 @@ namespace FAnsi.Discovery
                     p.Value = value;
 
             return p;
+        }
+
+        /// <summary>
+        /// Return the appropriate value such that it can be put into a DbParameter.Value field and be succesfully inserted into a
+        /// column in the database designed to represent time fields (without date).
+        /// </summary>
+        /// <param name="timeSpan"></param>
+        /// <returns></returns>
+        protected virtual object FormatTimespanForDbParameter(TimeSpan timeSpan)
+        {
+            return timeSpan;
         }
 
         #region Equality Members

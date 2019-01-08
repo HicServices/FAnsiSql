@@ -133,7 +133,7 @@ namespace FAnsi.Discovery.TypeTranslation
             return "bit";
         }
 
-        protected string GetSmallIntDataType()
+        protected virtual string GetSmallIntDataType()
         {
             return "smallint";
         }
@@ -366,7 +366,7 @@ select LEN(dt) from omgdates
             return DataTypeComputer.MinimumLengthRequiredForDateStringRepresentation; //e.g. "2018-01-30 13:05:45.1266667"
         }
 
-        protected bool IsTime(string sqlType)
+        protected virtual bool IsTime(string sqlType)
         {
             return sqlType.Trim().Equals("time",StringComparison.CurrentCultureIgnoreCase);
         }

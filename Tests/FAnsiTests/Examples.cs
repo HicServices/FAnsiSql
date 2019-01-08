@@ -12,7 +12,7 @@ namespace FansiTests
     {
         [Test]
         [Ignore("Test only works when the hard coded connection strings pass,  this test is used to build clear examples in the documentation")]
-        public void Example()
+        public void Example_TableCreation()
         {
             //Load implementation assemblies that are relevant to your application
             ImplementationManager.Load(
