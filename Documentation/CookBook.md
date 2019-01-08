@@ -5,6 +5,8 @@
    1. [Primary Key](#primary-key)
    1. [Nullability / Collation etc](#nullability-collation)
 2. [Bulk Insert](#bulk-insert)
+3. [Query Syntax Helper](#query-syntax-helper)
+   1. [UPDATE JOIN](#update-join)
 
 ## Table Creation
 
@@ -128,3 +130,47 @@ If this requires writing a suboptimal solution (e.g. [extended INSERT](#https://
 
 
 Tests: [_BulkInsertTest.cs_](./../Tests/FAnsiTests/Table/BulkInsertTest.cs)
+
+## Query Syntax Helper
+
+`IQuerySyntaxHelper` is the interface for accessing language specific low level functionality e.g. how to qualify a table name, what the parameter symbol is (`@` for most, `:` for Oracle) etc.  The class also holds references to the Type translation layer for the DBMS (`ITypeTranslater`).
+
+You can get the `IQuerySyntaxHelper` from any object as follows (`DiscoveredServer`, `DiscoveredDatabase` etc) by going up the hierarchy to `Server` and calling `GetQuerySyntaxHelper()`.
+
+### UPDATE JOIN
+
+There is no ANSI standard SQL for issuing an UPDATE to a table based on data in another table.  The Microsoft SQL 
+
+```sql
+UPDATE t1
+  SET 
+    t1.HighScore = t2.Score
+  FROM [FAnsiTests]..[HighScoresTable] AS t1
+  INNER JOIN [FAnsiTests]..[NewScoresTable] AS t2
+  ON t1.Name = t2.Name
+WHERE
+t1.HighScore < t2.Score OR t1.HighScore is null
+
+```
+
+To achieve the same goal in My Sql we have to use a completely different layout
+
+```sql
+UPDATE `FAnsiTests`.`HighScoresTable` t1
+ join  `FAnsiTests`.`NewScoresTable` t2 
+on 
+t1.Name = t2.Name
+SET 
+    t1.HighScore = t2.Score
+WHERE
+t1.HighScore < t2.Score OR t1.HighScore is null
+```
+
+The `UpdateHelper` class allows you to abstract away this complexity and focus only on the 4 elements:
+
+- Which 2 tables are you joinin
+- The boolean logic for the join
+- The SET statement
+- Any WHERE logic
+
+You can see how to do this in [UpdateTests.cs](./../Tests/FAnsiTests/Table/UpdateTests.cs)

@@ -9,8 +9,11 @@
   - [X] Backup
 
 - Table
-  - [X] Script Table
+  - [X] Create
+  - [X] Drop
+  - [X] Script Table Structure
   - [X] MakeDistinct
+  - [X] Bulk Insert
 
 - Column
   - [X] Alter
@@ -21,3 +24,7 @@
   - [X] TimeSpan
   - [X] Decimal
   - [X] Date
+
+- Query
+  - [X] Top X
+  - [X] JOIN UPDATE

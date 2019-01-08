@@ -8,9 +8,12 @@
   - [X] Drop
   - [ ] Backup
 
-- Table
-  - [X] Script Table
+- Table 
+  - [X] Create
+  - [X] Drop
+  - [X] Script Table Structure
   - [ ] MakeDistinct
+  - [X] Bulk Insert
 
 - Column
   - [X] Alter
@@ -21,3 +24,7 @@
   - [ ] TimeSpan
   - [X] Decimal
   - [X] Date
+
+- Query
+  - [X] Top X (Uses ROWNUM)
+  - [X] JOIN UPDATE
