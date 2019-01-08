@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using FAnsi.TableCreation;
-using FAnsi.TypeTranslation;
+using FAnsi.Discovery.TypeTranslation;
 
 namespace FAnsi.Discovery.TableCreation
 {

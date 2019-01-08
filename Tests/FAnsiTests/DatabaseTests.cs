@@ -5,13 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FAnsi;
+using FAnsi.Discovery;
 using FAnsi.Implementation;
 using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
-using FAnsiSql.Implementations.MicrosoftSQL;
+using Fansi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
 
-namespace FAnsiSqlTests
+namespace FansiTests
 {
     public class DatabaseTests
     {

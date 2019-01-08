@@ -1,6 +1,6 @@
-using FAnsi.TypeTranslation;
+using FAnsi.Discovery.TypeTranslation;
 
-namespace FAnsiSql.Implementations.MicrosoftSQL
+namespace Fansi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLTypeTranslater : TypeTranslater
     {

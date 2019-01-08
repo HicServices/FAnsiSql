@@ -1,11 +1,8 @@
-﻿using System;
-using System.Runtime.Remoting.Messaging;
-using FAnsi.Discovery;
-using FAnsi.Discovery.QuerySyntax;
+﻿using FAnsi.Discovery.QuerySyntax;
+using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Naming;
-using FAnsi.TypeTranslation;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     /// <summary>
     /// Cross database type reference to a Column in a Table

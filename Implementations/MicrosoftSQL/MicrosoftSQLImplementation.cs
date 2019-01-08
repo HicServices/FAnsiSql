@@ -1,14 +1,13 @@
-﻿using System.ComponentModel.Composition;
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.Data.SqlClient;
-using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementation;
+using Fansi.Implementations.MicrosoftSQL;
 
-namespace FAnsiSql.Implementations.MicrosoftSQL
+namespace FAnsi.Implementations.MicrosoftSQL
 {
-    class MicrosoftSQLImplementation : Implementation<SqlConnectionStringBuilder>
+    public class MicrosoftSQLImplementation : Implementation<SqlConnectionStringBuilder>
     {
         public MicrosoftSQLImplementation():base(DatabaseType.MicrosoftSQLServer)
         {

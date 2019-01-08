@@ -7,8 +7,8 @@
     <ProjectGuid>{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FAnsiSql.Implementations.MicrosoftSQL</RootNamespace>
-    <AssemblyName>FAnsiSql.Implementations.MicrosoftSQL</AssemblyName>
+    <RootNamespace>FAnsi.Implementations.MicrosoftSQL</RootNamespace>
+    <AssemblyName>FAnsi.Implementations.MicrosoftSQL</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

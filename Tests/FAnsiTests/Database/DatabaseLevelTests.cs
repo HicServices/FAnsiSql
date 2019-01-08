@@ -1,7 +1,7 @@
 ﻿using FAnsi;
 using NUnit.Framework;
 
-namespace FAnsiSqlTests.Database
+namespace FansiTests.Database
 {
     class DatabaseLevelTests : DatabaseTests
     {

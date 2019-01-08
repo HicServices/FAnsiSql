@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Data.SqlClient;
 using FAnsi.Implementation;
 
 namespace FAnsi.Discovery.ConnectionStringDefaults

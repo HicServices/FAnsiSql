@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     /// <summary>
     /// Records the number of decimal places required to represent a given decimal.  This can class can represent a int (in which case <see cref="NumbersAfterDecimalPlace"/> will be 0) or

@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Data.Common;
 using FAnsi.Connections;
 using FAnsi.Discovery.Exceptions;
-using FAnsi.TypeTranslation;
-using FAnsi.TypeTranslation.TypeDeciders;
+using FAnsi.Discovery.TypeTranslation;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     /// <summary>
     /// Cross database type reference to a Data Type string (e.g. varchar(30), varbinary(100) etc) of a Column in a Table

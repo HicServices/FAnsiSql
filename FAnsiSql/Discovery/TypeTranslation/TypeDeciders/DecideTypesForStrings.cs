@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace FAnsi.TypeTranslation.TypeDeciders
+namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
     internal abstract class DecideTypesForStrings :IDecideTypesForStrings
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FAnsi.TypeTranslation.TypeDeciders
+namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
     internal class DecimalTypeDecider : DecideTypesForStrings
     {

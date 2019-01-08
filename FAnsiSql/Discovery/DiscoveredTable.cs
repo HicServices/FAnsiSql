@@ -5,8 +5,8 @@ using System.Data.Common;
 using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery.QuerySyntax;
+using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Naming;
-using FAnsi.TypeTranslation;
 
 namespace FAnsi.Discovery
 {

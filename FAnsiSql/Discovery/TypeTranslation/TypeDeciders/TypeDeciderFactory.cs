@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FAnsi.TypeTranslation.TypeDeciders;
 
 namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {

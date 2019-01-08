@@ -4,7 +4,7 @@ using System.Linq;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 
-namespace FAnsiSql.Implementations.MicrosoftSQL.Aggregation
+namespace Fansi.Implementations.MicrosoftSQL.Aggregation
 {
     public class MicrosoftSQLAggregateHelper : IAggregateHelper
     {

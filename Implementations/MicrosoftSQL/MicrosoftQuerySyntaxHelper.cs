@@ -4,10 +4,10 @@ using System.Data.SqlClient;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
-using FAnsiSql.Implementations.MicrosoftSQL.Aggregation;
-using FAnsiSql.Implementations.MicrosoftSQL.Update;
+using Fansi.Implementations.MicrosoftSQL.Aggregation;
+using Fansi.Implementations.MicrosoftSQL.Update;
 
-namespace FAnsiSql.Implementations.MicrosoftSQL
+namespace Fansi.Implementations.MicrosoftSQL
 {
     /// <inheritdoc/>
     public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper

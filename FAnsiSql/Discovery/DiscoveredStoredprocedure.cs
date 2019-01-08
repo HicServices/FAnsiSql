@@ -1,4 +1,4 @@
-﻿namespace FAnsi
+﻿namespace FAnsi.Discovery
 {
     /// <summary>
     /// Cross database type reference to a stored proceedure (function) on a database.

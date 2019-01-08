@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using FAnsi.Discovery.TypeTranslation.TypeDeciders;
-using FAnsi.TypeTranslation.TypeDeciders;
 
-namespace FAnsi.TypeTranslation
+namespace FAnsi.Discovery.TypeTranslation
 {
     /// <summary>
     /// Calculates a DatabaseTypeRequest based on a collection of objects seen so far.  This allows you to take a DataTable column (which might be only string

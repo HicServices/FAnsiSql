@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace FAnsi.TypeTranslation.TypeDeciders
+namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
     internal class TimeSpanTypeDecider : DecideTypesForStrings
     {

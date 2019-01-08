@@ -4,14 +4,12 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using FAnsi.Connections;
-using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
+using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Naming;
-using FAnsi.TableCreation;
-using FAnsi.TypeTranslation;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     /// <summary>
     /// Cross database type reference to a specific database on a database server.  Allows you to create tables, drop check existance etc.

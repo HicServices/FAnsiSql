@@ -9,8 +9,8 @@ using System.Text.RegularExpressions;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using FAnsi.Discovery.QuerySyntax.Update;
+using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Discovery.TypeTranslation.TypeDeciders;
-using FAnsi.TypeTranslation;
 
 namespace FAnsi.Discovery
 {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace FAnsi.TypeTranslation.TypeDeciders
+﻿namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
     class BoolTypeDecider: DecideTypesForStrings
     {

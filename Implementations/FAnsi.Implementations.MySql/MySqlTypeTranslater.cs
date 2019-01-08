@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
+using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Extensions;
-using FAnsi.TypeTranslation;
 
 namespace FAnsi.Implementations.MySql
 {

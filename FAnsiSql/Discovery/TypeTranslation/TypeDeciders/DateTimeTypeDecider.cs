@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Drawing;
 using System.Globalization;
 
-namespace FAnsi.TypeTranslation.TypeDeciders
+namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
     internal class DateTimeTypeDecider : DecideTypesForStrings
     {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace FAnsi.TableCreation
+namespace FAnsi.Discovery.TableCreation
 {
     /// <summary>
     /// Performs last minute changes on a set of columns that are about to be created.  This might include padding the maximum size of strings, using

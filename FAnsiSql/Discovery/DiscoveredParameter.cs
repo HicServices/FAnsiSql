@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FAnsi
+﻿namespace FAnsi.Discovery
 {
     /// <summary>
     /// Cross database type reference to a Parameter (e.g. of a Table valued function / stored proceedure).

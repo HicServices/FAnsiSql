@@ -9,7 +9,7 @@ using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 
-namespace FAnsiSql.Implementations.MicrosoftSQL
+namespace Fansi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     {

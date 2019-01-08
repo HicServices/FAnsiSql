@@ -1,8 +1,9 @@
 ﻿using FAnsi;
-using FAnsi.TypeTranslation;
+using FAnsi.Discovery;
+using FAnsi.Discovery.TypeTranslation;
 using NUnit.Framework;
 
-namespace FAnsiSqlTests.Table
+namespace FansiTests.Table
 {
     class CreateTableTests:DatabaseTests
     {

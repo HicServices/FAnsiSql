@@ -1,8 +1,7 @@
 using System;
 using System.Data;
-using FAnsi.TypeTranslation.TypeDeciders;
 
-namespace FAnsi.TypeTranslation
+namespace FAnsi.Discovery.TypeTranslation
 {
     /// <summary>
     ///  Cross database type functionality for translating between database proprietary datatypes e.g. varchar (varchar2 in Oracle) and the C# Type (and vice

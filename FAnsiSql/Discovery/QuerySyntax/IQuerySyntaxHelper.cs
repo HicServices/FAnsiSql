@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using FAnsi.Discovery.QuerySyntax.Update;
-using FAnsi.TypeTranslation;
+using FAnsi.Discovery.TypeTranslation;
 
 namespace FAnsi.Discovery.QuerySyntax
 {

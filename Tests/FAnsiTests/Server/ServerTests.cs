@@ -3,7 +3,7 @@ using System.Data;
 using FAnsi;
 using NUnit.Framework;
 
-namespace FAnsiSqlTests.Server
+namespace FansiTests.Server
 {
     class ServerLevelTests:DatabaseTests
     {

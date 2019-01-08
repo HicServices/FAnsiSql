@@ -1,8 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
-using FAnsi.TypeTranslation.TypeDeciders;
 
-namespace FAnsi.TypeTranslation
+namespace FAnsi.Discovery.TypeTranslation
 {
     /// <summary>
     /// Describes a cross platform database field type you want created including maximum width for string based columns and precision/scale for decimals.

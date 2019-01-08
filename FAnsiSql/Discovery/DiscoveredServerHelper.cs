@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using FAnsi.Connections;
-using FAnsi.Discovery;
 using FAnsi.Discovery.ConnectionStringDefaults;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Naming;
-using FAnsi.TypeTranslation;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     {

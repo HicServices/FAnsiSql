@@ -1,5 +1,5 @@
 ﻿using System;
-using FAnsi.TypeTranslation;
+using FAnsi.Discovery.TypeTranslation;
 
 namespace FAnsi.Implementations.Oracle
 {

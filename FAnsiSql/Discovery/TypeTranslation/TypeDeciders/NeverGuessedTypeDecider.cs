@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FAnsi.TypeTranslation.TypeDeciders
+namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
     /// <summary>
     /// DecideTypesForStrings for types that we should never assign to strings but need to support for CurrentEstimate

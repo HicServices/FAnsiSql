@@ -5,11 +5,12 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using FAnsi;
+using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
-using FAnsi.TypeTranslation;
+using FAnsi.Discovery.TypeTranslation;
 using NUnit.Framework;
 
-namespace FAnsiSqlTests
+namespace FansiTests
 {
     public class CrossPlatformTests:DatabaseTests
     {

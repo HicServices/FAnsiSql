@@ -8,9 +8,8 @@ using FAnsi;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Naming;
-using FAnsi.TypeTranslation;
 
-namespace FAnsiSql.Implementations.MicrosoftSQL
+namespace Fansi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLTableHelper : DiscoveredTableHelper
     {

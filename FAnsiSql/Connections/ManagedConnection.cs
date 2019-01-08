@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Threading;
+using FAnsi.Discovery;
 
 namespace FAnsi.Connections
 {

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using FAnsi.Connections;
-using FAnsi.Discovery;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     public abstract class BulkCopy:IBulkCopy
     {

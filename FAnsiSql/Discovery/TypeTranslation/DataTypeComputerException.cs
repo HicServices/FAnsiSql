@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FAnsi.TypeTranslation
+namespace FAnsi.Discovery.TypeTranslation
 {
     /// <summary>
     /// Exception thrown when there is a problem with the input data provided to a <see cref="DataTypeComputer"/> that reflects misuse of the class by the programmer

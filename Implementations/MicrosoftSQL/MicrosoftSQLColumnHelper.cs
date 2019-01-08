@@ -3,7 +3,7 @@ using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Naming;
 
-namespace FAnsiSql.Implementations.MicrosoftSQL
+namespace Fansi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLColumnHelper : IDiscoveredColumnHelper
     {

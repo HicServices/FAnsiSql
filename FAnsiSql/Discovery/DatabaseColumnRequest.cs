@@ -1,8 +1,7 @@
-using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
-using FAnsi.TypeTranslation;
+using FAnsi.Discovery.TypeTranslation;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     /// <summary>
     /// Request to create a column in a DatabaseType agnostic manner.  This class exists to let you declare a field called X where the data type is wide enough

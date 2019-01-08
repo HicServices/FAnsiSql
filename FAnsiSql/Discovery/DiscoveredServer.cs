@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using FAnsi.Connections;
-using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementation;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     /// <summary>
     /// Cross database type reference to a database server.  Allows you to get connections, create commands, list databases etc.

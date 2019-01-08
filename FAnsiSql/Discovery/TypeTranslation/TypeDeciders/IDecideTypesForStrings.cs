@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FAnsi.TypeTranslation.TypeDeciders
+namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
     /// <summary>
     /// Class responsible for deciding whether a given string representation is likely to be for a given C# Type e.g. 

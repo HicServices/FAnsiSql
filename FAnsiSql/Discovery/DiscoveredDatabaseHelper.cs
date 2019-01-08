@@ -5,15 +5,12 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
+using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Implementation;
-using FAnsi.TableCreation;
-using FAnsi.TypeTranslation;
 
-namespace FAnsi
+namespace FAnsi.Discovery
 {
     public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     {

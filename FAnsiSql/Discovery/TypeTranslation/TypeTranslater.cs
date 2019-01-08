@@ -4,9 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FAnsi.Extensions;
-using FAnsi.TypeTranslation.TypeDeciders;
 
-namespace FAnsi.TypeTranslation
+namespace FAnsi.Discovery.TypeTranslation
 {
     /// <summary>
     /// See ITypeTranslater
