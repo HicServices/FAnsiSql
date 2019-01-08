@@ -139,7 +139,7 @@ You can get the `IQuerySyntaxHelper` from any object as follows (`DiscoveredServ
 
 ### UPDATE JOIN
 
-There is no ANSI standard SQL for issuing an UPDATE to a table based on data in another table.  The Microsoft SQL 
+There is no ANSI standard SQL for issuing an UPDATE to a table based on data in another table.  The Microsoft SQL implementation might look like this:
 
 ```sql
 UPDATE t1
@@ -153,7 +153,7 @@ t1.HighScore < t2.Score OR t1.HighScore is null
 
 ```
 
-To achieve the same goal in My Sql we have to use a completely different layout
+To achieve the same goal in My Sql we have to use a completely different structure:
 
 ```sql
 UPDATE `FAnsiTests`.`HighScoresTable` t1
@@ -168,7 +168,7 @@ t1.HighScore < t2.Score OR t1.HighScore is null
 
 The `UpdateHelper` class allows you to abstract away this complexity and focus only on the 4 elements:
 
-- Which 2 tables are you joinin
+- Which 2 tables are you joining
 - The boolean logic for the join
 - The SET statement
 - Any WHERE logic
