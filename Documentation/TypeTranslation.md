@@ -107,4 +107,4 @@ Assert.AreEqual(int.MaxValue, oracle.GetLengthIfString("CLOB"));
 ```
 
 ## Tests
-See `TypeTranslaterTests` and `DatatypeComputerTests`
+See [TypeTranslaterTests.cs](./../Tests/FAnsiTests/TypeTranslation/TypeTranslaterTests.cs) and [DatatypeComputerTests](./../Tests/FAnsiTests/TypeTranslation/DatatypeComputerTests.cs)
