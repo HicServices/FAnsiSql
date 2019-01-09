@@ -89,14 +89,7 @@ namespace FansiTests.Table
 
             Assert.AreEqual(typeof(decimal), syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(score.DataType.SQLType));
 
-            //drop the database
-            database.ForceDrop();
-
-            //the database shouldn't exist anymore
-            Assert.IsFalse(database.Exists());
-
-            //and neither should the table
-            Assert.IsFalse(tbl.Exists());
+            tbl.Drop();
         }
 
 
