@@ -629,6 +629,8 @@ namespace FansiTests
         [TestCase(DatabaseType.MicrosoftSQLServer, "_-o-_", ":>0<:")]
         public void HorribleDatabaseAndTableNames(DatabaseType type,string horribleDatabaseName, string horribleTableName)
         {
+            AssertCanCreateDatabases();
+
             var database = GetTestDatabase(type);
 
             database = database.Server.ExpectDatabase(horribleDatabaseName);
