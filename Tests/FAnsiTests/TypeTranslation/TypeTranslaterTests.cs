@@ -98,6 +98,7 @@ namespace FAnsiTests.TypeTranslation
         [TestCase(DatabaseType.MicrosoftSQLServer,"varbinary",typeof(byte[]))]
         [TestCase(DatabaseType.MicrosoftSQLServer,"varchar",typeof(string))]
         [TestCase(DatabaseType.MicrosoftSQLServer, "xml",typeof(string))]
+
         [TestCase(DatabaseType.MySql, "BOOL",typeof(bool))]
         [TestCase(DatabaseType.MySql, "BOOLEAN",typeof(bool))]
         [TestCase(DatabaseType.MySql, "TINYINT",typeof(byte))]
@@ -147,7 +148,41 @@ namespace FAnsiTests.TypeTranslation
         [TestCase(DatabaseType.MySql, "nchar",typeof(string))]
         [TestCase(DatabaseType.MySql, "nvarchar(10)",typeof(string))]
         [TestCase(DatabaseType.MySql, "real",typeof(decimal))]
+        
         [TestCase(DatabaseType.Oracle, "varchar2(10)",typeof(string))]
+        [TestCase(DatabaseType.Oracle, "CHAR(10)", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "CHAR", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "nchar", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "nvarchar2(1)", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "clob", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "nclob", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "long", typeof(string))]//yes in Oracle LONG is text (https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm)
+        [TestCase(DatabaseType.Oracle, "NUMBER", typeof(decimal))]
+        [TestCase(DatabaseType.Oracle, "date", typeof(DateTime))]
+        [TestCase(DatabaseType.Oracle, "BLOB", typeof(byte[]))]
+        [TestCase(DatabaseType.Oracle, "BFILE", typeof(byte[]))]
+        [TestCase(DatabaseType.Oracle, "RAW(100)", typeof(byte[]))]
+        [TestCase(DatabaseType.Oracle, "LONG RAW", typeof(byte[]))]
+        [TestCase(DatabaseType.Oracle, "ROWID", typeof(byte[]))]
+        [TestCase(DatabaseType.Oracle, "CHARACTER", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "FLOAT", typeof(decimal))]
+        [TestCase(DatabaseType.Oracle, "FLOAT(5)", typeof(decimal))]
+        [TestCase(DatabaseType.Oracle, "REAL", typeof(decimal))]
+        [TestCase(DatabaseType.Oracle, "DOUBLE PRECISION", typeof(decimal))]
+        [TestCase(DatabaseType.Oracle, "CHARACTER VARYING(10)", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "CHAR VARYING(10)", typeof(string))]
+        [TestCase(DatabaseType.Oracle, "LONG VARCHAR", typeof(string))]
+
+        //[TestCase(DatabaseType.Oracle, "DECIMAL", typeof(decimal))] //GetBasicTypeFromOracleType makes this look like dcimal going in but Int32 comming out
+        //[TestCase(DatabaseType.Oracle, "DEC", typeof(decimal))]
+
+        [TestCase(DatabaseType.Oracle, "DEC(3,2)", typeof(decimal))]
+        [TestCase(DatabaseType.Oracle, "DEC(*,3)", typeof(decimal))]
+        
+        //These types are all converted to Number(38) by Oracle : https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm (See ANSI/ISO, DB2, and SQL/DS Datatypes )
+        [TestCase(DatabaseType.Oracle, "INTEGER", typeof(int))] 
+        [TestCase(DatabaseType.Oracle, "INT", typeof(int))]
+        [TestCase(DatabaseType.Oracle, "SMALLINT", typeof(int))]
         public void TestIsKnownType(DatabaseType databaseType,string sqlType, Type expectedType)
         {
             RunKnownTypeTest(databaseType, sqlType, expectedType);
@@ -197,6 +232,7 @@ namespace FAnsiTests.TypeTranslation
         [TestCase(DatabaseType.MySql,"MULTIPOLYGON")]
         [TestCase(DatabaseType.MySql,"GEOMETRYCOLLECTION")]
         [TestCase(DatabaseType.MicrosoftSQLServer,"sql_variant")]
+        [TestCase(DatabaseType.Oracle, "MLSLABEL")]
         public void TestNotSupportedTypes(DatabaseType type, string sqlType)
         {
             Assert.IsFalse(_translaters[type].IsSupportedSQLDBType(sqlType));

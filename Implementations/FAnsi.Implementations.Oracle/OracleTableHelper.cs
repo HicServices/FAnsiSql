@@ -108,30 +108,41 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
         
-        private string SensibleTypeFromOracleType(DbDataReader r)
+        private string GetBasicTypeFromOracleType(DbDataReader r)
         {
             int? precision = null;
             int? scale = null;
+            int? data_length = null; //in bytes
 
             if (r["DATA_SCALE"] != DBNull.Value)
                 scale = Convert.ToInt32(r["DATA_SCALE"]);
             if (r["DATA_PRECISION"] != DBNull.Value)
                 precision = Convert.ToInt32(r["DATA_PRECISION"]);
-
+            if(r["DATA_LENGTH"] != DBNull.Value)
+                data_length = Convert.ToInt32(r["DATA_LENGTH"]);
 
             switch (r["DATA_TYPE"] as string)
             {
                 case "VARCHAR2": return "varchar";
+
+
+                //All the ways that you can use the number keyword https://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#CNCPT1832
                 case "NUMBER":
                     if (scale == 0 && precision == null)
                         return "int";
                     else if (precision != null && scale != null)
                         return "decimal";
                     else
-                        throw new Exception(
-                            string.Format("Found Oracle NUMBER datatype with scale {0} and precision {1}, did not know what datatype to use to represent it",
-                            scale != null ? scale.ToString() : "DBNull.Value",
-                            precision != null ? precision.ToString() : "DBNull.Value"));
+                    {
+                        if (data_length == null)
+                            throw new Exception(
+                                string.Format(
+                                    "Found Oracle NUMBER datatype with scale {0} and precision {1}, did not know what datatype to use to represent it",
+                                    scale != null ? scale.ToString() : "DBNull.Value",
+                                    precision != null ? precision.ToString() : "DBNull.Value"));
+                        else
+                            return "double";
+                    }
                 case "FLOAT":
                     return "double";
                 default:
@@ -141,7 +152,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
 
         private string GetSQLType_From_all_tab_cols_Result(DbDataReader r)
         {
-            string columnType = SensibleTypeFromOracleType(r);
+            string columnType = GetBasicTypeFromOracleType(r);
 
             string lengthQualifier = "";
             
