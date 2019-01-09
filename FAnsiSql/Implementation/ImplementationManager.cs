@@ -4,6 +4,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.Data.Common;
 using System.Linq;
 using System.Reflection;
+using FAnsi.Exceptions;
 
 namespace FAnsi.Implementation
 {
@@ -64,7 +65,7 @@ namespace FAnsi.Implementation
             var implementation = _instance.Implementations.FirstOrDefault(condition);
 
             if (implementation == null)
-                throw new Exception(errorIfNotFound);
+                throw new ImplementationNotFoundException(errorIfNotFound);
 
             return implementation;
         }

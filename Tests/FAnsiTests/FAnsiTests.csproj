@@ -55,7 +55,8 @@
     <Compile Include="Server\ServerTests.cs" />
     <Compile Include="Table\BulkInsertTest.cs" />
     <Compile Include="Table\CreateTableTests.cs" />
-    <Compile Include="Table\UpdateTest.cs" />
+    <Compile Include="Table\UpdateTests.cs" />
+    <Compile Include="TypeTranslation\TypeTranslaterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestDatabases.xml">

@@ -2,6 +2,7 @@
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using FAnsi.Extensions;
 
@@ -78,9 +79,8 @@ namespace FAnsi.Discovery.TypeTranslation
                 return GetGuidDataType();
 
             throw new NotSupportedException("Unsure what SQL Database type to use for Property Type " + t.Name);
-
         }
-
+        
         protected virtual string GetByteArrayDataType()
         {
             return "varbinary(max)";
@@ -153,7 +153,19 @@ namespace FAnsi.Discovery.TypeTranslation
             return "uniqueidentifier";
         }
 
+        /// <inheritdoc/>
         public Type GetCSharpTypeForSQLDBType(string sqlType)
+        {
+            Type result = TryGetCSharpTypeForSQLDBType(sqlType);
+
+            if (result == null)
+                throw new NotSupportedException("Not sure what type of C# datatype to use for SQL type :" + sqlType);
+
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public Type TryGetCSharpTypeForSQLDBType(string sqlType)
         {
             if (IsBit(sqlType))
                 return typeof(bool);
@@ -166,29 +178,35 @@ namespace FAnsi.Discovery.TypeTranslation
 
             if (IsInt(sqlType))
                 return typeof(int);
-            
+
             if (IsLong(sqlType))
                 return typeof(long);
 
             if (IsFloatingPoint(sqlType))
-                return typeof (decimal);
+                return typeof(decimal);
 
             if (IsString(sqlType))
-                return typeof (string);
+                return typeof(string);
 
             if (IsDate(sqlType))
-                return typeof (DateTime);
+                return typeof(DateTime);
 
             if (IsTime(sqlType))
                 return typeof(TimeSpan);
-            
+
             if (IsByteArray(sqlType))
-                return typeof (byte[]);
+                return typeof(byte[]);
 
             if (IsGuid(sqlType))
-                return typeof (Guid);
+                return typeof(Guid);
 
-            throw new NotSupportedException("Not sure what type of C# datatype to use for SQL type :" + sqlType);
+            return null;
+        }
+        
+        /// <inheritdoc/>
+        public bool IsSupportedSQLDBType(string sqlType)
+        {
+            return TryGetCSharpTypeForSQLDBType(sqlType) != null;
         }
 
         protected virtual bool IsLong(string sqlType)

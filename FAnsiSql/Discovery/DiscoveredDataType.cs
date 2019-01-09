@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using FAnsi.Connections;
-using FAnsi.Discovery.Exceptions;
 using FAnsi.Discovery.TypeTranslation;
+using FAnsi.Exceptions;
 
 namespace FAnsi.Discovery
 {

@@ -46,8 +46,7 @@ FAnsiSql is built using only the core `System.Data.Common` abstract classes (e.g
 
 - Database / Table Management (Discovery, Create, Drop, Script etc)
 - Bulk Insert
-- Type Translation (C# => DBMS A => C# => DBMS B)
-- Type Calculation (Assign DB types to untyped string data)
+- [Type Calculation](./Documentation/TypeTranslation.md) (Assign DB types to untyped string data)
 
 ## Example
 

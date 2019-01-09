@@ -24,16 +24,37 @@ namespace FAnsi.Discovery.TypeTranslation
         /// <summary>
         /// Returns the System.Data.DbType (e.g. DbType.String) for the specified proprietary database type (e.g. "varchar(max)")
         /// </summary>
+        /// <exception cref="NotSupportedException"></exception>
         /// <param name="sqlType"></param>
         /// <returns></returns>
         DbType GetDbTypeForSQLDBType(string sqlType);
 
+
         /// <summary>
-        /// Translates a database proprietary type e.g. 'decimal(10,2)' into a C# type 'typeof(String)'
+        /// Translates a database proprietary type e.g. 'decimal(10,2)' into a C# type e.g. 'typeof(decimal)'
+        /// </summary>
+        /// <param name="sqlType"></param>
+        /// <returns>The C# Type which can be used to store values of this database type</returns>
+        Type GetCSharpTypeForSQLDBType(string sqlType);
+        
+        /// <summary>
+        /// Translates a database proprietary type e.g. 'decimal(10,2)' into a C# type e.g. 'typeof(decimal)'
+        /// 
+        /// <para>Returns null if no the <paramref name="sqlType"/> is not understood</para>
+        /// </summary>
+        /// <param name="sqlType"></param>
+        /// <returns>The C# Type which can be used to store values of this database type</returns>
+        Type TryGetCSharpTypeForSQLDBType(string sqlType);
+
+        /// <summary>
+        /// Returns true if the <paramref name="sqlType"/> string could be reconciled into a known C# Type
+        /// 
+        /// <para>See also <see cref="GetCSharpTypeForSQLDBType"/></para>
         /// </summary>
         /// <param name="sqlType"></param>
         /// <returns></returns>
-        Type GetCSharpTypeForSQLDBType(string sqlType);
+        bool IsSupportedSQLDBType(string sqlType);
+
         DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string sqlType);
 
         DataTypeComputer GetDataTypeComputerFor(DiscoveredColumn discoveredColumn);

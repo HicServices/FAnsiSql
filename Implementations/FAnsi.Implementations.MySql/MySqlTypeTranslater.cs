@@ -37,6 +37,10 @@ namespace FAnsi.Implementations.MySql
         
         protected override bool IsInt(string sqlType)
         {
+            //Not an int!
+            if (sqlType.Contains("point", CompareOptions.IgnoreCase))
+                return false;
+
             return base.IsInt(sqlType)
                 || sqlType.Equals("int3", StringComparison.CurrentCultureIgnoreCase)
                 || sqlType.Equals("int4", StringComparison.CurrentCultureIgnoreCase)

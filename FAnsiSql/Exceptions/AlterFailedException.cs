@@ -1,6 +1,6 @@
 using System;
 
-namespace FAnsi.Discovery.Exceptions
+namespace FAnsi.Exceptions
 {
     /// <summary>
     /// Thrown when a schema alter statement fails

@@ -61,13 +61,14 @@
     <Compile Include="Discovery\DiscoveredTable.cs" />
     <Compile Include="Discovery\DiscoveredTableHelper.cs" />
     <Compile Include="Discovery\DiscoveredTableValuedFunction.cs" />
-    <Compile Include="Discovery\Exceptions\AlterFailedException.cs" />
+    <Compile Include="Exceptions\AlterFailedException.cs" />
     <Compile Include="Discovery\IBulkCopy.cs" />
     <Compile Include="Discovery\IDiscoveredColumnHelper.cs" />
     <Compile Include="Discovery\IDiscoveredDatabaseHelper.cs" />
     <Compile Include="Discovery\IDiscoveredServerHelper.cs" />
     <Compile Include="Discovery\IDiscoveredTableHelper.cs" />
     <Compile Include="Discovery\QuerySyntax\IHasQuerySyntaxHelper.cs" />
+    <Compile Include="Exceptions\ImplementationNotFoundException.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Implementation\Implementation.cs" />
     <Compile Include="Implementation\ImplementationManager.cs" />
