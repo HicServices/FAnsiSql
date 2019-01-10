@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
-using FAnsi.Extensions;
 
 namespace FAnsi.Discovery.TypeTranslation
 {
@@ -15,6 +11,21 @@ namespace FAnsi.Discovery.TypeTranslation
     {
         protected const string StringSizeRegexPattern = @"\(([0-9]+)\)";
         protected const string DecimalsBeforeAndAfterPattern = @"\(([0-9]+),([0-9]+)\)";
+
+        //Take special note of the use or absence of ^ in the regex to do Contains or StartsWith
+        //Ideally dont use $ (end of string) since databases can stick extraneous stuff on the end in many cases
+
+        protected Regex BitRegex = new Regex("^(bit)|(bool)|(boolean)",RegexOptions.IgnoreCase);
+        protected Regex ByteRegex = new Regex("^tinyint", RegexOptions.IgnoreCase);
+        protected Regex SmallIntRegex = new Regex("^smallint", RegexOptions.IgnoreCase);
+        protected Regex IntRegex = new Regex("^(int)|(integer)",RegexOptions.IgnoreCase);
+        protected Regex LongRegex = new Regex("^bigint", RegexOptions.IgnoreCase);
+        protected Regex DateRegex = new Regex("date", RegexOptions.IgnoreCase);
+        protected Regex TimeRegex = new Regex("^time$", RegexOptions.IgnoreCase);
+        protected Regex StringRegex = new Regex("(char)|(text)|(xml)",RegexOptions.IgnoreCase);
+        protected Regex ByteArrayRegex = new Regex("(binary)|(blob)",RegexOptions.IgnoreCase);
+        protected Regex FloatingPointRegex = new Regex("^(float)|(decimal)|(numeric)|(real)|(money)|(smallmoney)|(double)", RegexOptions.IgnoreCase);
+        protected Regex GuidRegex = new Regex("^uniqueidentifier",RegexOptions.IgnoreCase);
 
         /// <summary>
         /// The maximum number of characters to declare explicitly in the char type (e.g. varchar(500)) before instead declaring the text/varchar(max) etc type
@@ -27,7 +38,7 @@ namespace FAnsi.Discovery.TypeTranslation
         /// use <see cref="DataTypeComputer"/> to determine the required length/type at runtime.
         /// </summary>
         protected int StringWidthWhenNotSupplied = 4000;
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -43,35 +54,35 @@ namespace FAnsi.Discovery.TypeTranslation
         {
             var t = request.CSharpType;
 
-            if (t == typeof(int) || t == typeof(Int32)  || t == typeof(uint) || t == typeof(int?) || t == typeof(uint?))
-                return GetIntDataType();
+            if (t == typeof(bool) || t == typeof(bool?))
+                return GetBoolDataType();
 
-            if (t == typeof (short) || t == typeof (Int16) || t == typeof (ushort) || t == typeof (short?) || t == typeof (ushort?))
+            if (t == typeof(byte))
+                return GetByteDataType();
+            
+            if (t == typeof(short) || t == typeof(Int16) || t == typeof(ushort) || t == typeof(short?) || t == typeof(ushort?))
                 return GetSmallIntDataType();
 
+            if (t == typeof(int) || t == typeof(Int32)  || t == typeof(uint) || t == typeof(int?) || t == typeof(uint?))
+                return GetIntDataType();
+            
             if (t == typeof (long) || t == typeof(ulong) || t == typeof(long?) || t == typeof(ulong?))
                 return GetBigIntDataType();
 
-            if (t == typeof(bool) || t == typeof(bool?)) 
-                return GetBoolDataType();
-            
-            if (t == typeof(TimeSpan) || t == typeof(TimeSpan?))
-                return GetTimeDataType();
-
-            if (t == typeof (string))
-                return GetStringDataType(request.MaxWidthForStrings);
-
-            if (t == typeof (DateTime) || t == typeof (DateTime?))
-                return GetDateDateTimeDataType();
-            
-            if (t == typeof (float) || t == typeof (float?) || t == typeof (double) ||
-                t == typeof (double?) || t == typeof (decimal) ||
-                t == typeof (decimal?))
+            if (t == typeof(float) || t == typeof(float?) || t == typeof(double) ||
+                t == typeof(double?) || t == typeof(decimal) ||
+                t == typeof(decimal?))
                 return GetFloatingPointDataType(request.DecimalPlacesBeforeAndAfter);
 
-            if (t == typeof (byte))
-                return GetByteDataType();
+            if (t == typeof(string))
+                return GetStringDataType(request.MaxWidthForStrings);
 
+            if (t == typeof(DateTime) || t == typeof(DateTime?))
+                return GetDateDateTimeDataType();
+
+            if (t == typeof(TimeSpan) || t == typeof(TimeSpan?))
+                return GetTimeDataType();
+            
             if (t == typeof (byte[]))
                 return GetByteArrayDataType();
 
@@ -209,31 +220,9 @@ namespace FAnsi.Discovery.TypeTranslation
             return TryGetCSharpTypeForSQLDBType(sqlType) != null;
         }
 
-        protected virtual bool IsLong(string sqlType)
-        {
-            return sqlType.ToLower().Contains(GetBigIntDataType().ToLower());
-        }
-
         /// <inheritdoc/>
         public DbType GetDbTypeForSQLDBType(string sqlType)
         {
-            if (IsFloatingPoint(sqlType))
-                return DbType.Decimal;
-
-            if (IsString(sqlType))
-                return DbType.String;
-
-            if (IsDate(sqlType))
-                return DbType.DateTime;
-
-            if (IsTime(sqlType))
-                return DbType.Time;
-
-            if (IsInt(sqlType))
-                return  DbType.Int32;
-
-            if (IsSmallInt(sqlType))
-                return DbType.Int16;
 
             if (IsBit(sqlType))
                 return DbType.Boolean;
@@ -241,6 +230,27 @@ namespace FAnsi.Discovery.TypeTranslation
             if (IsByte(sqlType))
                 return DbType.Byte;
 
+            if (IsSmallInt(sqlType))
+                return DbType.Int16;
+
+            if (IsInt(sqlType))
+                return DbType.Int32;
+
+            if (IsLong(sqlType))
+                return DbType.Int64;
+
+            if (IsFloatingPoint(sqlType))
+                return DbType.Decimal;
+
+            if (IsString(sqlType))
+                return DbType.String;
+            
+            if (IsDate(sqlType))
+                return DbType.DateTime;
+
+            if (IsTime(sqlType))
+                return DbType.Time;
+            
             if (IsByteArray(sqlType))
                 return DbType.Object;
 
@@ -384,65 +394,49 @@ select LEN(dt) from omgdates
             return DataTypeComputer.MinimumLengthRequiredForDateStringRepresentation; //e.g. "2018-01-30 13:05:45.1266667"
         }
 
-        protected virtual bool IsTime(string sqlType)
-        {
-            return sqlType.Trim().Equals("time",StringComparison.CurrentCultureIgnoreCase);
-        }
-
-        protected virtual bool IsSmallInt(string sqlType)
-        {
-            return sqlType.ToLower().StartsWith("smallint",StringComparison.CurrentCultureIgnoreCase);
-        }
-
-        protected virtual bool IsByte(string sqlType)
-        {
-            return sqlType.Contains("tinyint",CompareOptions.IgnoreCase);
-        }
-
-        protected virtual bool IsByteArray(string sqlType)
-        {
-            return sqlType.ToLower().Contains("binary");
-        }
-        
-        private string[] _bitTypes = new[] {"bit", "bool", "boolean"};
-
         protected virtual bool IsBit(string sqlType)
         {
-            return _bitTypes.Any(t=>sqlType.Contains(t,CompareOptions.IgnoreCase));
+            return BitRegex.IsMatch(sqlType);
         }
-        
-        private string[] _intTypes = new[] { "int", "integer" };
-
+        protected virtual bool IsByte(string sqlType)
+        {
+            return ByteRegex.IsMatch(sqlType);
+        }
+        protected virtual bool IsSmallInt(string sqlType)
+        {
+            return SmallIntRegex.IsMatch(sqlType);
+        }
         protected virtual bool IsInt(string sqlType)
         {
-            return _intTypes.Any(t => sqlType.Contains(t, CompareOptions.IgnoreCase));
+            return IntRegex.IsMatch(sqlType);
         }
-
+        protected virtual bool IsLong(string sqlType)
+        {
+            return LongRegex.IsMatch(sqlType);
+        }
         protected virtual bool IsDate(string sqlType)
         {
-            return sqlType.ToLower().Contains("date");
+            return DateRegex.IsMatch(sqlType);
         }
-
+        protected virtual bool IsTime(string sqlType)
+        {
+            return TimeRegex.IsMatch(sqlType);
+        }
         protected virtual bool IsString(string sqlType)
         {
-            var lower = sqlType.ToLower().Trim();
-            return lower.Contains("char") || lower.Contains("text") || lower == "xml";
+            return StringRegex.IsMatch(sqlType);
         }
-
+        protected virtual bool IsByteArray(string sqlType)
+        {
+            return ByteArrayRegex.IsMatch(sqlType);
+        }
         protected virtual bool IsFloatingPoint(string sqlType)
         {
-            foreach (var s in new[] { "float","decimal","numeric","real" ,"money","smallmoney","double"})
-            {
-                if (sqlType.Trim().StartsWith(s, StringComparison.CurrentCultureIgnoreCase))
-                    return true;
-            }
-
-            return false;
+            return FloatingPointRegex.IsMatch(sqlType);
         }
-
         protected virtual bool IsGuid(string sqlType)
         {
-            return sqlType.ToLower().Trim().Equals("uniqueidentifier");
+            return GuidRegex.IsMatch(sqlType);
         }
     }
 }

@@ -67,7 +67,7 @@ namespace FAnsiTests.TypeTranslation
             Assert.AreEqual(typeof(string), _translaters[type].GetCSharpTypeForSQLDBType(expectedType));
         }
         
-        [TestCase(DatabaseType.MicrosoftSQLServer,"bigint",typeof(int))]
+        [TestCase(DatabaseType.MicrosoftSQLServer,"bigint",typeof(long))]
         [TestCase(DatabaseType.MicrosoftSQLServer,"binary",typeof(byte[]))]
         [TestCase(DatabaseType.MicrosoftSQLServer,"bit",typeof(bool))]
         [TestCase(DatabaseType.MicrosoftSQLServer,"char",typeof(string))]
@@ -116,6 +116,11 @@ namespace FAnsiTests.TypeTranslation
         [TestCase(DatabaseType.MySql, "INT3",typeof(int))]
         [TestCase(DatabaseType.MySql, "INT4",typeof(int))]
         [TestCase(DatabaseType.MySql, "INT8",typeof(long))]
+        [TestCase(DatabaseType.MySql, "INT(1)", typeof(int))] //Confusing but these are actually display names https://stackoverflow.com/questions/11563830/what-does-int1-stand-for-in-mysql
+        [TestCase(DatabaseType.MySql, "INT(2)",typeof(int))]
+        [TestCase(DatabaseType.MySql, "INT(3)",typeof(int))]
+        [TestCase(DatabaseType.MySql, "INT(4)",typeof(int))]
+        [TestCase(DatabaseType.MySql, "INT(8)",typeof(int))]
         [TestCase(DatabaseType.MySql, "SMALLINT",typeof(short))]
         [TestCase(DatabaseType.MySql, "MEDIUMINT",typeof(int))]
         [TestCase(DatabaseType.MySql, "INT",typeof(int))]
@@ -182,35 +187,41 @@ namespace FAnsiTests.TypeTranslation
         //These types are all converted to Number(38) by Oracle : https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm (See ANSI/ISO, DB2, and SQL/DS Datatypes )
         [TestCase(DatabaseType.Oracle, "INTEGER", typeof(int))] 
         [TestCase(DatabaseType.Oracle, "INT", typeof(int))]
-        [TestCase(DatabaseType.Oracle, "SMALLINT", typeof(int))]
+        [TestCase(DatabaseType.Oracle, "SMALLINT", typeof(int))] //yup, see the link above
         public void TestIsKnownType(DatabaseType databaseType,string sqlType, Type expectedType)
         {
             RunKnownTypeTest(databaseType, sqlType, expectedType);
         }
-
-
+        
         private void RunKnownTypeTest(DatabaseType type, string sqlType, Type expectedType)
         {
+            //Get test database
             var db = GetTestDatabase(type);
             var tt = db.Server.GetQuerySyntaxHelper().TypeTranslater;
-
-            var tBefore = tt.GetCSharpTypeForSQLDBType(sqlType);
-
-            //was the Type expected
-            Assert.AreEqual(expectedType,tBefore);
             
-            Assert.IsNotNull(tBefore);
-
+            //Create it in database (crashes here if it's an invalid datatype according to DBMS)
             var tbl = db.CreateTable("TTT", new[] { new DatabaseColumnRequest("MyCol", sqlType) });
-
+            
             try
             {
+                //Find the column on the created table and fetch it
                 var col = tbl.DiscoverColumns().Single();
+
+                //What type does FAnsi think this is?
+                var tBefore = tt.TryGetCSharpTypeForSQLDBType(sqlType);
+                Assert.IsNotNull(tBefore,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi didn't recognise '{0}' as a supported Type",sqlType,col.DataType.SQLType);
+
+                //Does FAnsi understand the datatype that was actually created on the server (sometimes you specify something and it is an
+                //alias for something else e.g. Oracle creates 'varchar2' when you ask for 'CHAR VARYING'
                 var datatypeComputer = col.GetDataTypeComputer();
                 Assert.IsNotNull(datatypeComputer.CurrentEstimate);
                 var tAfter = datatypeComputer.CurrentEstimate;
+                
+                //was the Type REQUESTED correct according to the test case expectation
+                Assert.AreEqual(expectedType, tBefore,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'",sqlType,col.DataType.SQLType,tBefore,tAfter);
 
-                Assert.AreEqual(tBefore, tAfter);
+                //Was the Type CREATED matching the REQUESTED type (as far as FAnsi is concerned)
+                Assert.AreEqual(tBefore, tAfter,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'",sqlType,col.DataType.SQLType,tBefore,tAfter);
 
                 if(!string.Equals(col.DataType.SQLType,sqlType,StringComparison.CurrentCultureIgnoreCase))
                     Console.WriteLine("{0} created a '{1}' when asked to create a '{2}'",type,col.DataType.SQLType,sqlType);

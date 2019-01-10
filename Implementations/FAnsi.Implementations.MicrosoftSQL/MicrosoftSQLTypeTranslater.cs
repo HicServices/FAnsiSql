@@ -1,9 +1,13 @@
+using System.Text.RegularExpressions;
 using FAnsi.Discovery.TypeTranslation;
 
 namespace Fansi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLTypeTranslater : TypeTranslater
     {
+        protected Regex AlsoBinaryRegex = new Regex("(image)|(timestamp)|(rowversion)",RegexOptions.IgnoreCase);
+
+
         public MicrosoftSQLTypeTranslater() : base(8000, 4000)
         {
         }
@@ -20,13 +24,7 @@ namespace Fansi.Implementations.MicrosoftSQL
 
         protected override bool IsByteArray(string sqlType)
         {
-            var lower = sqlType.ToLower().Trim();
-
-            return base.IsByteArray(sqlType)
-                || lower.Contains("image")
-                || lower == "timestamp" 
-                || lower == "rowversion";
-
+            return base.IsByteArray(sqlType) || AlsoBinaryRegex.IsMatch(sqlType);
         }
     }
 }

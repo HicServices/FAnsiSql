@@ -22,7 +22,7 @@ namespace FAnsi.Implementations.MySql
             using(DbDataReader r = cmd.ExecuteReader())
             {
                 if (!r.HasRows)
-                    throw new Exception("Could not find any columns using sp_columns for table " + tableName + " in database " + database);
+                    throw new Exception("Could not find any columns for table " + tableName + " in database " + database);
 
                 while (r.Read())
                 {
@@ -34,7 +34,7 @@ namespace FAnsi.Implementations.MySql
                     toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
                     toAdd.Collation = r["Collation"] as string;
                     
-                    toAdd.DataType = new DiscoveredDataType(r,SensibleTypeFromMySqlType(r["Type"].ToString()),toAdd);
+                    toAdd.DataType = new DiscoveredDataType(r,r["Type"].ToString(),toAdd);
                     columns.Add(toAdd);
 
                 }
@@ -62,21 +62,7 @@ namespace FAnsi.Implementations.MySql
 
             return Convert.ToBoolean(o);
         }
-
-        private string SensibleTypeFromMySqlType(string type)
-        {
-            if (type.StartsWith("int"))//for some reason mysql likes to put parenthesis and the byte size.. ??? after the number
-                return "int";
-
-            if (type.StartsWith("smallint"))//for some reason mysql likes to put parenthesis and the byte size.. ??? after the number
-                return "smallint";
-
-            if (type.Equals("bit(1)"))
-                return "bit";
-
-            return type;
-        }
-
+        
         public override IDiscoveredColumnHelper GetColumnHelper()
         {
             return new MySqlColumnHelper();

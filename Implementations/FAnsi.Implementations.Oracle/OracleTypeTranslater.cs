@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Extensions;
 
@@ -7,6 +8,14 @@ namespace FAnsi.Implementations.Oracle
 {
     public class OracleTypeTranslater:TypeTranslater
     {
+        private Regex AlsoFloatingPointRegex = new Regex("^(NUMBER)|(DEC)",RegexOptions.IgnoreCase);
+        private Regex AlsoByteArrayRegex = new Regex("(BFILE)|(BLOB)|(RAW)|(ROWID)",RegexOptions.IgnoreCase);
+        
+        /// <summary>
+        /// Oracle specific string types, these are all max length as returned by <see cref="GetLengthIfString"/>
+        /// </summary>
+        private Regex AlsoStringRegex = new Regex("^([N]?CLOB)|(LONG)", RegexOptions.IgnoreCase);
+
         public OracleTypeTranslater(): base(4000, 4000)
         {
             
@@ -35,38 +44,23 @@ namespace FAnsi.Implementations.Oracle
 
         protected override bool IsString(string sqlType)
         {
-            if (sqlType.Contains("CLOB", CompareOptions.IgnoreCase))
-                return true;
+            if (sqlType.Contains("RAW",CompareOptions.IgnoreCase))
+                return false;
 
-            //LONG but not LONG RAW!
-            if (sqlType.StartsWith("LONG", StringComparison.CurrentCultureIgnoreCase) && !sqlType.Contains("RAW", CompareOptions.IgnoreCase))
-                return true;
-            
-            return base.IsString(sqlType);
+            return base.IsString(sqlType) || AlsoStringRegex.IsMatch(sqlType);
         }
 
         protected override bool IsFloatingPoint(string sqlType)
         {
-            if (sqlType.StartsWith("NUMBER", StringComparison.CurrentCultureIgnoreCase))
-                return true;
-
-            if (sqlType.StartsWith("DEC", StringComparison.CurrentCultureIgnoreCase))
-                return true;
-
-            return base.IsFloatingPoint(sqlType);
+            return base.IsFloatingPoint(sqlType) || AlsoFloatingPointRegex.IsMatch(sqlType);
         }
 
         public override int GetLengthIfString(string sqlType)
         {
-            if (sqlType.Contains("CLOB", CompareOptions.IgnoreCase))
+            if (AlsoStringRegex.IsMatch(sqlType))
                 return int.MaxValue;
 
             return base.GetLengthIfString(sqlType);
-        }
-
-        protected override bool IsTime(string sqlType)
-        {
-            return sqlType.StartsWith("timestamp", StringComparison.CurrentCultureIgnoreCase) || base.IsTime(sqlType);
         }
 
         protected override bool IsSmallInt(string sqlType)
@@ -78,20 +72,20 @@ namespace FAnsi.Implementations.Oracle
             return base.IsSmallInt(sqlType);
         }
 
-        protected override bool IsByteArray(string sqlType)
+        protected override bool IsInt(string sqlType)
         {
-            if(sqlType.StartsWith("BFILE",StringComparison.CurrentCultureIgnoreCase))
-                return true;
-            if (sqlType.StartsWith("BLOB", StringComparison.CurrentCultureIgnoreCase))
-                return true;
-            if (sqlType.Contains("RAW", CompareOptions.IgnoreCase))
-                return true;
-            if (sqlType.Contains("ROWID", CompareOptions.IgnoreCase))
+            //yup you ask for one of these, you will get a NUMBER(38) https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm
+            if (sqlType.StartsWith("SMALLINT", StringComparison.CurrentCultureIgnoreCase))
                 return true;
 
-            return base.IsByteArray(sqlType);
+            return base.IsInt(sqlType);
         }
 
+        protected override bool IsByteArray(string sqlType)
+        {
+            return base.IsByteArray(sqlType) || AlsoByteArrayRegex.IsMatch(sqlType);
+        }
+        
         protected override string GetDateDateTimeDataType()
         {
             return "DATE";
