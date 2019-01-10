@@ -2,6 +2,8 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Data.Common;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using FAnsi.Exceptions;
@@ -21,9 +23,19 @@ namespace FAnsi.Implementation
         /// <summary>
         /// Loads all implementations found in currently loaded assemblies (in the current domain)
         /// </summary>
-        public static void Load()
+        public static void Load(DirectoryInfo currentDirectory=null)
         {
-            Load(AppDomain.CurrentDomain.GetAssemblies());
+            currentDirectory = currentDirectory ?? new DirectoryInfo(Environment.CurrentDirectory);
+
+            if(!currentDirectory.Exists)
+                throw new Exception("Directory '"+currentDirectory+"'did not exist");
+
+            var catalog = new DirectoryCatalog(currentDirectory.FullName,"*FAnsi*");
+            
+            CompositionContainer _container = new CompositionContainer(catalog);
+            _instance = new ImplementationManager();
+
+            _container.SatisfyImportsOnce(_instance);
         }
 
         /// <summary>
@@ -59,9 +71,10 @@ namespace FAnsi.Implementation
         }
         private static IImplementation GetImplementation(Func<IImplementation,bool> condition, string errorIfNotFound)
         {
+            //If no implementations are loaded, load the current directory's dlls to look for implmentations
             if (_instance == null)
-                throw new Exception("Instance has not been set yet, try calling ImplementationManager.Load");
-
+                Load();
+            
             var implementation = _instance.Implementations.FirstOrDefault(condition);
 
             if (implementation == null)
