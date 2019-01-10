@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Naming;
@@ -10,6 +11,9 @@ namespace FAnsi.Implementations.MySql
 {
     public class MySqlTableHelper : DiscoveredTableHelper
     {
+        private readonly static Regex IntParentheses = new Regex(@"^int\(\d+\)", RegexOptions.IgnoreCase);
+        private readonly static Regex SmallintParentheses = new Regex(@"^smallint\(\d+\)", RegexOptions.IgnoreCase);
+        private readonly static Regex BitParentheses = new Regex(@"^bit\(\d+\)", RegexOptions.IgnoreCase);
 
         public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
         {
@@ -34,7 +38,7 @@ namespace FAnsi.Implementations.MySql
                     toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
                     toAdd.Collation = r["Collation"] as string;
                     
-                    toAdd.DataType = new DiscoveredDataType(r,r["Type"].ToString(),toAdd);
+                    toAdd.DataType = new DiscoveredDataType(r,TrimIntDisplayValues(r["Type"].ToString()),toAdd);
                     columns.Add(toAdd);
 
                 }
@@ -62,7 +66,25 @@ namespace FAnsi.Implementations.MySql
 
             return Convert.ToBoolean(o);
         }
-        
+
+
+
+        private string TrimIntDisplayValues(string type)
+        {
+            //See comments of int(5) means display 5 digits only it doesn't prevent storing larger numbers: https://stackoverflow.com/a/5634147/4824531
+
+            if (IntParentheses.IsMatch(type))
+                return IntParentheses.Replace(type, "int");
+
+            if (SmallintParentheses.IsMatch(type))
+                return SmallintParentheses.Replace(type, "smallint");
+
+            if (BitParentheses.IsMatch(type))
+                return BitParentheses.Replace(type, "bit");
+
+            return type;
+        }
+
         public override IDiscoveredColumnHelper GetColumnHelper()
         {
             return new MySqlColumnHelper();

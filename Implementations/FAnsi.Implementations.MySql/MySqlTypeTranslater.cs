@@ -18,8 +18,8 @@ namespace FAnsi.Implementations.MySql
         {
             //match bigint and bigint(20) etc
             ByteRegex = new Regex(@"^(tinyint)|(int1)",RegexOptions.IgnoreCase);
-            SmallIntRegex = new Regex(@"^(int2)",RegexOptions.IgnoreCase);
-            IntRegex = new Regex(@"^(int)|(mediumint)|(middleint)|(smallint)|(int3)|(int4)",RegexOptions.IgnoreCase);
+            SmallIntRegex = new Regex(@"^(smallint)|(int2)", RegexOptions.IgnoreCase);
+            IntRegex = new Regex(@"^(int)|(mediumint)|(middleint)|(int3)|(int4)",RegexOptions.IgnoreCase);
             LongRegex = new Regex(@"^(bigint)|(int8)", RegexOptions.IgnoreCase);
             DateRegex = new Regex(@"(date)|(timestamp)",RegexOptions.IgnoreCase);
         }
