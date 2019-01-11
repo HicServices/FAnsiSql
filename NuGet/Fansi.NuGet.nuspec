@@ -18,5 +18,7 @@
   </metadata>
   <files>
     <file src="bin\$configuration$\Fansi*.dll" target="lib\net452" />
+    <file src="bin\$configuration$\Fansi*.pdb" target="lib\net452" />
+    <file src="bin\$configuration$\Fansi*.xml" target="lib\net452" />
   </files>
 </package>
