@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsi.Implementations.MySql
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsi.Implementations.MicrosoftSQL", "Implementations\FAnsi.Implementations.MicrosoftSQL\FAnsi.Implementations.MicrosoftSQL.csproj", "{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{3907AA0E-080C-4464-9795-C6FCECFE0336}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsi.NuGet", "NuGet\FAnsi.NuGet.csproj", "{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +47,10 @@ Global
 		{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,5 +60,6 @@ Global
 		{9E75C80E-50F2-45EF-BE94-3E81D2A2A83C} = {2F0E0572-B8CF-4B0D-9594-ADB9132CEF2C}
 		{B6C0C7B8-CA65-420B-B026-0B697195B17C} = {2F0E0572-B8CF-4B0D-9594-ADB9132CEF2C}
 		{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5} = {2F0E0572-B8CF-4B0D-9594-ADB9132CEF2C}
+		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658} = {3907AA0E-080C-4464-9795-C6FCECFE0336}
 	EndGlobalSection
 EndGlobal

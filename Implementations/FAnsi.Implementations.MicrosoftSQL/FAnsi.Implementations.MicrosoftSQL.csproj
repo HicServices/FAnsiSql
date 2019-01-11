@@ -56,7 +56,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\FAnsiSql\FAnsi.csproj">
       <Project>{9CD5C745-9015-447E-89A5-809103DFD97D}</Project>
-      <Name>FAnsiSql</Name>
+      <Name>FAnsi</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
