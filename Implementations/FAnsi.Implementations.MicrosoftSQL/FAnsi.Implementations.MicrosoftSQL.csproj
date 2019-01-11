@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FAnsi.Implementations.MicrosoftSQL</RootNamespace>
     <AssemblyName>FAnsi.Implementations.MicrosoftSQL</AssemblyName>
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -56,7 +57,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\FAnsiSql\FAnsi.csproj">
       <Project>{9CD5C745-9015-447E-89A5-809103DFD97D}</Project>
-      <Name>FAnsiSql</Name>
+      <Name>FAnsi</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

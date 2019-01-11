@@ -11,6 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FAnsiTests</RootNamespace>
     <AssemblyName>FAnsiTests</AssemblyName>
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
