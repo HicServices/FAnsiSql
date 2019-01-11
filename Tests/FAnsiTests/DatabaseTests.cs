@@ -14,6 +14,8 @@ using NUnit.Framework;
 
 namespace FansiTests
 {
+    [SingleThreaded]
+    [NonParallelizable]
     public class DatabaseTests
     {
         protected Dictionary<DatabaseType,string> TestConnectionStrings = new Dictionary<DatabaseType, string>();

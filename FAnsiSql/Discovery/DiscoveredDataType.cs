@@ -135,5 +135,10 @@ namespace FAnsi.Discovery
             if (obj.GetType() != this.GetType()) return false;
             return Equals((DiscoveredDataType)obj);
         }
+
+        public Type GetCSharpDataType()
+        {
+            return Column.Table.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(SQLType);
+        }
     }
 }

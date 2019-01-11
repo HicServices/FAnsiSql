@@ -95,15 +95,18 @@ namespace FAnsi.Discovery
         {
             var dt = new DataTable();
             var svr = Database.Server;
-            using (IManagedConnection con = svr.GetManagedConnection(transaction))
-                svr.GetDataAdapter(GetTopXSql(topX), con.Connection).Fill(dt);
 
             if (enforceTypesAndNullness)
                 foreach (DiscoveredColumn c in DiscoverColumns(transaction))
                 {
-                    var name = c.GetRuntimeName();
-                    dt.Columns[name].AllowDBNull = c.AllowNulls;
+                    var col = dt.Columns.Add(c.GetRuntimeName());
+                    col.AllowDBNull = c.AllowNulls;
+                    col.DataType = c.DataType.GetCSharpDataType();
                 }
+
+
+            using (IManagedConnection con = svr.GetManagedConnection(transaction))
+                svr.GetDataAdapter(GetTopXSql(topX), con.Connection).Fill(dt);
 
             return dt;
         }

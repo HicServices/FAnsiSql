@@ -35,11 +35,29 @@ namespace FAnsi.Implementations.Oracle
             return "TIMESTAMP";
         }
 
+        /// <summary>
+        /// <para>Returns char(5).  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint
+        /// For our purposes we will have to just use varchar2(5) to store "True" or "False" and "1" and "0" etc</para>
+        /// 
+        /// <para>See https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns</para>
+        /// </summary>
+        /// <returns></returns>
         protected override string GetBoolDataType()
         {
-            //See:
-            //https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns
-            return "char(1)";
+            return "varchar2(5)";
+        }
+
+        /// <summary>
+        /// <para>Returns False.  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint
+        /// For our purposes we will have to just use varchar2(5) to store "True" or "False" and "1" and "0" etc</para>
+        /// 
+        /// <para>See https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns</para>
+        /// </summary>
+        /// <param name="sqlType"></param>
+        /// <returns></returns>
+        protected override bool IsBit(string sqlType)
+        {
+            return false;
         }
 
         protected override bool IsString(string sqlType)

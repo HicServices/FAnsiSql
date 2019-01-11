@@ -24,6 +24,7 @@
   - [X] TimeSpan
   - [X] Decimal
   - [X] Date
+  - [X] Auto Increment
 
 - Query
   - [X] Top X

@@ -47,7 +47,9 @@ namespace FAnsi.Implementations.Oracle
 
             if (autoIncrementColumn == null)
                 return bodySql;
-            
+
+            //todo: this is only required in oracle 11.  In 12 there is IDENTITY keyword https://stackoverflow.com/a/11296469/4824531
+
             var sequenceName = string.Format("\"{0}\".\"{1}_{2}_seq\"", database.GetRuntimeName() , tableRuntimeName , autoIncrementColumn.ColumnName );
             var triggerName = string.Format("\"{0}\".\"{1}_bir\"",database.GetRuntimeName() ,tableRuntimeName);
 

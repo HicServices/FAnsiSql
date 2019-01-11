@@ -108,7 +108,42 @@ namespace FansiTests.Table
             table.Drop();
         }
 
-        
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
+        public void CreateSimpleTable_VarcharTypeCorrect(DatabaseType type)
+        {
+            var db = GetTestDatabase(type);
+            var table = db.CreateTable("People", new[]
+            {
+                new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 5))
+            });
+
+            Assert.IsTrue(table.Exists());
+
+
+            var dbType = table.DiscoverColumn("Name").DataType.SQLType;
+
+            switch (type)
+            {
+                case DatabaseType.MicrosoftSQLServer:
+                    Assert.AreEqual("varchar(5)",dbType);
+                    break;
+                case DatabaseType.MySql:
+                    Assert.AreEqual("varchar(5)",dbType);
+                    break;
+                case DatabaseType.Oracle:
+                    Assert.AreEqual("varchar2(5)",dbType);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("type");
+            }
+
+
+            table.Drop();
+
+            Assert.IsFalse(table.Exists());
+        }
 
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
@@ -166,6 +201,50 @@ namespace FansiTests.Table
             });
 
             Assert.AreEqual(collation, tbl.DiscoverColumn("Name").Collation);
+        }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.Oracle)]
+        public void CreateTable_BoolStrings(DatabaseType type)
+        {
+            var db = GetTestDatabase(type);
+            DataTable dt = new DataTable();
+            dt.TableName = "MyTable";
+            dt.Columns.Add("MyBoolCol");
+            dt.Rows.Add("true");
+
+            var tbl = db.CreateTable("MyTable", dt);
+
+            Assert.AreEqual(1,tbl.GetRowCount());
+
+            if (type == DatabaseType.Oracle)
+            {
+                //Oracle doesn't have a bit datatype
+                Assert.AreEqual(typeof(string), tbl.DiscoverColumn("MyBoolCol").GetDataTypeComputer().CurrentEstimate);
+                Assert.AreEqual("true", tbl.GetDataTable().Rows[0][0]);
+                return;
+            }
+
+            Assert.AreEqual(typeof(bool),tbl.DiscoverColumn("MyBoolCol").GetDataTypeComputer().CurrentEstimate);
+            Assert.AreEqual(true,tbl.GetDataTable().Rows[0][0]);
+        }
+
+
+        [Test]
+        public void Test_OracleBit_IsActuallyString()
+        {
+            DiscoveredDatabase db = GetTestDatabase(DatabaseType.Oracle);
+            DiscoveredTable table = db.CreateTable("MyTable",
+                new[]
+                {
+                    new DatabaseColumnRequest("MyCol", new DatabaseTypeRequest(typeof(bool)))
+                });
+
+            var col = table.DiscoverColumn("MyCol");
+            Assert.AreEqual("varchar2(5)", col.DataType.SQLType);
+            Assert.AreEqual(5, col.DataType.GetLengthIfString());
+
         }
     }
 }

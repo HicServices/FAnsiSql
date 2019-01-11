@@ -123,9 +123,6 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
 
             switch (r["DATA_TYPE"] as string)
             {
-                case "VARCHAR2": return "varchar";
-
-
                 //All the ways that you can use the number keyword https://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#CNCPT1832
                 case "NUMBER":
                     if (scale == 0 && precision == null)
@@ -204,6 +201,11 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
         {
             return string.Format(@"alter table {0} rename to {1};", discoveredTable.GetRuntimeName(),newName);
+        }
+
+        public override bool RequiresLength(string columnType)
+        {
+            return base.RequiresLength(columnType) || columnType.Equals("varchar2", StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }
