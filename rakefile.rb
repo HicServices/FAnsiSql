@@ -43,9 +43,9 @@ end
 desc "Runs all tests"
 nunit :test do |nunit|
 	files = FileList["Tests/**/*Tests.dll"].exclude(/obj\//)
-	nunit.command = "nunit-console.exe"
+	nunit.command = "packages/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe"
 	nunit.assemblies files.to_a
-	nunit.options "/xml=nunit-result.xml"
+	nunit.options "--workers=1 --inprocess --result=\"nunit-results.xml\";format=nunit2 --noheader --labels=After"
 end
 
 msbuild :deploy, [:config] => :restorepackages do |msb, args|
