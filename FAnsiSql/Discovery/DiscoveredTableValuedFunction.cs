@@ -25,7 +25,7 @@ namespace FAnsi.Discovery
 
         public override string GetRuntimeName()
         {
-            return _querySyntaxHelper.GetRuntimeName(_functionName);
+            return QuerySyntaxHelper.GetRuntimeName(_functionName);
         }
 
         public override string GetFullyQualifiedName()

@@ -307,9 +307,9 @@ namespace FAnsi.Discovery
         }
 
         /// <summary>
-        /// <para>Creates a new database with the given <see cref="newDatabaseName"/>.</para>
+        /// <para>Creates a new database with the given <paramref name="newDatabaseName"/>.</para>
         /// 
-        /// <para>In the case of Oracle this is a user+schema (See <see cref="https://stackoverflow.com/questions/880230/difference-between-a-user-and-a-schema-in-oracle"/></para>
+        /// <para>In the case of Oracle this is a user+schema (See https://stackoverflow.com/questions/880230/difference-between-a-user-and-a-schema-in-oracle) </para>
         /// </summary>
         /// <param name="newDatabaseName"></param>
         /// <returns></returns>

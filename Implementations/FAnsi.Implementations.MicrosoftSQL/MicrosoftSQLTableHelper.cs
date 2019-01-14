@@ -194,7 +194,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             return new MicrosoftSQLBulkCopy(discoveredTable,connection);
         }
 
-        public override void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection,int timeout = 0)
+        public override void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0)
         {
             try
             {
@@ -203,7 +203,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
                 {
                     var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
                     var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
-                    alterCmd.CommandTimeout = timeout;
+                    alterCmd.CommandTimeout = timeoutInSeconds;
                     alterCmd.ExecuteNonQuery();
                 }
             }
@@ -212,7 +212,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
                 throw new Exception("Failed to create primary key on table " + table + " using columns (" + string.Join(",", discoverColumns.Select(c => c.GetRuntimeName())) + ")", e);
             }
 
-            base.CreatePrimaryKey(table, discoverColumns, connection, timeout);
+            base.CreatePrimaryKey(table, discoverColumns, connection, timeoutInSeconds);
         }
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
@@ -225,7 +225,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             return string.Format("exec sp_rename '{0}', '{1}'", oldName, newName);
         }
 
-        public override void MakeDistinct(DiscoveredTable discoveredTable, int timeout)
+        public override void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds)
         {
             string sql = 
             @"DELETE f
@@ -246,10 +246,11 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             {
                 con.Open();
                 var cmd = server.GetCommand(sqlToExecute, con);
-                cmd.CommandTimeout = timeout;
+                cmd.CommandTimeout = timeoutInSeconds;
                 cmd.ExecuteNonQuery();
             }
         }
+
 
         public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
         {

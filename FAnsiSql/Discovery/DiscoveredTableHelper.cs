@@ -18,10 +18,10 @@ namespace FAnsi.Discovery
         public abstract void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
         public abstract void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
 
-        public virtual void AddColumn(DiscoveredTable table, DbConnection connection, string name, string dataType, bool allowNulls,int timeout)
+        public virtual void AddColumn(DiscoveredTable table, DbConnection connection, string name, string dataType, bool allowNulls, int timeoutInSeconds)
         {
             var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + name + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"), connection);
-            cmd.CommandTimeout = timeout;
+            cmd.CommandTimeout = timeoutInSeconds;
             cmd.ExecuteNonQuery();
         }
 
@@ -103,7 +103,7 @@ namespace FAnsi.Discovery
             cmd.ExecuteNonQuery();
         }
 
-        public virtual void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeout = 0)
+        public virtual void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0)
         {
             try{
 
@@ -113,7 +113,7 @@ namespace FAnsi.Discovery
                     );
 
                 DbCommand cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
-                cmd.CommandTimeout = timeout;
+                cmd.CommandTimeout = timeoutInSeconds;
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
@@ -136,7 +136,7 @@ namespace FAnsi.Discovery
 
         protected abstract string GetRenameTableSql(DiscoveredTable discoveredTable, string newName);
 
-        public virtual void MakeDistinct(DiscoveredTable discoveredTable, int timeout)
+        public virtual void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds)
         {
             var server = discoveredTable.Database.Server;
 
@@ -153,19 +153,19 @@ namespace FAnsi.Discovery
                 try
                 {
                     var cmdDistinct = server.GetCommand(string.Format("CREATE TABLE {1} AS SELECT distinct * FROM {0}", tableName, tempTable), con);
-                    cmdDistinct.CommandTimeout = timeout;
+                    cmdDistinct.CommandTimeout = timeoutInSeconds;
                     cmdDistinct.ExecuteNonQuery();
 
                     var cmdTruncate = server.GetCommand(string.Format("DELETE FROM {0}", tableName), con);
-                    cmdTruncate.CommandTimeout = timeout;
+                    cmdTruncate.CommandTimeout = timeoutInSeconds;
                     cmdTruncate.ExecuteNonQuery();
 
                     var cmdBack = server.GetCommand(string.Format("INSERT INTO {0} (SELECT * FROM {1})", tableName, tempTable), con);
-                    cmdBack.CommandTimeout = timeout;
+                    cmdBack.CommandTimeout = timeoutInSeconds;
                     cmdBack.ExecuteNonQuery();
 
                     var cmdDropDistinctTable = server.GetCommand(string.Format("DROP TABLE {0}", tempTable), con);
-                    cmdDropDistinctTable.CommandTimeout = timeout;
+                    cmdDropDistinctTable.CommandTimeout = timeoutInSeconds;
                     cmdDropDistinctTable.ExecuteNonQuery();
 
                     con.ManagedTransaction.CommitAndCloseConnection();

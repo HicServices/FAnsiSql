@@ -21,7 +21,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -62,6 +62,7 @@
     <Compile Include="Discovery\DiscoveredTable.cs" />
     <Compile Include="Discovery\DiscoveredTableHelper.cs" />
     <Compile Include="Discovery\DiscoveredTableValuedFunction.cs" />
+    <Compile Include="Discovery\TableType.cs" />
     <Compile Include="Exceptions\AlterFailedException.cs" />
     <Compile Include="Discovery\IBulkCopy.cs" />
     <Compile Include="Discovery\IDiscoveredColumnHelper.cs" />

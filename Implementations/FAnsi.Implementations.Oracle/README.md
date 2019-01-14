@@ -22,6 +22,7 @@
   - [X] Script Table Structure
   - [ ] MakeDistinct
   - [X] Bulk Insert
+  - [X] Rename
 
 - Column
   - [X] Alter

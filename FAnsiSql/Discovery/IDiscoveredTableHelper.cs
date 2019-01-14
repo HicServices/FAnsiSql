@@ -19,7 +19,7 @@ namespace FAnsi.Discovery
         void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
         void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
 
-        void AddColumn(DiscoveredTable table, DbConnection connection, string name, string dataType, bool allowNulls,int timeout);
+        void AddColumn(DiscoveredTable table, DbConnection connection, string name, string dataType, bool allowNulls, int timeoutInSeconds);
 
         int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null);
 
@@ -28,13 +28,13 @@ namespace FAnsi.Discovery
         IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection);
         
         void TruncateTable(DiscoveredTable discoveredTable);
-        void MakeDistinct(DiscoveredTable discoveredTable, int timeout);
+        void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds);
 
         /// <inheritdoc cref="DiscoveredTable.ScriptTableCreation"/>
         string ScriptTableCreation(DiscoveredTable constraints, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable toCreateTable = null);
         bool IsEmpty(DbConnection connection, DiscoveredTable discoveredTable, DbTransaction transaction);
         void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection);
-        void CreatePrimaryKey(DiscoveredTable columns, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeout = 0);
+        void CreatePrimaryKey(DiscoveredTable columns, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0);
         int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null);
     }
 }
