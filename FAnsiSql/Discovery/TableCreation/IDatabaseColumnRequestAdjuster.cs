@@ -8,6 +8,10 @@ namespace FAnsi.Discovery.TableCreation
     /// </summary>
     public interface IDatabaseColumnRequestAdjuster
     {
+        /// <summary>
+        /// Implement to make last minute changes to the columns in the table being created
+        /// </summary>
+        /// <param name="columns"></param>
         void AdjustColumns(List<DatabaseColumnRequest> columns);
     }
 }
