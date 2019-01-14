@@ -9,18 +9,56 @@ namespace FAnsi.Discovery
     /// </summary>
     public class DiscoveredColumn : IHasFullyQualifiedNameToo,ISupplementalColumnInformation
     {
-        public IDiscoveredColumnHelper Helper;
+        /// <summary>
+        /// The <see cref="DiscoveredTable"/> on which the <see cref="DiscoveredColumn"/> was found
+        /// </summary>
         public DiscoveredTable Table { get; private set; }
 
+        /// <summary>
+        /// Stateless helper class with DBMS specific implementation of the logic required by <see cref="DiscoveredColumn"/>.
+        /// </summary>
+        public IDiscoveredColumnHelper Helper;
+
+        /// <summary>
+        /// True if the column allows rows with nulls in this column
+        /// </summary>
         public bool AllowNulls { get; private set; }
+
+        /// <summary>
+        /// True if the column is part of the <see cref="Table"/> primary key (a primary key can consist of mulitple columns)
+        /// </summary>
+        public bool IsPrimaryKey { get; set; }
+
+        /// <summary>
+        /// True if the column is an auto incrementing default number e.g. IDENTITY.  This will not handle roundabout ways of declaring
+        /// auto increment e.g. sequences in Oracle, DEFAULT constraints etc.
+        /// </summary>
+        public bool IsAutoIncrement { get; set; }
+
+        /// <summary>
+        /// The DBMS proprietary column specific collation e.g. "Latin1_General_CS_AS_KS_WS"
+        /// </summary>
+        public string Collation { get; set; }
+
+        /// <summary>
+        /// The data type of the column found (includes String Length and Scale/Precision).
+        /// </summary>
+        public DiscoveredDataType DataType { get; set; }
+
+        /// <summary>
+        /// The character set of the column (if char)
+        /// </summary>
+        public string Format { get; set; }
+
         private readonly string _name;
         private readonly IQuerySyntaxHelper _querySyntaxHelper;
 
-        public bool IsPrimaryKey { get; set; }
-        public bool IsAutoIncrement { get; set; }
-        public string Collation { get; set; }
-
-
+        /// <summary>
+        /// Internal API constructor intended for Implementation classes, instead use <see cref="DiscoveredTable.DiscoverColumn"/> instead.
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="name"></param>
+        /// <param name="allowsNulls"></param>
         public DiscoveredColumn(DiscoveredTable table, string name,bool allowsNulls)
         {
             Table = table;
@@ -31,30 +69,50 @@ namespace FAnsi.Discovery
             AllowNulls = allowsNulls;
         }
 
+        /// <summary>
+        /// The unqualified name of the column e.g. "MyCol"
+        /// </summary>
+        /// <returns></returns>
         public string GetRuntimeName()
         {
             return _querySyntaxHelper.GetRuntimeName(_name);
         }
 
+        /// <summary>
+        /// The fully qualified name of the column e.g. [MyDb].dbo.[MyTable].[MyCol] or `MyDb`.`MyCol`
+        /// </summary>
+        /// <returns></returns>
         public string GetFullyQualifiedName()
         {
             return _querySyntaxHelper.EnsureFullyQualified(Table.Database.GetRuntimeName(),Table.Schema, Table.GetRuntimeName(), GetRuntimeName(), Table is DiscoveredTableValuedFunction);
         }
 
 
-        public DiscoveredDataType DataType { get; set; }
-        public string Format { get; set; }
-        
+        /// <summary>
+        /// Returns the SQL code required to fetch the <paramref name="topX"/> values from the table
+        /// </summary>
+        /// <param name="topX">The number of records to return</param>
+        /// <param name="discardNulls">If true adds a WHERE statement to throw away null values</param>
+        /// <returns></returns>
         public string GetTopXSql(int topX, bool discardNulls)
         {
             return Helper.GetTopXSqlForColumn(Table.Database, Table, this, topX, discardNulls);
         }
 
+        /// <summary>
+        /// Returns the name of the column
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return _name;
         }
 
+        /// <summary>
+        /// Generates a <see cref="DataTypeComputer"/> primed with the <see cref="DataType"/> of this column.  This can be used to inspect new
+        /// untyped (string) data to determine whether it will fit into the column.
+        /// </summary>
+        /// <returns></returns>
         public DataTypeComputer GetDataTypeComputer()
         {
             return Table.GetQuerySyntaxHelper().TypeTranslater.GetDataTypeComputerFor(this);
