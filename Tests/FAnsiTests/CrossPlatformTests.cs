@@ -679,7 +679,7 @@ namespace FansiTests
             }
             finally
             {
-                database.ForceDrop();
+                database.Drop();
             }
         }
 
@@ -709,7 +709,7 @@ namespace FansiTests
             }
             finally
             {
-                database.ForceDrop();
+                database.Drop();
             }
         }
 

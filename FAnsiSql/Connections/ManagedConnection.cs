@@ -7,9 +7,7 @@ using FAnsi.Discovery;
 
 namespace FAnsi.Connections
 {
-    /// <summary>
-    /// See IManagedConnection
-    /// </summary>
+    /// <inheritdoc/>
     public class ManagedConnection : IManagedConnection
     {
         public DbConnection Connection { get; private set; }

@@ -2,12 +2,20 @@
 
 # Feature Completeness
 
+- Server
+  - [X] Check Exists
+  - [ ] Describe 
+  - [X] List Databases
 
 - Database
   - [X] Create
   - [X] Drop
   - [ ] Backup
-
+  - [ ] Detach
+  - [X] List Tables
+  - [ ] List Table Valued Functions
+  - [ ] List Stored Proceedures
+  
 - Table  
   - [X] Create
   - [X] Drop

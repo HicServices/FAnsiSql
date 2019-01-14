@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Threading;
 using FAnsi.Connections;
 using FAnsi.Discovery.QuerySyntax;
+using FAnsi.Exceptions;
 using FAnsi.Implementation;
 
 namespace FAnsi.Discovery
@@ -13,10 +14,49 @@ namespace FAnsi.Discovery
     /// </summary>
     public class DiscoveredServer : IMightNotExist
     {
+        /// <summary>
+        /// Stores connection string State (which server the <see cref="DiscoveredServer"/> refers to.
+        /// </summary>
         public DbConnectionStringBuilder Builder { get; set; }
+
+        /// <summary>
+        /// Stateless helper class with DBMS specific implementation of the logic required by <see cref="DiscoveredServer"/>.
+        /// </summary>
         public IDiscoveredServerHelper Helper { get; set; }
+
+        /// <summary>
+        /// Returns <see cref="FAnsi.DatabaseType"/> (indicates what DBMS the <see cref="DiscoveredServer"/> is pointed at).
+        /// </summary>
         public DatabaseType DatabaseType { get { return Helper.DatabaseType; }}
 
+        /// <summary>
+        /// The server's name as specified in <cref name="Builder"/> e.g. localhost\sqlexpress
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                return Helper.GetServerName(Builder);
+            }
+        }
+
+        /// <summary>
+        /// Returns the username portion of <cref name="Builder"/> if specified
+        /// </summary>
+        public string ExplicitUsernameIfAny { get { return Helper.GetExplicitUsernameIfAny(Builder); } }
+
+        /// <summary>
+        /// Returns the password portion of <cref name="Builder"/> if specified
+        /// </summary>
+        public string ExplicitPasswordIfAny { get { return Helper.GetExplicitPasswordIfAny(Builder); } }
+        
+        /// <summary>
+        /// <para>Creates a new server pointed at the <paramref name="builder"/> server. </para>
+        /// 
+        /// <para><see cref="ImplementationManager"/> must have a loaded implementation for the DBMS type</para>
+        /// </summary>
+        /// <param name="builder">Determines the connection string and <see cref="DatabaseType"/> e.g. MySqlConnectionStringBuilder = DatabaseType.MySql</param>
+        /// <exception cref="ImplementationNotFoundException"></exception>
         public DiscoveredServer(DbConnectionStringBuilder builder)
         {
             Helper = ImplementationManager.GetImplementation(builder).GetServerHelper();;
@@ -25,12 +65,26 @@ namespace FAnsi.Discovery
             Builder = Helper.GetConnectionStringBuilder(builder.ConnectionString);
         }
 
+        /// <summary>
+        /// <para>Creates a new server pointed at the <paramref name="connectionString"/> which should be a server of DBMS <paramref name="databaseType"/></para>
+        /// 
+        /// <para><see cref="ImplementationManager"/> must have a loaded implementation for the DBMS type</para>
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="databaseType"></param>
+        /// <exception cref="ImplementationNotFoundException"></exception>
         public DiscoveredServer(string connectionString, DatabaseType databaseType)
         {
             Helper = ImplementationManager.GetImplementation(databaseType).GetServerHelper();
             Builder = Helper.GetConnectionStringBuilder(connectionString);
         }
 
+        /// <summary>
+        /// Returns a new unopened connection to the server.  Use <see cref="GetCommand(string,FAnsi.Connections.IManagedConnection)"/> to start sending
+        /// <see cref="DbCommand"/> without having to cast.
+        /// </summary>
+        /// <param name="transaction">Optional - when provided returns the <see cref="IManagedTransaction.Connection"/> instead of opening a new one </param>
+        /// <returns></returns>
         public DbConnection GetConnection(IManagedTransaction transaction = null)
         {
             if (transaction != null)
@@ -39,6 +93,12 @@ namespace FAnsi.Discovery
             return Helper.GetConnection(Builder);
         }
 
+        /// <summary>
+        /// Returns a new <see cref="DbCommand"/> of the correct DBMS type for the <see cref="DatabaseType"/> of the server
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="managedConnection"></param>
+        /// <returns></returns>
         public DbCommand GetCommand(string sql, IManagedConnection managedConnection)
         {
             var cmd = Helper.GetCommand(sql, managedConnection.Connection);
@@ -46,6 +106,13 @@ namespace FAnsi.Discovery
             return cmd;
         }
 
+        /// <summary>
+        /// Returns a new <see cref="DbCommand"/> of the correct DBMS type for the <see cref="DatabaseType"/> of the server
+        /// </summary>
+        /// <param name="sql">Can be null, command text for the <see cref="DbCommand"/></param>
+        /// <param name="con">Correctly typed connection for the <see cref="DatabaseType"/>.  (See <see cref="GetConnection"/>)</param>
+        /// <param name="transaction">Optional - if provided the <see cref="DbCommand.Transaction"/> will be set to the <paramref name="transaction"/></param>
+        /// <returns></returns>
         public DbCommand GetCommand(string sql, DbConnection con, IManagedTransaction transaction = null)
         {
             var cmd = Helper.GetCommand(sql, con);
@@ -56,11 +123,25 @@ namespace FAnsi.Discovery
             return cmd;
         }
 
+        /// <summary>
+        /// Returns a new <see cref="DbParameter"/> of the current <see cref="DatabaseType"/> of the server with the given
+        /// <paramref name="parameterName"/>.
+        /// </summary>
+        /// <param name="parameterName"></param>
+        /// <returns></returns>
         private DbParameter GetParameter(string parameterName)
         {
             return Helper.GetParameter(parameterName);
         }
 
+        /// <summary>
+        /// Returns a new <see cref="DbParameter"/> of the correct <see cref="DatabaseType"/> of the server.  Also adds it 
+        /// to the <see cref="DbCommand.Parameters"/> of <paramref name="command"/> and sets it's <paramref name="valueForParameter"/>
+        /// </summary>
+        /// <param name="parameterName"></param>
+        /// <param name="command"></param>
+        /// <param name="valueForParameter"></param>
+        /// <returns></returns>
         public DbParameter AddParameterWithValueToCommand(string parameterName, DbCommand command, object valueForParameter)
         {
             DbParameter dbParameter = GetParameter(parameterName);
@@ -69,6 +150,14 @@ namespace FAnsi.Discovery
             return dbParameter;
         }
 
+        /// <summary>
+        /// <para>Creates an expectation (See <see cref="IMightNotExist"/>) that there is a database with the given name on the server.
+        /// This method does not query the database or confirm it exists.</para>
+        /// 
+        /// <para>See also <see cref="DiscoveredDatabase.Exists"/>, <see cref="DiscoveredDatabase.Create"/> etc </para>
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
         public DiscoveredDatabase ExpectDatabase(string database)
         {
             var builder = Helper.ChangeDatabase(Builder, database);
@@ -76,6 +165,13 @@ namespace FAnsi.Discovery
             return new DiscoveredDatabase(server, database, Helper.GetQuerySyntaxHelper());
         }
 
+        /// <summary>
+        /// Attempts to connect to the server.  Throws <see cref="TimeoutException"/> if the server did not respond within
+        /// <paramref name="timeoutInMillis"/>.
+        /// </summary>
+        /// <param name="timeoutInMillis"></param>
+        /// <exception cref="TimeoutException"></exception>
+        /// <exception cref="AggregateException"></exception>
         public void TestConnection(int timeoutInMillis = 3000)
         {
             using (var con = Helper.GetConnection(Builder))
@@ -99,6 +195,25 @@ namespace FAnsi.Discovery
             }
         }
 
+        /// <summary>
+        /// <para>Attempts to connect to the server giving up after <paramref name="timeoutInSeconds"/> (if supported by DBMS).</para>
+        /// 
+        /// <para> This differs from <see cref="TestConnection"/> in that it specifies the timeout in the connection string (if possible) and waits for the
+        ///  server to shut down the connection rather than using a <see cref="CancellationToken"/>.
+        /// </para>
+        /// </summary>
+        /// <param name="timeoutInSeconds"></param>
+        /// <param name="exception"></param>
+        /// <returns></returns>
+        public bool RespondsWithinTime(int timeoutInSeconds, out Exception exception)
+        {
+            return Helper.RespondsWithinTime(Builder, timeoutInSeconds, out exception);
+        }
+
+        /// <summary>
+        /// Connects to the server and returns a list of databases found as <see cref="DiscoveredDatabase"/> objects
+        /// </summary>
+        /// <returns></returns>
         public DiscoveredDatabase[] DiscoverDatabases()
         {
             var toreturn = new List<DiscoveredDatabase>();
@@ -110,6 +225,13 @@ namespace FAnsi.Discovery
             return toreturn.ToArray();
         }
 
+        /// <summary>
+        /// <para>Returns true/false based on <see cref="TestConnection"/>.  This method will use the default timeout of <see cref="TestConnection"/> (e.g. 3 seconds).</para>
+        /// 
+        /// <para>NOTE: Returns false if any Exception is thrown during <see cref="TestConnection"/></para>
+        /// </summary>
+        /// <param name="transaction">Optional - if provided this method returns true (existence cannot be checked mid transaction).</param>
+        /// <returns></returns>
         public bool Exists(IManagedTransaction transaction = null)
         {
             if (transaction != null)
@@ -126,42 +248,71 @@ namespace FAnsi.Discovery
             }
         }
 
-        public string Name
-        {
-            get
-            {
-                return Helper.GetServerName(Builder); 
-            }
-        }
-
-        public string ExplicitUsernameIfAny { get { return Helper.GetExplicitUsernameIfAny(Builder); }}
-        public string ExplicitPasswordIfAny { get { return Helper.GetExplicitPasswordIfAny(Builder); }}
-        
+        /// <summary>
+        /// Returns a new correctly Typed <see cref="DbDataAdapter"/> for the <see cref="DatabaseType"/>
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
         public DbDataAdapter GetDataAdapter(DbCommand cmd)
         {
             return Helper.GetDataAdapter(cmd);
         }
 
+        /// <summary>
+        /// Returns a new correctly Typed <see cref="DbDataAdapter"/> for the <see cref="DatabaseType"/>
+        /// </summary>
+        /// <returns></returns>
+        public DbDataAdapter GetDataAdapter(string command, DbConnection con)
+        {
+            return GetDataAdapter(GetCommand(command, con));
+        }
+
+        /// <summary>
+        /// Returns the database that <see cref="Builder"/> is currently pointed at.
+        /// </summary>
+        /// <returns></returns>
         public DiscoveredDatabase GetCurrentDatabase()
         {
             return new DiscoveredDatabase(this,Helper.GetCurrentDatabase(Builder),Helper.GetQuerySyntaxHelper());
         }
-
+        
+        /// <summary>
+        /// Edits the connection string (See <see cref="Builder"/>) to allow async operations.  Depending on DBMS this may have 
+        /// no effect (e.g. Sql Server needs AsynchronousProcessing and MultipleActiveResultSets but Oracle / MySql do not need 
+        /// any special keywords)
+        /// </summary>
         public void EnableAsync()
         {
             Builder = Helper.EnableAsync(Builder);
         }
 
+        /// <summary>
+        /// <para>Edits the connection string (See <see cref="Builder"/>) to open connections to the <paramref name="newDatabase"/>.</para>
+        /// 
+        /// <para>NOTE: Generally it is better to use <see cref="ExpectDatabase"/> instead and interact with the new object</para>
+        /// </summary>
+        /// <param name="newDatabase"></param>
         public void ChangeDatabase(string newDatabase)
         {
             Builder = Helper.ChangeDatabase(Builder,newDatabase);
         }
 
+        /// <summary>
+        /// Returns the server <see cref="Name"/>
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return Name ;
         }
 
+        /// <summary>
+        /// <para>Creates a new database with the given <see cref="newDatabaseName"/>.</para>
+        /// 
+        /// <para>In the case of Oracle this is a user+schema (See <see cref="https://stackoverflow.com/questions/880230/difference-between-a-user-and-a-schema-in-oracle"/></para>
+        /// </summary>
+        /// <param name="newDatabaseName"></param>
+        /// <returns></returns>
         public DiscoveredDatabase CreateDatabase(string newDatabaseName)
         {
             //the database we will create - it's ok DiscoveredDatabase is IMightNotExist
@@ -175,13 +326,20 @@ namespace FAnsi.Discovery
             return db;
         }
 
+        /// <summary>
+        /// Opens a new <see cref="DbConnection"/> to the server and starts a <see cref="DbTransaction"/>.  These are packaged into an <see cref="IManagedConnection"/> which
+        /// should be wrapped with a using statement since it is <see cref="IDisposable"/>.
+        /// </summary>
+        /// <returns></returns>
         public IManagedConnection BeginNewTransactedConnection()
         {
             return new ManagedConnection(this, Helper.BeginTransaction(Builder));
         }
 
         /// <summary>
-        /// Gets a new ALREADY OPENED connection to the server OR if you specify an existing transaction just wrapps it's connection object
+        /// <para>Opens a new <see cref="DbConnection"/> or reuses an existing one (if <paramref name="transaction"/> is provided).</para>
+        /// 
+        /// <para>The returned object should be used in a using statement since it is <see cref="IDisposable"/></para>
         /// </summary>
         /// <param name="transaction"></param>
         /// <returns></returns>
@@ -190,29 +348,25 @@ namespace FAnsi.Discovery
             return new ManagedConnection(this, transaction);
         }
 
+        /// <summary>
+        /// Returns helper for generating queries compatible with the DBMS (See <see cref="DatabaseType"/>) e.g. TOP X, column qualifiers, what the parameter
+        /// symbol is etc.
+        /// </summary>
+        /// <returns></returns>
         public IQuerySyntaxHelper GetQuerySyntaxHelper()
         {
             return Helper.GetQuerySyntaxHelper();
         }
-
-        public IDiscoveredTableHelper GetTableHelper()
-        {
-            return Helper.GetDatabaseHelper().GetTableHelper();
-        }
-
+        
+        /// <summary>
+        /// Return key value pairs which describe attributes of the server e.g. version, available drive space etc
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<string, string> DescribeServer()
         {
             return Helper.DescribeServer(Builder);
         }
 
-        public bool RespondsWithinTime(int timeoutInSeconds, out Exception exception)
-        {
-            return Helper.RespondsWithinTime(Builder,timeoutInSeconds, out exception);
-        }
 
-        public DbDataAdapter GetDataAdapter(string command, DbConnection con)
-        {
-            return GetDataAdapter(GetCommand(command, con));
-        }
     }
 }

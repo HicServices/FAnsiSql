@@ -21,7 +21,7 @@ namespace FAnsi.Discovery.TableCreation
         public string TableName { get; private set; }
 
         /// <summary>
-        /// Schema of the <see cref="Database"/> to create the table in
+        /// Schema of the <see cref="Database"/> to create the table in.  This is NOT the database e.g. in [MyDb].[dbo].[MyTable] the schema is "dbo". If in doubt leave blank
         /// </summary>
         public string Schema { get; private set; }
 
