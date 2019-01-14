@@ -42,11 +42,13 @@ The goal of FAnsiSql is to abstract away cross DBMS differences and streamline c
 
 ## Features
 
-FAnsiSql is built using only the core `System.Data.Common` abstract classes (e.g. `DBCommand`, `DBConnection` etc).  Wherever possible ANSI Sql is defined in the main project but virtual/abstract methods are used to allow custom DBMS specific implementations.  Each implementation ([Microsoft Sql](./Implementations/FAnsi.Implementations.MicrosoftSQL/README.md) / [MySql](./Implementations/FAnsi.Implementations.MySql/README.md)/ [Oracle](./Implementations/FAnsi.Implementations.Oracle/README.md)) is defined in a separate assembly (e.g. FAnsi.Implementations.MicrosoftSQL.dll) and is powered by a suitable backing library (e.g. [ODP.net](https://www.oracle.com/technetwork/topics/dotnet/index-085163.html) for Oracle).  Implementations are loaded using [Managed Extensibility Framework](https://docs.microsoft.com/en-us/dotnet/framework/mef/).
+Feature Completeness by DBMS:
 
-- Database / Table Management (Discovery, Create, Drop, Script etc)
-- Bulk Insert
-- [Type Calculation](./Documentation/TypeTranslation.md) (Assign DB types to untyped string data)
+- [Microsoft Sql](./Implementations/FAnsi.Implementations.MicrosoftSQL/README.md) 
+- [MySql](./Implementations/FAnsi.Implementations.MySql/README.md)
+- [Oracle](./Implementations/FAnsi.Implementations.Oracle/README.md)
+
+FAnsiSql is built using core `System.Data.Common` classes (e.g. `DBCommand`, `DBConnection` etc).  A common set of operations is defined (See links above) with DBMS specific implementations defined in a separate assemblies (e.g. FAnsi.Implementations.MicrosoftSQL.dll).  Each implementation uses it's own backing library (e.g. [ODP.net](https://www.oracle.com/technetwork/topics/dotnet/index-085163.html) for Oracle).  Implementations are loaded using [Managed Extensibility Framework](https://docs.microsoft.com/en-us/dotnet/framework/mef/).
 
 ## Example
 

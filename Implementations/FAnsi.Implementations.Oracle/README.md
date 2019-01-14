@@ -28,6 +28,7 @@
   - [X] Alter
   
 - Data Types
+  - [X] [Translation](./../../Documentation/TypeTranslation.md)
   - [ ] Bit
   - [X] String
   - [ ] TimeSpan
