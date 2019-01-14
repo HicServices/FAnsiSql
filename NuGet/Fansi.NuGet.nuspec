@@ -6,7 +6,8 @@
     <title>HIC.FAnsiSql</title>
     <authors>Health Informatics Centre - University of Dundee</authors>
     <owners>Health Informatics Centre - University of Dundee</owners>
-    <licenseUrl>https://raw.githubusercontent.com/HicServices/FAnsiSql/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/HicServices/FAnsiSql</projectUrl>
+    <license type="expression">AGPL-3.0-or-later</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</description>
     <copyright>Copyright 2019</copyright>
