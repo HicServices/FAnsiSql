@@ -56,6 +56,29 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
 
                 }
 
+                //get auto increment information
+                cmd = new OracleCommand("select table_name,column_name from ALL_TAB_IDENTITY_COLS WHERE table_name = :table_name AND owner =:owner", (OracleConnection)connection.Connection);
+                cmd.Transaction = connection.Transaction;
+
+                p = new OracleParameter("table_name", OracleDbType.Varchar2);
+                p.Value = tableName;
+                cmd.Parameters.Add(p);
+
+                p2 = new OracleParameter("owner", OracleDbType.Varchar2);
+                p2.Value = database;
+                cmd.Parameters.Add(p2);
+
+                using (var r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        var colName = r["column_name"].ToString();
+                        var match = columns.Single(c => c.GetRuntimeName().Equals(colName, StringComparison.CurrentCultureIgnoreCase));
+                        match.IsAutoIncrement = true;
+                    }
+                }
+
+
                 //get primary key information 
                 cmd = new OracleCommand(@"SELECT cols.table_name, cols.column_name, cols.position, cons.status, cons.owner
 FROM all_constraints cons, all_cons_columns cols

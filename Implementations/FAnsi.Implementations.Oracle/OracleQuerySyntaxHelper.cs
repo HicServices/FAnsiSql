@@ -60,13 +60,13 @@ namespace FAnsi.Implementations.Oracle
         }
 
         /// <summary>
-        /// Always returns null for Oracle since this is handled by <see cref="OracleDatabaseHelper.GetCreateTableSql"/>
+        /// Works in Oracle 12c+ only https://oracle-base.com/articles/12c/identity-columns-in-oracle-12cr1
         /// </summary>
         /// <returns></returns>
         public override string GetAutoIncrementKeywordIfAny()
         {
             //this is handled in 
-            return null;
+            return " GENERATED ALWAYS AS IDENTITY";
         }
 
         public override Dictionary<string, string> GetSQLFunctionsDictionary()

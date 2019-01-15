@@ -35,7 +35,7 @@
   - [ ] TimeSpan
   - [X] Decimal
   - [X] Date
-  - [ ] Auto Increment
+  - [X] Auto Increment (Requires Oracle 12c)
 
 - Query
   - [X] Top X (Uses ROWNUM)

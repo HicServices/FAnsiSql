@@ -134,14 +134,7 @@ namespace FAnsi.Discovery
                 var datatype = col.GetSQLDbType(syntaxHelper.TypeTranslater);
                 
                 //add the column name and accompanying datatype
-                bodySql += string.Format("{0} {1} {2} {3} {4} {5},"+ Environment.NewLine,
-                    syntaxHelper.EnsureWrapped(col.ColumnName),
-                    datatype,
-                    col.Default != MandatoryScalarFunctions.None ? "default " + syntaxHelper.GetScalarFunctionSql(col.Default):"",
-                    string.IsNullOrWhiteSpace(col.Collation) ?"": "COLLATE " + col.Collation,
-                    col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL",
-                    col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny():""
-                    );
+                bodySql += GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper) + "," + Environment.NewLine;
             }
 
             var pks = columns.Where(c => c.IsPrimaryKey).ToArray();
@@ -158,6 +151,25 @@ namespace FAnsi.Discovery
             bodySql += ")" + Environment.NewLine;
 
             return bodySql;
+        }
+
+        /// <summary>
+        /// Return the line that represents the given <paramref name="col"/> for slotting into a CREATE statement SQL e.g. "description varchar(20)"
+        /// </summary>
+        /// <param name="col"></param>
+        /// <param name="datatype"></param>
+        /// <param name="syntaxHelper"></param>
+        /// <returns></returns>
+        protected virtual string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
+        {
+            return string.Format("{0} {1} {2} {3} {4} {5}",
+            syntaxHelper.EnsureWrapped(col.ColumnName),
+            datatype,
+            col.Default != MandatoryScalarFunctions.None ? "default " + syntaxHelper.GetScalarFunctionSql(col.Default) : "",
+            string.IsNullOrWhiteSpace(col.Collation) ? "" : "COLLATE " + col.Collation,
+            col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL",
+            col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : ""
+            );
         }
 
         private string GetForeignKeyConstraintSql(string tableName, IQuerySyntaxHelper syntaxHelper, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete)

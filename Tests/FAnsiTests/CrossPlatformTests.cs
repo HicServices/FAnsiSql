@@ -746,6 +746,7 @@ namespace FansiTests
             Assert.AreEqual(1,result.Rows[0]["IdColumn"]);
 
             Assert.IsTrue(tbl.DiscoverColumn("IdColumn").IsAutoIncrement);
+            Assert.IsFalse(tbl.DiscoverColumn("Name").IsAutoIncrement);
         }
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
