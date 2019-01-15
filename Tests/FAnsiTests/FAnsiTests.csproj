@@ -51,6 +51,8 @@
     <Compile Include="CrossPlatformTests.cs" />
     <Compile Include="Database\DatabaseLevelTests.cs" />
     <Compile Include="DatabaseTests.cs" />
+    <Compile Include="Equality\EqualityTests_ServerAndDatabase.cs" />
+    <Compile Include="Equality\EqualityTests_TableAndColumn.cs" />
     <Compile Include="Examples.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\ParameterNameExtractionTests.cs" />
