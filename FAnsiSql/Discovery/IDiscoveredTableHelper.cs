@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System.Data;
+using System.Data.Common;
 using FAnsi.Connections;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
@@ -38,5 +39,6 @@ namespace FAnsi.Discovery
         void CreatePrimaryKey(DiscoveredTable columns, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0);
         int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null);
         DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction transaction = null);
+        void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection, DbTransaction transaction = null);
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery;
@@ -122,7 +123,8 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
 
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
-            throw new NotImplementedException();
+            var cmd = new OracleCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + "  DROP COLUMN " + columnToDrop.GetRuntimeName(), (OracleConnection)connection);
+            cmd.ExecuteNonQuery();
         }
 
         public override int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null)
@@ -226,6 +228,17 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             IManagedTransaction transaction = null)
         {
             throw new NotImplementedException();
+        }
+
+        public override void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection,
+            DbTransaction transaction = null)
+        {
+            var cols = table.DiscoverColumns();
+
+            string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " WHERE ROWNUM <= " + topX;
+
+            var da = table.Database.Server.GetDataAdapter(sql, connection);
+            da.Fill(dt);
         }
 
 

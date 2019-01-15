@@ -230,6 +230,28 @@ namespace FansiTests.Table
             Assert.AreEqual(true,tbl.GetDataTable().Rows[0][0]);
         }
 
+        [Test]
+        public void OracleRaceCondition()
+        {
+            var db = GetTestDatabase(DatabaseType.Oracle);
+
+            var tbl = db.CreateTable("RaceTable", new[]
+            {
+                new DatabaseColumnRequest("A", "int"),
+                new DatabaseColumnRequest("B", "int"),
+                new DatabaseColumnRequest("C", "int"),
+                new DatabaseColumnRequest("D", "int"),
+                new DatabaseColumnRequest("E", "int")
+            });
+            
+            Assert.AreEqual(5,tbl.GetDataTable().Columns.Count);
+
+            tbl.DropColumn(tbl.DiscoverColumn("E"));
+
+            Assert.AreEqual(4, tbl.GetDataTable().Columns.Count);
+
+            tbl.Drop();
+        }
 
         [Test]
         public void Test_OracleBit_IsActuallyString()

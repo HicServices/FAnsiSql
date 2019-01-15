@@ -170,8 +170,7 @@ namespace FAnsi.Discovery
         public virtual DataTable GetDataTable(int topX = int.MaxValue,bool enforceTypesAndNullness = true, IManagedTransaction transaction = null)
         {
             var dt = new DataTable();
-            var svr = Database.Server;
-
+            
             if (enforceTypesAndNullness)
                 foreach (DiscoveredColumn c in DiscoverColumns(transaction))
                 {
@@ -180,9 +179,8 @@ namespace FAnsi.Discovery
                     col.DataType = c.DataType.GetCSharpDataType();
                 }
 
-
-            using (IManagedConnection con = svr.GetManagedConnection(transaction))
-                svr.GetDataAdapter(GetTopXSql(topX), con.Connection).Fill(dt);
+            using(var con = Database.Server.GetManagedConnection(transaction))
+                Helper.FillDataTableWithTopX(this,topX,dt,con.Connection,con.Transaction);
 
             return dt;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Linq;
 using FAnsi.Connections;
@@ -136,6 +137,14 @@ namespace FAnsi.Discovery
         }
 
         public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null);
+
+        public virtual void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection, DbTransaction transaction = null)
+        {
+            string sql = GetTopXSqlForTable(table, topX);
+
+            var da = table.Database.Server.GetDataAdapter(sql, connection);
+            da.Fill(dt);
+        }
 
         protected abstract string GetRenameTableSql(DiscoveredTable discoveredTable, string newName);
 

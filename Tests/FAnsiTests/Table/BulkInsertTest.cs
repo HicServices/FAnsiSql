@@ -272,6 +272,8 @@ namespace FAnsiTests.Table
             Assert.NotNull(result.Rows[0]["frank"]);
             Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString().Length, 5); //should be a date
             Assert.AreEqual("no", result.Rows[0]["peter"]);
+
+            tbl.Drop();
         }
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
@@ -371,9 +373,7 @@ namespace FAnsiTests.Table
             }
             sw.Stop();
             Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
-
-
-
+            
             var result = tbl.GetDataTable();
             Assert.AreEqual(33, result.Columns.Count);
             Assert.AreEqual(numberOfRowsPerBatch*2, result.Rows.Count);
@@ -381,6 +381,8 @@ namespace FAnsiTests.Table
             Assert.NotNull(result.Rows[0]["frank"]);
             Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString().Length, 5); //should be a date
             Assert.AreEqual("no", result.Rows[0]["peter"]);
+
+            tbl.Drop();
         }
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]

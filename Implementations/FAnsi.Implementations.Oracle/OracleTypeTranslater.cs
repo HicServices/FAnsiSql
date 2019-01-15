@@ -18,7 +18,7 @@ namespace FAnsi.Implementations.Oracle
 
         public OracleTypeTranslater(): base(4000, 4000)
         {
-            
+            DateRegex = new Regex("(date)|(timestamp)", RegexOptions.IgnoreCase);
         }
         protected override string GetStringDataTypeImpl(int maxExpectedStringWidth)
         {
