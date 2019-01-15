@@ -280,5 +280,40 @@ namespace FAnsi.Discovery
         {
             Helper.CreateBackup(this,backupName);
         }
+
+        /// <summary>
+        /// Equality based on Server and database name
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        protected bool Equals(DiscoveredDatabase other)
+        {
+            return Equals(Server, other.Server) && string.Equals(_database, other._database);
+        }
+
+        /// <summary>
+        /// Equality based on Server and database name
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((DiscoveredDatabase)obj);
+        }
+
+        /// <summary>
+        /// Based on Server and database name
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Server != null ? Server.GetHashCode() : 0) * 397) ^ (_database != null ? _database.GetHashCode() : 0);
+            }
+        }
     }
 }

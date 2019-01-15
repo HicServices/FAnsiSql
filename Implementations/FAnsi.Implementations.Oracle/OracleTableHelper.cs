@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery;
+using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
 using Oracle.ManagedDataAccess.Client;
 
@@ -197,6 +198,13 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
 
             return Convert.ToInt32(p.Value);
         }
+
+        public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
+            IManagedTransaction transaction = null)
+        {
+            throw new NotImplementedException();
+        }
+
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
         {

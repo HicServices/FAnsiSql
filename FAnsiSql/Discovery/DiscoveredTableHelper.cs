@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using FAnsi.Connections;
+using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
 
 namespace FAnsi.Discovery
@@ -133,6 +134,8 @@ namespace FAnsi.Discovery
 
             return Convert.ToInt32(result);
         }
+
+        public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null);
 
         protected abstract string GetRenameTableSql(DiscoveredTable discoveredTable, string newName);
 

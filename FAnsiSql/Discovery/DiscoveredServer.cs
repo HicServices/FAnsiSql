@@ -367,6 +367,40 @@ namespace FAnsi.Discovery
             return Helper.DescribeServer(Builder);
         }
 
+        /// <summary>
+        /// Equality based on Builder.ConnectionString and DatabaseType
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        protected bool Equals(DiscoveredServer other)
+        {
+            if (Builder == null || other.Builder == null)
+                return Equals(Builder, other.Builder) && DatabaseType == other.DatabaseType;
 
+            //server is the same if they are pointed at the same server
+            return Equals(Builder.ConnectionString, other.Builder.ConnectionString) && DatabaseType == other.DatabaseType;
+        }
+
+        /// <summary>
+        /// Equality based on Builder.ConnectionString and DatabaseType
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((DiscoveredServer)obj);
+        }
+
+        /// <summary>
+        /// Hashcode built from DatabaseType
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return DatabaseType.GetHashCode();
+        }
     }
 }

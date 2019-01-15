@@ -60,6 +60,7 @@
     <Compile Include="Table\CreatePrimaryKeyTest.cs" />
     <Compile Include="Table\CreateTableTests.cs" />
     <Compile Include="Table\DataTypeAdjusterTests.cs" />
+    <Compile Include="Table\ForeignKeyTests.cs" />
     <Compile Include="Table\UpdateTests.cs" />
     <Compile Include="TypeTranslation\DatatypeComputerTests.cs" />
     <Compile Include="TypeTranslation\TypeTranslaterTests.cs" />

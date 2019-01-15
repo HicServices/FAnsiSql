@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using FAnsi.Connections;
+using FAnsi.Discovery.Constraints;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Naming;
@@ -407,6 +408,55 @@ namespace FAnsi.Discovery
         public DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
         {
             return Database.Server.Helper.GetCommand(s, con, transaction);
+        }
+
+        /// <summary>
+        /// Returns all foreign keys where this table is the parent table (i.e. the primary key table).
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        public DiscoveredRelationship[] DiscoveredRelationships(IManagedTransaction transaction = null)
+        {
+            using (IManagedConnection connection = Database.Server.GetManagedConnection(transaction))
+                return Helper.DiscoverRelationships(this, connection.Connection,transaction);
+        }
+
+        /// <summary>
+        /// Based on table name, schema, database and TableType
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        protected bool Equals(DiscoveredTable other)
+        {
+            return string.Equals(_table, other._table) && string.Equals(Schema ?? "dbo", other.Schema ?? "dbo") && Equals(Database, other.Database) && TableType == other.TableType;
+        }
+
+        /// <summary>
+        /// Based on table name, schema, database and TableType
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((DiscoveredTable)obj);
+        }
+
+        /// <summary>
+        /// Based on table name, schema, database and TableType
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (_table != null ? _table.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Database != null ? Database.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (int)TableType;
+                return hashCode;
+            }
         }
     }
 }

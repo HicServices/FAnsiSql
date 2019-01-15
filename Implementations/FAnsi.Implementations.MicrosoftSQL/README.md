@@ -23,7 +23,8 @@
   - [X] MakeDistinct
   - [X] Bulk Insert
   - [X] Rename
-
+  - [X] List Foreign Keys
+  
 - Column
   - [X] Alter
   

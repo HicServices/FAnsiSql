@@ -117,5 +117,39 @@ namespace FAnsi.Discovery
         {
             return Table.GetQuerySyntaxHelper().TypeTranslater.GetDataTypeComputerFor(this);
         }
+
+        /// <summary>
+        /// Based on column name and Table
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        protected bool Equals(DiscoveredColumn other)
+        {
+            return string.Equals(_name, other._name) && Equals(Table, other.Table);
+        }
+        /// <summary>
+        /// Based on column name and Table
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((DiscoveredColumn)obj);
+        }
+
+        /// <summary>
+        /// Based on column name and Table
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((_name != null ? _name.GetHashCode() : 0) * 397) ^ (Table != null ? Table.GetHashCode() : 0);
+            }
+        }
     }
 }

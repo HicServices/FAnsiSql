@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
+using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
 using MySql.Data.MySqlClient;
 
@@ -118,6 +119,11 @@ namespace FAnsi.Implementations.MySql
         public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection)
         {
             return new MySqlBulkCopy(discoveredTable, connection);
+        }
+
+        public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
+        {
+            throw new NotImplementedException();
         }
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)

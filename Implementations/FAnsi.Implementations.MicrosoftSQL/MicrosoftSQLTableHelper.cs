@@ -7,6 +7,7 @@ using System.Linq;
 using FAnsi;
 using FAnsi.Connections;
 using FAnsi.Discovery;
+using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
 
 namespace Fansi.Implementations.MicrosoftSQL
@@ -213,6 +214,97 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             }
 
             base.CreatePrimaryKey(table, discoverColumns, connection, timeoutInSeconds);
+        }
+
+        public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null)
+        {
+            string sql = "exec sp_fkeys @pktable_name = @table, @pktable_qualifier=@database, @pktable_owner=@schema";
+
+            DbCommand cmd = table.GetCommand(sql, connection);
+            if(transaction != null)
+                cmd.Transaction = transaction.Transaction;
+            
+            var p = cmd.CreateParameter();
+            p.ParameterName = "@table";
+            p.Value = table.GetRuntimeName();
+            p.DbType = DbType.String;
+            cmd.Parameters.Add(p);
+
+            p = cmd.CreateParameter();
+            p.ParameterName = "@schema";
+            p.Value = table.Schema ?? "dbo";
+            p.DbType = DbType.String;
+            cmd.Parameters.Add(p);
+            
+            p = cmd.CreateParameter();
+            p.ParameterName = "@database";
+            p.Value = table.Database.GetRuntimeName();
+            p.DbType = DbType.String;
+            cmd.Parameters.Add(p);
+            
+
+            Dictionary<string,DiscoveredRelationship> toReturn = new Dictionary<string,DiscoveredRelationship>();
+
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    var fkName = r["FK_NAME"].ToString();
+                    
+                    DiscoveredRelationship current;
+
+                    //could be a 2+ columns foreign key?
+                    if (toReturn.ContainsKey(fkName))
+                    {
+                        current = toReturn[fkName];
+                    }
+                    else
+                    {
+                        var pkdb = r["PKTABLE_QUALIFIER"].ToString();
+                        var pkschema = r["PKTABLE_OWNER"].ToString();
+                        var pktableName = r["PKTABLE_NAME"].ToString();
+
+                        var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
+
+                        var fkdb = r["FKTABLE_QUALIFIER"].ToString();
+                        var fkschema = r["FKTABLE_OWNER"].ToString();
+                        var fktableName = r["FKTABLE_NAME"].ToString();
+
+                        var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
+
+                        var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
+                        CascadeRule deleteRule = CascadeRule.Unknown;
+                        
+
+                        if(deleteRuleInt == 0)
+                            deleteRule = CascadeRule.Delete;
+                        else if(deleteRuleInt == 1)
+                            deleteRule = CascadeRule.NoAction;
+                        else if (deleteRuleInt == 2)
+                            deleteRule = CascadeRule.SetNull;
+                        else if (deleteRuleInt == 3)
+                            deleteRule = CascadeRule.SetDefault;
+
+                        
+                        /*
+https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-fkeys-transact-sql?view=sql-server-2017
+                         
+0=CASCADE changes to foreign key.
+1=NO ACTION changes if foreign key is present.
+2 = set null
+3 = set default*/
+
+                        current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                        toReturn.Add(current.Name,current);
+                    }
+
+
+                    current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
+                }
+            }
+
+            return toReturn.Values.ToArray();
+
         }
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
