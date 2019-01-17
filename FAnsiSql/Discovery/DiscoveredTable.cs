@@ -426,7 +426,10 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         protected bool Equals(DiscoveredTable other)
         {
-            return string.Equals(_table, other._table) && string.Equals(Schema ?? "dbo", other.Schema ?? "dbo") && Equals(Database, other.Database) && TableType == other.TableType;
+            return
+                string.Equals(_table, other._table, StringComparison.OrdinalIgnoreCase) 
+                && string.Equals(Schema ?? "dbo", other.Schema ?? "dbo",StringComparison.OrdinalIgnoreCase) 
+                && Equals(Database, other.Database) && TableType == other.TableType;
         }
 
         /// <summary>
@@ -450,7 +453,7 @@ namespace FAnsi.Discovery
         {
             unchecked
             {
-                var hashCode = (_table != null ? _table.GetHashCode() : 0);
+                var hashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(Schema??"dbo");
                 hashCode = (hashCode * 397) ^ (Database != null ? Database.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (int)TableType;
                 return hashCode;

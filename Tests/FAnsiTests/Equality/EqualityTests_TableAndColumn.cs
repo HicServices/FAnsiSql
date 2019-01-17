@@ -21,7 +21,9 @@ namespace FAnsiTests.Equality
         }
 
         [TestCase("MyTable",null,"MyTable",null)]
+        [TestCase("MyTable", null, "myTable", null)]
         [TestCase("MyTable", null, "MyTable", "dbo")]
+        [TestCase("MyTable", null, "MyTable", "dBo")]
         public void EqualityTest_DiscoveredTable_AreEqual(string table1, string schema1, string table2, string schema2)
         {
             var s = new DiscoveredServer("Server=fish", DatabaseType.MicrosoftSQLServer);

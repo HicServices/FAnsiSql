@@ -378,7 +378,7 @@ namespace FAnsi.Discovery
                 return Equals(Builder, other.Builder) && DatabaseType == other.DatabaseType;
 
             //server is the same if they are pointed at the same server
-            return Equals(Builder.ConnectionString, other.Builder.ConnectionString) && DatabaseType == other.DatabaseType;
+            return string.Equals(Builder.ConnectionString, other.Builder.ConnectionString, StringComparison.OrdinalIgnoreCase) && DatabaseType == other.DatabaseType;
         }
 
         /// <summary>

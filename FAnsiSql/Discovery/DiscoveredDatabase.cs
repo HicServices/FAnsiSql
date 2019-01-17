@@ -288,7 +288,7 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         protected bool Equals(DiscoveredDatabase other)
         {
-            return Equals(Server, other.Server) && string.Equals(_database, other._database);
+            return Equals(Server, other.Server) && string.Equals(_database, other._database,StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace FAnsi.Discovery
         {
             unchecked
             {
-                return ((Server != null ? Server.GetHashCode() : 0) * 397) ^ (_database != null ? _database.GetHashCode() : 0);
+                return ((Server != null ? Server.GetHashCode() : 0) * 397) ^ (_database != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(_database) : 0);
             }
         }
     }
