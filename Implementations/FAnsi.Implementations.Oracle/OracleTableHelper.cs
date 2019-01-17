@@ -227,7 +227,82 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
             IManagedTransaction transaction = null)
         {
-            throw new NotImplementedException();
+            string sql = @"
+SELECT a.table_name
+     , a.column_name
+     , a.constraint_name
+     , c.owner
+     , c.delete_rule
+     , c.r_owner
+     , c_pk.table_name      r_table_name
+     , c_pk.constraint_name r_pk
+     , cc_pk.column_name    r_column_name
+  FROM all_cons_columns a
+  JOIN all_constraints  c       ON (a.owner                 = c.owner                   AND a.constraint_name   = c.constraint_name     )
+  JOIN all_constraints  c_pk    ON (c.r_owner               = c_pk.owner                AND c.r_constraint_name = c_pk.constraint_name  )
+  JOIN all_cons_columns cc_pk   on (cc_pk.constraint_name   = c_pk.constraint_name      AND cc_pk.owner         = c_pk.owner            )
+ WHERE c.constraint_type = 'R'
+   AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
+
+
+            var cmd = new OracleCommand(sql, (OracleConnection)connection);
+
+            var p = new OracleParameter(":TableName", OracleDbType.Varchar2);
+            p.Value = table.GetRuntimeName();
+            cmd.Parameters.Add(p);
+
+            Dictionary<string, DiscoveredRelationship> toReturn = new Dictionary<string, DiscoveredRelationship>();
+
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    var fkName = r["constraint_name"].ToString();
+
+                    DiscoveredRelationship current;
+
+                    //could be a 2+ columns foreign key?
+                    if (toReturn.ContainsKey(fkName))
+                    {
+                        current = toReturn[fkName];
+                    }
+                    else
+                    {
+
+                        var pkDb = r["r_owner"].ToString();
+                        var pkTableName = r["r_table_name"].ToString();
+
+                        var fkDb = r["owner"].ToString();
+                        var fkTableName = r["table_name"].ToString();
+
+                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
+                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
+
+                        //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
+                        var deleteRuleString = r["delete_rule"].ToString();
+
+                        CascadeRule deleteRule = CascadeRule.Unknown;
+
+                        if (deleteRuleString == "CASCADE")
+                            deleteRule = CascadeRule.Delete;
+                        else if (deleteRuleString == "NO ACTION")
+                            deleteRule = CascadeRule.NoAction;
+                        else if (deleteRuleString == "RESTRICT")
+                            deleteRule = CascadeRule.NoAction;
+                        else if (deleteRuleString == "SET NULL")
+                            deleteRule = CascadeRule.SetNull;
+                        else if (deleteRuleString == "SET DEFAULT")
+                            deleteRule = CascadeRule.SetDefault;
+
+                        current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                        toReturn.Add(current.Name, current);
+                    }
+
+                    current.AddKeys(r["r_column_name"].ToString(), r["column_name"].ToString(), transaction);
+                }
+            }
+
+            return toReturn.Values.ToArray();
         }
 
         public override void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection,

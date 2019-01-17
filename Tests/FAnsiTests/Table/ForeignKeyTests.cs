@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
@@ -18,9 +19,17 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.Oracle, false)]
         public void TestMicrosoftForeignKey(DatabaseType dbType, bool cascade)
         {
-            var db = GetTestDatabase(dbType);
+            var db = GetTestDatabase(dbType,false);
 
-            var parentTable = db.CreateTable("Table",
+            //cleanup remnants
+            foreach (var t in new[] { db.ExpectTable("Child1"), db.ExpectTable("Table1")})
+                if(t.Exists())
+                    t.Drop();
+            
+            foreach (var t in db.DiscoverTables(false))
+                t.Drop();
+
+            var parentTable = db.CreateTable("Table1",
                 new[]
                 {
                     new DatabaseColumnRequest("Id", "int", false)
@@ -33,7 +42,7 @@ namespace FAnsiTests.Table
             var discovered_pkCol = parentTable.DiscoverColumn("Id");
             var requested_fkCol = new DatabaseColumnRequest("Parent_Id", "int");
 
-            var childTable = db.CreateTable("Child", new[]
+            var childTable = db.CreateTable("Child1", new[]
             {
                 requested_fkCol,
                 new DatabaseColumnRequest("SomeNumber", "int")
