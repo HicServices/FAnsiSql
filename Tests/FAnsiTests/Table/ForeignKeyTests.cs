@@ -10,11 +10,15 @@ namespace FAnsiTests.Table
 {
     class ForeignKeyTests:DatabaseTests
     {
-        [TestCase(true)]
-        [TestCase(false)]
-        public void TestMicrosoftForeignKey(bool cascade)
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer, false)]
+        [TestCase(DatabaseType.MySql, true)]
+        [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.Oracle, true)]
+        [TestCase(DatabaseType.Oracle, false)]
+        public void TestMicrosoftForeignKey(DatabaseType dbType, bool cascade)
         {
-            var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer);
+            var db = GetTestDatabase(dbType);
 
             var parentTable = db.CreateTable("Table",
                 new[]

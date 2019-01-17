@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
@@ -123,7 +124,85 @@ namespace FAnsi.Implementations.MySql
 
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
         {
-            throw new NotImplementedException();
+            string sql = @"SELECT 
+u.CONSTRAINT_NAME,
+u.TABLE_SCHEMA,
+u.TABLE_NAME,
+u.COLUMN_NAME,
+u.REFERENCED_TABLE_SCHEMA,
+u.REFERENCED_TABLE_NAME,
+u.REFERENCED_COLUMN_NAME,
+c.DELETE_RULE
+FROM
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE u
+INNER JOIN
+    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS c ON c.CONSTRAINT_NAME = u.CONSTRAINT_NAME
+WHERE
+  u.REFERENCED_TABLE_SCHEMA = @db AND
+  u.REFERENCED_TABLE_NAME = @tbl";
+
+            var cmd = new MySqlCommand(sql, (MySqlConnection) connection);
+            
+            var p = new MySqlParameter("@db", MySqlDbType.String);
+            p.Value = table.Database.GetRuntimeName();
+            cmd.Parameters.Add(p);
+
+            p = new MySqlParameter("@tbl", MySqlDbType.String);
+            p.Value = table.GetRuntimeName();
+            cmd.Parameters.Add(p);
+
+            Dictionary<string,DiscoveredRelationship> toReturn = new Dictionary<string,DiscoveredRelationship>();
+            
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    var fkName = r["CONSTRAINT_NAME"].ToString();
+                    
+                    DiscoveredRelationship current;
+
+                    //could be a 2+ columns foreign key?
+                    if (toReturn.ContainsKey(fkName))
+                    {
+                        current = toReturn[fkName];
+                    }
+                    else
+                    {
+                        
+                        var pkDb = r["REFERENCED_TABLE_SCHEMA"].ToString();
+                        var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
+
+                        var fkDb = r["TABLE_SCHEMA"].ToString();
+                        var fkTableName =  r["TABLE_NAME"].ToString();
+
+                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
+                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
+
+                        //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
+                        var deleteRuleString = r["DELETE_RULE"].ToString();
+
+                        CascadeRule deleteRule = CascadeRule.Unknown;
+                        
+                        if(deleteRuleString == "CASCADE")
+                            deleteRule = CascadeRule.Delete;
+                        else if(deleteRuleString == "NO ACTION")
+                            deleteRule = CascadeRule.NoAction;
+                        else if(deleteRuleString == "RESTRICT")
+                            deleteRule = CascadeRule.NoAction;
+                        else if (deleteRuleString == "SET NULL")
+                            deleteRule = CascadeRule.SetNull;
+                        else if (deleteRuleString == "SET DEFAULT")
+                            deleteRule = CascadeRule.SetDefault;
+
+                        current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                        toReturn.Add(current.Name,current);
+                    }
+
+                    current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
+                }
+            }
+            
+            return toReturn.Values.ToArray();
         }
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
