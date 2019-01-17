@@ -240,14 +240,19 @@ SELECT a.table_name
   FROM all_cons_columns a
   JOIN all_constraints  c       ON (a.owner                 = c.owner                   AND a.constraint_name   = c.constraint_name     )
   JOIN all_constraints  c_pk    ON (c.r_owner               = c_pk.owner                AND c.r_constraint_name = c_pk.constraint_name  )
-  JOIN all_cons_columns cc_pk   on (cc_pk.constraint_name   = c_pk.constraint_name      AND cc_pk.owner         = c_pk.owner            )
+  JOIN all_cons_columns cc_pk   on (cc_pk.constraint_name   = c_pk.constraint_name      AND cc_pk.owner         = c_pk.owner            AND cc_pk.position = a.position)
  WHERE c.constraint_type = 'R'
-   AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
+AND  UPPER(c.r_owner) =  UPPER(:DatabaseName)
+AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
 
 
             var cmd = new OracleCommand(sql, (OracleConnection)connection);
 
-            var p = new OracleParameter(":TableName", OracleDbType.Varchar2);
+            var p = new OracleParameter(":DatabaseName", OracleDbType.Varchar2);
+            p.Value = table.Database.GetRuntimeName();
+            cmd.Parameters.Add(p);
+
+            p = new OracleParameter(":TableName", OracleDbType.Varchar2);
             p.Value = table.GetRuntimeName();
             cmd.Parameters.Add(p);
 
