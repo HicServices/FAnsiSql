@@ -2,11 +2,18 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using FAnsi.Exceptions;
 
 namespace FAnsi.Discovery.Constraints
 {
+    /// <summary>
+    /// Helps resolve a dependency order between a collection of tables with interlinking foreign key constraints.  Implements Khan's algorithm. 
+    /// </summary>
     public class RelationshipTopologicalSort
     {
+        /// <summary>
+        /// The dependency order from least dependent (isolated tables and parent tables) to most (child tables then grandchild tables).
+        /// </summary>
         public IReadOnlyList<DiscoveredTable> Order { get { return new ReadOnlyCollection<DiscoveredTable>(_sortedList); } }
         
         readonly List<DiscoveredTable> _sortedList = new List<DiscoveredTable>();
@@ -20,6 +27,7 @@ namespace FAnsi.Discovery.Constraints
         ///  <para>Sort order is based on Khan's algorithm (https://en.wikipedia.org/wiki/Topological_sorting)</para>
         /// </summary>
         /// <param name="tables"></param>
+        /// <exception cref="Exceptions.CircularDependencyException"></exception>
         public RelationshipTopologicalSort(IEnumerable<DiscoveredTable> tables)
         {
             HashSet<DiscoveredTable> nodes = new HashSet<DiscoveredTable>(tables);
@@ -84,7 +92,7 @@ namespace FAnsi.Discovery.Constraints
             // if graph has edges then
             if (edges.Any())
                 // return error (graph has at least one cycle)
-                throw new Exception("Found at least one cycle in relationship dependency");
+                throw new CircularDependencyException("Found at least one cycle in relationship dependency");
             
             
             // return L (a topologically sorted order)

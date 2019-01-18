@@ -66,6 +66,7 @@
     <Compile Include="Discovery\DiscoveredTable.cs" />
     <Compile Include="Discovery\DiscoveredTableHelper.cs" />
     <Compile Include="Discovery\DiscoveredTableValuedFunction.cs" />
+    <Compile Include="Exceptions\CircularDependencyException.cs" />
     <Compile Include="Exceptions\InvalidResizeException.cs" />
     <Compile Include="Discovery\TableType.cs" />
     <Compile Include="Exceptions\AlterFailedException.cs" />
