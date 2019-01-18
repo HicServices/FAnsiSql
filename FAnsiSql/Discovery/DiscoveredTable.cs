@@ -413,7 +413,7 @@ namespace FAnsi.Discovery
         /// </summary>
         /// <param name="transaction"></param>
         /// <returns></returns>
-        public DiscoveredRelationship[] DiscoveredRelationships(IManagedTransaction transaction = null)
+        public DiscoveredRelationship[] DiscoverRelationships(IManagedTransaction transaction = null)
         {
             using (IManagedConnection connection = Database.Server.GetManagedConnection(transaction))
                 return Helper.DiscoverRelationships(this, connection.Connection,transaction);

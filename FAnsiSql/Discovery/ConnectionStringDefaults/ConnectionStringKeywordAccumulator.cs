@@ -6,22 +6,37 @@ using FAnsi.Implementation;
 namespace FAnsi.Discovery.ConnectionStringDefaults
 {
     /// <summary>
-    /// Gathers keywords for use in building connection strings for a given <see cref="DatabaseType"/> in a priority overriding manner.
+    /// <para>Gathers keywords for use in building connection strings for a given <see cref="DatabaseType"/>.  Once created you can add keywords and then apply the template 
+    /// to new novel connection strings (see <see cref="EnforceOptions"/>).</para>
+    /// 
+    /// <para>Also handles connection string keyword aliases (where two words mean the same thing)</para>
     /// </summary>
     public class ConnectionStringKeywordAccumulator
     {
-        public DatabaseType DatabaseType { get; set; }
+        /// <summary>
+        /// <see cref="DatabaseType"/> describing what implmentation of DbConnectionStringBuilder is being manipulated
+        /// </summary>
+        public DatabaseType DatabaseType { get; private set; }
 
         private readonly Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>> _keywords = new Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>>(StringComparer.CurrentCultureIgnoreCase);
-        private DbConnectionStringBuilder _builder;
+        private readonly DbConnectionStringBuilder _builder;
 
+        /// <summary>
+        /// Initialises a new blank instance that does nothing.  Call <see cref="AddOrUpdateKeyword"/> to adjust the template connection string options.
+        /// </summary>
+        /// <param name="databaseType"></param>
         public ConnectionStringKeywordAccumulator(DatabaseType databaseType)
         {
             DatabaseType = databaseType;
-
             _builder = ImplementationManager.GetImplementation(databaseType).GetBuilder();
         }
 
+        /// <summary>
+        /// Adds a new connection string option (which must be compatible with <see cref="DatabaseType"/>) 
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <param name="value"></param>
+        /// <param name="priority"></param>
         public void AddOrUpdateKeyword(string keyword, string value, ConnectionStringKeywordPriority priority)
         {
             var collision = GetCollisionWithKeyword(keyword,value);
@@ -89,38 +104,5 @@ namespace FAnsi.Discovery.ConnectionStringDefaults
             foreach (var keyword in _keywords)
                 connectionStringBuilder[keyword.Key] = keyword.Value.Item1;
         }
-    }
-
-    public enum ConnectionStringKeywordPriority
-    {
-        /// <summary>
-        /// Lowest priority e.g. settings defined in app config / global const parameters etc that you are happy to be overriden elsewhere
-        /// </summary>
-        SystemDefaultLow,
-        /// <summary>
-        /// Lowest priority e.g. settings defined in app config / global const parameters etc that you are happy to be overriden elsewhere
-        /// </summary>
-        SystemDefaultMedium,
-        /// <summary>
-        /// Lowest priority e.g. settings defined in app config / global const parameters etc that you are happy to be overriden elsewhere
-        /// </summary>
-        SystemDefaultHigh,
-
-        /// <summary>
-        /// User specified overrides for System Default settings.
-        /// </summary>
-        UserOverride,
-
-        /// <summary>
-        /// High level priority, the C# object being used is specifying a required keyword for it to operate correctly.  This overrides
-        /// user settings and system defaults (but not <see cref="ApiRule"/>)
-        /// </summary>
-        ObjectOverride,
-
-        /// <summary>
-        /// Highest priority for keywords.  This is settings that cannot be unset/overriden by anyone else and are required
-        /// for the API to work e.g.  AllowUserVariables in MySql
-        /// </summary>
-        ApiRule
     }
 }

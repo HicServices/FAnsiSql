@@ -55,7 +55,7 @@ namespace FAnsiTests.Table
 
             var discovered_fkCol = childTable.DiscoverColumn("Parent_Id");
             
-            DiscoveredRelationship[] relationships = parentTable.DiscoveredRelationships();
+            DiscoveredRelationship[] relationships = parentTable.DiscoverRelationships();
 
             Assert.AreEqual(1,relationships.Length);
             
@@ -133,7 +133,7 @@ namespace FAnsiTests.Table
             var discovered_fkCol1 = childTable.DiscoverColumn("Parent_Id1");
             var discovered_fkCol2 = childTable.DiscoverColumn("Parent_Id2");
 
-            DiscoveredRelationship[] relationships = parentTable.DiscoveredRelationships();
+            DiscoveredRelationship[] relationships = parentTable.DiscoverRelationships();
 
             Assert.AreEqual(1, relationships.Length);
 

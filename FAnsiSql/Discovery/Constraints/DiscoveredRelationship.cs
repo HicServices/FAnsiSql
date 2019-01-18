@@ -5,23 +5,47 @@ using FAnsi.Connections;
 
 namespace FAnsi.Discovery.Constraints
 {
+    /// <summary>
+    /// A foreign key relationship between two database tables.
+    /// </summary>
     public class DiscoveredRelationship
     {
+        /// <summary>
+        /// The name of the foreign key constraint in the database e.g. FK_Table1_Table2
+        /// </summary>
         public string Name { get; private set; }
 
+        /// <summary>
+        /// The table in which the primary key is declared.  This is the parent table.
+        /// </summary>
         public DiscoveredTable PrimaryKeyTable { get; private set; }
+
+        /// <summary>
+        /// The table which contains child records.
+        /// </summary>
         public DiscoveredTable ForeignKeyTable { get; private set; }
 
         /// <summary>
-        /// Mapping of primary key columns in <see cref="PrimaryKeyTable"/> to foreign key columns in <see cref="ForeignKeyTable"/>
+        /// Mapping of primary key column(s) in <see cref="PrimaryKeyTable"/> to foreign key column(s) in <see cref="ForeignKeyTable"/>.  If there are more than one entry 
+        /// then the foreign key is a composite key.
         /// </summary>
         public Dictionary<DiscoveredColumn, DiscoveredColumn> Keys { get; private set; }
 
+        /// <summary>
+        /// Describes what happens to records in the <see cref="ForeignKeyTable"/> when thier parent records (in the <see cref="PrimaryKeyTable"/>) are deleted.
+        /// </summary>
         public CascadeRule CascadeDelete { get; private set; }
 
         private DiscoveredColumn[] _pkColumns;
         private DiscoveredColumn[] _fkColumns;
 
+        /// <summary>
+        /// Internal API constructor intended for Implementation classes, instead use <see cref="DiscoveredTable.DiscoverRelationships"/> instead.
+        /// </summary>
+        /// <param name="fkName"></param>
+        /// <param name="pkTable"></param>
+        /// <param name="fkTable"></param>
+        /// <param name="deleteRule"></param>
         public DiscoveredRelationship(string fkName, DiscoveredTable pkTable, DiscoveredTable fkTable, CascadeRule deleteRule)
         {
             Name = fkName;
@@ -51,26 +75,6 @@ namespace FAnsi.Discovery.Constraints
                     _fkColumns.Single(c => c.GetRuntimeName().Equals(foreignKeyCol, StringComparison.CurrentCultureIgnoreCase))
                 );
 
-        }
-    }
-
-
-    public class TableDependencyOrder
-    {
-        Dictionary<DiscoveredTable,DiscoveredTable[]>  tableDependencies = new Dictionary<DiscoveredTable, DiscoveredTable[]>();
-
-        public TableDependencyOrder(DiscoveredTable[] tables)
-        {
-            foreach (DiscoveredTable table in tables)
-            {
-                //find all foreign key relationships to other tables in the set
-                table.DiscoveredRelationships().Where(t => tables.Contains(t.ForeignKeyTable));
-            }
-        }
-
-        public int GetOrderFor(DiscoveredTable table)
-        {
-            throw new NotImplementedException();
         }
     }
 }

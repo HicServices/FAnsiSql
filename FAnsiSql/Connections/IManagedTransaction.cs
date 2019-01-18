@@ -1,20 +1,31 @@
 ﻿using System.Data.Common;
-using System.Threading;
 
 namespace FAnsi.Connections
 {
     /// <summary>
-    /// Wrapper for DbTransaction that associates it with a specific DbConnection and currently executing Thread.  Helps simplify calls to information 
-    /// methods such as DiscoveredTable.GetRowCount etc during the middle of an ongoing database transaction in a Thread/Connection safe way.
+    /// Wrapper for DbTransaction that associates it with a specific DbConnection.  Helps simplify calls to information 
+    /// methods such as DiscoveredTable.GetRowCount etc during the middle of an ongoing database transaction
     /// </summary>
     public interface IManagedTransaction
     {
-        Thread OriginThread { get;}
+        /// <summary>
+        /// The DbConnection that the <see cref="Transaction"/> is running on
+        /// </summary>
+        DbConnection Connection { get; }
 
-        DbConnection Connection { get; set; }
-        DbTransaction Transaction { get; set; }
+        /// <summary>
+        /// The DbTransaction being wrapped
+        /// </summary>
+        DbTransaction Transaction { get; }
 
+        /// <summary>
+        /// Calls <see cref="DbTransaction.Rollback"/> and closes/disposes the <see cref="Connection"/>
+        /// </summary>
         void AbandonAndCloseConnection();
+
+        /// <summary>
+        /// Calls <see cref="DbTransaction.Commit"/> and closes/disposes the <see cref="Connection"/>
+        /// </summary>
         void CommitAndCloseConnection();
     }
 }

@@ -1,27 +1,26 @@
 ﻿using System;
 using System.Data.Common;
-using System.Threading;
 
 namespace FAnsi.Connections
 {
-    /// <summary>
-    /// See IManagedTransaction
-    /// </summary>
+    /// <inheritdoc/>
     public class ManagedTransaction : IManagedTransaction
     {
-        public Thread OriginThread { get; private set; }
+        /// <inheritdoc/>
+        public DbConnection Connection { get; private set; }
 
-        public DbConnection Connection { get; set; }
-        public DbTransaction Transaction { get; set; }
+        /// <inheritdoc/>
+        public DbTransaction Transaction { get; private set; }
 
-        public ManagedTransaction(DbConnection connection, DbTransaction transaction)
+        internal ManagedTransaction(DbConnection connection, DbTransaction transaction)
         {
-            OriginThread = Thread.CurrentThread;
-
             Connection = connection;
             Transaction = transaction;
         }
 
+        /// <summary>
+        /// Attempts to rollback the DbTransaction (swallowing any Exception) and closes/disposes the DbConnection
+        /// </summary>
         public void AbandonAndCloseConnection()
         {
             try
@@ -39,6 +38,9 @@ namespace FAnsi.Connections
             }
         }
 
+        /// <summary>
+        /// Attempts to commit the DbTransaction and then closes/disposes the DbConnection
+        /// </summary>
         public void CommitAndCloseConnection()
         {
 

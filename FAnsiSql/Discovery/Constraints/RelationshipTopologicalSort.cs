@@ -28,7 +28,7 @@ namespace FAnsi.Discovery.Constraints
             foreach (var table in nodes)
             {
                 //find all foreign keys which involve tables in the set
-                var relevantRelationships = table.DiscoveredRelationships().Where(r=>nodes.Contains(r.ForeignKeyTable));
+                var relevantRelationships = table.DiscoverRelationships().Where(r=>nodes.Contains(r.ForeignKeyTable));
 
                 foreach (DiscoveredRelationship relationship in relevantRelationships)
                     edges.Add(Tuple.Create(relationship.PrimaryKeyTable, relationship.ForeignKeyTable));

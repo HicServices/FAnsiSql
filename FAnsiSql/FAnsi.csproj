@@ -49,6 +49,7 @@
     <Compile Include="DatabaseType.cs" />
     <Compile Include="Discovery\BulkCopy.cs" />
     <Compile Include="Discovery\ConnectionStringDefaults\ConnectionStringKeywordAccumulator.cs" />
+    <Compile Include="Discovery\ConnectionStringDefaults\ConnectionStringKeywordPriority.cs" />
     <Compile Include="Discovery\Constraints\CascadeRule.cs" />
     <Compile Include="Discovery\Constraints\DiscoveredRelationship.cs" />
     <Compile Include="Discovery\Constraints\RelationshipTopologicalSort.cs" />

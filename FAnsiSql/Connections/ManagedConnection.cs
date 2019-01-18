@@ -1,8 +1,6 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Threading;
 using FAnsi.Discovery;
 
 namespace FAnsi.Connections
@@ -10,17 +8,19 @@ namespace FAnsi.Connections
     /// <inheritdoc/>
     public class ManagedConnection : IManagedConnection
     {
+        /// <inheritdoc/>
         public DbConnection Connection { get; private set; }
+
+        /// <inheritdoc/>
         public DbTransaction Transaction { get; private set; }
+
+        /// <inheritdoc/>
         public IManagedTransaction ManagedTransaction { get; private set; }
-        public Thread OriginThread { get; private set; }
+        
+        private readonly bool _hadToOpenConnection = false;
 
-        private bool hadToOpenConnection = false;
-
-        public ManagedConnection(DiscoveredServer discoveredServer, IManagedTransaction managedTransaction)
+        internal ManagedConnection(DiscoveredServer discoveredServer, IManagedTransaction managedTransaction)
         {
-            OriginThread = Thread.CurrentThread;
-
             //get a new connection or use the existing one within the transaction
             Connection = discoveredServer.GetConnection(managedTransaction);
 
@@ -31,22 +31,18 @@ namespace FAnsi.Connections
             //if there isn't a transaction then we opened a new connection so we had better remember to close it again
             if(managedTransaction == null)
             {
-                hadToOpenConnection = true;
+                _hadToOpenConnection = true;
                 Debug.Assert(Connection.State == ConnectionState.Closed);
                 Connection.Open();
             }
-            else
-            {
-                if(OriginThread != managedTransaction.OriginThread)
-                    throw new Exception("Cannot open new connection on Thread " + OriginThread.ManagedThreadId + "(" + OriginThread.Name + ")" + " because there is an ongoing Transaction using the connection on Thread " + managedTransaction.OriginThread + "(" + managedTransaction.OriginThread.Name + ")");
-            }
-
-            
         }
 
+        /// <summary>
+        /// Closes and disposes the DbConnection unless this class is part of an <see cref="IManagedTransaction"/>
+        /// </summary>
         public void Dispose()
         {
-            if (hadToOpenConnection)
+            if (_hadToOpenConnection)
                 Connection.Dispose();
         }
     }
