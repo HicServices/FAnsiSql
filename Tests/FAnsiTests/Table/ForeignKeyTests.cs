@@ -153,7 +153,7 @@ namespace FAnsiTests.Table
         [Test]
         public void Test_RelationshipTopologicalSort_UnrelatedTables()
         {
-            var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer, false);
+            var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer);
 
             var cops = db.CreateTable("Cops", new[] {new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100))});
             var robbers = db.CreateTable("Robbers", new[] { new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100)) });

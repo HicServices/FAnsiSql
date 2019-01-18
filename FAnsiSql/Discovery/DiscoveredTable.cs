@@ -426,10 +426,18 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public bool Equals(DiscoveredTable other)
         {
+            if (ReferenceEquals(null, other)) return false;
+
             return
-                string.Equals(_table, other._table, StringComparison.OrdinalIgnoreCase) 
-                && string.Equals(Schema ?? "dbo", other.Schema ?? "dbo",StringComparison.OrdinalIgnoreCase) 
+                string.Equals(_table, other._table, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(GetSchemaWithDboForNull(), other.GetSchemaWithDboForNull(), StringComparison.OrdinalIgnoreCase)
                 && Equals(Database, other.Database) && TableType == other.TableType;
+        }
+
+        private string GetSchemaWithDboForNull()
+        {
+            //for "dbo, "" and null are all considered the same
+            return string.IsNullOrWhiteSpace(Schema) ? "dbo" : Schema;
         }
 
         /// <summary>
@@ -453,7 +461,7 @@ namespace FAnsi.Discovery
         {
             unchecked
             {
-                var hashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(Schema??"dbo");
+                var hashCode =  StringComparer.OrdinalIgnoreCase.GetHashCode(GetSchemaWithDboForNull());
                 hashCode = (hashCode * 397) ^ (Database != null ? Database.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (int)TableType;
                 return hashCode;

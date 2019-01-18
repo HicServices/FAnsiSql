@@ -40,6 +40,9 @@ namespace FAnsiTests.Equality
 
             Assert.AreEqual(s1.ExpectDatabase("MyDb"), s2.ExpectDatabase("MyDb"));
             Assert.AreEqual(s1.ExpectDatabase("MyDb").GetHashCode(), s2.ExpectDatabase("MyDb").GetHashCode());
+
+            Assert.AreEqual(s1.ExpectDatabase("Mydb"), s2.ExpectDatabase("MyDb"));
+            Assert.AreEqual(s1.ExpectDatabase("Mydb").GetHashCode(), s2.ExpectDatabase("MyDb").GetHashCode());
             
             Assert.AreNotEqual(s1.ExpectDatabase("MyDb"), s2.ExpectDatabase("MyDb2"));
 
