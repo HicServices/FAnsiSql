@@ -12,6 +12,14 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation
     /// </summary>
     public interface IAggregateHelper
     {
+        /// <summary>
+        /// Returns an SQL statement that can be run on the DBMS being implemented that runs a GROUP BY query.  Optionally this query must join to a calendar table
+        /// defined by <paramref name="axisIfAny"/>.  Optionally this query must include a dynamic pivot column.
+        /// </summary>
+        /// <param name="queryLines"></param>
+        /// <param name="axisIfAny"></param>
+        /// <param name="pivot"></param>
+        /// <returns></returns>
         string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot);
     }
 }

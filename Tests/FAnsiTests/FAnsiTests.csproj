@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aggregation\AggregationTests.cs" />
     <Compile Include="CrossPlatformTests.cs" />
     <Compile Include="Database\DatabaseLevelTests.cs" />
     <Compile Include="DatabaseTests.cs" />
