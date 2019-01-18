@@ -15,7 +15,7 @@ namespace FAnsi.Discovery
     /// Cross database type reference to a Table (or view) in a Database.  Use TableType to determine whether it is a view or a table.  Allows you to check
     /// existence, drop, add columns, get row counts etc.
     /// </summary>
-    public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQuerySyntaxHelper
+    public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQuerySyntaxHelper, IEquatable<DiscoveredTable>
     {
         private string _table;
 
@@ -424,7 +424,7 @@ namespace FAnsi.Discovery
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        protected bool Equals(DiscoveredTable other)
+        public bool Equals(DiscoveredTable other)
         {
             return
                 string.Equals(_table, other._table, StringComparison.OrdinalIgnoreCase) 

@@ -51,6 +51,7 @@
     <Compile Include="Discovery\ConnectionStringDefaults\ConnectionStringKeywordAccumulator.cs" />
     <Compile Include="Discovery\Constraints\CascadeRule.cs" />
     <Compile Include="Discovery\Constraints\DiscoveredRelationship.cs" />
+    <Compile Include="Discovery\Constraints\RelationshipTopologicalSort.cs" />
     <Compile Include="Discovery\DatabaseColumnRequest.cs" />
     <Compile Include="Discovery\DecimalSize.cs" />
     <Compile Include="Discovery\DiscoveredColumn.cs" />

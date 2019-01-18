@@ -53,4 +53,24 @@ namespace FAnsi.Discovery.Constraints
 
         }
     }
+
+
+    public class TableDependencyOrder
+    {
+        Dictionary<DiscoveredTable,DiscoveredTable[]>  tableDependencies = new Dictionary<DiscoveredTable, DiscoveredTable[]>();
+
+        public TableDependencyOrder(DiscoveredTable[] tables)
+        {
+            foreach (DiscoveredTable table in tables)
+            {
+                //find all foreign key relationships to other tables in the set
+                table.DiscoveredRelationships().Where(t => tables.Contains(t.ForeignKeyTable));
+            }
+        }
+
+        public int GetOrderFor(DiscoveredTable table)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

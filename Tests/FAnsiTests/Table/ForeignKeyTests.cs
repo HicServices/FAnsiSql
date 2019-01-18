@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
+using FAnsi.Discovery.TypeTranslation;
 using FansiTests;
 using NUnit.Framework;
 
@@ -71,6 +72,14 @@ namespace FAnsiTests.Table
 
             Assert.AreEqual(cascade ? CascadeRule.Delete:CascadeRule.NoAction,relationships[0].CascadeDelete);
 
+            var sort1 = new RelationshipTopologicalSort(new[] {childTable, parentTable});
+            Assert.AreEqual(sort1.Order[0],parentTable);
+            Assert.AreEqual(sort1.Order[1],childTable);
+
+            var sort2 = new RelationshipTopologicalSort(new[] { parentTable,childTable});
+            Assert.AreEqual(sort2.Order[0], parentTable);
+            Assert.AreEqual(sort2.Order[1], childTable);
+            
             childTable.Drop();
             parentTable.Drop();
         }
@@ -139,6 +148,25 @@ namespace FAnsiTests.Table
             
             childTable.Drop();
             parentTable.Drop();
+        }
+
+        [Test]
+        public void Test_RelationshipTopologicalSort_UnrelatedTables()
+        {
+            var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer, false);
+
+            var cops = db.CreateTable("Cops", new[] {new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100))});
+            var robbers = db.CreateTable("Robbers", new[] { new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100)) });
+            var lawyers = db.CreateTable("Lawyers", new[] { new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100)) });
+
+            var sort = new RelationshipTopologicalSort(new DiscoveredTable[] {cops});
+            Assert.AreEqual(cops,sort.Order.Single());
+            
+            var sort2 = new RelationshipTopologicalSort(new DiscoveredTable[] { cops,robbers,lawyers });
+            Assert.AreEqual(cops, sort2.Order[0]);
+            Assert.AreEqual(robbers, sort2.Order[1]);
+            Assert.AreEqual(lawyers, sort2.Order[2]);
+
         }
     }
 }
