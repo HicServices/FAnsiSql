@@ -8,7 +8,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Naming;
 
-namespace Fansi.Implementations.MicrosoftSQL
+namespace FAnsi.Implementations.MicrosoftSQL
 {
 
     public class MicrosoftSQLServerHelper : DiscoveredServerHelper

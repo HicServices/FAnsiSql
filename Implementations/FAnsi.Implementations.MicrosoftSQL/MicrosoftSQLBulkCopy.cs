@@ -11,7 +11,7 @@ using FAnsi;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 
-namespace Fansi.Implementations.MicrosoftSQL
+namespace FAnsi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLBulkCopy : BulkCopy
     {

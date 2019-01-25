@@ -10,7 +10,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
 
-namespace Fansi.Implementations.MicrosoftSQL
+namespace FAnsi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLTableHelper : DiscoveredTableHelper
     {

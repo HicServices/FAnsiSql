@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using FAnsi.Discovery.TypeTranslation;
 
-namespace Fansi.Implementations.MicrosoftSQL
+namespace FAnsi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLTypeTranslater : TypeTranslater
     {

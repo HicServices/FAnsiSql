@@ -10,7 +10,7 @@ using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TypeTranslation;
 using NUnit.Framework;
 
-namespace FansiTests
+namespace FAnsiTests
 {
     public class CrossPlatformTests:DatabaseTests
     {

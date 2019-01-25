@@ -5,7 +5,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Update;
 
-namespace Fansi.Implementations.MicrosoftSQL.Update
+namespace FAnsi.Implementations.MicrosoftSQL.Update
 {
     public class MicrosoftSQLUpdateHelper:UpdateHelper
     {

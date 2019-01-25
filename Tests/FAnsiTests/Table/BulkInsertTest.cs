@@ -6,7 +6,7 @@ using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TypeTranslation;
-using FansiTests;
+using FAnsiTests;
 using NUnit.Framework;
 
 namespace FAnsiTests.Table

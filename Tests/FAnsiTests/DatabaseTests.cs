@@ -9,10 +9,10 @@ using FAnsi.Discovery;
 using FAnsi.Implementation;
 using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
-using Fansi.Implementations.MicrosoftSQL;
+using FAnsi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
 
-namespace FansiTests
+namespace FAnsiTests
 {
     [SingleThreaded]
     [NonParallelizable]

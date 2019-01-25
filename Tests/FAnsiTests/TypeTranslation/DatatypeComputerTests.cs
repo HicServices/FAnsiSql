@@ -1,6 +1,6 @@
 ﻿using System;
 using FAnsi.Discovery.TypeTranslation;
-using Fansi.Implementations.MicrosoftSQL;
+using FAnsi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
 
 namespace FAnsiTests.TypeTranslation

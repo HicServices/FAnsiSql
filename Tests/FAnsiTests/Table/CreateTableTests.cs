@@ -6,7 +6,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.TypeTranslation;
 using NUnit.Framework;
 
-namespace FansiTests.Table
+namespace FAnsiTests.Table
 {
     class CreateTableTests:DatabaseTests
     {

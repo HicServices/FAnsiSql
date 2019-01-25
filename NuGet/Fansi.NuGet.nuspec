@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
-    <id>HIC.FansiSql</id>
+    <id>HIC.FAnsiSql</id>
     <version>$version$</version>
     <title>HIC.FAnsiSql</title>
     <authors>Health Informatics Centre - University of Dundee</authors>
@@ -18,8 +18,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\$configuration$\Fansi*.dll" target="lib\net452" />
-    <file src="bin\$configuration$\Fansi*.pdb" target="lib\net452" />
-    <file src="bin\$configuration$\Fansi*.xml" target="lib\net452" />
+    <file src="bin\$configuration$\FAnsi*.dll" target="lib\net452" />
+    <file src="bin\$configuration$\FAnsi*.pdb" target="lib\net452" />
+    <file src="bin\$configuration$\FAnsi*.xml" target="lib\net452" />
   </files>
 </package>

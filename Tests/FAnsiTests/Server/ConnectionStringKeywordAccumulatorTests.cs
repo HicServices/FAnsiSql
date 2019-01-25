@@ -3,10 +3,10 @@ using System.Data.Common;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.ConnectionStringDefaults;
-using Fansi.Implementations.MicrosoftSQL;
+using FAnsi.Implementations.MicrosoftSQL;
 using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
-using FansiTests;
+using FAnsiTests;
 using NUnit.Framework;
 
 namespace FAnsiTests.Server

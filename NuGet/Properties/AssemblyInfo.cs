@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Health Informatics Centre, University of Dundee")]
-[assembly: AssemblyProduct("HIC.FansiSql")]
+[assembly: AssemblyProduct("HIC.FAnsiSql")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

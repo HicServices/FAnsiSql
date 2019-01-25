@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 using FAnsi;
-using FansiTests;
+using FAnsiTests;
 using NUnit.Framework;
 
 namespace FAnsiTests.Table

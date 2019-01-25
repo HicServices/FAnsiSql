@@ -6,7 +6,7 @@ using FAnsi.Discovery;
 using FAnsi.Implementation;
 using NUnit.Framework;
 
-namespace FansiTests
+namespace FAnsiTests
 {
     class TestExamples : DatabaseTests
     {

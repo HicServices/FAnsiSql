@@ -6,7 +6,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Exceptions;
 using FAnsi.Implementation;
-using FansiTests;
+using FAnsiTests;
 using NUnit.Framework;
 
 namespace FAnsiTests.TypeTranslation
