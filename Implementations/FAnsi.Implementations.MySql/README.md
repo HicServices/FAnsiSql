@@ -40,3 +40,8 @@
 - Query
   - [X] Top X
   - [X] JOIN UPDATE
+  
+- Aggregation 
+  - [X] Basic GROUP BY
+  - [X] Calendar/Axis Table GROUP BY
+  - [X] Dynamic Pivot GROUP BY

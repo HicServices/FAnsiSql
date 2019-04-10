@@ -72,36 +72,7 @@ delete from dateAxis where dt > @endDate;",
 
         }
 
-        public string GetPivotPostfixSql(IQueryAxis axis, string countColumnRuntimeName, string pivotColumnRuntimeName,string groupBy, string orderBy)
-        {
-
-            string axisColumnSelectLine = GetDatePartOfColumn(axis.AxisIncrement, "dateAxis.dt");
-
-            return
-                " group by " + axisColumnSelectLine +
-            @"');
-
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;";
-        }
-
-        public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot)
-        {
-            if (!pivot && axisIfAny == null)
-                return string.Join(Environment.NewLine, queryLines);
-
-            //axis only
-            if (!pivot)
-                return BuildAxisOnlyAggregate(queryLines,axisIfAny);
-            
-            //axis and pivot (cannot pivot without axis)
-            if (axisIfAny == null)
-                throw new NotSupportedException("Expected there to be both a pivot and an axis");
-
-            return BuildPivotAggregate(queryLines, axisIfAny);
-            
-        }
+        
 
         private string BuildAxisOnlyAggregate(List<CustomLine> lines, IQueryAxis axis)
         {
@@ -163,17 +134,114 @@ ORDER BY
 
         }
 
-        private string BuildPivotAggregate(List<CustomLine> lines, IQueryAxis axis)
+        private string BuildPivotAndAxisAggregate(List<CustomLine> lines, IQueryAxis axis)
         {
-            var syntaxHelper = new MySqlQuerySyntaxHelper();
+            string axisColumnWithoutAlias;
+            MySqlQuerySyntaxHelper syntaxHelper;
+            string part1 = GetPivotPart1(lines, out syntaxHelper,out axisColumnWithoutAlias);
+            
+            return string.Format(@"
+{0}
 
-            var pivotSelectLine = lines.Single(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.Pivot);
+{1}
+
+{2}
+
+SET @sql =
+
+CONCAT(
+'
+SELECT 
+{3} as joinDt,',@columnsSelectFromDataset,'
+FROM
+dateAxis
+LEFT JOIN
+(
+    {4}
+    {5} AS joinDt,
+'
+    ,@columnsSelectCases,
+'
+{6}
+group by
+{5}
+) dataset
+ON {3} = dataset.joinDt
+ORDER BY 
+{3}
+');
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;",
+                string.Join(Environment.NewLine, lines.Where(l => l.LocationToInsert < QueryComponent.SELECT)),
+                GetDateAxisTableDeclaration(axis),
+                part1,
+                syntaxHelper.Escape(GetDatePartOfColumn(axis.AxisIncrement, "dateAxis.dt")),
+                string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert == QueryComponent.SELECT)),
+
+                //the from including all table joins and where but no calendar table join
+                syntaxHelper.Escape(GetDatePartOfColumn(axis.AxisIncrement,axisColumnWithoutAlias)),
+
+                //the order by (should be count so that heavy populated columns come first)
+                syntaxHelper.Escape(string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert <= QueryComponent.WHERE)))
+                );
+        }
+        
+        private string BuildPivotOnlyAggregate(List<CustomLine> lines)
+        {
+            MySqlQuerySyntaxHelper syntaxHelper;
+            string axisColumnWithoutAlias;
+            string part1 = GetPivotPart1(lines, out syntaxHelper, out axisColumnWithoutAlias);
+
+            
+            var nonPivotColumn = lines.Where(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.None).ToArray();
+            if(nonPivotColumn.Length != 1)
+                throw new Exception("Pivot is only valid when there are 3 SELECT columns, an aggregate (e.g. count(*)), a pivot and a final column");
+                        
+            return string.Format(@"
+{0}
+
+{1}
+
+SET @sql =
+
+CONCAT(
+'
+SELECT 
+{2}',@columnsSelectCases,'
+
+{3}');
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;",
+                string.Join(Environment.NewLine, lines.Where(l => l.LocationToInsert < QueryComponent.SELECT)),
+                part1,
+                nonPivotColumn[0],
+                syntaxHelper.Escape(string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert >= QueryComponent.FROM)))
+            );
+        }
+
+        /// <summary>
+        /// Returns the section of the PIVOT which identifies unique values.  For MySql this is done by assembling a massive CASE statement.
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="syntaxHelper"></param>
+        /// <returns></returns>
+        private static string GetPivotPart1(List<CustomLine> lines, out MySqlQuerySyntaxHelper syntaxHelper, out string axisColumnWithoutAlias)
+        {
+            syntaxHelper = new MySqlQuerySyntaxHelper();
+
+            var pivotSelectLine = lines.Single(l =>
+                l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.Pivot);
 
             string pivotSqlWithoutAlias;
             string pivotAlias;
             syntaxHelper.SplitLineIntoSelectSQLAndAlias(pivotSelectLine.Text, out pivotSqlWithoutAlias, out pivotAlias);
 
-            var countSelectLine = lines.Single(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.CountFunction);
+            var countSelectLine = lines.Single(l =>
+                l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.CountFunction);
 
             string countSqlWithoutAlias;
             string countAlias;
@@ -181,40 +249,47 @@ ORDER BY
 
             string aggregateMethod;
             string aggregateParameter;
-            syntaxHelper.SplitLineIntoOuterMostMethodAndContents(countSqlWithoutAlias, out aggregateMethod,out aggregateParameter);
+            syntaxHelper.SplitLineIntoOuterMostMethodAndContents(countSqlWithoutAlias, out aggregateMethod,
+                out aggregateParameter);
 
             if (aggregateParameter.Equals("*"))
                 aggregateParameter = "1";
 
-            var joinDtColumn = lines.Single(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.Axis);
-
-            string axisColumnWithoutAlias;
-            string axisColumnAlias;
-            syntaxHelper.SplitLineIntoSelectSQLAndAlias(joinDtColumn.Text, out axisColumnWithoutAlias, out axisColumnAlias);
-
-            string whereDateColumnNotNull = lines.Any(l => l.LocationToInsert == QueryComponent.WHERE) ? "AND " : "WHERE ";
-            whereDateColumnNotNull += axisColumnWithoutAlias + " IS NOT NULL";
+            var joinDtColumn = lines.SingleOrDefault(l =>
+                l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.Axis);
+            
+            //if there is an axis we must ensure we only pull pivot values where the values appear in that axis range
+            string whereDateColumnNotNull = "";
+            
+            if(joinDtColumn != null)
+            {
+                string axisColumnAlias;
+                syntaxHelper.SplitLineIntoSelectSQLAndAlias(joinDtColumn.Text, out axisColumnWithoutAlias, out axisColumnAlias);
+                
+                whereDateColumnNotNull += lines.Any(l => l.LocationToInsert == QueryComponent.WHERE) ? "AND " : "WHERE ";
+                whereDateColumnNotNull += axisColumnWithoutAlias + " IS NOT NULL";
+            }
+            else
+                axisColumnWithoutAlias = null;
 
             //work out how to order the pivot columns
             string orderBy = countSqlWithoutAlias + " desc"; //default, order by the count(*) / sum(*) etc column desc
 
             //theres an explicit topX so order by it verbatim instead
-            var topXOrderByLine = lines.SingleOrDefault(c => c.LocationToInsert == QueryComponent.OrderBy && c.Role == CustomLineRole.TopX);
+            var topXOrderByLine =
+                lines.SingleOrDefault(c => c.LocationToInsert == QueryComponent.OrderBy && c.Role == CustomLineRole.TopX);
             if (topXOrderByLine != null)
                 orderBy = topXOrderByLine.Text;
 
             //if theres a topX limit postfix line (See MySqlQuerySyntaxHelper.HowDoWeAchieveTopX) add that too
-            var topXLimitLine = lines.SingleOrDefault(c => c.LocationToInsert == QueryComponent.Postfix && c.Role == CustomLineRole.TopX);
+            var topXLimitLine =
+                lines.SingleOrDefault(c => c.LocationToInsert == QueryComponent.Postfix && c.Role == CustomLineRole.TopX);
             string topXLimitSqlIfAny = topXLimitLine != null ? topXLimitLine.Text : "";
 
             string havingSqlIfAny = string.Join(Environment.NewLine,
                 lines.Where(l => l.LocationToInsert == QueryComponent.Having).Select(l => l.Text));
 
             return string.Format(@"
-{0}
-
-{1}
-
 SET SESSION group_concat_max_len = 1000000; 
 
 DROP TEMPORARY TABLE IF EXISTS pivotValues;
@@ -222,15 +297,15 @@ DROP TEMPORARY TABLE IF EXISTS pivotValues;
 /*Get the unique values in the pivot column into a temporary table ordered by size of the count*/
 CREATE TEMPORARY TABLE pivotValues AS (
 SELECT
-{3} as piv
-{5}
-{11}
-group by
+{1} as piv
 {3}
-{14}
+{4}
+group by
+{1}
+{7}
 order by
-{13}
-{12}
+{6}
+{5}
 );
 
 /* Build case when x='fish' then 1 end as 'fish', case when x='cammel' then 1 end as 'cammel' etc*/
@@ -238,7 +313,7 @@ SET @columnsSelectCases = NULL;
 SELECT
   GROUP_CONCAT(
     CONCAT(
-      '{2}(case when {3} = ''', REPLACE(pivotValues.piv,'\'','\\\''), ''' then {4} end) AS `', pivotValues.piv,'`'
+      '{0}(case when {1} = ''', REPLACE(pivotValues.piv,'\'','\\\''), ''' then {2} end) AS `', pivotValues.piv,'`'
     )
   ) INTO @columnsSelectCases
 FROM
@@ -253,65 +328,42 @@ SELECT
   ) INTO @columnsSelectFromDataset
 FROM
 pivotValues;
-
-
-SET @sql =
-
-CONCAT(
-'
-SELECT 
-{7} as joinDt,',@columnsSelectFromDataset,'
-FROM
-dateAxis
-LEFT JOIN
-(
-    {8}
-    {9} AS joinDt,
-'
-    ,@columnsSelectCases,
-'
-{10}
-group by
-{9}
-) dataset
-ON {7} = dataset.joinDt
-ORDER BY 
-{7}
-');
-
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;",
-                string.Join(Environment.NewLine, lines.Where(l => l.LocationToInsert < QueryComponent.SELECT)),
-                GetDateAxisTableDeclaration(axis),
-
+",
                 aggregateMethod,
                 pivotSqlWithoutAlias,
-                
                 aggregateParameter,
 
                 //the from including all table joins and where but no calendar table join
-                string.Join(Environment.NewLine, lines.Where(l => l.LocationToInsert >= QueryComponent.FROM && l.LocationToInsert <= QueryComponent.WHERE && l.Role != CustomLineRole.Axis)),
-
-                //the order by (should be count so that heavy populated columns come first)
-                countSqlWithoutAlias,
-                syntaxHelper.Escape(GetDatePartOfColumn(axis.AxisIncrement, "dateAxis.dt")),
-
-                //the SELECT statement only (no columns)
-                string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert == QueryComponent.SELECT)),
-
-                syntaxHelper.Escape(GetDatePartOfColumn(axis.AxisIncrement,axisColumnWithoutAlias)),
-
-                //the rest of the query down to the WHERE (escaping quotes)
-                syntaxHelper.Escape(string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert <= QueryComponent.WHERE))),
+                string.Join(Environment.NewLine,
+                    lines.Where(l =>
+                        l.LocationToInsert >= QueryComponent.FROM && l.LocationToInsert <= QueryComponent.WHERE &&
+                        l.Role != CustomLineRole.Axis)),
                 whereDateColumnNotNull,
                 topXLimitSqlIfAny,
                 orderBy,
                 havingSqlIfAny
-                );
+            );
+            
         }
 
+
         
+        public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot)
+        {
+            if (!pivot && axisIfAny == null)
+                return string.Join(Environment.NewLine, queryLines);
+
+            //axis only
+            if (!pivot)
+                return BuildAxisOnlyAggregate(queryLines,axisIfAny);
+            
+            //axis and pivot (cannot pivot without axis)
+            if (axisIfAny == null)
+                return BuildPivotOnlyAggregate(queryLines);
+
+            return BuildPivotAndAxisAggregate(queryLines, axisIfAny);
+            
+        }
 
         //so janky to double select GROUP_Concat just so we can get dataset* except join.dt -- can we do it once into @columns then again into the other
 

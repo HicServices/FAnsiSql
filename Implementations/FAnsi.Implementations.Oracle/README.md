@@ -41,6 +41,11 @@
   - [X] Top X (Uses ROWNUM)
   - [X] JOIN UPDATE
   
+- Aggregation 
+  - [ ] Basic GROUP BY
+  - [ ] Calendar/Axis Table GROUP BY
+  - [ ] Dynamic Pivot GROUP BY
+  
 
 ##Issues
 Oracle [does not have a bit data type](https://asktom.oracle.com/pls/asktom/f?p=100:11:0::::P11_QUESTION_ID:6263249199595#876972400346931526).  If you ask to create a bool column you will get a varchar2(5)
