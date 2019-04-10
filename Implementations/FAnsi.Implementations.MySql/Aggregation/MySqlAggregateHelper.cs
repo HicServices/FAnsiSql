@@ -209,17 +209,28 @@ SET @sql =
 CONCAT(
 '
 SELECT 
-{2}',@columnsSelectCases,'
+{2},',@columnsSelectCases,'
 
-{3}');
+{3}
+GROUP BY 
+{2}
+ORDER BY 
+{2}
+{4}
+');
 
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;",
                 string.Join(Environment.NewLine, lines.Where(l => l.LocationToInsert < QueryComponent.SELECT)),
                 part1,
-                nonPivotColumn[0],
-                syntaxHelper.Escape(string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert >= QueryComponent.FROM)))
+                nonPivotColumn[0].Text.TrimEnd(' ',','),
+
+                //everything inclusive of FROM but stopping before GROUP BY 
+                syntaxHelper.Escape(string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert < QueryComponent.GroupBy))),
+                
+                //any HAVING SQL
+                syntaxHelper.Escape(string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert == QueryComponent.Having)))
             );
         }
 

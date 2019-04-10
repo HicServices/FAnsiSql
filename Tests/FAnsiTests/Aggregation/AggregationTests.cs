@@ -312,6 +312,7 @@ namespace FAnsiTests.Aggregation
                 da.Fill(dt);
 
                 Assert.AreEqual(9,dt.Columns.Count);
+                Assert.AreEqual(4,dt.Rows.Count);
                 Assert.AreEqual("Category",dt.Columns[0].ColumnName);
 
 
