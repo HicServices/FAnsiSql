@@ -343,7 +343,7 @@ namespace FAnsi.Discovery
         /// </summary>
         /// <param name="transaction"></param>
         /// <returns></returns>
-        internal IManagedConnection GetManagedConnection(IManagedTransaction transaction = null)
+        public IManagedConnection GetManagedConnection(IManagedTransaction transaction = null)
         {
             return new ManagedConnection(this, transaction);
         }
