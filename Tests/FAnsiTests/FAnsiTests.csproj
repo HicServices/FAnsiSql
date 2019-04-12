@@ -57,6 +57,7 @@
     <Compile Include="Examples.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\ParameterNameExtractionTests.cs" />
+    <Compile Include="Query\QuerySyntaxHelperTests.cs" />
     <Compile Include="Server\ConnectionStringKeywordAccumulatorTests.cs" />
     <Compile Include="Server\ServerTests.cs" />
     <Compile Include="Table\BulkInsertTest.cs" />
