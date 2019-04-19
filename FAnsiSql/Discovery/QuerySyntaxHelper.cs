@@ -39,9 +39,23 @@ namespace FAnsi.Discovery
         public virtual char ParameterSymbol { get { return '@'; } }
 
         
+        /// <summary>
+        /// Returns a regex that picks up alias specifications in SELECT sql (e.g. "mytbl.mycol as fish").  This only has to match when the
+        /// " AS " qualifier is used explicitly.  The capture groups of this Regex must match <see cref="SplitLineIntoSelectSQLAndAlias"/>
+        /// </summary>
+        /// <returns></returns>
         protected virtual Regex GetAliasRegex()
         {
-            return new Regex(@"\s+as\s+(\w+)$", RegexOptions.IgnoreCase);
+            //whitespace followed by as and more whitespace
+            //Then any word (optionally bounded by a table name qualifier)
+
+            //alias is a word
+            //(w+)
+            
+            //alias is a wrapped word e.g. [hey hey].  In this case we must allow anything between the brackets that is not closing bracket
+            //[[`""]([^[`""]+)[]`""]
+
+            return new Regex(@"\s+as\s+((\w+)|([[`""]([^[`""]+)[]`""]))$", RegexOptions.IgnoreCase);
         }
 
         protected virtual string GetAliasConst()
@@ -53,7 +67,7 @@ namespace FAnsi.Discovery
         {
             get
             {
-                return ValidateAlias(GetAliasConst());
+                return GetAliasConst();
             }
         }
 
@@ -106,9 +120,12 @@ namespace FAnsi.Discovery
             if (string.IsNullOrWhiteSpace(s))
                 return s;
 
-            var match = GetAliasRegex().Match(s.Trim());//if it is an aliased entity e.g. AS fish then we should return fish (this is the case for table valued functions and not much else)
-            if (match.Success)
-                return match.Groups[1].Value;
+            string selectSQL;
+            string alias;
+            
+            //if it is an aliased entity e.g. AS fish then we should return fish (this is the case for table valued functions and not much else)
+            if (SplitLineIntoSelectSQLAndAlias(s.Trim(), out selectSQL, out alias))
+                return alias;
 
             return s.Substring(s.LastIndexOf(".") + 1).Trim('[', ']', '`');
         }
@@ -161,52 +178,38 @@ namespace FAnsi.Discovery
 
         public abstract string GetParameterDeclaration(string proposedNewParameterName, string sqlType);
 
-        private string ValidateAlias(string getAlias)
-        {
-            if (!(getAlias.StartsWith(" ") && getAlias.EndsWith(" ")))
-                throw new NotSupportedException("GetAliasConst method on Type " + this.GetType().Name + " returned a value that was not bounded by whitespace ' '.  GetAliasConst must start and end with a space e.g. ' AS '");
-
-            var testString = "col " + getAlias + " bob";
-            var match = GetAliasRegex().Match(testString);
-            if (!match.Success)
-                throw new NotSupportedException("GetAliasConst method on Type " + this.GetType().Name + " returned a value that was not matched by  GetAliasRegex()");
-
-            if (match.Groups.Count < 2 || !match.Groups[1].Value.Equals("bob"))
-                throw new NotSupportedException("GetAliasRegex method on Type " + this.GetType().Name + @" must return a regex with a capture group that matches the runtime name of the line e.g. \s+AS\s+(\w+)$");
-
-
-            return getAlias;
-        }
-
+        /// <summary>
+        /// Splits the given <paramref name="lineToSplit"/> into 
+        /// </summary>
+        /// <param name="lineToSplit"></param>
+        /// <param name="selectSQL"></param>
+        /// <param name="alias"></param>
+        /// <returns></returns>
         public virtual bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string alias)
         {
-            StringComparison comparisonType = StringComparison.InvariantCultureIgnoreCase;
+            //Ths line is expected to be some SELECT sql so remove trailing whitespace and commas etc
+            lineToSplit = lineToSplit.TrimEnd(',', ' ', '\n', '\r');
 
-            if (lineToSplit.IndexOf(AliasPrefix, comparisonType) == -1)
+            var matches = GetAliasRegex().Matches(lineToSplit);
+
+            if (matches.Count >1)
+                throw new SyntaxErrorException("Found 2+ instances of the alias regex");
+
+            if (matches.Count == 0)
             {
-                //doesn't have the alias prefix
-                selectSQL = lineToSplit.TrimEnd(',', ' ', '\n', '\r');
+                selectSQL = lineToSplit;
                 alias = null;
                 return false;
             }
 
-            if (lineToSplit.IndexOf(AliasPrefix, comparisonType) != lineToSplit.LastIndexOf(AliasPrefix, comparisonType))
-                throw new SyntaxErrorException("Found two instances of the alias prefix:\"" + AliasPrefix + "\"");
+            //match is an unwrapped alias
+            string unqualifiedAlias = matches[0].Groups[2].Value;
+            string qualifiedAlias = matches[0].Groups[4].Value;
 
-            int splitPoint = lineToSplit.IndexOf(AliasPrefix, comparisonType);
-
-            selectSQL = lineToSplit.Substring(0, splitPoint);
-
-            //could end with the alias and then be blank if the user is busy typing it all in a oner
-            if (splitPoint + AliasPrefix.Length < lineToSplit.Length)
-            {
-                alias = lineToSplit.Substring(splitPoint + AliasPrefix.Length).TrimEnd(',', ' ', '\n', '\r');
-
-                return true;
-            }
-
-            alias = null;
-            return false;
+            alias = string.IsNullOrWhiteSpace(unqualifiedAlias) ? qualifiedAlias : unqualifiedAlias;
+            alias = alias.Trim();
+            selectSQL = lineToSplit.Substring(0, matches[0].Index).Trim();
+            return true;
         }
 
         public abstract string GetScalarFunctionSql(MandatoryScalarFunctions function);

@@ -20,11 +20,13 @@ namespace FAnsi.Implementations.Oracle
 
         public override string GetRuntimeName(string s)
         {
-            if (string.IsNullOrWhiteSpace(s))
-                return s;
+            var answer = base.GetRuntimeName(s);
 
+            if (string.IsNullOrWhiteSpace(answer))
+                return s;
+            
             //upper it because oracle loves uppercase stuff
-            string toReturn =  s.Substring(s.LastIndexOf(".") + 1).Trim('"').ToUpper();
+            string toReturn =  answer.Trim('"').ToUpper();
 
             //truncate it to 30 maximum because oracle cant count higher than 30
             return toReturn.Length > 30 ? toReturn.Substring(0, 30) : toReturn;
