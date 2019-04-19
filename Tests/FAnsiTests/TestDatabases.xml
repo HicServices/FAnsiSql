@@ -3,7 +3,7 @@
     <AllowDatabaseCreation>False</AllowDatabaseCreation>
     <TestScratchDatabase>FAnsiTests</TestScratchDatabase>
   </Settings>
-  <!--<TestDatabase>
+  <TestDatabase>
     <DatabaseType>MicrosoftSQLServer</DatabaseType>
     <ConnectionString>server=localhost\sqlexpress;Trusted_Connection=True;</ConnectionString>
   </TestDatabase>
@@ -14,5 +14,5 @@
   <TestDatabase>
     <DatabaseType>Oracle</DatabaseType>
     <ConnectionString>Data Source=localhost:1521/orclpdb.dundee.uni;User Id=ora;Password=zombie;</ConnectionString>
-  </TestDatabase>-->
+  </TestDatabase>
 </TestDatabases>

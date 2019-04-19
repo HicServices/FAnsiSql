@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.OleDb;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -304,10 +303,12 @@ namespace FAnsi.Discovery
         public virtual bool IsTimeout(Exception exception)
         {
 
+            /*
+            //todo doesn't work with .net standard 
             var oleE = exception as OleDbException;
 
             if (oleE != null && oleE.ErrorCode == -2147217871)
-                return true;
+                return true;*/
 
             return exception.Message.ToLower().Contains("timeout");
         }

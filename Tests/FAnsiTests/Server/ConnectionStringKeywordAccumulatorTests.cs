@@ -61,7 +61,6 @@ namespace FAnsiTests.Server
 
         [TestCase(DatabaseType.MySql, "sslmode", "None", "Ssl-Mode","Required")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "AttachDbFilename", @"c:\temp\db", "Initial File Name", @"x:\omg.mdf")]
-        [TestCase(DatabaseType.MicrosoftSQLServer, "Asynchronous Processing", "True", "Async", "False")]
         [TestCase(DatabaseType.Oracle, "CONNECTION TIMEOUT", "10", "Connection Timeout", "20")]
         public void TestKeywords_OverrideWithNovelButEquivalentKeyword_Ignored(DatabaseType databaseType, string key1, string value1, string equivalentKey, string value2)
         {

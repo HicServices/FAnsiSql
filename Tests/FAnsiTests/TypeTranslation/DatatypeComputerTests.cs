@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
@@ -220,7 +221,7 @@ namespace FAnsiTests.TypeTranslation
         public void TestDatatypeComputer_DateTime_English()
         {
             DataTypeComputer t = new DataTypeComputer();
-            t.AdjustToCompensateForValue("23/01/2001");
+            t.AdjustToCompensateForValue(GetCultureSpecificDate());
             t.AdjustToCompensateForValue(null);
 
             Assert.AreEqual(t.CurrentEstimate, typeof(DateTime));
@@ -231,17 +232,34 @@ namespace FAnsiTests.TypeTranslation
         public void TestDatatypeComputer_DateTime_EnglishWithTime()
         {
             DataTypeComputer t = new DataTypeComputer();
-            t.AdjustToCompensateForValue("23/01/2001 11:10");
+            
+            Console.WriteLine(CultureInfo.CurrentCulture.EnglishName);
+            Console.WriteLine(CultureInfo.CurrentCulture.DateTimeFormat.MonthDayPattern);
+
+            t.AdjustToCompensateForValue(GetCultureSpecificDate() + " 11:10");
             t.AdjustToCompensateForValue(null);
 
             Assert.AreEqual(t.CurrentEstimate, typeof(DateTime));
             Assert.AreEqual("datetime2", t.GetSqlDBType(_translater));
         }
+
+        private string GetCultureSpecificDate()
+        {
+            if (CultureInfo.CurrentCulture.EnglishName.Contains("United States"))
+                return "01/23/2001";
+
+            if (CultureInfo.CurrentCulture.EnglishName.Contains("Kingdom"))
+                return "23/01/2001";
+
+            Assert.Inconclusive("Did not have a good implementation of test date for culture " +CultureInfo.CurrentCulture.EnglishName);
+            return null;
+        }
+
         [Test]
         public void TestDatatypeComputer_DateTime_EnglishWithTimeAndAM()
         {
             DataTypeComputer t = new DataTypeComputer();
-            t.AdjustToCompensateForValue("23/01/2001 11:10AM");
+            t.AdjustToCompensateForValue(GetCultureSpecificDate()+" 11:10AM");
             t.AdjustToCompensateForValue(null);
 
             Assert.AreEqual(t.CurrentEstimate, typeof(DateTime));

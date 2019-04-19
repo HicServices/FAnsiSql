@@ -113,7 +113,6 @@ namespace FAnsi.Implementations.MicrosoftSQL
             var b = (SqlConnectionStringBuilder) builder;
 
             b.MultipleActiveResultSets = true;
-            b.AsynchronousProcessing = true;
 
             return b;
         }
