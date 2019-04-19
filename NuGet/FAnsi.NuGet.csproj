@@ -17,19 +17,17 @@
     <PackageTags>Ansi,SQL</PackageTags>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel" Version="4.*" />
-    <PackageReference Include="System.Management" Version="4.*" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.*" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.*" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.5.1" />
-    <PackageReference Include="MySql.Data" Version="8.0.13" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FAnsiSql\FAnsi.csproj" />
-    <ProjectReference Include="..\Implementations\FAnsi.Implementations.MicrosoftSQL\FAnsi.Implementations.MicrosoftSQL.csproj" />
-    <ProjectReference Include="..\Implementations\FAnsi.Implementations.MySql\FAnsi.Implementations.MySql.csproj" />
-    <ProjectReference Include="..\Implementations\FAnsi.Implementations.Oracle\FAnsi.Implementations.Oracle.csproj" />
+    <ProjectReference Include="..\FAnsiSql\FAnsi.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Implementations\FAnsi.Implementations.MicrosoftSQL\FAnsi.Implementations.MicrosoftSQL.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Implementations\FAnsi.Implementations.MySql\FAnsi.Implementations.MySql.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Implementations\FAnsi.Implementations.Oracle\FAnsi.Implementations.Oracle.csproj">
+      <Private>true</Private>
+    </ProjectReference>
   </ItemGroup>
 </Project>
