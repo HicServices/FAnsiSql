@@ -747,6 +747,9 @@ namespace FAnsiTests
 
             Assert.IsTrue(tbl.DiscoverColumn("IdColumn").IsAutoIncrement);
             Assert.IsFalse(tbl.DiscoverColumn("Name").IsAutoIncrement);
+
+            int autoIncrement = tbl.Insert(new Dictionary<string, object>() {{"Name", "Tony"}});
+            Assert.AreEqual(2,autoIncrement);
         }
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]

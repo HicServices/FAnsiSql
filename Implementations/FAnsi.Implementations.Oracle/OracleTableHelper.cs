@@ -213,10 +213,13 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
 
             var p = discoveredTable.Database.Server.Helper.GetParameter("identityOut");
             p.Direction = ParameterDirection.Output;
+            p.DbType = DbType.Int32;
 
             cmd.Parameters.Add(p);
 
             cmd.CommandText += " RETURNING " + autoIncrement + " INTO :identityOut;";
+
+            cmd.CommandText = "BEGIN " +Environment.NewLine + cmd.CommandText + Environment.NewLine + "COMMIT;" + Environment.NewLine + "END;";
 
             cmd.ExecuteNonQuery();
             
