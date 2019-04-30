@@ -88,6 +88,6 @@ task :pack, [:config] do |t, args|
 	args.with_defaults(:config => :Release)
     Dir.chdir('NuGet') do
         sh "nuget pack Fansi.NuGet.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{$VERSION}#{$SUFFIX}"
-        sh "nuget push HIC.FansiSql.#{$VERSION}#{$SUFFIX}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey oy2jgteeftepxdms2sjq6tqp2imcusmevl44a2iolwj2c4"
+        sh "nuget push HIC.FansiSql.#{$VERSION}#{$SUFFIX}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
     end
 end
