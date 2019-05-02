@@ -8,13 +8,11 @@
     <Product>HIC.FAnsiSql</Product>
     <Description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</Description>
     <Copyright>Copyright 2019</Copyright>
-    <Version>0.9.0.10</Version>
-    <AssemblyVersion>0.9.0.10</AssemblyVersion>
-    <FileVersion>0.9.0.10</FileVersion>
     <Authors>Health Informatics Centre - University of Dundee</Authors>
     <PackageId>HIC.FAnsiSql</PackageId>
     <PackageProjectUrl>https://github.com/HicServices/FAnsiSql</PackageProjectUrl>
     <PackageTags>Ansi,SQL</PackageTags>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\FAnsiSql\FAnsi.csproj">
