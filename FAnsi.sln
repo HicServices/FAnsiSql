@@ -1,29 +1,34 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsi", "FAnsiSql\FAnsi.csproj", "{9CD5C745-9015-447E-89A5-809103DFD97D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FAnsi", "FAnsiSql\FAnsi.csproj", "{9CD5C745-9015-447E-89A5-809103DFD97D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsiTests", "Tests\FAnsiTests\FAnsiTests.csproj", "{84C476DB-FD9F-4A39-86C3-D7510167F75D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FAnsiTests", "Tests\FAnsiTests\FAnsiTests.csproj", "{84C476DB-FD9F-4A39-86C3-D7510167F75D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Implementations", "Implementations", "{2F0E0572-B8CF-4B0D-9594-ADB9132CEF2C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6E411B20-D0CB-4F5E-9BDC-4910373C9812}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsi.Implementations.Oracle", "Implementations\FAnsi.Implementations.Oracle\FAnsi.Implementations.Oracle.csproj", "{9E75C80E-50F2-45EF-BE94-3E81D2A2A83C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FAnsi.Implementations.Oracle", "Implementations\FAnsi.Implementations.Oracle\FAnsi.Implementations.Oracle.csproj", "{9E75C80E-50F2-45EF-BE94-3E81D2A2A83C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsi.Implementations.MySql", "Implementations\FAnsi.Implementations.MySql\FAnsi.Implementations.MySql.csproj", "{B6C0C7B8-CA65-420B-B026-0B697195B17C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FAnsi.Implementations.MySql", "Implementations\FAnsi.Implementations.MySql\FAnsi.Implementations.MySql.csproj", "{B6C0C7B8-CA65-420B-B026-0B697195B17C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsi.Implementations.MicrosoftSQL", "Implementations\FAnsi.Implementations.MicrosoftSQL\FAnsi.Implementations.MicrosoftSQL.csproj", "{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FAnsi.Implementations.MicrosoftSQL", "Implementations\FAnsi.Implementations.MicrosoftSQL\FAnsi.Implementations.MicrosoftSQL.csproj", "{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{3907AA0E-080C-4464-9795-C6FCECFE0336}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAnsi.NuGet", "NuGet\FAnsi.NuGet.csproj", "{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FAnsi.NuGet", "NuGet\FAnsi.NuGet.csproj", "{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{02B6EB8B-3CAA-4DE8-9220-0E353730ABAA}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1904EC10-14D9-4D9A-B570-2AD159F150A5}"
+	ProjectSection(SolutionItems) = preProject
+		SharedAssemblyInfo.cs = SharedAssemblyInfo.cs
 	EndProjectSection
 EndProject
 Global
@@ -66,5 +71,8 @@ Global
 		{B6C0C7B8-CA65-420B-B026-0B697195B17C} = {2F0E0572-B8CF-4B0D-9594-ADB9132CEF2C}
 		{5FEE5C27-F57D-4F56-8FD0-D58A49CF1CC5} = {2F0E0572-B8CF-4B0D-9594-ADB9132CEF2C}
 		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658} = {3907AA0E-080C-4464-9795-C6FCECFE0336}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {995D3A83-EB2E-4635-87E7-9A7865A05EF0}
 	EndGlobalSection
 EndGlobal

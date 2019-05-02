@@ -4,7 +4,13 @@
     <AssemblyTitle>FAnsi.Implementations.MySql</AssemblyTitle>
     <Product>FAnsi.Implementations.MySql</Product>
     <Copyright>Copyright ©  2019</Copyright>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.ComponentModel" Version="4.*" />
     <PackageReference Include="System.Management" Version="4.*" />

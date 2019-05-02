@@ -15,6 +15,9 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\FAnsiSql\FAnsi.csproj">
       <Private>true</Private>
     </ProjectReference>

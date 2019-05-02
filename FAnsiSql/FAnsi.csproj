@@ -6,13 +6,14 @@
     <Product>HIC.FAnsiSql</Product>
     <Description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</Description>
     <Copyright>Copyright ©  2019</Copyright>
-    <Version>0.9.0.10</Version>
-    <AssemblyVersion>0.9.0.10</AssemblyVersion>
-    <FileVersion>0.9.0.10</FileVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Discovery\TypeTranslation\README.md" />
     <None Include="Discovery\TypeTranslation\TypeTranslation.cd" />
