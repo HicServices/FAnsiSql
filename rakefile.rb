@@ -57,9 +57,9 @@ end
 
 desc "Sets the version number from GIT"    
 assemblyinfo :assemblyinfo do |asm|
-	asm.input_file = "FAnsiSql/Properties/AssemblyInfo.cs"
-    asm.output_file = "FAnsiSql/Properties/AssemblyInfo.cs"
-    asminfoversion = File.read("FAnsiSql/Properties/AssemblyInfo.cs")[/\d+\.\d+\.\d+(\.\d+)?/]
+	asm.input_file = "SharedAssemblyInfo.cs"
+    asm.output_file = "SharedAssemblyInfo.cs"
+    asminfoversion = File.read("SharedAssemblyInfo.cs")[/\d+\.\d+\.\d+(\.\d+)?/]
         
     major, minor, patch, build = asminfoversion.split(/\./)
    
