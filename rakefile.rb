@@ -42,7 +42,7 @@ msbuild :build, [:config] => :restorepackages do |msb, args|
 end
 
 task :tests do 
-	sh 'dotnet test --logger:"xunit;LogFilePath=test-result.xml"'
+	sh 'dotnet test --logger:"nunit;LogFilePath=test-result.xml"'
 end
 
 desc "Runs all tests"
