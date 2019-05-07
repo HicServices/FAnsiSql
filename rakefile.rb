@@ -1,6 +1,6 @@
 require 'albacore'
 load 'rakeconfig.rb'
-$MSBUILD = MSBUILD15CMD.gsub(/\\/,"/")
+$MSBUILD15CMD = MSBUILD15CMD.gsub(/\\/,"/")
 
 task :continuous, [:config] => [:setup_connection, :assemblyinfo, :build, :tests]
 
@@ -35,7 +35,7 @@ end
 
 msbuild :build, [:config] => :restorepackages do |msb, args|
 	args.with_defaults(:config => :Debug)
-	msb.command = $MSBUILD
+	msb.command = $MSBUILD15CMD
     msb.properties = { :configuration => args.config }
     msb.targets = [ :Clean, :Build ]   
     msb.solution = SOLUTION
@@ -55,7 +55,7 @@ end
 
 msbuild :deploy, [:config] => :restorepackages do |msb, args|
 	args.with_defaults(:config => :Release)
-	msb.command = $MSBUILD
+	msb.command = $MSBUILD15CMD
     msb.targets [ :Clean, :Build ]
     msb.properties = { :configuration => args.config }
     msb.solution = SOLUTION
