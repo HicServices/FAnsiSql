@@ -55,7 +55,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
             DbCommand cmd = new SqlCommand("use [" + database + @"];select name,
  (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name
   from sys.objects o
-WHERE type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection);
+WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection);
 
             cmd.Transaction = transaction;
 
