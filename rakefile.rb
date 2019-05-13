@@ -1,9 +1,8 @@
 require 'albacore'
-
 load 'rakeconfig.rb'
 $MSBUILD15CMD = MSBUILD15CMD.gsub(/\\/,"/")
 
-task :continuous, [:config] => [:setup_connection, :assemblyinfo, :build, :test]
+task :continuous, [:config] => [:setup_connection, :assemblyinfo, :build, :tests]
 
 task :release, [:config] => [:setup_connection, :assemblyinfo, :deploy, :pack]
 
@@ -40,6 +39,10 @@ msbuild :build, [:config] => :restorepackages do |msb, args|
     msb.properties = { :configuration => args.config }
     msb.targets = [ :Clean, :Build ]   
     msb.solution = SOLUTION
+end
+
+task :tests do 
+	sh 'dotnet test --logger:"nunit;LogFilePath=test-result.xml"'
 end
 
 desc "Runs all tests"

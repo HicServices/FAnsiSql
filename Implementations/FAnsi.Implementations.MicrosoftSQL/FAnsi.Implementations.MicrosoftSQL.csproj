@@ -10,6 +10,9 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.6.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\FAnsiSql\FAnsi.csproj" />
   </ItemGroup>
 </Project>
