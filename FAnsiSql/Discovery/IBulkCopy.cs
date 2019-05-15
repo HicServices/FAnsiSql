@@ -9,7 +9,16 @@ namespace FAnsi.Discovery
     /// </summary>
     public interface IBulkCopy : IDisposable
     {
+        /// <summary>
+        /// Upload all rows in the <paramref name="dt"/> to the destination table.
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns>number of rows written or number of rows affected (may not match row count if triggers etc are abound)</returns>
         int Upload(DataTable dt);
+
+        /// <summary>
+        /// The timeout in seconds for each call to <see cref="Upload"/> (implementation depends on derrived classes).
+        /// </summary>
         int Timeout { get; set; }
 
         /// <summary>

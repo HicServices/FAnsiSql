@@ -9,6 +9,10 @@ using FAnsi.Naming;
 
 namespace FAnsi.Discovery
 {
+    /// <summary>
+    /// DBMS specific implementation of all functionality that relates to interacting with existing tables (altering, dropping, truncating etc).  For table creation
+    /// see <see cref="DiscoveredDatabaseHelper"/>.
+    /// </summary>
     public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
     {
         public abstract string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX);

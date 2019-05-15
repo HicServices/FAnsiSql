@@ -333,7 +333,7 @@ namespace FAnsi.Discovery
         /// <summary>
         /// Creates a primary key on the table if none exists yet
         /// </summary>
-        /// <param name="timeout"></param>
+        /// <param name="timeoutInSeconds">The number of seconds to wait for the operation to complete</param>
         /// <param name="discoverColumns">Columns that should become part of the primary key</param>
         public void CreatePrimaryKey(int timeoutInSeconds, params DiscoveredColumn[] discoverColumns)
         {

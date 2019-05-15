@@ -12,6 +12,10 @@ using FAnsi.Implementation;
 
 namespace FAnsi.Discovery
 {
+    /// <summary>
+    /// DBMS specific implementation of all functionality that relates to interacting with existing databases (dropping databases, creating tables, finding stored proceedures etc).  For 
+    /// database creation see <see cref="DiscoveredServerHelper"/>
+    /// </summary>
     public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     {
         public abstract IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection,
@@ -223,10 +227,11 @@ REFERENCES {2}({3}) {4}",
         /// <summary>
         /// Executes the given SQL against the database + sends GO delimited statements as separate batches
         /// </summary>
-        /// <param name="sql"></param>
+        /// <param name="sql">Collection of SQL queries which can be separated by the use of "GO" on a line (works for all DBMS)</param>
         /// <param name="conn"></param>
         /// <param name="transaction"></param>
         /// <param name="performanceFigures">Line number the batch started at and the time it took to complete it</param>
+        /// <param name="timeout">Timeout in seconds to run each batch in the <see cref="sql"/></param>
         public void ExecuteBatchNonQuery(string sql, DbConnection conn, DbTransaction transaction, out Dictionary<int, Stopwatch> performanceFigures, int timeout = 30)
         {
             performanceFigures = new Dictionary<int, Stopwatch>();
