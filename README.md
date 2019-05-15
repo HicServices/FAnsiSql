@@ -36,7 +36,7 @@ CREATE TABLE `FAnsiTests`.`MyTable`
 );
 ```
 
-We have to change the table qualifier, we don't specify schema (dbo) and even the data types are different.  The more advanced the feature, the more desperate the varied the implementations are (e.g. [TOP X](https://www.w3schools.com/sql/sql_top.asp), [UPDATE from JOIN](https://stackoverflow.com/a/1293347/4824531) etc).
+We have to change the table qualifier, we don't specify schema (dbo) and even the data types are different.  The more advanced the feature, the more disparate the varied the implementations are (e.g. [TOP X](https://www.w3schools.com/sql/sql_top.asp), [UPDATE from JOIN](https://stackoverflow.com/a/1293347/4824531) etc).
 
 The goal of FAnsiSql is to abstract away cross DBMS differences and streamline common tasks while still allowing you to harness the power of executing raw SQL commands.
 
