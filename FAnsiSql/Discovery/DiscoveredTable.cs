@@ -148,11 +148,7 @@ namespace FAnsi.Discovery
             }
         }
 
-        /// <summary>
-        /// Returns the SQL required to fetch the first <paramref name="topX"/> records out of the table.
-        /// </summary>
-        /// <param name="topX"></param>
-        /// <returns></returns>
+        /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetTopXSql"]'/>
         public string GetTopXSql(int topX)
         {
             return Helper.GetTopXSqlForTable(this, topX);

@@ -1,0 +1,10 @@
+<Methods>
+<Method name="GetTopXSql">
+<summary>
+Returns the SQL required to fetch the first <paramref name="topX"/> records out of the table.
+</summary>
+<param name="topX">The number of records to fetch</param>
+<returns>Sql to execute</returns>
+</Method>
+
+</Methods>
