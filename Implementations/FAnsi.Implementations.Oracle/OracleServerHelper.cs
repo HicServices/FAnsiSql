@@ -22,6 +22,8 @@ namespace FAnsi.Implementations.Oracle
         protected override string ServerKeyName { get { return "DATA SOURCE"; } }
         protected override string DatabaseKeyName { get { return "USER ID"; } }//this is pretty insane is this really what oracle does?
 
+
+        protected override string  ConnectionTimeoutKeyName { get { return "Connection Timeout"; } }
         #region Up Typing
         public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
         {

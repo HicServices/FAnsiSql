@@ -16,6 +16,16 @@ namespace FAnsiTests.Server
             Assert.IsTrue(server.Exists(), "Server " + server + " did not exist");
         }
 
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
+        public void Server_RespondsWithinTime(DatabaseType type)
+        {
+            var server = GetTestServer(type);
+
+            Assert.IsTrue(server.RespondsWithinTime(3,out Exception ex));
+        }
+
 
         [TestCase(DatabaseType.MicrosoftSQLServer,DatabaseType.MySql)]
         [TestCase(DatabaseType.MySql, DatabaseType.MicrosoftSQLServer)]
