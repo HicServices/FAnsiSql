@@ -17,6 +17,8 @@ namespace FAnsi.Discovery
         /// <para>See also <see cref="GetSQLDbType"/></para>
         /// </summary>
         public string ExplicitDbType { get; set; }
+
+
         public string ColumnName { get; set; }
 
         /// <summary>
@@ -28,11 +30,30 @@ namespace FAnsi.Discovery
         /// </summary>
         public DatabaseTypeRequest TypeRequested { get; set; }
 
+        /// <summary>
+        /// True to create a column which is nullable
+        /// </summary>
         public bool AllowNulls { get; set; }
+
+        /// <summary>
+        /// True to include the column as part of the tables primary key 
+        /// </summary>
         public bool IsPrimaryKey { get; set; }
 
+        /// <summary>
+        /// True to create a column with auto incrementing number values in this column (autonum / identity etc)
+        /// </summary>
         public bool IsAutoIncrement { get; set; }
+
+        /// <summary>
+        /// Set to create a default constraint on the column which calls the given scalar function
+        /// </summary>
         public MandatoryScalarFunctions Default { get; set; }
+
+        /// <summary>
+        /// Applies only if the <see cref="TypeRequested"/> is string based.  Setting this will override the default collation and specify 
+        /// a specific collation.  The value specified must be an installed collation supported by the DBMS
+        /// </summary>
         public string Collation { get; set; }
 
         public DatabaseColumnRequest(string columnName, DatabaseTypeRequest typeRequested, bool allowNulls = true)

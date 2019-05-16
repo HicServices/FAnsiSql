@@ -9,6 +9,9 @@ using FAnsi.Naming;
 
 namespace FAnsi.Discovery
 {
+    /// <summary>
+    /// DBMS specific implementation of all functionality that relates to interacting with existing server (testing connections, creating databases, etc).
+    /// </summary>
     public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     {
         private static Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = new Dictionary<DatabaseType, ConnectionStringKeywordAccumulator>();

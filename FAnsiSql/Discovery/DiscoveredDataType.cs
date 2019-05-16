@@ -106,7 +106,7 @@ namespace FAnsi.Discovery
         /// <para>Creates and runs an ALTER TABLE statement which will increase the size of a decimal column to support larger Precision/Scale values than it currently does. 
         /// If you want decimal(4,2) then pass <paramref name="numberOfDigitsBeforeDecimalPoint"/>=2 and <paramref name="numberOfDigitsAfterDecimalPoint"/>=2</para>
         /// 
-        /// <para>Throws <see cref="InvalidResizeException"/> if the column is not a decimal type or the <paramref name="newSize"/> is smaller than the current column size</para>
+        /// <para>Throws <see cref="InvalidResizeException"/> if the column is not a decimal type or the new size is smaller than the current column size</para>
         /// </summary>
         /// <param name="numberOfDigitsBeforeDecimalPoint">The number of decimal places before the . you want represented e.g. for decimal(5,3) specify 2</param>
         /// <param name="numberOfDigitsAfterDecimalPoint">The number of decimal places after the . you want represented e.g. for decimal(5,3,) specify 3</param>
@@ -134,7 +134,7 @@ namespace FAnsi.Discovery
         }
 
         /// <summary>
-        /// <para>Creates and runs an ALTER TABLE statement to change the data type to the <param name="newType"></param></para>
+        /// <para>Creates and runs an ALTER TABLE statement to change the data type to the <paramref name="newType"/></para>
         /// 
         /// <para>Consider using <see cref="Resize(int,FAnsi.Connections.IManagedTransaction)"/> instead</para>
         /// </summary>

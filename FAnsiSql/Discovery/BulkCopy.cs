@@ -6,10 +6,23 @@ using FAnsi.Connections;
 
 namespace FAnsi.Discovery
 {
+    /// <inheritdoc/>
     public abstract class BulkCopy:IBulkCopy
     {
+        /// <summary>
+        /// The database connection on which the bulk insert operation is underway
+        /// </summary>
         protected readonly IManagedConnection Connection;
+
+        /// <summary>
+        /// The target table on the database server to which records are being uploaded
+        /// </summary>
         protected readonly DiscoveredTable TargetTable;
+
+        /// <summary>
+        /// The cached columns found on the <see cref="TargetTable"/>.  If you alter the table midway through a bulk insert you must
+        /// call <see cref="InvalidateTableSchema"/> to refresh this.
+        /// </summary>
         protected DiscoveredColumn[] TargetTableColumns;
 
 
@@ -22,6 +35,13 @@ namespace FAnsi.Discovery
         /// </summary>
         public bool AllowUnmatchedInputColumns { get; private set; }
 
+        /// <summary>
+        /// Begins a new bulk copy operation in which one or more data tables are uploaded to the <paramref name="targetTable"/>.  The API entrypoint for this is
+        /// <see cref="DiscoveredTable.BeginBulkInsert(IManagedTransaction)"/>.
+        /// 
+        /// </summary>
+        /// <param name="targetTable"></param>
+        /// <param name="connection"></param>
         protected BulkCopy(DiscoveredTable targetTable, IManagedConnection connection)
         {
             TargetTable = targetTable;
@@ -31,18 +51,27 @@ namespace FAnsi.Discovery
         }
 
 
+        /// <inheritdoc/>
         public virtual int Timeout { get; set; }
 
+        /// <summary>
+        /// Updates <see cref="TargetTableColumns"/>.  Call if you are making modifications to the <see cref="TargetTable"/> midway through a bulk insert.
+        /// </summary>
         public void InvalidateTableSchema()
         {
             TargetTableColumns = TargetTable.DiscoverColumns(Connection.ManagedTransaction);
         }
 
+        /// <summary>
+        /// Closes the connection and completes the bulk insert operation (including comitting the transaction).  If this method is not called
+        /// then the records may not be committed.
+        /// </summary>
         public virtual void Dispose()
         {
             Connection.Dispose();
         }
 
+        /// <inheritdoc/>
         public abstract int Upload(DataTable dt);
 
         /// <summary>

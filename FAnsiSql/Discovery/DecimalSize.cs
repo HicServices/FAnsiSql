@@ -11,17 +11,28 @@ namespace FAnsi.Discovery
         public int? NumbersBeforeDecimalPlace;
         public int? NumbersAfterDecimalPlace;
 
+        /// <summary>
+        /// Creates a new empty instance
+        /// </summary>
         public DecimalSize()
         {
             
         }
 
+        /// <summary>
+        /// Creates a new instance initialized to the sizes provided
+        /// </summary>
+        /// <param name="numbersBeforeDecimalPlace"></param>
+        /// <param name="numbersAfterDecimalPlace"></param>
         public DecimalSize(int numbersBeforeDecimalPlace, int numbersAfterDecimalPlace)
         {
             NumbersBeforeDecimalPlace = Math.Max(0,numbersBeforeDecimalPlace);
             NumbersAfterDecimalPlace = Math.Max(0,numbersAfterDecimalPlace);
         }
 
+        /// <summary>
+        /// Returns true if both <see cref="NumbersAfterDecimalPlace"/> and <see cref="NumbersBeforeDecimalPlace"/> are null/zero
+        /// </summary>
         public bool IsEmpty
         {
             get
@@ -31,20 +42,40 @@ namespace FAnsi.Discovery
             }
         }
 
+        /// <summary>
+        /// Returns the sum of <see cref="NumbersBeforeDecimalPlace"/> and <see cref="NumbersAfterDecimalPlace"/>
+        /// </summary>
         public int Precision { get { return  (NumbersBeforeDecimalPlace??0) + (NumbersAfterDecimalPlace??0); } }
+
+        /// <summary>
+        /// Returns the <see cref="NumbersAfterDecimalPlace"/>
+        /// </summary>
         public int Scale { get { return NumbersAfterDecimalPlace??0; } }
 
+        /// <summary>
+        /// Expands the instance to accomodate the new size (if expansion is required)
+        /// </summary>
+        /// <param name="numbersBeforeDecimalPlace"></param>
         public void IncreaseTo(int numbersBeforeDecimalPlace)
         {
             NumbersBeforeDecimalPlace = NumbersBeforeDecimalPlace == null ? numbersBeforeDecimalPlace : Math.Max(NumbersBeforeDecimalPlace.Value, numbersBeforeDecimalPlace);
         }
 
+        /// <summary>
+        /// Expands the instance to accomodate the new size (if expansion is required)
+        /// </summary>
+        /// <param name="numbersBeforeDecimalPlace"></param>
+        /// <param name="numbersAfterDecimalPlace"></param>
         public void IncreaseTo(int numbersBeforeDecimalPlace, int numbersAfterDecimalPlace)
         {
             NumbersBeforeDecimalPlace = NumbersBeforeDecimalPlace == null ? numbersBeforeDecimalPlace : Math.Max(NumbersBeforeDecimalPlace.Value, numbersBeforeDecimalPlace);
             NumbersAfterDecimalPlace = NumbersAfterDecimalPlace == null ? numbersAfterDecimalPlace : Math.Max(NumbersAfterDecimalPlace.Value, numbersAfterDecimalPlace);
         }
 
+        /// <summary>
+        /// Expands the instance to accomodate the new size (if expansion is required)
+        /// </summary>
+        /// <param name="other"></param>
         private void IncreaseTo(DecimalSize other)
         {
 
@@ -74,6 +105,13 @@ namespace FAnsi.Discovery
             return lengthRequired;
         }
 
+        /// <summary>
+        /// Returns a new <see cref="DecimalSize"/> which is big enough to accomodate decimals of <paramref name="first"/> size and those of <paramref name="second"/>.  
+        /// For example if the first is decimal(3,0) and the second is decimal(5,4) then the returned result would be decimal(7,4).
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <returns></returns>
         public static DecimalSize Combine(DecimalSize first, DecimalSize second)
         {
             if (first == null)

@@ -148,11 +148,7 @@ namespace FAnsi.Discovery
             }
         }
 
-        /// <summary>
-        /// Returns the SQL required to fetch the first <paramref name="topX"/> records out of the table.
-        /// </summary>
-        /// <param name="topX"></param>
-        /// <returns></returns>
+        /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetTopXSql"]'/>
         public string GetTopXSql(int topX)
         {
             return Helper.GetTopXSqlForTable(this, topX);
@@ -333,7 +329,7 @@ namespace FAnsi.Discovery
         /// <summary>
         /// Creates a primary key on the table if none exists yet
         /// </summary>
-        /// <param name="timeout"></param>
+        /// <param name="timeoutInSeconds">The number of seconds to wait for the operation to complete</param>
         /// <param name="discoverColumns">Columns that should become part of the primary key</param>
         public void CreatePrimaryKey(int timeoutInSeconds, params DiscoveredColumn[] discoverColumns)
         {
