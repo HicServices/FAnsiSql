@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using FAnsi;
+using FAnsi.Discovery;
 using NUnit.Framework;
 
 namespace FAnsiTests.Server
@@ -24,6 +25,23 @@ namespace FAnsiTests.Server
             var server = GetTestServer(type);
 
             Assert.IsTrue(server.RespondsWithinTime(3,out Exception ex));
+        }
+
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
+        public void Server_Helper_GetConnectionStringBuilder(DatabaseType type)
+        {
+            var server = GetTestServer(type);
+                       
+            var builder = server.Helper.GetConnectionStringBuilder("loco","bob","franko","wacky");
+
+            var server2 = new DiscoveredServer(builder);
+
+            Assert.AreEqual(server2.Name,"loco");
+            Assert.AreEqual(server2.GetCurrentDatabase().GetRuntimeName(),"bob");
+            Assert.AreEqual(server2.ExplicitUsernameIfAny,"franko");
+            Assert.AreEqual(server2.ExplicitPasswordIfAny,"wacky");
         }
 
 
