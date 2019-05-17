@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 using Oracle.ManagedDataAccess.Client;
@@ -24,6 +25,12 @@ namespace FAnsi.Implementations.Oracle
             //don't run an insert if there are 0 rows
             if (dt.Rows.Count == 0)
                 return 0;
+                        
+            var syntaxHelper = _server.GetQuerySyntaxHelper();
+            var tt = syntaxHelper.TypeTranslater;
+
+            //if the column name is a reserved keyword e.g. "Comment" we need to give it a new name
+            Dictionary<DataColumn,string> parameterNames = syntaxHelper.GetParameterNamesFor(dt.Columns.Cast<DataColumn>().ToArray(),c=>c.ColumnName);
 
             int affectedRows = 0;
             
@@ -32,11 +39,10 @@ namespace FAnsi.Implementations.Oracle
             var dateColumns = new HashSet<DataColumn>();
 
             var sql = string.Format("INSERT INTO " + TargetTable.GetFullyQualifiedName() + "({0}) VALUES ({1})",
-                string.Join(",", mapping.Values.Select(c=>c.GetRuntimeName())),
-                string.Join(",", mapping.Keys.Select(c => ParameterSymbol + c.ColumnName))
+                string.Join(",", mapping.Values.Select(c=>'"'+c.GetRuntimeName() +'"')),
+                string.Join(",", mapping.Keys.Select(c => parameterNames[c]))
                 );
 
-            var tt = _server.GetQuerySyntaxHelper().TypeTranslater;
 
             using(OracleCommand cmd = (OracleCommand) _server.GetCommand(sql, Connection))
             {
@@ -45,7 +51,7 @@ namespace FAnsi.Implementations.Oracle
 
                 foreach (var kvp in mapping)
                 {
-                    var p = _server.AddParameterWithValueToCommand(ParameterSymbol + kvp.Key.ColumnName, cmd, DBNull.Value);
+                    var p = _server.AddParameterWithValueToCommand(parameterNames[kvp.Key], cmd, DBNull.Value);
                     p.DbType = tt.GetDbTypeForSQLDBType(kvp.Value.DataType.SQLType);
 
                     if (p.DbType == DbType.DateTime)
@@ -79,7 +85,7 @@ namespace FAnsi.Implementations.Oracle
 
                 foreach (DataColumn col in mapping.Keys)
                 {
-                    var param = cmd.Parameters[ParameterSymbol + col.ColumnName];
+                    var param = cmd.Parameters[parameterNames[col]];
                     param.Value = values[col].ToArray();
                 }
 

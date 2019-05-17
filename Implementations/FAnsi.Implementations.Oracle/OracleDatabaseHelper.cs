@@ -21,7 +21,7 @@ namespace FAnsi.Implementations.Oracle
              using(var con = (OracleConnection)database.Server.GetConnection())
              {
                  con.Open();
-                 var cmd = new OracleCommand("DROP USER " + database.GetRuntimeName() + " CASCADE ",con);
+                 var cmd = new OracleCommand("DROP USER \"" + database.GetRuntimeName() + "\" CASCADE ",con);
                  cmd.ExecuteNonQuery();
              }
         }

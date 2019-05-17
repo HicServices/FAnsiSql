@@ -684,7 +684,12 @@ namespace FAnsiTests
         }
 
         [TestCase(DatabaseType.MySql, "_-o-_", ":>0<:","-_")]
+        [TestCase(DatabaseType.MySql, "Comment", "SSSS", "Space Out")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "_-o-_", ":>0<:", "-_")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "Comment", "SSSS", "Space Out")]
+        [TestCase(DatabaseType.Oracle, "_-o-_", ":>0<:", "-_")]
+        [TestCase(DatabaseType.Oracle, "Comment", "Comment", "Comment")] //reserved keyword in Oracle
+        [TestCase(DatabaseType.Oracle, "Comment", "SSSS", "Space Out")]
         public void HorribleColumnNames(DatabaseType type, string horribleDatabaseName, string horribleTableName,string columnName)
         {
             AssertCanCreateDatabases();
@@ -696,7 +701,7 @@ namespace FAnsiTests
             try
             {
                 var dt = new DataTable();
-                dt.Columns.Add(horribleTableName);
+                dt.Columns.Add(columnName);
                 dt.Rows.Add(new[] {"dave"});
                 dt.PrimaryKey = new[] {dt.Columns[0]};
 
@@ -706,6 +711,11 @@ namespace FAnsiTests
 
                 Assert.IsTrue(tbl.DiscoverColumns().Single().IsPrimaryKey);
 
+                Assert.AreEqual(1,tbl.GetDataTable().Rows.Count);
+
+                tbl.Insert(new Dictionary<string, object>(){ {columnName,"fff" } });
+                
+                Assert.AreEqual(2,tbl.GetDataTable().Rows.Count);
             }
             finally
             {

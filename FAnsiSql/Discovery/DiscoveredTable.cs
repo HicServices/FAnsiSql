@@ -346,21 +346,23 @@ namespace FAnsi.Discovery
         {
             var syntaxHelper = GetQuerySyntaxHelper();
             var server = Database.Server;
+                       
+            var _parameterNames = syntaxHelper.GetParameterNamesFor(toInsert.Keys.ToArray(),c=>c.GetRuntimeName());
 
             using (IManagedConnection connection = Database.Server.GetManagedConnection(transaction))
             {
                 string sql = 
                     string.Format("INSERT INTO {0}({1}) VALUES ({2})",
                     GetFullyQualifiedName(),
-                    string.Join(",",toInsert.Keys.Select(c=>c.GetRuntimeName())),
-                    string.Join(",",toInsert.Keys.Select(c=>syntaxHelper.ParameterSymbol + c.GetRuntimeName()))
+                    string.Join(",",toInsert.Keys.Select(c=>syntaxHelper.EnsureWrapped(c.GetRuntimeName()))),
+                    string.Join(",",toInsert.Keys.Select(c=>_parameterNames[c]))
                     );
 
                 var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
 
                 foreach (KeyValuePair<DiscoveredColumn, object> kvp in toInsert)
                 {
-                    var parameter = server.Helper.GetParameter(kvp.Key.GetRuntimeName());
+                    var parameter = server.Helper.GetParameter(_parameterNames[kvp.Key]);
 
                     var p = GetQuerySyntaxHelper().GetParameter(parameter, kvp.Key, kvp.Value);
                     cmd.Parameters.Add(p);

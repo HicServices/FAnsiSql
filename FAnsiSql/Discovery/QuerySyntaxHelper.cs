@@ -176,6 +176,11 @@ namespace FAnsi.Discovery
             return GetParameterDeclaration(proposedNewParameterName, TypeTranslater.GetSQLDBTypeForCSharpType(request));
         }
 
+        public virtual HashSet<string> GetReservedWords()
+        {
+            return new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+        }
+
         public abstract string GetParameterDeclaration(string proposedNewParameterName, string sqlType);
 
         /// <summary>
@@ -378,5 +383,29 @@ namespace FAnsi.Discovery
             return GetType().GetHashCode();
         }
         #endregion
+
+        public Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T,string> toStringFunc)
+        {
+            var toReturn = new Dictionary<T, string>();
+            
+            var reservedKeywords = GetReservedWords();
+                       
+
+            //sensible parameter names have no spaces or symbols!
+            Regex sensibleParameterNamesInclude = new Regex(@"^\w*$");
+
+            for (int i = 0; i < columns.Length; i++)
+            {
+                T c = columns[i];
+                var columnName = toStringFunc(c);
+                
+                if(!sensibleParameterNamesInclude.IsMatch(columnName)) //if column name is "_:_" or something
+                    toReturn.Add(c,ParameterSymbol + "p"+i);
+                else
+                    toReturn.Add(c,ParameterSymbol + (reservedKeywords.Contains(columnName)?columnName +"1":columnName)); //if column is reserved keyword or normal name
+            }
+
+            return toReturn;
+        }
     }
 }

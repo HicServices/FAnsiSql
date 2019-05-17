@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using FAnsi.Discovery.QuerySyntax.Update;
@@ -21,6 +22,16 @@ namespace FAnsi.Discovery.QuerySyntax
     public interface IQuerySyntaxHelper
     {
         ITypeTranslater TypeTranslater { get; }
+
+        /// <summary>
+        /// Creates parameters names from the column names in the collection.  Use this for INSERT etc commands to avoid SQL injection and handle creepy column
+        /// names with spaces or reserved keywords
+        /// </summary>
+        /// <param name="columns"></param>
+        /// <param name="toStringFunc">Function to convert the <typeparamref name="T"/> to a string e.g. c.ColumnName if DataColumn</param>
+        /// <returns></returns>
+        Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T,string> toStringFunc);
+
         IAggregateHelper AggregateHelper { get; }
         IUpdateHelper UpdateHelper { get; set; }
 
@@ -70,6 +81,8 @@ namespace FAnsi.Discovery.QuerySyntax
         bool IsBasicallyNull(object value);
         bool IsTimeout(Exception exception);
         
+        HashSet<string> GetReservedWords();
+
         /// <summary>
         /// Returns SQL that will wrap a single line of SQL with the SQL to calculate MD5 hash e.g. change `MyTable`.`MyColumn` to md5(`MyTable`.`MyColumn`)
         /// <para>The SQL might include transform functions e.g. UPPER etc</para>
