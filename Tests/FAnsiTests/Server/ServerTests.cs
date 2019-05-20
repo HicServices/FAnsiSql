@@ -67,6 +67,36 @@ namespace FAnsiTests.Server
             Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
             Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
         }
+
+        
+        [TestCase(DatabaseType.MySql,true)]
+        [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        [TestCase(DatabaseType.Oracle,true)]
+        [TestCase(DatabaseType.Oracle,false)]
+        public void ServerHelper_GetConnectionStringBuilder_NoDatabase(DatabaseType type,bool useWhitespace)
+        {
+            var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
+            var builder = helper.GetConnectionStringBuilder("loco",useWhitespace? "  ":null,"franko","wacky");
+
+            var server = new DiscoveredServer(builder);
+
+            Assert.AreEqual("loco",server.Name);
+
+            Assert.IsNull(server.GetCurrentDatabase());
+
+            Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
+            Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
+
+            server = new DiscoveredServer("loco",useWhitespace?"  ":null,type,null,null);
+            Assert.AreEqual("loco",server.Name);
+
+            Assert.IsNull(server.GetCurrentDatabase());
+
+
+        }
+
         [TestCase(DatabaseType.MySql,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
         [TestCase(DatabaseType.Oracle,true)]
@@ -90,6 +120,7 @@ namespace FAnsiTests.Server
             Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
             Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
         }
+
 
         /// <summary>
         /// Checks the API for <see cref="DiscoveredServer"/> respects both changes using the API and direct user changes made

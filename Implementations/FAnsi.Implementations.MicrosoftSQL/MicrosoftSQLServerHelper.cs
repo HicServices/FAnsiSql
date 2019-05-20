@@ -61,7 +61,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
         protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
         {
-            var toReturn = new SqlConnectionStringBuilder() { DataSource = server, InitialCatalog = database };
+            var toReturn = new SqlConnectionStringBuilder() { DataSource = server};
             if (!string.IsNullOrWhiteSpace(username))
             {
                 toReturn.UserID = username;
@@ -69,6 +69,9 @@ namespace FAnsi.Implementations.MicrosoftSQL
             }
             else
                 toReturn.IntegratedSecurity = true;
+
+            if(!string.IsNullOrWhiteSpace(database))
+                toReturn.InitialCatalog = database;
 
             return toReturn;
         }

@@ -60,9 +60,10 @@ namespace FAnsi.Implementations.MySql
             var toReturn = new MySqlConnectionStringBuilder()
             {
                 Server = server,
-                Database = database
-
             };
+
+            if(!string.IsNullOrWhiteSpace(database))
+                toReturn.Database = database;
 
             if (!string.IsNullOrWhiteSpace(username))
             {
