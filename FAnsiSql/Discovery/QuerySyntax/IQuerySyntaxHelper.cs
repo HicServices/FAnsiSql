@@ -39,6 +39,8 @@ namespace FAnsi.Discovery.QuerySyntax
 
         string GetRuntimeName(string s);
 
+        bool TryGetRuntimeName(string s, out string name);
+
         DatabaseType DatabaseType {get;}
         
         /// <summary>

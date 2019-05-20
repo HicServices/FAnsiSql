@@ -1,7 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿using System.IO;
 using FAnsi;
+using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementation;
 using NUnit.Framework;
 
@@ -9,19 +8,47 @@ namespace FAnsiTests.Query
 {
     class QuerySyntaxHelperTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        public void SyntaxHelperTest_GetRuntimeName(DatabaseType t)
+        //Oracle always uppers everything because... Oracle
+        [TestCase(DatabaseType.Oracle,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        [TestCase(DatabaseType.MySql,false)]
+        public void SyntaxHelperTest_GetRuntimeName(DatabaseType t,bool expectUpper)
         {
             ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
 
             var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
-            Assert.AreEqual("Frank",syntaxHelper.GetRuntimeName("count(*) as Frank"));
-            Assert.AreEqual("Frank",syntaxHelper.GetRuntimeName("count(cast(1 as int)) as Frank"));
-            Assert.AreEqual("Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as Frank"));
-            Assert.AreEqual("Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as [Frank]"));
-            Assert.AreEqual("Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as `Frank`"));
-            Assert.AreEqual("mycol",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol]"));
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("count(*) as Frank"));
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("count(cast(1 as int)) as Frank"));
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as Frank"));
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as [Frank]"));
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as `Frank`"));
+            Assert.AreEqual(expectUpper?"MYCOL":"mycol",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol]"));
+            Assert.AreEqual(expectUpper?"ZOMBIE":"zombie",syntaxHelper.GetRuntimeName("dbo.GetMyCoolThing(\"Magic Fun Times\") as zombie"));
+                        
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("`mydb`.`mytbl`.`mycol` as `Frank`"));
+
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("\"mydb\".\"mytbl\".\"mycol\" as \"Frank\""));
+
+            
+            Assert.IsTrue(syntaxHelper.TryGetRuntimeName("\"mydb\".\"mytbl\".\"mycol\" as \"Frank\"",out string name));
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",name);
+        }
+        
+        [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        public void SyntaxHelperTest_GetRuntimeName_Impossible(DatabaseType t)
+        {
+            ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
+
+            var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
+            var ex = Assert.Throws<RuntimeNameException>(()=>syntaxHelper.GetRuntimeName("count(*)"));
+            StringAssert.Contains("Could not determine runtime name for Sql:'count(*)'.  It had brackets and no alias.",ex.Message);
+
+            Assert.Throws<RuntimeNameException>(()=>syntaxHelper.GetRuntimeName("dbo.GetMyCoolThing(\"Magic Fun Times\")"));
+
+            Assert.IsFalse(syntaxHelper.TryGetRuntimeName("count(*)",out _));
+            Assert.IsFalse(syntaxHelper.TryGetRuntimeName("dbo.GetMyCoolThing(\"Magic Fun Times\")",out _));
         }
 
         [Test]

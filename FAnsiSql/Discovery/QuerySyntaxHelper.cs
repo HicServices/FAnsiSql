@@ -124,12 +124,31 @@ namespace FAnsi.Discovery
             string alias;
             
             //if it is an aliased entity e.g. AS fish then we should return fish (this is the case for table valued functions and not much else)
-            if (SplitLineIntoSelectSQLAndAlias(s.Trim(), out selectSQL, out alias))
+            if (SplitLineIntoSelectSQLAndAlias(s.Trim(), out _, out alias))
                 return alias;
+
+            //it doesn't have an alias, e.g. it's `MyDatabase`.`mytable` or something
+
+            //if it's "count(1)" or something then that's a problem!
+            if(s.IndexOfAny(new char[]{'(',')' }) != -1)
+                throw new RuntimeNameException("Could not determine runtime name for Sql:'" + s + "'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
 
             return s.Substring(s.LastIndexOf(".") + 1).Trim('[', ']', '`');
         }
-
+        
+        public virtual bool TryGetRuntimeName(string s,out string name)
+        {
+            try
+            {
+                name = GetRuntimeName(s);
+                return true;
+            }
+            catch (RuntimeNameException)
+            {
+                name = null;
+                return false;
+            }
+        }
 
         public string EnsureWrapped(string databaseOrTableName)
         {
