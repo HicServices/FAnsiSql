@@ -39,8 +39,8 @@ namespace FAnsi.Discovery
             return builder;
         }
         
-        public DbConnectionStringBuilder GetConnectionStringBuilder(string server, string database,
-            string username, string password)
+        /// <inheritdoc/>
+        public DbConnectionStringBuilder GetConnectionStringBuilder(string server, string database, string username, string password)
         {
             var builder = GetConnectionStringBuilderImpl(server,database,username,password);
             EnforceKeywords(builder);
@@ -64,7 +64,8 @@ namespace FAnsi.Discovery
 
         public string GetServerName(DbConnectionStringBuilder builder)
         {
-            return (string) builder[ServerKeyName];
+            var s = (string) builder[ServerKeyName];
+            return string.IsNullOrWhiteSpace(s)?null:s;
         }
 
         public DbConnectionStringBuilder ChangeServer(DbConnectionStringBuilder builder, string newServer)
@@ -73,7 +74,7 @@ namespace FAnsi.Discovery
             return builder;
         }
 
-        public string GetCurrentDatabase(DbConnectionStringBuilder builder)
+        public virtual string GetCurrentDatabase(DbConnectionStringBuilder builder)
         {
             return (string) builder[DatabaseKeyName];
         }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Data;
+using System.Data.SqlClient;
 using FAnsi;
 using FAnsi.Discovery;
+using FAnsi.Implementation;
 using NUnit.Framework;
 
 namespace FAnsiTests.Server
@@ -27,23 +29,103 @@ namespace FAnsiTests.Server
             Assert.IsTrue(server.RespondsWithinTime(3,out Exception ex));
         }
 
+        /// <summary>
+        /// Tests systems ability to deal with missing information in the connection string
+        /// </summary>
+        /// <param name="type"></param>
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
-        public void Server_Helper_GetConnectionStringBuilder(DatabaseType type)
+        public void ServerHelper_GetCurrentDatabase_WhenNoneSpecified(DatabaseType type)
         {
-            var server = GetTestServer(type);
-                       
-            var builder = server.Helper.GetConnectionStringBuilder("loco","bob","franko","wacky");
+            var helper = ImplementationManager.GetImplementation(type).GetServerHelper();            
+            var builder = helper.GetConnectionStringBuilder("");
+            var server = new DiscoveredServer(builder);
 
-            var server2 = new DiscoveredServer(builder);
-
-            Assert.AreEqual(server2.Name,"loco");
-            Assert.AreEqual(server2.GetCurrentDatabase().GetRuntimeName(),"bob");
-            Assert.AreEqual(server2.ExplicitUsernameIfAny,"franko");
-            Assert.AreEqual(server2.ExplicitPasswordIfAny,"wacky");
+            Assert.AreEqual(null,server.Name);
+            Assert.AreEqual(null,server.GetCurrentDatabase());
         }
 
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
+        public void ServerHelper_GetConnectionStringBuilder(DatabaseType type)
+        {
+            var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
+            var builder = helper.GetConnectionStringBuilder("loco","bob","franko","wacky");
+
+            var server = new DiscoveredServer(builder);
+
+            Assert.AreEqual("loco",server.Name);
+
+            //Oracle does not persist database in connection string
+            if(type == DatabaseType.Oracle)
+                Assert.IsNull(server.GetCurrentDatabase());
+            else
+                Assert.AreEqual("bob",server.GetCurrentDatabase().GetRuntimeName());
+
+            Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
+            Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
+        }
+        [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        [TestCase(DatabaseType.Oracle,true)]
+        public void ServerHelper_ChangeDatabase(DatabaseType type,bool expectCaps)
+        {
+            var server = new DiscoveredServer("loco","bob",type,"franko","wacky");
+
+            Assert.AreEqual("loco",server.Name);
+            
+            //this failure is already exposed by Server_Helper_GetConnectionStringBuilder
+            Assert.AreEqual("bob",server.GetCurrentDatabase().GetRuntimeName());
+
+            Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
+            Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
+
+            server.ChangeDatabase("omgggg");
+
+            Assert.AreEqual(server.Name,"loco");
+            
+            Assert.AreEqual(expectCaps?"OMGGGG":"omgggg",server.GetCurrentDatabase().GetRuntimeName());
+            Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
+            Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
+        }
+
+        /// <summary>
+        /// Checks the API for <see cref="DiscoveredServer"/> respects both changes using the API and direct user changes made
+        /// to <see cref="DiscoveredServer.Builder"/>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="useApiFirst"></param>
+        [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.MySql,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        public void ServerHelper_ChangeDatabase_AdHoc(DatabaseType type, bool useApiFirst)
+        {
+            //create initial server reference
+            var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
+            var server = new DiscoveredServer(helper.GetConnectionStringBuilder("loco","bob","franko","wacky"));
+            Assert.AreEqual("loco",server.Name);
+            Assert.AreEqual("bob",server.GetCurrentDatabase().GetRuntimeName());
+
+            //Use API to change databases
+            if(useApiFirst)
+            {
+                server.ChangeDatabase("omgggg");
+                Assert.AreEqual("loco",server.Name);
+                Assert.AreEqual("omgggg",server.GetCurrentDatabase().GetRuntimeName());
+            }
+
+            //adhoc changes to builder
+            server.Builder["Database"] = "Fisss";
+            Assert.AreEqual("loco",server.Name);
+            Assert.AreEqual("Fisss",server.GetCurrentDatabase().GetRuntimeName());
+
+            server.Builder["Server"] = "Amagad";
+            Assert.AreEqual("Amagad",server.Name);
+            Assert.AreEqual("Fisss",server.GetCurrentDatabase().GetRuntimeName());
+        }
 
         [TestCase(DatabaseType.MicrosoftSQLServer,DatabaseType.MySql)]
         [TestCase(DatabaseType.MySql, DatabaseType.MicrosoftSQLServer)]

@@ -20,6 +20,17 @@ namespace FAnsi.Discovery
         DbConnection GetConnection(DbConnectionStringBuilder builder);
 
         DbConnectionStringBuilder GetConnectionStringBuilder(string connectionString);
+        
+        /// <summary>
+        /// Returns a new connection string builder with the supplied parameters.  Note that if a concept is not supported in the 
+        /// <see cref="DbConnectionStringBuilder"/> implementation then the value will not appear in the connection string (e.g. Oracle
+        /// does not support specifying a <paramref name="database"/> to connect to).
+        /// </summary>
+        /// <param name="server">The server/datasource to connect to e.g. "localhost\sqlexpress"</param>
+        /// <param name="database">Optional database to connect to e.g. "master"</param>
+        /// <param name="username">Optional username to set in connection string (otherwise integrated security will be used - if supported)</param>
+        /// <param name="password">Optional password to set in connection string (otherwise integrated security will be used - if supported)</param>
+        /// <returns></returns>
         DbConnectionStringBuilder GetConnectionStringBuilder(string server, string database, string username, string password);
 
         string GetServerName(DbConnectionStringBuilder builder);

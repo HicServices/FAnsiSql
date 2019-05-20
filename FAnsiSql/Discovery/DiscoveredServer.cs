@@ -20,6 +20,11 @@ namespace FAnsi.Discovery
         public DbConnectionStringBuilder Builder { get; set; }
 
         /// <summary>
+        /// The currently used database
+        /// </summary>
+        private DiscoveredDatabase _currentDatabase;
+
+        /// <summary>
         /// Stateless helper class with DBMS specific implementation of the logic required by <see cref="DiscoveredServer"/>.
         /// </summary>
         public IDiscoveredServerHelper Helper { get; set; }
@@ -78,6 +83,28 @@ namespace FAnsi.Discovery
             Helper = ImplementationManager.GetImplementation(databaseType).GetServerHelper();
             Builder = Helper.GetConnectionStringBuilder(connectionString);
         }
+
+        /// <summary>
+        /// <para>Creates a new server pointed at the <paramref name="server"/> which should be a server of DBMS <paramref name="databaseType"/></para>
+        /// 
+        /// <para><see cref="ImplementationManager"/> must have a loaded implementation for the DBMS type</para>
+        /// </summary>
+        /// <param name="server">The server to connect to e.g. "localhost\sqlexpress"</param>
+        /// <param name="database">The default database to connect into/query (see <see cref="GetCurrentDatabase"/>)</param>
+        /// <param name="databaseType">The DBMS provider type</param>
+        /// <param name="usernameIfAny">Optional username to set in the connection string</param>
+        /// <param name="passwordIfAny">Optional password to set in the connection string</param>
+        /// <exception cref="ImplementationNotFoundException"></exception>
+        public DiscoveredServer(string server,string database, DatabaseType databaseType,string usernameIfAny,string passwordIfAny)
+        {
+            Helper = ImplementationManager.GetImplementation(databaseType).GetServerHelper();
+            
+            Builder = Helper.GetConnectionStringBuilder(server,database,usernameIfAny,passwordIfAny);
+
+            if(!string.IsNullOrWhiteSpace(database))
+                _currentDatabase = ExpectDatabase(database);
+        }
+
 
         /// <summary>
         /// Returns a new unopened connection to the server.  Use <see cref="GetCommand(string,FAnsi.Connections.IManagedConnection)"/> to start sending
@@ -273,7 +300,18 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public DiscoveredDatabase GetCurrentDatabase()
         {
-            return new DiscoveredDatabase(this,Helper.GetCurrentDatabase(Builder),Helper.GetQuerySyntaxHelper());
+            //Is the database name persisted in the connection string?
+            var dbName = Helper.GetCurrentDatabase(Builder);
+
+            //yes
+            if(!string.IsNullOrWhiteSpace(dbName))
+                return ExpectDatabase(dbName);
+
+            //no (e.g. Oracle or no default database specified in connection string)
+            if(_currentDatabase != null) //has user called ChangeDatabase
+                return _currentDatabase; //yes use that one
+            else
+                return null; //no change database call and no database in connection string
         }
         
         /// <summary>
@@ -294,7 +332,11 @@ namespace FAnsi.Discovery
         /// <param name="newDatabase"></param>
         public void ChangeDatabase(string newDatabase)
         {
+            //change the connection string to point to the newDatabase
             Builder = Helper.ChangeDatabase(Builder,newDatabase);
+
+            //for DBMS that do not persist database in connection string (Oracle), we must persist this change
+            _currentDatabase = ExpectDatabase(newDatabase);
         }
 
         /// <summary>

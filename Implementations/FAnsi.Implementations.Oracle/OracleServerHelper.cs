@@ -70,7 +70,7 @@ namespace FAnsi.Implementations.Oracle
             
             return toReturn;
         }
-
+        
         public override DbConnectionStringBuilder ChangeDatabase(DbConnectionStringBuilder builder, string newDatabase)
         {
             //does not apply to oracle since user = database but we create users with random passwords
@@ -90,6 +90,12 @@ namespace FAnsi.Implementations.Oracle
         public override IQuerySyntaxHelper GetQuerySyntaxHelper()
         {
             return new OracleQuerySyntaxHelper();
+        }
+
+        public override string GetCurrentDatabase(DbConnectionStringBuilder builder)
+        {
+            //Oracle does not persist database as a connection string (only server).
+            return null;
         }
 
         public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
