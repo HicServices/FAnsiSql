@@ -313,9 +313,10 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
             return toReturn.Values.ToArray();
         }
 
-        public override void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection,
-            DbTransaction transaction = null)
+        public override void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection,DbTransaction transaction = null)
         {
+            ((OracleConnection)connection).PurgeStatementCache();
+
             var cols = table.DiscoverColumns();
 
             string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " WHERE ROWNUM <= " + topX;
