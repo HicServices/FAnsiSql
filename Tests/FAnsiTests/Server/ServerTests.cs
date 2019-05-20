@@ -77,7 +77,7 @@ namespace FAnsiTests.Server
             Assert.AreEqual("loco",server.Name);
             
             //this failure is already exposed by Server_Helper_GetConnectionStringBuilder
-            Assert.AreEqual("bob",server.GetCurrentDatabase().GetRuntimeName());
+            Assert.AreEqual(expectCaps?"BOB":"bob",server.GetCurrentDatabase().GetRuntimeName());
 
             Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
             Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
