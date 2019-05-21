@@ -9,7 +9,13 @@ namespace FAnsi.Implementations.MySql
 
         public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table, IHasRuntimeName column, int topX, bool discardNulls)
         {
-            throw new NotImplementedException();
+            string sql = "SELECT " + column.GetRuntimeName() + " FROM " + table.GetFullyQualifiedName();
+
+            if (discardNulls)
+                sql += " WHERE " + column.GetRuntimeName() + " IS NOT NULL";
+
+             sql += " LIMIT "+topX;
+            return sql;
         }
 
         public string GetAlterColumnToSql(DiscoveredColumn column, string newType, bool allowNulls)

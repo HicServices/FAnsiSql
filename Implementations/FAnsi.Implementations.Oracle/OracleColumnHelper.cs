@@ -8,11 +8,12 @@ namespace FAnsi.Implementations.Oracle
     {
         public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table, IHasRuntimeName column, int topX, bool discardNulls)
         {
-            string sql = "SELECT " + column.GetRuntimeName() + " FROM " + table.GetFullyQualifiedName() + " WHERE ROWNUM <= " + topX;
+           string sql = "SELECT " + column.GetRuntimeName() + " FROM " + table.GetFullyQualifiedName();
 
             if (discardNulls)
-                sql += " AND " + column.GetRuntimeName() + " IS NOT NULL";
+                sql += " WHERE " + column.GetRuntimeName() + " IS NOT NULL";
 
+             sql += " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY";
             return sql;
         }
 

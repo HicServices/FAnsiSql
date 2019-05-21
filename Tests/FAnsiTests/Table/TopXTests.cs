@@ -22,7 +22,7 @@ namespace FAnsiTests.Table
             dt.Columns.Add("F");
             dt.Columns.Add("X");
 
-            dt.Rows.Add(1,"fish");
+            dt.Rows.Add(1,DBNull.Value);
             dt.Rows.Add(2,"fish");
             dt.Rows.Add(3,"fish");
             dt.Rows.Add(4,"fish");
@@ -51,6 +51,23 @@ namespace FAnsiTests.Table
             {
                 con.Open();
                 Assert.AreEqual(asc?1:4,db.Server.GetCommand(sql,con).ExecuteScalar());
+            }
+
+            var dtTopX = tbl.GetDataTable(1);
+            Assert.AreEqual(1,dtTopX.Rows.Count);
+            Assert.AreEqual(1,dtTopX.Rows[0]["F"]);
+
+
+            using(var con = db.Server.GetConnection())
+            {
+                con.Open();
+                var sqlcol = tbl.DiscoverColumn("X").GetTopXSql(1,false);
+
+                Assert.AreEqual(DBNull.Value,db.Server.GetCommand(sqlcol,con).ExecuteScalar());
+                                
+                sqlcol = tbl.DiscoverColumn("X").GetTopXSql(1,true);
+
+                Assert.AreEqual("fish",db.Server.GetCommand(sqlcol,con).ExecuteScalar());
             }
         }
     }

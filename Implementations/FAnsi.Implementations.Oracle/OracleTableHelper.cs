@@ -17,7 +17,7 @@ namespace FAnsi.Implementations.Oracle
 
         public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
         {
-            return "SELECT * FROM " + table.GetFullyQualifiedName() + " WHERE ROWNUM <= " + topX;
+            return "SELECT * FROM " + table.GetFullyQualifiedName() + " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY";
         }
 
         public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
@@ -319,7 +319,7 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
 
             var cols = table.DiscoverColumns();
 
-            string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " WHERE ROWNUM <= " + topX;
+            string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY" ;
 
             var da = table.Database.Server.GetDataAdapter(sql, connection);
             da.Fill(dt);

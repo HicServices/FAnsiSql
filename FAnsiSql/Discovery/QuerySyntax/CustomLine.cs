@@ -4,8 +4,8 @@ namespace FAnsi.Discovery.QuerySyntax
 {
     /// <summary>
     /// An arbitrary string to be injected into an SQL query being built by an ISqlQueryBuilder.  This is needed to handle differences in Database Query Engine Implementations
-    /// e.g. Top X is done as part of SELECT in Microsoft Sql Server (e.g. select top x * from bob) while in Oracle it is done as part of WHERE (e.g. select * from bob where ROWNUM
-    ///  less than x) (See IQuerySyntaxHelper.HowDoWeAchieveTopX).
+    /// e.g. Top X is done as part of SELECT in Microsoft Sql Server (e.g. select top x * from bob) while in MySql it is done as part of Postfix (e.g. select * from bob LIMIT 1)
+    /// (See IQuerySyntaxHelper.HowDoWeAchieveTopX).
     /// 
     /// <para>Each CustomLine must have an QueryComponent of the Query that it relates to (LocationToInsert) and may have a CustomLineRole. </para>
     /// 

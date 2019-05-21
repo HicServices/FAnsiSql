@@ -38,7 +38,7 @@
   - [X] Auto Increment (Requires Oracle 12c)
 
 - Query
-  - [X] Top X (Uses ROWNUM)
+  - [X] Top X (Requires Oracle 12c)
   - [X] JOIN UPDATE
   
 - Aggregation 
