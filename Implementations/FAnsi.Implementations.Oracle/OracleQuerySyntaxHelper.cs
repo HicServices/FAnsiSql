@@ -52,7 +52,7 @@ namespace FAnsi.Implementations.Oracle
         }
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
-            return new TopXResponse("ROWNUM <= " + x, QueryComponent.WHERE);
+            return new TopXResponse("OFFSET 0 ROWS FETCH NEXT " + x + " ROWS ONLY", QueryComponent.Postfix);
         }
 
         public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
