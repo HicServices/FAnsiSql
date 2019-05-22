@@ -231,7 +231,7 @@ REFERENCES {2}({3}) {4}",
         /// <param name="conn"></param>
         /// <param name="transaction"></param>
         /// <param name="performanceFigures">Line number the batch started at and the time it took to complete it</param>
-        /// <param name="timeout">Timeout in seconds to run each batch in the <see cref="sql"/></param>
+        /// <param name="timeout">Timeout in seconds to run each batch in the <paramref name="sql"/></param>
         public void ExecuteBatchNonQuery(string sql, DbConnection conn, DbTransaction transaction, out Dictionary<int, Stopwatch> performanceFigures, int timeout = 30)
         {
             performanceFigures = new Dictionary<int, Stopwatch>();

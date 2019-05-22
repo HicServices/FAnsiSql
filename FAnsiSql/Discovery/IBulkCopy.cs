@@ -1,5 +1,7 @@
-﻿using System;
+﻿using FAnsi.Discovery.TypeTranslation.TypeDeciders;
+using System;
 using System.Data;
+using System.Globalization;
 
 namespace FAnsi.Discovery
 {
@@ -26,5 +28,11 @@ namespace FAnsi.Discovery
         /// DbTransaction as the bulkc copy.
         /// </summary>
         void InvalidateTableSchema();
+
+        /// <summary>
+        /// Responsible for parsing DateTime strings (including Culture) into hard values for upload to the DBMS
+        /// </summary>
+        DateTimeTypeDecider DateTimeDecider{get;}
+
     }
 }

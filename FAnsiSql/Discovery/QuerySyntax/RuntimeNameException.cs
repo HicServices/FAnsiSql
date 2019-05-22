@@ -23,7 +23,7 @@ namespace FAnsi.Discovery.QuerySyntax
         }
 
         /// <summary>
-        /// Creates a new instance of the Exception with the given <
+        /// Creates a new instance of the Exception with the given <paramref name="message"/>
         /// </summary>
         /// <param name="message"></param>
         public RuntimeNameException(string message):base(message)

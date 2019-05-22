@@ -22,7 +22,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
         /// </summary>
         public static bool AllowCultureGuessing = true;
 
-        CultureInfo Culture { get{ return culture;}
+        public CultureInfo Culture { get{ return culture;}
             set
                 {
                     if(value.DateTimeFormat.ShortDatePattern.IndexOf('M') > value.DateTimeFormat.ShortDatePattern.IndexOf('d'))

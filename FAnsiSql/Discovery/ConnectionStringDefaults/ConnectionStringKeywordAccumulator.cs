@@ -76,8 +76,15 @@ namespace FAnsi.Discovery.ConnectionStringDefaults
             //lets evaluate this alleged keyword!
             _builder.Clear();
 
-            //Make sure it is supported by the connection string builder
-            _builder.Add(keyword, value);
+            try
+            {
+                //Make sure it is supported by the connection string builder
+                _builder.Add(keyword, value);
+            }catch(Exception ex)
+            {
+                //don't output the value since that could be a password
+                throw new ArgumentException("Keyword '" + keyword + "' did not support supplied value",ex);
+            }            
 
             //now iterate all the keys we had before and add those too, if the key count doesn't change for any of them we know it's a duplicate semantically
             if (_builder.Keys != null)

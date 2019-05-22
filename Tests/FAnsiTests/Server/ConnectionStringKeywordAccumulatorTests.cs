@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using FAnsi;
 using FAnsi.Discovery;
@@ -112,8 +113,9 @@ namespace FAnsiTests.Server
         {
             var acc = new ConnectionStringKeywordAccumulator(databaseType);
           
-            Assert.That(() => acc.AddOrUpdateKeyword("FLIBBLE", "false", ConnectionStringKeywordPriority.SystemDefaultLow), Throws.Exception
-                .With.Property("Message").ContainsSubstring("FLIBBLE"));
+            var ex = Assert.Throws<ArgumentException>(()=>acc.AddOrUpdateKeyword("FLIBBLE", "false", ConnectionStringKeywordPriority.SystemDefaultLow));
+
+            StringAssert.Contains("FLIBBLE",ex.Message);
         }
     }
 }

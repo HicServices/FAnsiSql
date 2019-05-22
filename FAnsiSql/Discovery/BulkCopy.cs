@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery.TypeTranslation.TypeDeciders;
@@ -35,8 +36,8 @@ namespace FAnsi.Discovery
         /// </summary>
         public bool AllowUnmatchedInputColumns { get; private set; }
 
-        protected DateTimeTypeDecider DateTimeDecider = new DateTimeTypeDecider();
-
+        public DateTimeTypeDecider DateTimeDecider {get; protected set; }
+        
         /// <summary>
         /// Begins a new bulk copy operation in which one or more data tables are uploaded to the <paramref name="targetTable"/>.  The API entrypoint for this is
         /// <see cref="DiscoveredTable.BeginBulkInsert(IManagedTransaction)"/>.
@@ -50,6 +51,7 @@ namespace FAnsi.Discovery
             Connection = connection;
             InvalidateTableSchema();
             AllowUnmatchedInputColumns = false;
+            DateTimeDecider = new DateTimeTypeDecider();
         }
 
 
