@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
+using FAnsi.Discovery.TypeTranslation.TypeDeciders;
 using MySql.Data.MySqlClient;
 
 namespace FAnsi.Implementations.MySql
@@ -30,10 +31,9 @@ namespace FAnsi.Implementations.MySql
 
         public MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection) : base(targetTable, connection)
         {
-            
         }
 
-        public override int Upload(DataTable dt)
+        public override int UploadImpl(DataTable dt)
         {
             var matchedColumns = GetMapping(dt.Columns.Cast<DataColumn>());
 
@@ -126,13 +126,12 @@ namespace FAnsi.Implementations.MySql
                 
                 //Dates/times
                 case "DATE":
-                    return String.Format("'{0:yyyy-MM-dd}'", value);
+                    return String.Format("'{0:yyyy-MM-dd}'", (DateTime)DateTimeDecider.Parse(value));
                 case "TIMESTAMP":
                 case "DATETIME":
-                    DateTime date = DateTime.Parse(value);
-                    return String.Format("'{0:yyyy-MM-dd HH:mm:ss}'", date);
+                    return String.Format("'{0:yyyy-MM-dd HH:mm:ss}'", (DateTime)DateTimeDecider.Parse(value));
                 case "TIME":
-                    return String.Format("'{0:HH:mm:ss}'", value);
+                    return String.Format("'{0:HH:mm:ss}'", (DateTime)DateTimeDecider.Parse(value));
                 case "YEAR2":
                     return String.Format("'{0:yy}'", value);
                 case "YEAR4":

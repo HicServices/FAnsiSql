@@ -341,30 +341,41 @@ namespace FAnsi.Discovery
         }
 
         public abstract string HowDoWeAchieveMd5(string selectSql);
-
-
+        
         public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
         {
-            var tt = TypeTranslater;
-            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
-            var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType.SQLType);
+            try
+            {
+                var tt = TypeTranslater;
+                p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
+                var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType.SQLType);
 
-            if (IsBasicallyNull(value))
-                p.Value = DBNull.Value;
-            else
-                if (value is string && typeDeciderFactory.IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan 
-                {
-                    var o = typeDeciderFactory.Create(cSharpType).Parse((string)value);
-
-                    //Not all DBMS support DBParameter.Value = new TimeSpan(...);
-                    if (o is TimeSpan)
-                        o = FormatTimespanForDbParameter((TimeSpan) o);
-
-                    p.Value = o;
-
-                }
+                if (IsBasicallyNull(value))
+                    p.Value = DBNull.Value;
                 else
-                    p.Value = value;
+                    if (value is string strVal && typeDeciderFactory.IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan 
+                    {
+                        var decider = typeDeciderFactory.Create(cSharpType);
+
+                        if(decider is DateTimeTypeDecider dt)
+                            dt.GuessDateFormat(new string[]{strVal});
+                        
+                        var o = decider.Parse(strVal);
+
+                        //Not all DBMS support DBParameter.Value = new TimeSpan(...);
+                        if (o is TimeSpan)
+                            o = FormatTimespanForDbParameter((TimeSpan) o);
+
+                        p.Value = o;
+
+                    }
+                    else
+                        p.Value = value;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Could not GetParameter for column '" + discoveredColumn.GetFullyQualifiedName() + "'",ex);
+            }            
 
             return p;
         }

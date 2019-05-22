@@ -24,7 +24,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
             _bulkcopy.DestinationTableName = targetTable.GetFullyQualifiedName();
         }
 
-        public override int Upload(DataTable dt)
+        public override int UploadImpl(DataTable dt)
         {
             _bulkcopy.BulkCopyTimeout = Timeout;
 
@@ -43,6 +43,8 @@ namespace FAnsi.Implementations.MicrosoftSQL
             EmptyStringsToNulls(dt);
 
             InspectDataTableForFloats(dt);
+
+            ConvertStringDatesToDateTime(dt);
 
             try
             {

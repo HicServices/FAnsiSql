@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
-    internal abstract class DecideTypesForStrings :IDecideTypesForStrings
+    public abstract class DecideTypesForStrings :IDecideTypesForStrings
     {
         public TypeCompatibilityGroup CompatibilityGroup { get; private set; }
         public HashSet<Type> TypesSupported { get; private set; }
@@ -45,8 +45,14 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
         {
             if (string.IsNullOrWhiteSpace(value))
                 return null;
-
-            return ParseImpl(value);
+            
+            try
+            {
+                return ParseImpl(value);
+            }catch(Exception ex)
+            {
+                throw new FormatException("Could not parse string value '" + value + "' with Decider Type:" + GetType().Name,ex);
+            }            
         }
 
         protected abstract object ParseImpl(string value);

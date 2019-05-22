@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using FAnsi.Connections;
+using FAnsi.Discovery.TypeTranslation.TypeDeciders;
 
 namespace FAnsi.Discovery
 {
@@ -24,8 +25,7 @@ namespace FAnsi.Discovery
         /// call <see cref="InvalidateTableSchema"/> to refresh this.
         /// </summary>
         protected DiscoveredColumn[] TargetTableColumns;
-
-
+        
         /// <summary>
         /// When calling GetMapping if there are DataColumns in the input table that you are trying to bulk insert that are not matched
         /// in the destination table then the default behaviour is to throw a KeyNotFoundException.  Set this to false to ignore that
@@ -34,6 +34,8 @@ namespace FAnsi.Discovery
         /// <para>Defaults to false</para>
         /// </summary>
         public bool AllowUnmatchedInputColumns { get; private set; }
+
+        protected DateTimeTypeDecider DateTimeDecider = new DateTimeTypeDecider();
 
         /// <summary>
         /// Begins a new bulk copy operation in which one or more data tables are uploaded to the <paramref name="targetTable"/>.  The API entrypoint for this is
@@ -72,7 +74,60 @@ namespace FAnsi.Discovery
         }
 
         /// <inheritdoc/>
-        public abstract int Upload(DataTable dt);
+        public virtual int Upload(DataTable dt)
+        {
+            ConvertStringDatesToDateTime(dt);
+
+            return UploadImpl(dt);
+        }
+
+        public abstract int UploadImpl(DataTable dt);
+
+        /// <summary>
+        /// Replaces all string representations destined to end up in DateTime or TimeSpan fields in the target database
+        /// into hard typed objects (using <see cref="DateTimeDecider"/>)
+        /// </summary>
+        /// <param name="dt"></param>
+        protected void ConvertStringDatesToDateTime(DataTable dt)
+        {
+            var dict = GetMapping(dt.Columns.Cast<DataColumn>(),out _);
+                    
+            //for each column in the destination
+            foreach(var kvp in dict)
+            {
+                //if the destination column is a date based column
+                var dataType = kvp.Value.DataType.GetCSharpDataType();
+                if(dataType == typeof(DateTime) || dataType == typeof(TimeSpan))
+                {
+                    //if it's already not a string then that's fine (hopefully its a DateTime!)
+                    if(kvp.Key.DataType != typeof(string))
+                        continue;
+
+                    //create a new column hard typed to DateTime
+                    var newColumn = dt.Columns.Add(kvp.Key.ColumnName + "_" + Guid.NewGuid().ToString(),dataType);
+                    
+                    //guess the DateTime culture based on values in the table
+                    DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
+
+                    foreach(DataRow dr in dt.Rows)
+                    {
+                        //parse the value
+
+                        var val = DateTimeDecider.Parse(dr[kvp.Key] as string)??DBNull.Value;
+                        if(dataType == typeof(DateTime))
+                            dr[newColumn] = val;
+                        else
+                            dr[newColumn] = val == DBNull.Value? val:((DateTime)val).TimeOfDay;
+                    }
+
+                    //drop the original column
+                    dt.Columns.Remove(kvp.Key);
+
+                    //rename the hard typed column to match the old column name
+                    newColumn.ColumnName = kvp.Key.ColumnName;                    
+                }
+            }
+        }
 
         /// <summary>
         /// Returns a case insensitive mapping between columns in your DataTable that you are trying to upload and the columns that actually exist in the destination 

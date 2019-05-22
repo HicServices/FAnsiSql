@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TypeTranslation;
+using FAnsi.Discovery.TypeTranslation.TypeDeciders;
 using NUnit.Framework;
 
 namespace FAnsiTests
@@ -15,10 +18,6 @@ namespace FAnsiTests
     public class CrossPlatformTests:DatabaseTests
     {
         
-        
-
-        
-
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
@@ -57,6 +56,36 @@ namespace FAnsiTests
             Assert.AreEqual(expectedDate, result.Rows[1][0]);
         }
 
+        [TestCase(DatabaseType.MicrosoftSQLServer, "2/28/1993 5:36:27 AM")]
+        [TestCase(DatabaseType.MySql, "2/28/1993 5:36:27 AM")]
+        [TestCase(DatabaseType.Oracle, "2/28/1993 5:36:27 AM")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "28/2/1993 5:36:27 AM")]
+        [TestCase(DatabaseType.MySql, "28/2/1993 5:36:27 AM")]
+        [TestCase(DatabaseType.Oracle, "28/2/1993 5:36:27 AM")]
+        public void DateColumnTests_UkUsFormat_Resolveable(DatabaseType type, object input)
+        {
+            var db = GetTestDatabase(type, true);
+            var tbl = db.CreateTable("MyTable",new []{new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))});
+
+            //basic insert
+            tbl.Insert(new Dictionary<string, object>() { { "MyDate", input } });
+            
+            //then bulk insert, both need to work
+            using (var blk = tbl.BeginBulkInsert())
+            {
+                var dt = new DataTable();
+                dt.Columns.Add("MyDate");
+                dt.Rows.Add(input);
+
+                blk.Upload(dt);
+            }
+
+            var result = tbl.GetDataTable();
+            var expectedDate = new DateTime(1993, 2,28,5,36,27);
+            Assert.AreEqual(expectedDate, result.Rows[0][0]);
+            Assert.AreEqual(expectedDate, result.Rows[1][0]);
+        }
+
         [TestCase(DatabaseType.MicrosoftSQLServer, "00:00:00")]
         [TestCase(DatabaseType.MySql, "00:00:00")]
         [TestCase(DatabaseType.Oracle, "00:00:00")]
@@ -81,8 +110,18 @@ namespace FAnsiTests
 
             var result = tbl.GetDataTable();
             var expectedTime = new TimeSpan(0,0,0,0);
-            Assert.AreEqual(expectedTime, result.Rows[0][0]);
-            Assert.AreEqual(expectedTime, result.Rows[1][0]);
+
+            object[] resultTimeSpans = null;
+
+            //Oracle is a bit special it only stores whole dates then has server side settings about how much to return (like a format string)
+            if(type == DatabaseType.Oracle)
+                    resultTimeSpans = new DateTime[] {(DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0]}.Select(dt=>dt.TimeOfDay).Cast<object>().ToArray();
+                else
+                    resultTimeSpans = new[] {result.Rows[0][0], result.Rows[1][0]};
+
+
+            Assert.AreEqual(expectedTime, resultTimeSpans[0]);
+            Assert.AreEqual(expectedTime, resultTimeSpans[1]);
         }
 
         /*
@@ -144,7 +183,15 @@ namespace FAnsiTests
             var result = tbl.GetDataTable();
             var expectedTime = new TimeSpan(13,11,00);
 
-            foreach (TimeSpan t in new[] {result.Rows[0][0], result.Rows[1][0]})
+            object[] resultTimeSpans = null;
+
+            //Oracle is a bit special it only stores whole dates then has server side settings about how much to return (like a format string)
+            if(type == DatabaseType.Oracle)
+                    resultTimeSpans = new DateTime[] {(DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0]}.Select(dt=>dt.TimeOfDay).Cast<object>().ToArray();
+                else
+                    resultTimeSpans = new[] {result.Rows[0][0], result.Rows[1][0]};
+
+            foreach (TimeSpan t in resultTimeSpans)
             {
                 if(t.Seconds>0)
                     Assert.AreEqual(10,t.Seconds);
@@ -800,5 +847,330 @@ namespace FAnsiTests
             Assert.AreEqual(currentValue.Hour, databaseValue.Hour);
         }
 
+        [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        public void Test_BulkInserting_LotsOfDates(DatabaseType type)
+        {
+            var db = GetTestDatabase(type);
+
+            var tbl = db.CreateTable("LotsOfDatesTest",new DatabaseColumnRequest[]
+            { 
+                new DatabaseColumnRequest("ID",new DatabaseTypeRequest(typeof(int))),
+                new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime))),    
+                new DatabaseColumnRequest("MyString",new DatabaseTypeRequest(typeof(string),int.MaxValue)),
+            });
+
+            //test basic insert
+            foreach(string s in someDates)
+            {
+                tbl.Insert(new Dictionary<string,object>(){ 
+                    {"ID",1}, 
+                    {"MyDate",s}, 
+                    {"MyString",Guid.NewGuid().ToString()}
+                    }
+                    );
+            }
+
+
+            DataTable dt = new DataTable();
+
+            dt.Columns.Add("id");
+            dt.Columns.Add("mydate");
+            dt.Columns.Add("mystring");
+
+            foreach(string s in someDates)
+                dt.Rows.Add(2,s,Guid.NewGuid().ToString());
+
+
+            Assert.AreEqual(someDates.Length,tbl.GetRowCount());
+
+            using(var bulkInsert = tbl.BeginBulkInsert())
+            {
+                bulkInsert.Upload(dt);
+            }
+
+            Assert.AreEqual(someDates.Length*2,tbl.GetRowCount());
+        }
+        
+        string [] someDates = new string[]
+        {
+            "22\\5\\19",
+"22/5/19",
+"22-5-19",
+"22.5.19",
+"Wed\\5\\19",
+"Wed/5/19",
+"Wed-5-19",
+"Wed.5.19",
+"Wednesday\\5\\19",
+"Wednesday/5/19",
+"Wednesday-5-19",
+"Wednesday.5.19",
+"22\\05\\19",
+"22/05/19",
+"22-05-19",
+"22.05.19",
+"Wed\\05\\19",
+"Wed/05/19",
+"Wed-05-19",
+"Wed.05.19",
+"Wednesday\\05\\19",
+"Wednesday/05/19",
+"Wednesday-05-19",
+"Wednesday.05.19",
+"22\\May\\19",
+"22/May/19",
+"22-May-19",
+"22.May.19",
+"Wed\\May\\19",
+"Wed/May/19",
+"Wed-May-19",
+"Wed.May.19",
+"Wednesday\\May\\19",
+"Wednesday/May/19",
+"Wednesday-May-19",
+"Wednesday.May.19",
+"22\\May\\19",
+"22/May/19",
+"22-May-19",
+"22.May.19",
+"Wed\\May\\19",
+"Wed/May/19",
+"Wed-May-19",
+"Wed.May.19",
+"Wednesday\\May\\19",
+"Wednesday/May/19",
+"Wednesday-May-19",
+"Wednesday.May.19",
+"22\\5\\2019",
+"22/5/2019",
+"22-5-2019",
+"22.5.2019",
+"Wed\\5\\2019",
+"Wed/5/2019",
+"Wed-5-2019",
+"Wed.5.2019",
+"Wednesday\\5\\2019",
+"Wednesday/5/2019",
+"Wednesday-5-2019",
+"Wednesday.5.2019",
+"22\\05\\2019",
+"22/05/2019",
+"22-05-2019",
+"22.05.2019",
+"Wed\\05\\2019",
+"Wed/05/2019",
+"Wed-05-2019",
+"Wed.05.2019",
+"Wednesday\\05\\2019",
+"Wednesday/05/2019",
+"Wednesday-05-2019",
+"Wednesday.05.2019",
+"22\\May\\2019",
+"22/May/2019",
+"22-May-2019",
+"22.May.2019",
+"Wed\\May\\2019",
+"Wed/May/2019",
+"Wed-May-2019",
+"Wed.May.2019",
+"Wednesday\\May\\2019",
+"Wednesday/May/2019",
+"Wednesday-May-2019",
+"Wednesday.May.2019",
+"22\\May\\2019",
+"22/May/2019",
+"22-May-2019",
+"22.May.2019",
+"Wed\\May\\2019",
+"Wed/May/2019",
+"Wed-May-2019",
+"Wed.May.2019",
+"Wednesday\\May\\2019",
+"Wednesday/May/2019",
+"Wednesday-May-2019",
+"Wednesday.May.2019",
+"22\\5\\2019",
+"22/5/2019",
+"22-5-2019",
+"22.5.2019",
+"Wed\\5\\2019",
+"Wed/5/2019",
+"Wed-5-2019",
+"Wed.5.2019",
+"Wednesday\\5\\2019",
+"Wednesday/5/2019",
+"Wednesday-5-2019",
+"Wednesday.5.2019",
+"22\\05\\2019",
+"22/05/2019",
+"22-05-2019",
+"22.05.2019",
+"Wed\\05\\2019",
+"Wed/05/2019",
+"Wed-05-2019",
+"Wed.05.2019",
+"Wednesday\\05\\2019",
+"Wednesday/05/2019",
+"Wednesday-05-2019",
+"Wednesday.05.2019",
+"22\\May\\2019",
+"22/May/2019",
+"22-May-2019",
+"22.May.2019",
+"Wed\\May\\2019",
+"Wed/May/2019",
+"Wed-May-2019",
+"Wed.May.2019",
+"Wednesday\\May\\2019",
+"Wednesday/May/2019",
+"Wednesday-May-2019",
+"Wednesday.May.2019",
+"22\\May\\2019",
+"22/May/2019",
+"22-May-2019",
+"22.May.2019",
+"Wed\\May\\2019",
+"Wed/May/2019",
+"Wed-May-2019",
+"Wed.May.2019",
+"Wednesday\\May\\2019",
+"Wednesday/May/2019",
+"Wednesday-May-2019",
+"Wednesday.May.2019",
+"22\\5\\02019",
+"22/5/02019",
+"22-5-02019",
+"22.5.02019",
+"Wed\\5\\02019",
+"Wed/5/02019",
+"Wed-5-02019",
+"Wed.5.02019",
+"Wednesday\\5\\02019",
+"Wednesday/5/02019",
+"Wednesday-5-02019",
+"Wednesday.5.02019",
+"22\\05\\02019",
+"22/05/02019",
+"22-05-02019",
+"22.05.02019",
+"Wed\\05\\02019",
+"Wed/05/02019",
+"Wed-05-02019",
+"Wed.05.02019",
+"Wednesday\\05\\02019",
+"Wednesday/05/02019",
+"Wednesday-05-02019",
+"Wednesday.05.02019",
+"22\\May\\02019",
+"22/May/02019",
+"22-May-02019",
+"22.May.02019",
+"Wed\\May\\02019",
+"Wed/May/02019",
+"Wed-May-02019",
+"Wed.May.02019",
+"Wednesday\\May\\02019",
+"Wednesday/May/02019",
+"Wednesday-May-02019",
+"Wednesday.May.02019",
+"22\\May\\02019",
+"22/May/02019",
+"22-May-02019",
+"22.May.02019",
+"Wed\\May\\02019",
+"Wed/May/02019",
+"Wed-May-02019",
+"Wed.May.02019",
+"Wednesday\\May\\02019",
+"Wednesday/May/02019",
+"Wednesday-May-02019",
+"Wednesday.May.02019",
+"8:59",
+"8:59 AM",
+"8:59:36",
+"8:59:36 AM",
+"8:59:36",
+"8:59:36 AM",
+"8:59",
+"8:59 AM",
+"8:59:36",
+"8:59:36 AM",
+"8:59:36",
+"8:59:36 AM",
+"08:59",
+"08:59 AM",
+"08:59:36",
+"08:59:36 AM",
+"08:59:36",
+"08:59:36 AM",
+"08:59",
+"08:59 AM",
+"08:59:36",
+"08:59:36 AM",
+"08:59:36",
+"08:59:36 AM",
+"8:59",
+"8:59 AM",
+"8:59:36",
+"8:59:36 AM",
+"8:59:36",
+"8:59:36 AM",
+"8:59",
+"8:59 AM",
+"8:59:36",
+"8:59:36 AM",
+"8:59:36",
+"8:59:36 AM",
+"08:59",
+"08:59 AM",
+"08:59:36",
+"08:59:36 AM",
+"08:59:36",
+"08:59:36 AM",
+"08:59",
+"08:59 AM",
+"08:59:36",
+"08:59:36 AM",
+"08:59:36",
+"08:59:36 AM"
+        };
+
+
+
+        [Test]
+        public void DateTimeTypeDeciderPerformance()
+        {
+            var d = new DateTimeTypeDecider();
+            
+            var sw = Stopwatch.StartNew();
+
+            DateTime dt = new DateTime(2019,5,22,8,59,36);
+
+            foreach(string f in DateTimeTypeDecider.DateFormatsDM)
+            {
+                var val = dt.ToString(f);
+                Console.WriteLine(val);
+                
+                d.Parse(val);
+            }
+                
+
+            foreach(string f in DateTimeTypeDecider.TimeFormats)
+            {
+                var t = dt.ToString(f);
+                Console.WriteLine(t); 
+                d.Parse(t);
+            }
+
+            for(int i = 0 ; i < 1000;i++)
+                Assert.AreEqual(new DateTime(1993,2,28,5,36,27),d.Parse("28/2/1993 5:36:27 AM"));
+
+            //12s
+            sw.Stop();
+            Console.WriteLine(sw.ElapsedMilliseconds + " ms");
+        }
     }
 }
+

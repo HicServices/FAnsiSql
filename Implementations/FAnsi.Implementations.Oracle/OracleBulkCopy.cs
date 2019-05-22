@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
+using FAnsi.Discovery.TypeTranslation.TypeDeciders;
 using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Implementations.Oracle
@@ -12,7 +13,6 @@ namespace FAnsi.Implementations.Oracle
     class OracleBulkCopy : BulkCopy
     {
         private readonly DiscoveredServer _server;
-        
         private const char ParameterSymbol = ':';
 
         public OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection): base(targetTable, connection)
@@ -20,7 +20,7 @@ namespace FAnsi.Implementations.Oracle
             _server = targetTable.Database.Server;
         }
         
-        public override int Upload(DataTable dt)
+        public override int UploadImpl(DataTable dt)
         {
             //don't run an insert if there are 0 rows
             if (dt.Rows.Count == 0)
@@ -77,7 +77,13 @@ namespace FAnsi.Implementations.Oracle
                         if (val == null || val == DBNull.Value)
                             val = null;
                         else if (dateColumns.Contains(col))
-                            val = Convert.ToDateTime(dataRow[col]);
+                        {
+                            if(val is string s)
+                                val = (DateTime)DateTimeDecider.Parse(s);
+                            else
+                                val = Convert.ToDateTime(dataRow[col]);
+                        }
+                            
                         
                         values[col].Add(val);
                     }
