@@ -83,6 +83,23 @@ namespace FAnsi.Implementations.MySql
 
         private string ConstructIndividualValue(string dataType, object value)
         {
+            dataType = dataType.ToUpper();
+            dataType = Regex.Replace(dataType,"\\(.*\\)", "").Trim();
+
+            if(value is DateTime valueDateTime)
+                switch(dataType)
+                {
+                    case "DATE":
+                    return String.Format("'{0:yyyy-MM-dd}'", valueDateTime);
+                    case "TIMESTAMP":
+                    case "DATETIME":
+                        return String.Format("'{0:yyyy-MM-dd HH:mm:ss}'", valueDateTime);
+                    case "TIME":
+                        return String.Format("'{0:HH:mm:ss}'", valueDateTime);
+                    default :
+                        break;
+                }
+
             if(value == null || value == DBNull.Value)
                 return "NULL";
             
@@ -91,10 +108,7 @@ namespace FAnsi.Implementations.MySql
 
         private string ConstructIndividualValue(string dataType, string value)
         {
-            var type = dataType.ToUpper();
-            type = Regex.Replace(type,"\\(.*\\)", "");
-
-            switch (type.Trim())
+            switch (dataType)
             {
                 case "BIT":
                     return value;

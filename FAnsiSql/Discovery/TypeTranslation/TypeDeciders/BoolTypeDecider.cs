@@ -1,6 +1,6 @@
 ﻿namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
-    class BoolTypeDecider: DecideTypesForStrings
+    public class BoolTypeDecider: DecideTypesForStrings
     {
         public BoolTypeDecider(): base(TypeCompatibilityGroup.Numerical,typeof(bool))
         {

@@ -5,7 +5,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
     /// <summary>
     /// DecideTypesForStrings for types that we should never assign to strings but need to support for CurrentEstimate
     /// </summary>
-    class NeverGuessTheseTypeDecider : DecideTypesForStrings
+    public class NeverGuessTheseTypeDecider : DecideTypesForStrings
     {
         public NeverGuessTheseTypeDecider() : base(TypeCompatibilityGroup.Exclusive, typeof(byte[]), typeof(Guid))
         {

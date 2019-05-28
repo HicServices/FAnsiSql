@@ -15,16 +15,27 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
         public static string[] TimeFormats;
         
         string[] _dateFormatToUse;
+        private CultureInfo culture;
+        private bool _explicitCultureSet;
 
         /// <summary>
         /// Setting this to false will prevent <see cref="GuessDateFormat(IEnumerable{string})"/> changing the <see cref="Culture"/> e.g. when
         /// inserting date times
         /// </summary>
         public static bool AllowCultureGuessing = true;
-
+        
+        /// <summary>
+        /// Explicitly sets the culture to use for processing date times.  This suppresses <see cref="GuessDateFormat(IEnumerable{string})"/>.
+        /// Set to null to restore the current environment culture (and re enable guessing).
+        /// 
+        /// </summary>
         public CultureInfo Culture { get{ return culture;}
             set
                 {
+                    _explicitCultureSet = value != null;
+                    if(value == null)
+                        culture = CultureInfo.CurrentCulture;
+
                     if(value.DateTimeFormat.ShortDatePattern.IndexOf('M') > value.DateTimeFormat.ShortDatePattern.IndexOf('d'))
                         _dateFormatToUse = DateFormatsDM;
                     else
@@ -132,7 +143,6 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
         {
             ":"
         };
-        private CultureInfo culture;
 
         public DateTimeTypeDecider() : base(TypeCompatibilityGroup.Exclusive, typeof(DateTime))
         {
@@ -150,11 +160,15 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
         /// <summary>
         /// Makes guess about whether to use MD or DM based on the <paramref name="samples"/>.
         /// Where no samples, or no matches or the same number of matches DM is used.
-        /// the samples
+        /// the samples.
+        /// 
+        /// <para>If <see cref="Culture"/> has been set then this method is ignored.  If the static property <see cref="AllowCultureGuessing"/>
+        /// is set then it is also ignored.</para>
         /// </summary>
         public void GuessDateFormat(IEnumerable<string> samples)
         {
-            if(!AllowCultureGuessing)
+            //do not guess if Culture has been set
+            if(!AllowCultureGuessing || _explicitCultureSet)
                 return;
             
             samples = samples.Where(s=>!string.IsNullOrWhiteSpace(s)).ToList();

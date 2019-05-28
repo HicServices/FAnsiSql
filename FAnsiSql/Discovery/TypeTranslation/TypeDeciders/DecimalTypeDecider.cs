@@ -2,7 +2,7 @@
 
 namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
-    internal class DecimalTypeDecider : DecideTypesForStrings
+    public class DecimalTypeDecider : DecideTypesForStrings
     {
         public DecimalTypeDecider() : base(TypeCompatibilityGroup.Numerical,typeof(decimal), typeof(float) , typeof(double))
         {

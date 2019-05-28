@@ -2,7 +2,7 @@
 
 namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
-    class IntTypeDecider : DecideTypesForStrings
+    public class IntTypeDecider : DecideTypesForStrings
     {
         public IntTypeDecider() : base(TypeCompatibilityGroup.Numerical, typeof(Int16) , typeof(Int32), typeof(Int64),typeof(byte))
         {

@@ -86,6 +86,40 @@ namespace FAnsiTests
             Assert.AreEqual(expectedDate, result.Rows[1][0]);
         }
 
+        [TestCase(DatabaseType.MicrosoftSQLServer, "2/28/1993 5:36:27 AM","en-US")]
+        [TestCase(DatabaseType.MySql, "2/28/1993 5:36:27 AM","en-US")]
+        [TestCase(DatabaseType.Oracle, "2/28/1993 5:36:27 AM","en-US")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "28/2/1993 5:36:27 AM","en-GB")]
+        [TestCase(DatabaseType.MySql, "28/2/1993 5:36:27 AM","en-GB")]
+        [TestCase(DatabaseType.Oracle, "28/2/1993 5:36:27 AM","en-GB")]
+        public void DateColumnTests_UkUsFormat_Explicit(DatabaseType type, object input, string culture)
+        {
+            var db = GetTestDatabase(type, true);
+            var tbl = db.CreateTable("MyTable",new []{new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))});
+
+            var c = new CultureInfo (culture);
+
+            //basic insert
+            tbl.Insert(new Dictionary<string, object>() { { "MyDate", input } },null);
+            
+            //then bulk insert, both need to work
+            using (var blk = tbl.BeginBulkInsert())
+            {
+                blk.DateTimeDecider.Culture = c;
+                var dt = new DataTable();
+                dt.Columns.Add("MyDate");
+                dt.Rows.Add(input);
+
+                blk.Upload(dt);
+            }
+
+            var result = tbl.GetDataTable();
+            var expectedDate = new DateTime(1993, 2,28,5,36,27);
+            Assert.AreEqual(expectedDate, result.Rows[0][0]);
+            Assert.AreEqual(expectedDate, result.Rows[1][0]);
+        }
+
+
         [TestCase(DatabaseType.MicrosoftSQLServer, "00:00:00")]
         [TestCase(DatabaseType.MySql, "00:00:00")]
         [TestCase(DatabaseType.Oracle, "00:00:00")]

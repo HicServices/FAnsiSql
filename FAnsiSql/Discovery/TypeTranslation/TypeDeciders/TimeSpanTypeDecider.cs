@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
-    internal class TimeSpanTypeDecider : DecideTypesForStrings
+    public class TimeSpanTypeDecider : DecideTypesForStrings
     {
         public TimeSpanTypeDecider(): base(TypeCompatibilityGroup.Exclusive, typeof(TimeSpan))
         {
