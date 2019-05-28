@@ -122,6 +122,11 @@ namespace FAnsi.Discovery
                             dr[newColumn] = val == DBNull.Value? val:((DateTime)val).TimeOfDay;
                     }
 
+                    //if the DataColumn is part of the Primary Key of the DataTable (in memory)
+                    //then we need to update the primary key to include the new column not the old one
+                    if(dt.PrimaryKey != null && dt.PrimaryKey.Contains(kvp.Key))
+                        dt.PrimaryKey = dt.PrimaryKey.Except(new []{kvp.Key }).Union(new []{newColumn }).ToArray();
+                    
                     //drop the original column
                     dt.Columns.Remove(kvp.Key);
 

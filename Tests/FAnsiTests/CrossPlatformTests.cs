@@ -118,6 +118,46 @@ namespace FAnsiTests
             Assert.AreEqual(expectedDate, result.Rows[0][0]);
             Assert.AreEqual(expectedDate, result.Rows[1][0]);
         }
+        
+
+        /// <summary>
+        /// Since DateTimes are converted in DataTable in memory before being up loaded to the database we need to check
+        /// that any PrimaryKey on the <see cref="DataTable"/> is not compromised
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="input"></param>
+        /// <param name="culture"></param>
+        [TestCase(DatabaseType.MicrosoftSQLServer, "2/28/1993 5:36:27 AM","en-US")]
+        [TestCase(DatabaseType.MySql, "2/28/1993 5:36:27 AM","en-US")]
+        [TestCase(DatabaseType.Oracle, "2/28/1993 5:36:27 AM","en-US")]
+        public void DateColumnTests_PrimaryKeyColumn(DatabaseType type, object input, string culture)
+        {
+            var db = GetTestDatabase(type, true);
+            var tbl = db.CreateTable("MyTable",new []{
+                new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))
+                {IsPrimaryKey = true }
+                });
+
+            //then bulk insert, both need to work
+            using (var blk = tbl.BeginBulkInsert())
+            {
+                blk.DateTimeDecider.Culture = new CultureInfo (culture);
+                var dt = new DataTable();
+                dt.Columns.Add("MyDate");
+                dt.Rows.Add(input);
+
+                //this is the novel thing we are testing
+                dt.PrimaryKey = new DataColumn[]{ dt.Columns[0]};
+                blk.Upload(dt);
+
+                Assert.AreEqual(1,dt.PrimaryKey.Length);
+                Assert.AreEqual("MyDate",dt.PrimaryKey[0].ColumnName);
+            }
+
+            var result = tbl.GetDataTable();
+            var expectedDate = new DateTime(1993, 2,28,5,36,27);
+            Assert.AreEqual(expectedDate, result.Rows[0][0]);
+        }
 
 
         [TestCase(DatabaseType.MicrosoftSQLServer, "00:00:00")]
