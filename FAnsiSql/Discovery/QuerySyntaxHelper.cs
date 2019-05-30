@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -342,7 +343,7 @@ namespace FAnsi.Discovery
 
         public abstract string HowDoWeAchieveMd5(string selectSql);
         
-        public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
+        public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value,CultureInfo culture)
         {
             try
             {
@@ -358,7 +359,8 @@ namespace FAnsi.Discovery
                         var decider = typeDeciderFactory.Create(cSharpType);
 
                         if(decider is DateTimeTypeDecider dt)
-                            dt.GuessDateFormat(new string[]{strVal});
+                            if(culture != null)
+                                dt.Culture = culture;
                         
                         var o = decider.Parse(strVal);
 
@@ -378,6 +380,11 @@ namespace FAnsi.Discovery
             }            
 
             return p;
+        }
+
+        public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
+        {
+            return GetParameter(p,discoveredColumn,value,null);
         }
 
         /// <summary>

@@ -345,6 +345,16 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public int Insert(Dictionary<DiscoveredColumn,object> toInsert, IManagedTransaction transaction = null)
         {
+            return Insert(toInsert, null, transaction);
+        }
+        
+        /// <summary>
+        /// Inserts the values specified into the database table and returns the last autonum identity generated (or 0 if none present)
+        /// </summary>
+        /// <param name="toInsert"></param>
+        /// <returns></returns>
+        public int Insert(Dictionary<DiscoveredColumn,object> toInsert, CultureInfo culture, IManagedTransaction transaction=null)
+        {
             var syntaxHelper = GetQuerySyntaxHelper();
             var server = Database.Server;
                        
@@ -365,7 +375,7 @@ namespace FAnsi.Discovery
                 {
                     var parameter = server.Helper.GetParameter(_parameterNames[kvp.Key]);
 
-                    var p = GetQuerySyntaxHelper().GetParameter(parameter, kvp.Key, kvp.Value);
+                    var p = GetQuerySyntaxHelper().GetParameter(parameter, kvp.Key, kvp.Value,culture);
                     cmd.Parameters.Add(p);
                 }
 
@@ -383,6 +393,16 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public int Insert(Dictionary<string, object> toInsert, IManagedTransaction transaction = null)
         {
+            return Insert(toInsert,null, transaction);
+        }
+        /// <summary>
+        /// Overload which will discover the columns by name for you.
+        /// </summary>
+        /// <param name="toInsert"></param>
+        /// <param name="transaction">ongoing transaction this insert should be part of</param>
+        /// <returns></returns>
+        public int Insert(Dictionary<string, object> toInsert, CultureInfo culture, IManagedTransaction transaction = null)
+        {
             var cols = DiscoverColumns(transaction);
 
             var foundColumns = new Dictionary<DiscoveredColumn, object>();
@@ -398,7 +418,6 @@ namespace FAnsi.Discovery
 
             return Insert(foundColumns, transaction);
         }
-
         /// <summary>
         /// See <see cref="DiscoveredServerHelper.GetCommand"/>
         /// </summary>

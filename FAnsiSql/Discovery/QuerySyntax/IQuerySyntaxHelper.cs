@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using FAnsi.Discovery.QuerySyntax.Update;
 using FAnsi.Discovery.TypeTranslation;
@@ -102,6 +103,16 @@ namespace FAnsi.Discovery.QuerySyntax
         /// <param name="value">The value to populate into the command, this will be converted to DBNull.Value if the value is nullish</param>
         /// <returns></returns>
         DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn,object value);
+
+        /// <summary>
+        /// Gets a DbParameter hard typed with the correct DbType for the discoveredColumn and the Value set to the correct Value representation (e.g. DBNull for nulls or whitespace).
+        /// <para>Also handles converting DateTime representations since many DBMS are a bit rubbish at that</para> 
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="discoveredColumn">The column the parameter is for loading - this is used to determine the DbType for the paramter</param>
+        /// <param name="value">The value to populate into the command, this will be converted to DBNull.Value if the value is nullish</param>
+        /// <returns></returns>
+        DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn,object value,CultureInfo culture);
     }
 
     public enum MandatoryScalarFunctions
