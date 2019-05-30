@@ -416,7 +416,7 @@ namespace FAnsi.Discovery
                 foundColumns.Add(match,toInsert[k]);
             }
 
-            return Insert(foundColumns, transaction);
+            return Insert(foundColumns, culture,transaction);
         }
         /// <summary>
         /// See <see cref="DiscoveredServerHelper.GetCommand"/>
