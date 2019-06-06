@@ -1,8 +1,71 @@
 # FAnsiSql
-## Purpose
-FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).  
 
-FAnsiSql is not an ORM API, it deals only in raw data (Strings, `System.DataTable`, Value Types, SQL etc).
+<p align="right">
+<a href="https://www.publicdomainpictures.net/en/view-image.php?image=184699&picture=a-laugh-every-day-126">
+  <img src="FansiHammerSmall.png" align="right"/>
+</a>
+</p>
+
+Ever had difficulty getting a DataTable into a database? Maybe the dates are going in a strings or some clever dude put spaces in the middle of column names?  FAnsiSql has you covered:
+
+
+```csharp 
+//Some data we want to load
+var dt = new DataTable();
+dt.Columns.Add("Name");
+dt.Columns.Add("Date of Birth");
+dt.Rows.Add("Frank \"The Boss\" Spagetti","1920-01-01");
+dt.Rows.Add("Pete Mudarillo","22-May-1910");
+
+//Load the DBMS implementation(s) you need
+ImplementationManager.Load<MicrosoftSQLImplementation>();
+
+//Get Management object for the database
+var server = new DiscoveredServer(
+    @"server=localhost\sqlexpress;Trusted_Connection=True;", DatabaseType.MicrosoftSQLServer);
+var database = server.ExpectDatabase("test");
+var table = database.ExpectTable("MyTable");
+            
+//Throw out whatever was there before
+if(table.Exists())
+    table.Drop();
+
+//Create the table
+database.CreateTable("MyTable",dt);
+            
+//Database types are compatible with all the data
+Assert.AreEqual("datetime2",table.DiscoverColumn("Date of Birth").DataType.SQLType);
+Assert.AreEqual("varchar(25)",table.DiscoverColumn("Name").DataType.SQLType);
+
+//And the (string) data is now properly typed and sat in our DBMS
+Assert.AreEqual(2,table.GetRowCount());    
+Assert.AreEqual(new DateTime(1920,1,1),table.GetDataTable().Rows[0][1]);
+Assert.AreEqual(new DateTime(1910,5,22),table.GetDataTable().Rows[1][1]);
+```
+
+FAnsi Sql! it's like a budget version of [SMO](https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/sql-server-management-objects-smo-programming-guide?view=sql-server-2017) (that works cross platform - Sql Server,  MySql and Oracle).  It supports:
+
+ * Table Creation
+ * Assigning Types to untyped (string) data
+ * Bulk Insert
+ * DDL layer operations (Create database, drop database etc)
+ * Discovery (Does table exist, what columns are in table)
+ * Query writting assistance (e.g. TOP X)
+
+It is **not** an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping), it deals only in value type data (Strings, `System.DataTable`, Value Types, SQL etc).
+
+## Feature Completeness
+
+Most features are implemented across all 3 DBMS, you can find a list of progress here:
+
+- [Microsoft Sql](./Implementations/FAnsi.Implementations.MicrosoftSQL/README.md) 
+- [MySql](./Implementations/FAnsi.Implementations.MySql/README.md)
+- [Oracle](./Implementations/FAnsi.Implementations.Oracle/README.md)
+
+Implementations are defined in separate assemblies (e.g. FAnsi.Implementations.MicrosoftSQL.dll) to allow for future expansion.  Each implementation uses it's own backing library (e.g. [ODP.net](https://www.oracle.com/technetwork/topics/dotnet/index-085163.html) for Oracle).  Implementations are loaded using [Managed Extensibility Framework](https://docs.microsoft.com/en-us/dotnet/framework/mef/).
+
+## Why is it useful?
+FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).  
 
 Consider writing an SQL create table command:
 
@@ -39,16 +102,6 @@ CREATE TABLE `FAnsiTests`.`MyTable`
 We have to change the table qualifier, we don't specify schema (dbo) and even the data types are different.  The more advanced the feature, the more disparate the varied the implementations are (e.g. [TOP X](https://www.w3schools.com/sql/sql_top.asp), [UPDATE from JOIN](https://stackoverflow.com/a/1293347/4824531) etc).
 
 The goal of FAnsiSql is to abstract away cross DBMS differences and streamline common tasks while still allowing you to harness the power of executing raw SQL commands.
-
-## Features
-
-Feature Completeness by DBMS:
-
-- [Microsoft Sql](./Implementations/FAnsi.Implementations.MicrosoftSQL/README.md) 
-- [MySql](./Implementations/FAnsi.Implementations.MySql/README.md)
-- [Oracle](./Implementations/FAnsi.Implementations.Oracle/README.md)
-
-FAnsiSql is built using core `System.Data.Common` classes (e.g. `DBCommand`, `DBConnection` etc).  A common set of operations is defined (See links above) with DBMS specific implementations defined in a separate assemblies (e.g. FAnsi.Implementations.MicrosoftSQL.dll).  Each implementation uses it's own backing library (e.g. [ODP.net](https://www.oracle.com/technetwork/topics/dotnet/index-085163.html) for Oracle).  Implementations are loaded using [Managed Extensibility Framework](https://docs.microsoft.com/en-us/dotnet/framework/mef/).
 
 ## Example
 
