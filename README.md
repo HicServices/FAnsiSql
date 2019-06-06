@@ -6,7 +6,7 @@
 </a>
 </p>
 
-Ever had difficulty getting a DataTable into a database? Maybe the dates are going in a strings or some clever dude put spaces in the middle of column names?  FAnsiSql has you covered:
+Ever had difficulty getting a DataTable into a database? Maybe the dates are going in as strings or some clever dude put spaces in the middle of column names?  FAnsiSql has you covered:
 
 
 ```csharp 
@@ -54,10 +54,10 @@ Assert.AreEqual(new DateTime(1910,5,22),
 FAnsi Sql! it's like a budget version of [SMO](https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/sql-server-management-objects-smo-programming-guide?view=sql-server-2017) (that works cross platform - Sql Server,  MySql and Oracle).  It supports:
 
  * Table Creation
- * Assigning Types to untyped (string) data
+ * Assigning types to untyped (string) data
  * Bulk Insert
- * DDL layer operations (Create database, drop database etc)
- * Discovery (Does table exist, what columns are in table)
+ * DDL operations (Create database, drop database etc)
+ * Discovery (Does table exist?, what columns are in table? etc)
  * Query writting assistance (e.g. TOP X)
 
 It is **not** an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping), it deals only in value type data (Strings, `System.DataTable`, Value Types, SQL etc).
@@ -77,7 +77,7 @@ Or .NET CLI Console:
 
 ## Feature Completeness
 
-Most features are implemented across all 3 DBMS, you can find a list of progress here:
+Most features are implemented across all 3 DBMS, you can find a breakdown of progress here:
 
 - [Microsoft Sql](./Implementations/FAnsi.Implementations.MicrosoftSQL/README.md) 
 - [MySql](./Implementations/FAnsi.Implementations.MySql/README.md)
