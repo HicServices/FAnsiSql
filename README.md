@@ -20,9 +20,11 @@ dt.Rows.Add("Pete Mudarillo","22-May-1910");
 //Load the DBMS implementation(s) you need
 ImplementationManager.Load<MicrosoftSQLImplementation>();
 
-//Get Management object for the database
+//Get management object for the database
 var server = new DiscoveredServer(
-    @"server=localhost\sqlexpress;Trusted_Connection=True;", DatabaseType.MicrosoftSQLServer);
+    @"server=localhost\sqlexpress;Trusted_Connection=True;",
+     DatabaseType.MicrosoftSQLServer);
+
 var database = server.ExpectDatabase("test");
 var table = database.ExpectTable("MyTable");
             
@@ -34,13 +36,19 @@ if(table.Exists())
 database.CreateTable("MyTable",dt);
             
 //Database types are compatible with all the data
-Assert.AreEqual("datetime2",table.DiscoverColumn("Date of Birth").DataType.SQLType);
-Assert.AreEqual("varchar(25)",table.DiscoverColumn("Name").DataType.SQLType);
+Assert.AreEqual("datetime2",
+    table.DiscoverColumn("Date of Birth").DataType.SQLType);
+
+Assert.AreEqual("varchar(25)",
+    table.DiscoverColumn("Name").DataType.SQLType);
 
 //And the (string) data is now properly typed and sat in our DBMS
 Assert.AreEqual(2,table.GetRowCount());    
-Assert.AreEqual(new DateTime(1920,1,1),table.GetDataTable().Rows[0][1]);
-Assert.AreEqual(new DateTime(1910,5,22),table.GetDataTable().Rows[1][1]);
+Assert.AreEqual(new DateTime(1920,1,1),
+    table.GetDataTable().Rows[0][1]);
+
+Assert.AreEqual(new DateTime(1910,5,22),
+    table.GetDataTable().Rows[1][1]);
 ```
 
 FAnsi Sql! it's like a budget version of [SMO](https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/sql-server-management-objects-smo-programming-guide?view=sql-server-2017) (that works cross platform - Sql Server,  MySql and Oracle).  It supports:
@@ -53,6 +61,19 @@ FAnsi Sql! it's like a budget version of [SMO](https://docs.microsoft.com/en-us/
  * Query writting assistance (e.g. TOP X)
 
 It is **not** an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping), it deals only in value type data (Strings, `System.DataTable`, Value Types, SQL etc).
+
+## Install
+
+FAnsi Sql is a [nuget package](https://www.nuget.org/packages/HIC.FansiSql/).  You can install it using either using the package manager:
+
+```
+PM> Install-Package HIC.FansiSql
+```
+Or .NET CLI Console:
+
+```
+> dotnet add package HIC.FansiSql
+```
 
 ## Feature Completeness
 
