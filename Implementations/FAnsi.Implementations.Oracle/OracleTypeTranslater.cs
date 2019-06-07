@@ -8,13 +8,13 @@ namespace FAnsi.Implementations.Oracle
 {
     public class OracleTypeTranslater:TypeTranslater
     {
-        private Regex AlsoFloatingPointRegex = new Regex("^(NUMBER)|(DEC)",RegexOptions.IgnoreCase);
-        private Regex AlsoByteArrayRegex = new Regex("(BFILE)|(BLOB)|(RAW)|(ROWID)",RegexOptions.IgnoreCase);
+        private readonly Regex AlsoFloatingPointRegex = new Regex("^(NUMBER)|(DEC)",RegexOptions.IgnoreCase);
+        private readonly Regex AlsoByteArrayRegex = new Regex("(BFILE)|(BLOB)|(RAW)|(ROWID)",RegexOptions.IgnoreCase);
         
         /// <summary>
         /// Oracle specific string types, these are all max length as returned by <see cref="GetLengthIfString"/>
         /// </summary>
-        private Regex AlsoStringRegex = new Regex("^([N]?CLOB)|(LONG)", RegexOptions.IgnoreCase);
+        private readonly Regex AlsoStringRegex = new Regex("^([N]?CLOB)|(LONG)", RegexOptions.IgnoreCase);
 
         public OracleTypeTranslater(): base(4000, 4000)
         {

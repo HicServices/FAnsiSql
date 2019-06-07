@@ -7,8 +7,8 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
     public class DateTimeTypeDecider : DecideTypesForStrings
     {
-        private TimeSpanTypeDecider _timeSpanTypeDecider = new TimeSpanTypeDecider();
-        private DecimalTypeDecider _decimalChecker = new DecimalTypeDecider();
+        private readonly TimeSpanTypeDecider _timeSpanTypeDecider = new TimeSpanTypeDecider();
+        private readonly DecimalTypeDecider _decimalChecker = new DecimalTypeDecider();
 
         public static string[] DateFormatsMD;
         public static string[] DateFormatsDM;
@@ -83,7 +83,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
             TimeFormats = timeFormats.ToArray();
         }
 
-        static string[] YearFormats = new string[]
+        static readonly string[] YearFormats = new string[]
         {
             "yy",
             "yyy",
@@ -91,7 +91,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
             "yyyyy"
         };
 
-        static string[] MonthFormats = new string[]
+        static readonly string[] MonthFormats = new string[]
         {
             "M",
             "MM",
@@ -99,14 +99,14 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
             "MMMM"
         };
 
-        static string[] DayFormats = new string[]
+        static readonly string[] DayFormats = new string[]
         {
             "dd",
             "ddd",
             "dddd"
         };
 
-        static string[] DateSeparators = new string[]
+        static readonly string[] DateSeparators = new string[]
         {
             "\\\\",
             "/",
@@ -114,7 +114,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
             "."
         };
 
-        static string[] HourFormats = new string[]
+        static readonly string[] HourFormats = new string[]
         {
             "h",
             "hh",
@@ -122,24 +122,24 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
             "HH"
         };
 
-        static string[] MinuteFormats = new string[]
+        static readonly string[] MinuteFormats = new string[]
         {
             "m",
             "mm"
         };
 
-        static string[] SecondFormats = new string[]
+        static readonly string[] SecondFormats = new string[]
         {
             "s",
             "ss"
         };
 
-        static string[] Suffixes = new string[]
+        static readonly string[] Suffixes = new string[]
         {
             "tt"
         };
 
-        static string[] TimeSeparators = new string[]
+        static readonly string[] TimeSeparators = new string[]
         {
             ":"
         };
@@ -174,7 +174,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
             samples = samples.Where(s=>!string.IsNullOrWhiteSpace(s)).ToList();
 
             //if they are all valid anyway
-            if(samples.All(s=>DateTime.TryParse(s,Culture,DateTimeStyles.None,out _)));
+            if(samples.All(s=>DateTime.TryParse(s,Culture,DateTimeStyles.None,out _)))
                 return;
                         
             _dateFormatToUse = DateFormatsDM;

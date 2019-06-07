@@ -121,17 +121,14 @@ namespace FAnsi.Discovery
             if (string.IsNullOrWhiteSpace(s))
                 return s;
 
-            string selectSQL;
-            string alias;
-            
             //if it is an aliased entity e.g. AS fish then we should return fish (this is the case for table valued functions and not much else)
-            if (SplitLineIntoSelectSQLAndAlias(s.Trim(), out _, out alias))
+            if (SplitLineIntoSelectSQLAndAlias(s.Trim(), out _, out string alias))
                 return alias;
 
             //it doesn't have an alias, e.g. it's `MyDatabase`.`mytable` or something
 
             //if it's "count(1)" or something then that's a problem!
-            if(s.IndexOfAny(new char[]{'(',')' }) != -1)
+            if (s.IndexOfAny(new char[]{'(',')' }) != -1)
                 throw new RuntimeNameException("Could not determine runtime name for Sql:'" + s + "'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
 
             return s.Substring(s.LastIndexOf(".") + 1).Trim('[', ']', '`');
@@ -409,7 +406,7 @@ namespace FAnsi.Discovery
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
             return Equals((QuerySyntaxHelper)obj);

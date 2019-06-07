@@ -15,13 +15,15 @@ namespace FAnsi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLBulkCopy : BulkCopy
     {
-        private SqlBulkCopy _bulkcopy;
+        private readonly SqlBulkCopy _bulkcopy;
 
         public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection): base(targetTable, connection)
         {
-            _bulkcopy = new SqlBulkCopy((SqlConnection)connection.Connection, SqlBulkCopyOptions.KeepIdentity, (SqlTransaction)connection.Transaction);
-            _bulkcopy.BulkCopyTimeout = 50000;
-            _bulkcopy.DestinationTableName = targetTable.GetFullyQualifiedName();
+            _bulkcopy = new SqlBulkCopy((SqlConnection)connection.Connection, SqlBulkCopyOptions.KeepIdentity, (SqlTransaction)connection.Transaction)
+            {
+                BulkCopyTimeout = 50000,
+                DestinationTableName = targetTable.GetFullyQualifiedName()
+            };
         }
 
         public override int UploadImpl(DataTable dt)
@@ -83,8 +85,10 @@ namespace FAnsi.Implementations.MicrosoftSQL
                 {
                     con.Open();
                     SqlTransaction investigationTransaction = con.BeginTransaction("Investigate BulkCopyFailure");
-                    SqlBulkCopy investigationOneLineAtATime = new SqlBulkCopy(con, SqlBulkCopyOptions.KeepIdentity, investigationTransaction);
-                    investigationOneLineAtATime.DestinationTableName = insert.DestinationTableName;
+                    SqlBulkCopy investigationOneLineAtATime = new SqlBulkCopy(con, SqlBulkCopyOptions.KeepIdentity, investigationTransaction)
+                    {
+                        DestinationTableName = insert.DestinationTableName
+                    };
 
                     foreach (SqlBulkCopyColumnMapping m in insert.ColumnMappings)
                         investigationOneLineAtATime.ColumnMappings.Add(m);

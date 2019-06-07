@@ -4,6 +4,7 @@
 Returns the SQL required to fetch the first <paramref name="topX"/> records out of the table.
 </summary>
 <param name="topX">The number of records to fetch</param>
+<param name="table">The table to fetch records from</param>
 <returns>Sql to execute</returns>
 </Method>
 

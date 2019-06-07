@@ -15,7 +15,7 @@ namespace FAnsiTests.TypeTranslation
     /// </summary>
     public class DatatypeComputerTests
     {
-        ITypeTranslater _translater = new MicrosoftSQLTypeTranslater();
+        readonly ITypeTranslater _translater = new MicrosoftSQLTypeTranslater();
 
         [Test]
         public void TestDatatypeComputer_IntToFloat()
