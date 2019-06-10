@@ -4,8 +4,31 @@
 Returns the SQL required to fetch the first <paramref name="topX"/> records out of the table.
 </summary>
 <param name="topX">The number of records to fetch</param>
-<param name="table">The table to fetch records from</param>
 <returns>Sql to execute</returns>
 </Method>
+<Method name="GetCommand">
+<summary>
+Returns a DbCommand of the appropriate API type initialized with the given SQL CommandText.
+</summary>
+</Method>
+<Method name="GetDataAdapter">
+<summary>
+Returns a DbDataAdapter of the appropriate API type (e.g. SqlDataAdapter for sql server).
+</summary>
+</Method>
+<Method name="GetCommandBuilder">
+<summary>
+Returns a DbCommandBuilder of the appropriate API type (e.g. SqlCommandBuilder for sql server)
+</summary>
+</Method>
+<Method name="GetParameter">
+<summary>
+Returns a DbParameter of the appropriate API type (e.g. SqlParameter for sql server)
+</summary>
+</Method>
+<Method name="Placeholder">
+<summary>
 
+</summary>
+</Method>
 </Methods>

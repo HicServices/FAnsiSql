@@ -36,6 +36,7 @@ namespace FAnsi.Discovery
         /// </summary>
         public bool AllowUnmatchedInputColumns { get; private set; }
 
+        /// <inheritdoc/>
         public DateTimeTypeDecider DateTimeDecider {get; protected set; }
         
         /// <summary>

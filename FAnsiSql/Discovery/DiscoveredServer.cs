@@ -120,12 +120,7 @@ namespace FAnsi.Discovery
             return Helper.GetConnection(Builder);
         }
 
-        /// <summary>
-        /// Returns a new <see cref="DbCommand"/> of the correct DBMS type for the <see cref="DatabaseType"/> of the server
-        /// </summary>
-        /// <param name="sql"></param>
-        /// <param name="managedConnection"></param>
-        /// <returns></returns>
+        /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
         public DbCommand GetCommand(string sql, IManagedConnection managedConnection)
         {
             var cmd = Helper.GetCommand(sql, managedConnection.Connection);

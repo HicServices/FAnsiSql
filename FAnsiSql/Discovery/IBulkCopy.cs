@@ -29,8 +29,10 @@ namespace FAnsi.Discovery
         /// </summary>
         void InvalidateTableSchema();
 
+
         /// <summary>
-        /// Responsible for parsing DateTime strings (including Culture) into hard values for upload to the DBMS
+        /// Determines how strings are parsed into <see cref="DateTime"/> objects (including culture).  This is used whenever the target database column
+        /// is a date type and the data in the <see cref="DataTable"/> column is of string type.
         /// </summary>
         DateTimeTypeDecider DateTimeDecider{get;}
 
