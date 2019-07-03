@@ -327,7 +327,7 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
         {
-            return string.Format(@"alter table {0} rename to {1};", discoveredTable.GetRuntimeName(),newName);
+            return string.Format(@"alter table {0} rename to {1}", discoveredTable.GetFullyQualifiedName(),newName);
         }
 
         public override bool RequiresLength(string columnType)
