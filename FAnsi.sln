@@ -29,6 +29,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1904EC10-14D9-4D9A-B570-2AD159F150A5}"
 	ProjectSection(SolutionItems) = preProject
 		Packages.md = Packages.md
+		rakeconfig.rb = rakeconfig.rb
+		rakefile.rb = rakefile.rb
+		README.md = README.md
 		SharedAssemblyInfo.cs = SharedAssemblyInfo.cs
 	EndProjectSection
 EndProject
