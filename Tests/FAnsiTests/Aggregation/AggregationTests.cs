@@ -11,7 +11,7 @@ namespace FAnsiTests.Aggregation
 {
     class AggregationTests:DatabaseTests
     {
-        private Dictionary<DatabaseType, DiscoveredTable> _testTables = new Dictionary<DatabaseType, DiscoveredTable>();
+        private readonly Dictionary<DatabaseType, DiscoveredTable> _testTables = new Dictionary<DatabaseType, DiscoveredTable>();
             
         [OneTimeSetUp]
         public void Setup()

@@ -111,6 +111,7 @@ namespace FAnsi.Discovery.QuerySyntax
         /// <param name="p"></param>
         /// <param name="discoveredColumn">The column the parameter is for loading - this is used to determine the DbType for the paramter</param>
         /// <param name="value">The value to populate into the command, this will be converted to DBNull.Value if the value is nullish</param>
+        /// <param name="culture"></param>
         /// <returns></returns>
         DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn,object value,CultureInfo culture);
     }

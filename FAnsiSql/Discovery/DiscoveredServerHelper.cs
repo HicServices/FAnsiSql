@@ -14,8 +14,15 @@ namespace FAnsi.Discovery
     /// </summary>
     public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     {
-        private static Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = new Dictionary<DatabaseType, ConnectionStringKeywordAccumulator>();
+        private static readonly Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = new Dictionary<DatabaseType, ConnectionStringKeywordAccumulator>();
 
+        /// <summary>
+        /// Register a system wide rule that all connection strings of <paramref name="databaseType"/> should include the given <paramref name="keyword"/>.
+        /// </summary>
+        /// <param name="databaseType"></param>
+        /// <param name="keyword"></param>
+        /// <param name="value"></param>
+        /// <param name="priority">Resolves conflicts when multiple calls are made for the same <paramref name="keyword"/> at different times</param>
         public static void AddConnectionStringKeyword(DatabaseType databaseType, string keyword, string value,ConnectionStringKeywordPriority priority)
         {
             if(!ConnectionStringKeywordAccumulators.ContainsKey(databaseType))
@@ -23,10 +30,17 @@ namespace FAnsi.Discovery
 
             ConnectionStringKeywordAccumulators[databaseType].AddOrUpdateKeyword(keyword,value,priority);
         }
-
+    
+        /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
         public abstract DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null);
+
+        /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetDataAdapter"]'/>
         public abstract DbDataAdapter GetDataAdapter(DbCommand cmd);
+
+        /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommandBuilder"]'/>
         public abstract DbCommandBuilder GetCommandBuilder(DbCommand cmd);
+
+        /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetParameter"]'/>
         public abstract DbParameter GetParameter(string parameterName);
         
         public abstract DbConnection GetConnection(DbConnectionStringBuilder builder);

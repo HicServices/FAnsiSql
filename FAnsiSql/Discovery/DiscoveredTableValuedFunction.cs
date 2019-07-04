@@ -10,7 +10,7 @@ namespace FAnsi.Discovery
     /// </summary>
     public class DiscoveredTableValuedFunction : DiscoveredTable
     {
-        private string _functionName;
+        private readonly string _functionName;
         
         //constructor
         public DiscoveredTableValuedFunction(DiscoveredDatabase database, string functionName, IQuerySyntaxHelper querySyntaxHelper,string schema = null):base(database,functionName,querySyntaxHelper,schema,TableType.TableValuedFunction)

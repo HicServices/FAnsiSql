@@ -249,9 +249,11 @@ namespace FAnsiTests
         [Test]
         public void MicrosoftHatesDbTypeTime()
         {
-            var p = new SqlParameter("m",DBNull.Value);
-            p.DbType = DbType.Time;
-            
+            var p = new SqlParameter("m", DBNull.Value)
+            {
+                DbType = DbType.Time
+            };
+
             Assert.AreNotEqual(DbType.Time, p.DbType);
             Assert.AreEqual(DbType.DateTime, p.DbType);
         }
@@ -587,8 +589,7 @@ namespace FAnsiTests
         {
             var database1 = GetTestDatabase(type);
             var stringBefore = database1.Server.Builder.ConnectionString;
-
-            var database2 = database1.Server.ExpectDatabase("SomeOtherDb");
+            database1.Server.ExpectDatabase("SomeOtherDb");
 
             Assert.AreEqual(stringBefore, database1.Server.Builder.ConnectionString);
         }
@@ -936,8 +937,8 @@ namespace FAnsiTests
 
             Assert.AreEqual(someDates.Length*2,tbl.GetRowCount());
         }
-        
-        string [] someDates = new string[]
+
+        readonly string [] someDates = new string[]
         {
             "22\\5\\19",
 "22/5/19",

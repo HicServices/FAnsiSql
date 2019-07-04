@@ -20,8 +20,12 @@ namespace FAnsi.Implementation
     {
         private static ImplementationManager _instance;
 
+        /// <summary>
+        /// Collection of all the currently loaded API <see cref="IImplementation"/>.  Normally you only want 1 implementation per DBMS.
+        /// <para>Populated by MEF during calls to <see cref="Load{T}"/>.</para>
+        /// </summary>
         [ImportMany]
-        private List<IImplementation> _implementations;
+        public List<IImplementation> Implementations;
 
         private ImplementationManager()
         {
@@ -72,7 +76,7 @@ namespace FAnsi.Implementation
                 _instance = new ImplementationManager();
 
             //just because we load new implementations doesn't mean we should throw away the old ones
-            var old = _instance._implementations?.ToArray();
+            var old = _instance.Implementations?.ToArray();
 
             using (CompositionContainer container = new CompositionContainer(catalog))
             {
@@ -83,8 +87,8 @@ namespace FAnsi.Implementation
                 if(old != null)
                     foreach(IImplementation o in old)
                     {
-                        if(_instance._implementations.All(i=>i.GetType() != o.GetType()))
-                            _instance._implementations.Add(o);
+                        if(_instance.Implementations.All(i=>i.GetType() != o.GetType()))
+                            _instance.Implementations.Add(o);
                     }
             }
         }
@@ -109,7 +113,7 @@ namespace FAnsi.Implementation
             if (_instance == null)
                 Load();
             
-            var implementation = _instance._implementations.FirstOrDefault(condition);
+            var implementation = _instance.Implementations.FirstOrDefault(condition);
 
             if (implementation == null)
                 throw new ImplementationNotFoundException(errorIfNotFound);
@@ -127,12 +131,15 @@ namespace FAnsi.Implementation
             if (_instance == null)
                 return null;
 
-            if(_instance._implementations == null)
+            if(_instance.Implementations == null)
                 return null;
 
-            return new ReadOnlyCollection<IImplementation>(_instance._implementations);
+            return new ReadOnlyCollection<IImplementation>(_instance.Implementations);
         }
 
+        /// <summary>
+        /// Clears all currently loaded <see cref="IImplementation"/>
+        /// </summary>
         public static void Clear()
         {
             _instance = null;

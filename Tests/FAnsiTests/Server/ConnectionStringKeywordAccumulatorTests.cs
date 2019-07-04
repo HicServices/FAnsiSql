@@ -14,7 +14,7 @@ namespace FAnsiTests.Server
 {
     public class ConnectionStringKeywordAccumulatorTests
     {
-        private Dictionary<DatabaseType, IDiscoveredServerHelper> helpers = new Dictionary
+        private readonly Dictionary<DatabaseType, IDiscoveredServerHelper> helpers = new Dictionary
             <DatabaseType, IDiscoveredServerHelper>()
         {
             {DatabaseType.MicrosoftSQLServer, new MicrosoftSQLServerHelper()},

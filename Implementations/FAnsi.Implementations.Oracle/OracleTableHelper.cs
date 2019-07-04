@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery;
@@ -114,13 +113,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         {
             return new OracleColumnHelper();
         }
-
-        public override void DropTable(DbConnection connection, DiscoveredTable table)
-        {
-            var cmd = new OracleCommand("DROP TABLE " +table.GetFullyQualifiedName(), (OracleConnection)connection);
-            cmd.ExecuteNonQuery();
-        }
-
+        
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
             var cmd = new OracleCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + "  DROP COLUMN " + columnToDrop.GetRuntimeName(), (OracleConnection)connection);
@@ -328,7 +321,7 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
         {
-            return string.Format(@"alter table {0} rename to {1};", discoveredTable.GetRuntimeName(),newName);
+            return string.Format(@"alter table {0} rename to {1}", discoveredTable.GetFullyQualifiedName(),newName);
         }
 
         public override bool RequiresLength(string columnType)

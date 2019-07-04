@@ -20,7 +20,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
         /// <para>Also allows for leading / trailing whitespace</para>
         /// 
         /// </summary>
-        Regex zeroPrefixedNumber = new Regex(@"^\s*-?0+[1-9]+\.?[0-9]*\s*$");
+        readonly Regex zeroPrefixedNumber = new Regex(@"^\s*-?0+[1-9]+\.?[0-9]*\s*$");
 
         protected DecideTypesForStrings(TypeCompatibilityGroup compatibilityGroup,params Type[] typesSupportedSupported)
         {

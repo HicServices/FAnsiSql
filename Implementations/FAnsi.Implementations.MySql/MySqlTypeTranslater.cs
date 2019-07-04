@@ -10,9 +10,9 @@ namespace FAnsi.Implementations.MySql
     {
         //yup thats right!, long is string (MEDIUMTEXT)
         //https://dev.mysql.com/doc/refman/8.0/en/other-vendor-data-types.html
-        private Regex AlsoBitRegex = new Regex(@"tinyint\(1\)",RegexOptions.IgnoreCase);
-        private Regex AlsoStringRegex = new Regex("(long)|(enum)|(set)|(text)|(mediumtext)",RegexOptions.IgnoreCase);
-        private Regex AlsoFloatingPoint = new Regex("^(dec)|(fixed)",RegexOptions.IgnoreCase);
+        private readonly Regex AlsoBitRegex = new Regex(@"tinyint\(1\)",RegexOptions.IgnoreCase);
+        private readonly Regex AlsoStringRegex = new Regex("(long)|(enum)|(set)|(text)|(mediumtext)",RegexOptions.IgnoreCase);
+        private readonly Regex AlsoFloatingPoint = new Regex("^(dec)|(fixed)",RegexOptions.IgnoreCase);
 
         public MySqlTypeTranslater() : base(4000, 4000)
         {

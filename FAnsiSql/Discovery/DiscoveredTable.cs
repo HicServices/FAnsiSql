@@ -77,7 +77,7 @@ namespace FAnsi.Discovery
             if (!Database.Exists())
                 return false;
 
-            return Database.DiscoverTables(true, transaction)
+            return Database.DiscoverTables(TableType == TableType.View, transaction)
                .Any(t => t.GetRuntimeName().Equals(GetRuntimeName(),StringComparison.InvariantCultureIgnoreCase));
         }
 
@@ -337,21 +337,24 @@ namespace FAnsi.Discovery
             using (var connection = Database.Server.GetManagedConnection())
                 Helper.CreatePrimaryKey(this, discoverColumns, connection, timeoutInSeconds);
         }
-        
+
         /// <summary>
         /// Inserts the values specified into the database table and returns the last autonum identity generated (or 0 if none present)
         /// </summary>
         /// <param name="toInsert"></param>
+        /// <param name="transaction"></param>
         /// <returns></returns>
         public int Insert(Dictionary<DiscoveredColumn,object> toInsert, IManagedTransaction transaction = null)
         {
             return Insert(toInsert, null, transaction);
         }
-        
+
         /// <summary>
         /// Inserts the values specified into the database table and returns the last autonum identity generated (or 0 if none present)
         /// </summary>
         /// <param name="toInsert"></param>
+        /// <param name="culture"></param>
+        /// <param name="transaction"></param>
         /// <returns></returns>
         public int Insert(Dictionary<DiscoveredColumn,object> toInsert, CultureInfo culture, IManagedTransaction transaction=null)
         {
@@ -399,6 +402,7 @@ namespace FAnsi.Discovery
         /// Overload which will discover the columns by name for you.
         /// </summary>
         /// <param name="toInsert"></param>
+        /// <param name="culture"></param>
         /// <param name="transaction">ongoing transaction this insert should be part of</param>
         /// <returns></returns>
         public int Insert(Dictionary<string, object> toInsert, CultureInfo culture, IManagedTransaction transaction = null)
@@ -444,7 +448,7 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public bool Equals(DiscoveredTable other)
         {
-            if (ReferenceEquals(null, other)) return false;
+            if (other is null) return false;
 
             return
                 string.Equals(_table, other._table, StringComparison.OrdinalIgnoreCase)
@@ -465,7 +469,7 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
             return Equals((DiscoveredTable)obj);

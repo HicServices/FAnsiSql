@@ -12,6 +12,7 @@ namespace FAnsi.Discovery
     public interface IDiscoveredTableHelper
     {
         /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetTopXSql"]'/>
+        /// <param name="table">The table to fetch records from</param>
         string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX);
 
         DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);

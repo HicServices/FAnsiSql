@@ -109,7 +109,7 @@ namespace FAnsi.Implementations.Oracle
             get { return "."; }
         }
         
-        static HashSet<string> ReservedWords = new HashSet<string>( new []
+        static readonly HashSet<string> ReservedWords = new HashSet<string>( new []
         {
             
         "ACCESS",
