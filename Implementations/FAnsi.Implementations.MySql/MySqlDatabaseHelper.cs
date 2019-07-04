@@ -67,12 +67,21 @@ namespace FAnsi.Implementations.MySql
 
             List<DiscoveredTable> tables = new List<DiscoveredTable>();
 
-            var cmd = new MySqlCommand("SHOW TABLES in `" + database +"`", (MySqlConnection) connection);
+            var cmd = new MySqlCommand("SHOW FULL TABLES in `" + database +"`", (MySqlConnection) connection);
             cmd.Transaction = transaction as MySqlTransaction;
 
             var r = cmd.ExecuteReader();
             while (r.Read())
-                tables.Add(new DiscoveredTable(parent,r[0] as string,querySyntaxHelper));//this table fieldname will be something like Tables_in_mydbwhatevernameitis
+            {
+                bool isView = (string)r[1] == "VIEW";
+
+                //if we are skipping views
+                if(isView && !includeViews)
+                    continue;
+                
+                tables.Add(new DiscoveredTable(parent,r[0] as string,querySyntaxHelper,null,isView ? TableType.View : TableType.Table));//this table fieldname will be something like Tables_in_mydbwhatevernameitis
+            }
+                
             
             return tables.ToArray();
         }

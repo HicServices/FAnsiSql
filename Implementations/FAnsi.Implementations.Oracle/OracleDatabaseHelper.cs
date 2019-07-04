@@ -53,22 +53,29 @@ namespace FAnsi.Implementations.Oracle
         {
             List<DiscoveredTable> tables = new List<DiscoveredTable>();
             
+            //find all the tables
+            using(var cmd = new OracleCommand("SELECT table_name FROM all_tables where owner='" + database + "'", (OracleConnection) connection))
+            {
+                cmd.Transaction = transaction as OracleTransaction;
 
-            /*Maybe add this WHERE statement?
-             * 
-             * where owner not in 
-(
-'SYS','SYSTEM','MDSYS','OUTLN','CTXSYS','OLAPSYS','FLOWS_FILES','DVSYS','AUDSYS','DBSNMP','GSMADMIN_INTERNAL','OJVMSYS','ORDSYS','APPQOSSYS','XDB','ORDDATA','WMSYS','LBACSYS'
-)*/
+                var r = cmd.ExecuteReader();
 
-            var cmd = new OracleCommand("SELECT table_name FROM all_tables where owner='" + database + "'", (OracleConnection) connection);
-            cmd.Transaction = transaction as OracleTransaction;
+                while (r.Read())
+                    tables.Add(new DiscoveredTable(parent,r["table_name"].ToString(),querySyntaxHelper));
+            }
+            
+            //find all the views
+            if(includeViews)
+                using(var cmd = new OracleCommand("SELECT view_name FROM all_views where owner='" + database + "'", (OracleConnection) connection))
+                {
+                    cmd.Transaction = transaction as OracleTransaction;
+                    var r = cmd.ExecuteReader();
+                
+                    while (r.Read())
+                        tables.Add(new DiscoveredTable(parent,r["view_name"].ToString(),querySyntaxHelper,null,TableType.View));
+                }
 
-            var r = cmd.ExecuteReader();
-
-            while (r.Read())
-                tables.Add(new DiscoveredTable(parent,r["table_name"].ToString(),querySyntaxHelper));
-
+            
             return tables.ToArray();
         }
 

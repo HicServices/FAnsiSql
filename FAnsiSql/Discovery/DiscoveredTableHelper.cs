@@ -20,7 +20,25 @@ namespace FAnsi.Discovery
         public abstract DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);
         
         public abstract IDiscoveredColumnHelper GetColumnHelper();
-        public abstract void DropTable(DbConnection connection, DiscoveredTable tableToDrop);
+        public virtual void DropTable(DbConnection connection, DiscoveredTable tableToDrop)
+        {
+            string sql;
+            switch (tableToDrop.TableType)
+            {
+                case TableType.Table:
+                    sql = "DROP TABLE {0}"; break;
+                case TableType.View:
+                    sql = "DROP VIEW {0}"; break;
+                case TableType.TableValuedFunction:
+                    throw new NotSupportedException();
+                default:
+                    throw new ArgumentOutOfRangeException("Unknown TableType");
+            }
+            
+            var cmd = tableToDrop.GetCommand(string.Format(sql,tableToDrop.GetFullyQualifiedName()),connection);
+            cmd.ExecuteNonQuery();
+        }
+
         public abstract void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
         public abstract void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
 

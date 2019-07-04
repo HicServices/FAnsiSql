@@ -77,7 +77,7 @@ namespace FAnsi.Discovery
             if (!Database.Exists())
                 return false;
 
-            return Database.DiscoverTables(true, transaction)
+            return Database.DiscoverTables(TableType == TableType.View, transaction)
                .Any(t => t.GetRuntimeName().Equals(GetRuntimeName(),StringComparison.InvariantCultureIgnoreCase));
         }
 

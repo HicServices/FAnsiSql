@@ -113,13 +113,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         {
             return new OracleColumnHelper();
         }
-
-        public override void DropTable(DbConnection connection, DiscoveredTable table)
-        {
-            var cmd = new OracleCommand("DROP TABLE " +table.GetFullyQualifiedName(), (OracleConnection)connection);
-            cmd.ExecuteNonQuery();
-        }
-
+        
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
             var cmd = new OracleCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + "  DROP COLUMN " + columnToDrop.GetRuntimeName(), (OracleConnection)connection);
