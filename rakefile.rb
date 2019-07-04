@@ -68,6 +68,10 @@ end
 desc "Pushes the plugin packages into the specified folder"    
 task :pack, [:config] do |t, args|
 	args.with_defaults(:config => :Release)
+
+	version = File.open('version') {|f| f.readline}
+    puts "version: #{version}"
+
     Dir.chdir('NuGet') do
         sh "nuget pack Fansi.NuGet.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
         sh "nuget push HIC.FansiSql.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
