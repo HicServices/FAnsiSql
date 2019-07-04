@@ -1,10 +1,9 @@
-require 'albacore'
 load 'rakeconfig.rb'
 $MSBUILD15CMD = MSBUILD15CMD.gsub(/\\/,"/")
 
 task :continuous, [:config] => [:setup_connection, :assemblyinfo, :build, :tests]
 
-task :release, [:config] => [:setup_connection, :assemblyinfo, :deploy, :pack]
+task :release, [:config] => [:setup_connection, :assemblyinfo, :build_release, :pack]
 
 task :restorepackages do
     sh "nuget restore #{SOLUTION}"
@@ -33,67 +32,48 @@ task :setup_connection do
     end
 end
 
-msbuild :build, [:config] => :restorepackages do |msb, args|
-	args.with_defaults(:config => :Debug)
-	msb.command = $MSBUILD15CMD
-    msb.properties = { :configuration => args.config }
-    msb.targets = [ :Clean, :Build ]   
-    msb.solution = SOLUTION
+task :build, [:config] => :restorepackages do |msb, args|
+	sh "\"#{$MSBUILD15CMD}\" #{SOLUTION} \/t:Clean;Build \/p:Configuration=#{args.config}"
 end
 
 task :tests do 
 	sh 'dotnet test --logger:"nunit;LogFilePath=test-result.xml"'
 end
 
-desc "Runs all tests"
-nunit :test do |nunit|
-	files = FileList["Tests/**/*Tests.dll"].exclude(/obj\//)
-	nunit.command = "packages/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe"
-	nunit.assemblies files.to_a
-	nunit.options "--workers=1 --inprocess --result=\"nunit-results.xml\";format=nunit2 --noheader --labels=After"
-end
-
-msbuild :deploy, [:config] => :restorepackages do |msb, args|
-	args.with_defaults(:config => :Release)
-	msb.command = $MSBUILD15CMD
-    msb.targets [ :Clean, :Build ]
-    msb.properties = { :configuration => args.config }
-    msb.solution = SOLUTION
+task :build_release => :restorepackages do
+	sh "\"#{$MSBUILD15CMD}\" #{SOLUTION} \/t:Clean;Build \/p:Configuration=Release"
 end
 
 desc "Sets the version number from GIT"    
-assemblyinfo :assemblyinfo do |asm|
-	asm.input_file = "SharedAssemblyInfo.cs"
-    asm.output_file = "SharedAssemblyInfo.cs"
-    asminfoversion = File.read("SharedAssemblyInfo.cs")[/\d+\.\d+\.\d+(\.\d+)?/]
-        
-    major, minor, patch, build = asminfoversion.split(/\./)
-   
-    if PRERELEASE == "true"
-        build = build.to_i + 1
-        $SUFFIX = "-pre"
-    elsif CANDIDATE == "true"
-        build = build.to_i + 1
-        $SUFFIX = "-rc"
-    end
-
-    $VERSION = "#{major}.#{minor}.#{patch}.#{build}"
-    puts "version: #{$VERSION}#{$SUFFIX}"
-    # DO NOT REMOVE! needed by build script!
+task :assemblyinfo do |asm|
+	asminfoversion = File.read("SharedAssemblyInfo.cs").match(/AssemblyInformationalVersion\("(\d+)\.(\d+)\.(\d+)(-.*)?"/)
+    
+	puts asminfoversion.inspect
+	
+    major = asminfoversion[1]
+	minor = asminfoversion[2]
+	patch = asminfoversion[3]
+    suffix = asminfoversion[4]
+	
+	version = "#{major}.#{minor}.#{patch}"
+    puts "version: #{version}#{suffix}"
+    
+	# DO NOT REMOVE! needed by build script!
     f = File.new('version', 'w')
-    f.write "#{$VERSION}#{$SUFFIX}"
+    f.write "#{version}#{suffix}"
     f.close
     # ----
-    asm.version = $VERSION
-    asm.file_version = $VERSION
-    asm.informational_version = "#{$VERSION}#{$SUFFIX}"
 end
 
 desc "Pushes the plugin packages into the specified folder"    
 task :pack, [:config] do |t, args|
 	args.with_defaults(:config => :Release)
+
+	version = File.open('version') {|f| f.readline}
+    puts "version: #{version}"
+
     Dir.chdir('NuGet') do
-        sh "nuget pack Fansi.NuGet.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{$VERSION}#{$SUFFIX}"
-        sh "nuget push HIC.FansiSql.#{$VERSION}#{$SUFFIX}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
+        sh "nuget pack Fansi.NuGet.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
+        sh "nuget push HIC.FansiSql.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
     end
 end
