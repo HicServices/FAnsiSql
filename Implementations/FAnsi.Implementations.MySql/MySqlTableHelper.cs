@@ -92,12 +92,6 @@ namespace FAnsi.Implementations.MySql
             return new MySqlColumnHelper();
         }
 
-        public override void DropTable(DbConnection connection, DiscoveredTable table)
-        {
-            var cmd = new MySqlCommand("drop table " + table.GetFullyQualifiedName(), (MySqlConnection)connection);
-            cmd.ExecuteNonQuery();
-        }
-
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
             var cmd = new MySqlCommand("alter table " + columnToDrop.Table.GetFullyQualifiedName() + " drop column " + columnToDrop.GetRuntimeName(), (MySqlConnection)connection);
