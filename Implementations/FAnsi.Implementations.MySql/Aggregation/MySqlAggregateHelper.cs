@@ -6,7 +6,7 @@ using FAnsi.Discovery.QuerySyntax.Aggregation;
 
 namespace FAnsi.Implementations.MySql.Aggregation
 {
-    public class MySqlAggregateHelper : IAggregateHelper
+    public class MySqlAggregateHelper : AggregateHelper
     {
         private string GetDateAxisTableDeclaration(IQueryAxis axis)
         {
@@ -54,7 +54,7 @@ delete from dateAxis where dt > @endDate;",
             axis.AxisIncrement);
         }
 
-        public string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
+        public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
         {
             switch (increment)
             {
@@ -72,35 +72,18 @@ delete from dateAxis where dt > @endDate;",
 
         }
 
-        
-
         private string BuildAxisOnlyAggregate(List<CustomLine> lines, IQueryAxis axis)
         {
             var syntaxHelper = new MySqlQuerySyntaxHelper();
             
-            var countSelectLine = lines.Single(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.CountFunction);
+            GetAggregateAxisBits(syntaxHelper,lines,out CustomLine countSelectLine,
+                out string countSqlWithoutAlias,
+                out string countAlias,
+                out CustomLine axisColumn,
+                out string axisColumnWithoutAlias,
+                out string axisColumnAlias);
 
-            string countSqlWithoutAlias;
-            string countAlias;
-            syntaxHelper.SplitLineIntoSelectSQLAndAlias(countSelectLine.Text, out countSqlWithoutAlias, out countAlias);
-
-            //Deal with the axis dimension which is currently `mydb`.`mytbl`.`mycol` and needs to become YEAR(`mydb`.`mytbl`.`mycol`) As joinDt 
-            var axisColumn = lines.Single(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.Axis);
-
-            string axisColumnWithoutAlias;
-            string axisColumnAlias;
-            syntaxHelper.SplitLineIntoSelectSQLAndAlias(axisColumn.Text, out axisColumnWithoutAlias, out axisColumnAlias);
-
-            var axisGroupBy = lines.Single(l => l.LocationToInsert == QueryComponent.GroupBy && l.Role == CustomLineRole.Axis);
-
-            if (string.IsNullOrWhiteSpace(axisColumnAlias))
-                axisColumnAlias = "joinDt";
-
-            var axisColumnEndedWithComma = axisColumn.Text.EndsWith(",");
-            axisColumn.Text = GetDatePartOfColumn(axis.AxisIncrement, axisColumnWithoutAlias) + " AS " + axisColumnAlias + (axisColumnEndedWithComma?",":"");
-
-            var groupByEndedWithComma = axisGroupBy.Text.EndsWith(",");
-            axisGroupBy.Text = GetDatePartOfColumn(axis.AxisIncrement, axisColumnWithoutAlias) + (groupByEndedWithComma ? "," : "");
+            WrapAxisColumnWithDatePartFunction(axisColumn,lines,axis,axisColumnWithoutAlias,axisColumnAlias);
             
 
             return string.Format(
@@ -133,6 +116,7 @@ ORDER BY
                 ).Trim();
 
         }
+
 
         private string BuildPivotAndAxisAggregate(List<CustomLine> lines, IQueryAxis axis)
         {
@@ -365,7 +349,7 @@ pivotValues;
 
 
         
-        public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot)
+        public override string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot)
         {
             if (!pivot && axisIfAny == null)
                 return string.Join(Environment.NewLine, queryLines);

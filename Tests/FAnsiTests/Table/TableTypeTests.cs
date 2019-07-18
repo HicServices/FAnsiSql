@@ -61,6 +61,8 @@ viewName,
             view.Drop();
             Assert.IsFalse(view.Exists());
 
+            view.Rename("Lolz");
+
         }
     }
 }
