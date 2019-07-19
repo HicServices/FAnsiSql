@@ -61,7 +61,8 @@ viewName,
             view.Drop();
             Assert.IsFalse(view.Exists());
 
-            view.Rename("Lolz");
+            var ex = Assert.Throws<NotSupportedException>(()=>view.Rename("Lolz"));
+            Assert.AreEqual("Rename is not supported for TableType View", ex.Message);
 
         }
     }
