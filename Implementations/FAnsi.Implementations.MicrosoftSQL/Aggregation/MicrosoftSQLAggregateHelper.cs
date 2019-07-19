@@ -6,7 +6,7 @@ using FAnsi.Discovery.QuerySyntax.Aggregation;
 
 namespace FAnsi.Implementations.MicrosoftSQL.Aggregation
 {
-    public class MicrosoftSQLAggregateHelper : IAggregateHelper
+    public class MicrosoftSQLAggregateHelper : AggregateHelper
     {
         private string GetDateAxisTableDeclaration(IQueryAxis axis)
         {
@@ -57,7 +57,7 @@ namespace FAnsi.Implementations.MicrosoftSQL.Aggregation
         /// <param name="increment"></param>
         /// <param name="columnSql"></param>
         /// <returns></returns>
-        public string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
+        public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
         {
             switch (increment)
             {
@@ -410,7 +410,7 @@ if LEFT(@FinalSelectList,1)  = ','
             return part1;
         }
 
-        public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot)
+        public override string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot)
         {
             if (axisIfAny == null && !pivot)
                 return string.Join(Environment.NewLine, queryLines);
