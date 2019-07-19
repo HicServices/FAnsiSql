@@ -6,12 +6,13 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using NUnit.Framework;
+using System.Linq;
 
 namespace FAnsiTests.Aggregation
 {
     class AggregationTests:DatabaseTests
     {
-        private readonly Dictionary<DatabaseType, DiscoveredTable> _testTables = new Dictionary<DatabaseType, DiscoveredTable>();
+        protected readonly Dictionary<DatabaseType, DiscoveredTable> _testTables = new Dictionary<DatabaseType, DiscoveredTable>();
             
         [OneTimeSetUp]
         public void Setup()
@@ -46,346 +47,89 @@ namespace FAnsiTests.Aggregation
             
             foreach (KeyValuePair<DatabaseType, string> kvp in TestConnectionStrings)
             {
-                
                 var db = GetTestDatabase(kvp.Key);
                 var tbl = db.CreateTable("AggregateDataBasedTests", dt);
                 _testTables.Add(kvp.Key,tbl);
             }
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        public void Test_BasicCount(DatabaseType type)
+
+        protected void AssertHasRow(DataTable dt, params object[] cells)
         {
-            var tbl = _testTables[type];
-            var svr = tbl.Database.Server;
+            Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r=>IsMatch(r,cells)),"Did not find expected row:" + string.Join("|",cells));
+        }
 
-            var lines = new List<CustomLine>();
-
-            lines.Add(new CustomLine("SELECT",QueryComponent.SELECT));
-            lines.Add(new CustomLine("count(*)", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("FROM " + tbl.GetFullyQualifiedName(),QueryComponent.FROM));
-
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines,null,false);
-
-            using (var con = svr.GetConnection())
+        /// <summary>
+        /// Confirms that the first x cells of <paramref name="r"/> match the contents of <paramref name="cells"/>
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="cells"></param>
+        /// <returns></returns>
+        protected bool IsMatch(DataRow r, object[] cells)
+        {
+            for(int i = 0 ; i<cells.Length ;i++)
             {
-                con.Open();
+                var a = r[i];
+                var b = cells[i] ?? DBNull.Value; //null means dbnull
 
-                var cmd = svr.GetCommand(sql, con);
-                Assert.AreEqual(14,Convert.ToInt32(cmd.ExecuteScalar()));
-            }
+                var aType = a.GetType();
+                var bType = b.GetType();
+
+                //could be dealing with int / long mismatch etc
+                if (aType != bType)
+                    try
+                    {
+                        b = Convert.ChangeType(b, aType);
+                    }
+                    catch (Exception)
+                    {
+                    }
+            
+                if (!a.Equals(b))
+                    return false;
+            }                
+            
+            return true;
         }
 
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        public void Test_GroupByCount(DatabaseType type)
+        protected void ConsoleWriteTable(DataTable dt)
         {
-            var tbl = _testTables[type];
-            var svr = tbl.Database.Server;
+            Console.WriteLine("--- DebugTable(" + dt.TableName + ") ---");
+            int zeilen = dt.Rows.Count;
+            int spalten = dt.Columns.Count;
 
-            var lines = new List<CustomLine>();
-
-            lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
-            
-            lines.Add(new CustomLine("count(*),", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("Category", QueryComponent.QueryTimeColumn));
-            
-            lines.Add(new CustomLine("FROM " + tbl.GetFullyQualifiedName(), QueryComponent.FROM));
-            
-            lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("Category", QueryComponent.GroupBy));
-
-            lines.Add(new CustomLine("ORDER BY", QueryComponent.OrderBy));
-            lines.Add(new CustomLine("Category", QueryComponent.OrderBy));
-
-
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null, false);
-
-            using (var con = svr.GetConnection())
+            // Header
+            for (int i = 0; i < dt.Columns.Count; i++)
             {
-                con.Open();
-
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                Assert.AreEqual(4,dt.Rows.Count);
-                Assert.AreEqual("E&, %a' mp;E", dt.Rows[0][1]);
-                Assert.AreEqual(3, dt.Rows[0][0]);
-
-                Assert.AreEqual("F", dt.Rows[1][1]);
-                Assert.AreEqual(2, dt.Rows[1][0]);
+                string s = dt.Columns[i].ToString();
+                Console.Write(String.Format("{0,-20} | ", s));
             }
-        }
-
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        public void Test_Calendar(DatabaseType type)
-        {
-            var tbl = _testTables[type];
-            var svr = tbl.Database.Server;
-
-            var lines = new List<CustomLine>();
-            lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
-            lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn){Role = CustomLineRole.CountFunction});
-            lines.Add(new CustomLine("EventDate", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
-            lines.Add(new CustomLine("FROM ", QueryComponent.FROM));
-            lines.Add(new CustomLine(tbl.GetFullyQualifiedName(),QueryComponent.FROM));
-            lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy){Role = CustomLineRole.Axis});                                           //tell it which the axis are 
-            
-            var axis = new QueryAxis()
+            Console.Write(Environment.NewLine);
+            for (int i = 0; i < dt.Columns.Count; i++)
             {
-                StartDate = "'2001-01-01'",
-                EndDate = "'2010-01-01'",
-                AxisIncrement = AxisIncrement.Year //by year
-            };
-
-
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, false);
-
-            using (var con = svr.GetConnection())
-            {
-                con.Open();
-
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                Assert.AreEqual(10, dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
-                Assert.AreEqual(2001,           dt.Rows[0][0]);
-                Assert.AreEqual(5,              dt.Rows[0][1]);
-                Assert.AreEqual(2002,           dt.Rows[1][0]);
-                Assert.AreEqual(5,              dt.Rows[1][1]);
-                Assert.AreEqual(2003,           dt.Rows[2][0]);
-                Assert.AreEqual(2,              dt.Rows[2][1]);
-                Assert.AreEqual(2004,           dt.Rows[3][0]);
-                Assert.AreEqual(DBNull.Value,   dt.Rows[3][1]);
-                Assert.AreEqual(2005,           dt.Rows[4][0]);
-                Assert.AreEqual(1,              dt.Rows[4][1]);
-                Assert.AreEqual(2006,           dt.Rows[5][0]);
-                Assert.AreEqual(DBNull.Value,   dt.Rows[5][1]);
-                Assert.AreEqual(2007,           dt.Rows[6][0]);
-                Assert.AreEqual(DBNull.Value,   dt.Rows[6][1]);
-                Assert.AreEqual(2008,           dt.Rows[7][0]);
-                Assert.AreEqual(DBNull.Value,   dt.Rows[7][1]);
-                Assert.AreEqual(2009,           dt.Rows[8][0]);
-                Assert.AreEqual(DBNull.Value,   dt.Rows[8][1]);
-                Assert.AreEqual(2010,           dt.Rows[9][0]);
-                Assert.AreEqual(DBNull.Value,   dt.Rows[9][1]);
+                Console.Write("---------------------|-");
             }
-        }
+            Console.Write(Environment.NewLine);
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        public void Test_Calendar_ToToday(DatabaseType type)
-        {
-            var tbl = _testTables[type];
-            var svr = tbl.Database.Server;
-
-            var lines = new List<CustomLine>();
-            lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
-            lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("EventDate", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
-            lines.Add(new CustomLine("FROM ", QueryComponent.FROM));
-            lines.Add(new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM));
-            lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
-
-            var axis = new QueryAxis()
+            // Data
+            for (int i = 0; i < zeilen; i++)
             {
-                StartDate = "'2001-01-01'",
-                EndDate = tbl.GetQuerySyntaxHelper().GetScalarFunctionSql(MandatoryScalarFunctions.GetTodaysDate),
-                AxisIncrement = AxisIncrement.Year //by year
-            };
-
-
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, false);
-
-            using (var con = svr.GetConnection())
-            {
-                con.Open();
-
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                Assert.GreaterOrEqual(dt.Rows.Count, 19); //there are 19 years between 2001 and 2019 (use greater than because we don't want test to fail in 2020)
-                Assert.AreEqual(2001, dt.Rows[0][0]);
-                Assert.AreEqual(5, dt.Rows[0][1]);
-                Assert.AreEqual(2002, dt.Rows[1][0]);
-                Assert.AreEqual(5, dt.Rows[1][1]);
-                Assert.AreEqual(2003, dt.Rows[2][0]);
-                Assert.AreEqual(2, dt.Rows[2][1]);
-                Assert.AreEqual(2004, dt.Rows[3][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[3][1]);
-                Assert.AreEqual(2005, dt.Rows[4][0]);
-                Assert.AreEqual(1, dt.Rows[4][1]);
-                Assert.AreEqual(2006, dt.Rows[5][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[5][1]);
-                Assert.AreEqual(2007, dt.Rows[6][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[6][1]);
-                Assert.AreEqual(2008, dt.Rows[7][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[7][1]);
-                Assert.AreEqual(2009, dt.Rows[8][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[8][1]);
-                Assert.AreEqual(2010, dt.Rows[9][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
-
-                //should go up to this year
-                Assert.AreEqual(DateTime.Now.Year, dt.Rows[dt.Rows.Count-1][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
+                DataRow row = dt.Rows[i];
+                //Console.WriteLine("{0} {1} ", row[0], row[1]);
+                for (int j = 0; j < spalten; j++)
+                {
+                    string s = row[j].ToString();
+                    if (s.Length > 20) s = s.Substring(0, 17) + "...";
+                    Console.Write(String.Format("{0,-20} | ", s));
+                }
+                Console.Write(Environment.NewLine);
             }
-        }
-
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        public void Test_Calendar_WithPivot(DatabaseType type)
-        {
-            var tbl = _testTables[type];
-            var svr = tbl.Database.Server;
-
-            var lines = new List<CustomLine>();
-            lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
-            lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("EventDate,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
-            lines.Add(new CustomLine("Category", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Pivot });                      //tell it which the pivot
-            lines.Add(new CustomLine("FROM ", QueryComponent.FROM));
-            lines.Add(new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM));
-            lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate,", QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
-            lines.Add(new CustomLine("Category", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot });
-
-            var axis = new QueryAxis()
+            for (int i = 0; i < dt.Columns.Count; i++)
             {
-                StartDate = "'2001-01-01'",
-                EndDate = "'2010-01-01'",
-                AxisIncrement = AxisIncrement.Year //by year
-            };
-
-
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, true);
-
-            using (var con = svr.GetConnection())
-            {
-                con.Open();
-
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                //pivot columns should ordered by sum of pivot values (T has the highest followed by E...)
-
-                /*joinDt	T	E&, %a' mp;E	F	G
-                    2001	3	1	            0	1
-                    2002	2	1	            2	0
-                    2003	2	0	            0	0
-                    2004	0	0	            0	0
-                    2005	0	1	            0	0
-                    2006	0	0	            0	0
-                    2007	0	0	            0	0
-                    2008	0	0	            0	0
-                    2009	0	0	            0	0
-                    2010	0	0	            0	0
-*/
-
-                Assert.AreEqual(10, dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
-
-                StringAssert.AreEqualIgnoringCase("joinDt",dt.Columns[0].ColumnName);
-                StringAssert.AreEqualIgnoringCase("T", dt.Columns[1].ColumnName);
-                StringAssert.AreEqualIgnoringCase("E&, %a' mp;E", dt.Columns[2].ColumnName);
-                StringAssert.AreEqualIgnoringCase("F", dt.Columns[3].ColumnName);
-                StringAssert.AreEqualIgnoringCase("G", dt.Columns[4].ColumnName);
-
-                Assert.AreEqual(2001, dt.Rows[0][0]);
-                Assert.AreEqual(3 , dt.Rows[0][1]);
-                Assert.AreEqual(1, dt.Rows[0][2]);
-                Assert.AreEqual(0, dt.Rows[0][3]);
-                Assert.AreEqual(1, dt.Rows[0][4]);
-
-                Assert.AreEqual(2002, dt.Rows[1][0]);
-                Assert.AreEqual(2, dt.Rows[1][1]);
-                Assert.AreEqual(1, dt.Rows[1][2]);
-                Assert.AreEqual(2, dt.Rows[1][3]);
-                Assert.AreEqual(0, dt.Rows[1][4]);
-
-                Assert.AreEqual(2003, dt.Rows[2][0]);
-                Assert.AreEqual(2, dt.Rows[2][1]);
-                Assert.AreEqual(0, dt.Rows[2][2]);
-                Assert.AreEqual(0, dt.Rows[2][3]);
-                Assert.AreEqual(0, dt.Rows[2][4]);
-
-                Assert.AreEqual(2004, dt.Rows[3][0]);
-                Assert.AreEqual(0, dt.Rows[3][1] == DBNull.Value ? 0 : dt.Rows[3][1]);
-                Assert.AreEqual(0, dt.Rows[3][2] == DBNull.Value ? 0 : dt.Rows[3][1]);  //null is permitted because this row doesn't have any matching records... peculiarity of MySql implementation but null=0 is ok for aggregates
-                Assert.AreEqual(0, dt.Rows[3][3] == DBNull.Value ? 0 : dt.Rows[3][1]);
-                Assert.AreEqual(0, dt.Rows[3][4] == DBNull.Value ? 0 : dt.Rows[3][1]);
-
-                Assert.AreEqual(2005, dt.Rows[4][0]);
-                Assert.AreEqual(0, dt.Rows[4][1]);
-                Assert.AreEqual(1, dt.Rows[4][2]);
-                Assert.AreEqual(0, dt.Rows[4][3]);
-                Assert.AreEqual(0, dt.Rows[4][4]);
-
+                Console.Write("---------------------|-");
             }
+            Console.Write(Environment.NewLine);
         }
-
-
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        public void Test_PivotOnlyCount(DatabaseType type)
-        {
-            var tbl = _testTables[type];
-            var svr = tbl.Database.Server;
-
-            var lines = new List<CustomLine>();
-            
-            lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
-            
-            lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("Category as Cat,", QueryComponent.QueryTimeColumn));
-            lines.Add(new CustomLine("EventDate as Ev", QueryComponent.QueryTimeColumn){Role = CustomLineRole.Pivot});
-            
-            lines.Add(new CustomLine("FROM " + tbl.GetFullyQualifiedName(), QueryComponent.FROM));
-            
-            lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("Category,", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy){Role = CustomLineRole.Pivot});
-            
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines,null,true);
-
-            using (var con = svr.GetConnection())
-            {
-                con.Open();
-                //Expected Test Results:
-                /*
-                    Cat	    2001-01-01 00:00:00.0000000	2002-01-01 00:00:00.0000000	2002-02-01 00:00:00.0000000	2002-03-02 00:00:00.0000000	2003-01-01 00:00:00.0000000	2003-04-02 00:00:00.0000000	2005-01-01 00:00:00.0000000	2001-01-02 00:00:00.0000000
-                    E&, %a' mp;E	1	1	0	0	0	0	1	0
-                    F	            0	2	0	0	0	0	0	0
-                    G	            1	0	0	0	0	0	0	0
-                    T	            2	0	1	1	1	1	0	1
-                 */
-
-                var cmd = svr.GetCommand(sql, con);
-                var da = svr.GetDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-                Assert.AreEqual(9,dt.Columns.Count);
-                Assert.AreEqual(4,dt.Rows.Count);
-                Assert.AreEqual("Cat",dt.Columns[0].ColumnName);
-
-
-            }
-        }
-
     }
-
-
 }
