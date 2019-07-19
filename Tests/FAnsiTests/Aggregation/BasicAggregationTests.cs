@@ -15,7 +15,7 @@ namespace FAnsiTests.Aggregation
         [TestCase(DatabaseType.Oracle)]
         public void Test_BasicCount(DatabaseType type)
         {
-            var tbl = _testTables[type];
+            var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
 
             var lines = new List<CustomLine>();
@@ -41,7 +41,7 @@ namespace FAnsiTests.Aggregation
         [TestCase(DatabaseType.Oracle)]
         public void Test_GroupByCount(DatabaseType type)
         {
-            var tbl = _testTables[type];
+            var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
 
             var lines = new List<CustomLine>();

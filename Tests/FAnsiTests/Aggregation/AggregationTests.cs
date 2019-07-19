@@ -53,7 +53,6 @@ namespace FAnsiTests.Aggregation
             }
         }
 
-
         protected void AssertHasRow(DataTable dt, params object[] cells)
         {
             Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r=>IsMatch(r,cells)),"Did not find expected row:" + string.Join("|",cells));
@@ -131,5 +130,14 @@ namespace FAnsiTests.Aggregation
             }
             Console.Write(Environment.NewLine);
         }
+
+        protected DiscoveredTable GetTestTable(DatabaseType type)
+        {
+            if (!_testTables.ContainsKey(type))
+                Assert.Inconclusive("No connection string found for Test database type {0}", type);
+            
+            return _testTables[type];
+        }
+            
     }
 }

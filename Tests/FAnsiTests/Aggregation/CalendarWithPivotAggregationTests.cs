@@ -15,7 +15,7 @@ namespace FAnsiTests.Aggregation
         [TestCase(DatabaseType.MySql)]
         public void Test_Calendar_WithPivot(DatabaseType type)
         {
-            var tbl = _testTables[type];
+            var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
 
             var lines = new List<CustomLine>();

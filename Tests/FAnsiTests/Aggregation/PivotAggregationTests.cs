@@ -14,7 +14,7 @@ namespace FAnsiTests.Aggregation
         [TestCase(DatabaseType.MySql)]
         public void Test_PivotOnlyCount(DatabaseType type)
         {
-            var tbl = _testTables[type];
+            var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
 
             var lines = new List<CustomLine>();

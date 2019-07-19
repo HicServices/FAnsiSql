@@ -27,7 +27,7 @@ namespace FAnsi.Implementations.Oracle.Aggregation
             switch (increment)
             {
                 case AxisIncrement.Day:
-                    return $"to_char({columnSql},'YYYY-MM-dd')";
+                    return columnSql;
                 case AxisIncrement.Month:
                     return $"to_char({columnSql},'YYYY-MM')";
                 case AxisIncrement.Year:
@@ -75,8 +75,42 @@ floor(months_between({1}, {0}) /12)
             endDateSql);
 
                 case AxisIncrement.Day:
+                    return
+                        string.Format(
+           @"
+with calendar as (
+        select {0} + (rownum - 1) as dt
+        from dual
+        connect by rownum <= 1+
+floor({1} - {0})
+    )",
+            startDateSql,
+            endDateSql);
                 case AxisIncrement.Month:
+                    return 
+                        string.Format(
+           @"
+with calendar as (
+        select add_months({0},rownum - 1) as dt
+        from dual
+        connect by rownum <= 1+
+floor(months_between({1}, {0}))
+    )",
+            startDateSql,
+            endDateSql);
                 case AxisIncrement.Quarter:
+
+                    return
+             string.Format(
+         @"
+with calendar as (
+        select add_months({0},3* (rownum - 1)) as dt
+        from dual
+        connect by rownum <= 1+
+floor(months_between({1}, {0}) /3)
+    )",
+          startDateSql,
+          endDateSql);
                 default:
                     throw new NotImplementedException();
             }         

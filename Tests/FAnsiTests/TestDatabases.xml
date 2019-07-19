@@ -1,6 +1,6 @@
 <TestDatabases>
           <Settings>
-            <AllowDatabaseCreation>True</AllowDatabaseCreation>
+            <AllowDatabaseCreation>False</AllowDatabaseCreation>
             <TestScratchDatabase>FAnsiTests</TestScratchDatabase>
           </Settings>
           <TestDatabase>
