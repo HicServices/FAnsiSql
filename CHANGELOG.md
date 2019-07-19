@@ -36,6 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.9.2...develop
-[0.9.3]: https://github.com/HicServices/FAnsiSql/compare/v0.9.2...0.9.3
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.9.3...develop
+[0.9.3]: https://github.com/HicServices/FAnsiSql/compare/0.9.2...0.9.3
 [0.9.2]: https://github.com/HicServices/FAnsiSql/compare/v0.9.1.10...0.9.2
