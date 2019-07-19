@@ -42,8 +42,8 @@
   - [X] JOIN UPDATE
   
 - Aggregation 
-  - [ ] Basic GROUP BY
-  - [ ] Calendar/Axis Table GROUP BY
+  - [X] Basic GROUP BY
+  - [X] Calendar/Axis Table GROUP BY
   - [ ] Dynamic Pivot GROUP BY
   
 
