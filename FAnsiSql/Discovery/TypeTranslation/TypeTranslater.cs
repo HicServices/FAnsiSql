@@ -285,7 +285,12 @@ namespace FAnsi.Discovery.TypeTranslation
         {
             var reqType = GetDataTypeRequestForSQLDBType(discoveredColumn.DataType.SQLType);
 
-            return new DataTypeComputer(reqType.CSharpType, reqType.DecimalPlacesBeforeAndAfter, reqType.MaxWidthForStrings??-1);
+            return GetDataTypeComputer(reqType.CSharpType, reqType.DecimalPlacesBeforeAndAfter, reqType.MaxWidthForStrings??-1);
+        }
+
+        protected virtual DataTypeComputer GetDataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString)
+        {
+            return new DataTypeComputer(currentEstimatedType,decimalSize,lengthIfString);
         }
 
         public virtual int GetLengthIfString(string sqlType)

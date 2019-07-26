@@ -69,12 +69,12 @@ namespace FAnsi.Discovery
                             else
                                 throw new Exception("explicitColumnDefinitions for column " + column + " did not contain either a TypeRequested or ExplicitDbType");
                     
-                        typeDictionary.Add(overriding.ColumnName, new DataTypeComputer(request));
+                        typeDictionary.Add(overriding.ColumnName, GetDataTypeComputer(request));
                     }
                     else
                     {
                         //no, work out the column definition using a datatype computer
-                        DataTypeComputer computer = new DataTypeComputer(column);
+                        DataTypeComputer computer = GetDataTypeComputer(column);
                         typeDictionary.Add(column.ColumnName,computer);
 
                         columns.Add(new DatabaseColumnRequest(column.ColumnName, computer.GetTypeRequest(), column.AllowDBNull) { IsPrimaryKey = args.DataTable.PrimaryKey.Contains(column)});
@@ -114,7 +114,17 @@ namespace FAnsi.Discovery
 
             return tbl;
         }
-        
+
+        protected virtual DataTypeComputer GetDataTypeComputer(DataColumn column)
+        {
+            return new DataTypeComputer(column);
+        }
+
+        protected virtual DataTypeComputer GetDataTypeComputer(DatabaseTypeRequest request)
+        {
+            return new DataTypeComputer(request);
+        }
+
         public virtual string GetCreateTableSql(DiscoveredDatabase database, string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string schema)
         {
             if (string.IsNullOrWhiteSpace(tableName))

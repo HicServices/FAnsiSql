@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using FAnsi.Discovery;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Extensions;
 
@@ -11,6 +12,8 @@ namespace FAnsi.Implementations.Oracle
         private readonly Regex AlsoFloatingPointRegex = new Regex("^(NUMBER)|(DEC)",RegexOptions.IgnoreCase);
         private readonly Regex AlsoByteArrayRegex = new Regex("(BFILE)|(BLOB)|(RAW)|(ROWID)",RegexOptions.IgnoreCase);
         
+        public const int ExtraLengthPerNonAsciiCharacter = 3;
+
         /// <summary>
         /// Oracle specific string types, these are all max length as returned by <see cref="GetLengthIfString"/>
         /// </summary>
@@ -107,6 +110,11 @@ namespace FAnsi.Implementations.Oracle
         protected override string GetDateDateTimeDataType()
         {
             return "DATE";
+        }
+
+        protected override DataTypeComputer GetDataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString)
+        {
+            return new DataTypeComputer(currentEstimatedType, decimalSize, lengthIfString, ExtraLengthPerNonAsciiCharacter);
         }
     }
 }

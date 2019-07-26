@@ -268,5 +268,30 @@ namespace FAnsiTests.Table
             Assert.AreEqual(5, col.DataType.GetLengthIfString());
 
         }
+
+
+        [TestCase(DatabaseType.MySql, "didn’t",null)] //<- it's a ’ not a '
+        [TestCase(DatabaseType.MicrosoftSQLServer, "didn’t",null)]
+        [TestCase(DatabaseType.Oracle, "didn’t",null)]
+        [TestCase(DatabaseType.MySql, "Æther",null)]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "Æther",null)]
+        [TestCase(DatabaseType.Oracle,"Æther",null)]
+        [TestCase(DatabaseType.MySql,"乗","?")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "乗","?")]
+        [TestCase(DatabaseType.Oracle, "乗",null)]
+        public void Test_CreateTable_UnicodeStrings(DatabaseType type,string testString,string expectedAnswer)
+        {
+            var db = GetTestDatabase(type);
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Yay");
+            dt.Rows.Add(testString); 
+
+            var table = db.CreateTable("GoGo",dt);
+
+            Assert.AreEqual(expectedAnswer??testString, table.GetDataTable().Rows[0][0]);
+
+            table.Drop();
+        }
     }
 }
