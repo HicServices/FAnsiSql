@@ -200,3 +200,8 @@ using (DbConnection con = server.GetConnection())
 		Console.WriteLine(string.Join(",", r["Name"],r["DateOfBirth"]));
 }
 ```
+
+
+## Building
+
+Building requires MSBuild 15 or later (or Visual Studio 2017 or later).  You will also need to install the DotNetCore 2.2 SDK.
