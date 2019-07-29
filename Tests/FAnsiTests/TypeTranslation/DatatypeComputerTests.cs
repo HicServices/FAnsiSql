@@ -614,5 +614,23 @@ namespace FAnsiTests.TypeTranslation
             t.AdjustToCompensateForValue(randomCrud);
             Assert.AreEqual(typeof(string), t.CurrentEstimate);
         }
+        
+        [TestCase("didn’t")]
+        [TestCase("Æther")]
+        [TestCase("乗")]
+        public void Test_NonAscii_CharacterLength(string word)
+        {
+            var t = new DataTypeComputer();
+            t.AdjustToCompensateForValue(word);
+
+            //in most DBMS
+            Assert.AreEqual(t.Length,word.Length);
+
+            //in the world of Oracle where you need varchar2(6) to store "It’s"
+            t = new DataTypeComputer(0,3);
+            t.AdjustToCompensateForValue(word);
+
+            Assert.AreEqual(word.Length + 3, t.Length);
+        }
     }
 }

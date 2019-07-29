@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
+using FAnsi.Discovery.TypeTranslation;
 using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Implementations.Oracle
@@ -88,6 +90,15 @@ namespace FAnsi.Implementations.Oracle
         public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
         {
             return new DiscoveredStoredprocedure[0];
+        }
+
+        protected override DataTypeComputer GetDataTypeComputer(DatabaseTypeRequest request)
+        {
+            return new DataTypeComputer(request, OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter);
+        }
+        protected override DataTypeComputer GetDataTypeComputer(DataColumn column)
+        {
+            return new DataTypeComputer(column, OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter);
         }
 
 

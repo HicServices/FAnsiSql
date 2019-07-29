@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Linq;
 using FAnsi.Discovery.TypeTranslation.TypeDeciders;
 
 namespace FAnsi.Discovery.TypeTranslation
@@ -16,6 +17,12 @@ namespace FAnsi.Discovery.TypeTranslation
     /// </summary>
     public class DataTypeComputer
     {
+        /// <summary>
+        /// Normally when measuring the lengths of strings something like "It’s" would be 4 but for Oracle it needs extra width.  If this is
+        /// non zero then when <see cref="AdjustToCompensateForValue(object)"/> is a string then any non standard characters will have this number
+        /// added to the length predicted.
+        /// </summary>
+        public int ExtraLengthPerNonAsciiCharacter { get; private set; }
 
         /// <summary>
         /// The minimum amount of characters required to represent date values stored in the database when issuing ALTER statement to convert
@@ -62,6 +69,10 @@ namespace FAnsi.Discovery.TypeTranslation
             
         }
 
+        /// <summary>
+        /// Creates a new computer primed with the size of the given <paramref name="request"/>.
+        /// </summary>
+        /// <param name="request"></param>
         public DataTypeComputer(DatabaseTypeRequest request): this(request.MaxWidthForStrings.HasValue? request.MaxWidthForStrings.Value:-1)
         {
             CurrentEstimate = request.CSharpType;
@@ -74,12 +85,56 @@ namespace FAnsi.Discovery.TypeTranslation
         /// Creates a new DataTypeComputer adjusted to compensate for all values in all rows of the supplied DataColumn
         /// </summary>
         /// <param name="column"></param>
-        public DataTypeComputer(DataColumn column):this(-1)
+        public DataTypeComputer(DataColumn column):this(column,0)
         {
+            
+        }
+
+        /// <summary>
+        /// Creates a new computer primed with the size of the given <paramref name="request"/>.  Uses the provided
+        /// <paramref name="extraLengthPerNonAsciiCharacter"/>
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="extraLengthPerNonAsciiCharacter"></param>
+        public DataTypeComputer(DatabaseTypeRequest request, int extraLengthPerNonAsciiCharacter) : this(request)
+        {
+            ExtraLengthPerNonAsciiCharacter = extraLengthPerNonAsciiCharacter;
+        }
+
+        /// <summary>
+        /// Creates a new DataTypeComputer adjusted to compensate for all values in all rows of the supplied DataColumn.  Uses the
+        /// provided <paramref name="extraLengthPerNonAsciiCharacter"/>
+        /// </summary>
+        /// <param name="column"></param>
+        public DataTypeComputer(DataColumn column, int extraLengthPerNonAsciiCharacter) : this(-1)
+        {
+            ExtraLengthPerNonAsciiCharacter = extraLengthPerNonAsciiCharacter;
+
             var dt = column.Table;
             foreach (DataRow row in dt.Rows)
                 AdjustToCompensateForValue(row[column]);
         }
+
+        /// <summary>
+        /// Creates a new DataTypeComputer
+        /// <param name="minimumLengthToMakeCharacterFields"></param>
+        /// <param name="extraLengthPerNonAsciiCharacter"></param>
+        public DataTypeComputer(int minimumLengthToMakeCharacterFields, int extraLengthPerNonAsciiCharacter):this(minimumLengthToMakeCharacterFields)
+        {
+            ExtraLengthPerNonAsciiCharacter = extraLengthPerNonAsciiCharacter;
+        }
+        /// <summary>
+        /// Creates a hydrated DataTypeComputer  for when you want to clone an existing one or otherwise make up a DataTypeComputer for a known starting datatype
+        /// (See TypeTranslater.GetDataTypeComputerFor)
+        /// </summary>
+        /// <param name="currentEstimatedType"></param>
+        /// <param name="decimalSize"></param>
+        /// <param name="lengthIfString"></param>
+        public DataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString):this(currentEstimatedType, decimalSize,lengthIfString,0)
+        {
+            
+        }
+
 
         /// <summary>
         /// Creates a hydrated DataTypeComputer  for when you want to clone an existing one or otherwise make up a DataTypeComputer for a known starting datatype
@@ -88,10 +143,11 @@ namespace FAnsi.Discovery.TypeTranslation
         /// <param name="currentEstimatedType"></param>
         /// <param name="decimalSize"></param>
         /// <param name="lengthIfString"></param>
-        public DataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString):this(-1)
+        public DataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString, int extraLengthPerNonAsciiCharacter) : this(-1)
         {
             CurrentEstimate = currentEstimatedType;
-            
+            ExtraLengthPerNonAsciiCharacter = extraLengthPerNonAsciiCharacter;
+
             ThrowIfNotSupported(CurrentEstimate);
 
             if (lengthIfString > 0)
@@ -122,7 +178,7 @@ namespace FAnsi.Discovery.TypeTranslation
             var oAsString = o as string;
 
             //we might need to fallback on a string later on, in this case we should always record the maximum length of input seen before even if it is acceptable as int, double, dates etc
-            _stringLength = Math.Max(Length, oToString.Length);
+            _stringLength = Math.Max(Length, GetStringLength(oToString));
 
             //if it's a string
             if (oAsString != null)
@@ -172,6 +228,19 @@ namespace FAnsi.Discovery.TypeTranslation
                 if (_typeDeciders.Dictionary.ContainsKey(o.GetType()))
                     _typeDeciders.Dictionary[o.GetType()].IsAcceptableAsType(oToString, DecimalSize);
             }
+        }
+
+        private int GetStringLength(string oToString)
+        {
+            if(ExtraLengthPerNonAsciiCharacter == 0)
+                return oToString.Length;
+
+            return oToString.Length + (oToString.Count(IsNotAscii) * ExtraLengthPerNonAsciiCharacter);
+        }
+
+        private bool IsNotAscii(char arg)
+        {
+            return (int)arg >= 127;
         }
 
         private void ChangeEstimateToNext()
