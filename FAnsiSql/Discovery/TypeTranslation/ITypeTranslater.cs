@@ -47,12 +47,14 @@ namespace FAnsi.Discovery.TypeTranslation
         Type TryGetCSharpTypeForSQLDBType(string sqlType);
 
         /// <summary>
-        /// Returns true if the <paramref name="sqlType"/> string could be reconciled into a known C# Type
+        /// Returns true if the <paramref name="sqlType"/> string could be reconciled into a known C# Type.  Do not use this
+        /// for testing if a given random string is likely to be accepted by the DBMS.  You should only pass Types that actually
+        /// resolve.
         /// 
         /// <para>See also <see cref="GetCSharpTypeForSQLDBType"/></para>
         /// </summary>
-        /// <param name="sqlType"></param>
-        /// <returns></returns>
+        /// <param name="sqlType">A DBMS type name which you want the API to guess a C# Type for.</param>
+        /// <returns>True if FAnsi has a C# Type representation for the supplied <paramref name="sqlType"/></returns>
         bool IsSupportedSQLDBType(string sqlType);
 
         DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string sqlType);
