@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
-## [0.9.4]
+## [0.9.4] - 2019-07-29
 
 ### Fixed 
 - Fixed bug creating Oracle tables from free text data containing extended ASCII / Unicode characters.
 
-## [0.9.3]
+## [0.9.3] - 2019-07-19
 
 ### Added 
 
