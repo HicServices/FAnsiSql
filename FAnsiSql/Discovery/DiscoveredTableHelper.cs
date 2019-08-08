@@ -126,6 +126,8 @@ namespace FAnsi.Discovery
             if(discoveredTable.TableType != TableType.Table)
                 throw new NotSupportedException("Rename is not supported for TableType " + discoveredTable.TableType);
 
+            discoveredTable.GetQuerySyntaxHelper().ValidateTableName(newName);
+
             DbCommand cmd = discoveredTable.Database.Server.Helper.GetCommand(GetRenameTableSql(discoveredTable, newName), connection.Connection, connection.Transaction);
             cmd.ExecuteNonQuery();
         }

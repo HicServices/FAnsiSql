@@ -9,6 +9,11 @@ namespace FAnsi.Implementations.Oracle
 {
     public class OracleQuerySyntaxHelper : QuerySyntaxHelper
     {
+        public override int MaximumDatabaseLength => 128;
+        public override int MaximumTableLength => 128;
+        public override int MaximumColumnLength => 128;
+
+
         public OracleQuerySyntaxHelper() : base(new OracleTypeTranslater(), new OracleAggregateHelper(),new OracleUpdateHelper(),DatabaseType.Oracle)//no custom translater
         {
         }
@@ -26,11 +31,7 @@ namespace FAnsi.Implementations.Oracle
                 return s;
             
             //upper it because oracle loves uppercase stuff
-            string toReturn =  answer.Trim('"').ToUpper();
-
-            //truncate it to 30 maximum because oracle cant count higher than 30
-            return toReturn.Length > 30 ? toReturn.Substring(0, 30) : toReturn;
-
+            return answer.Trim('"').ToUpper();
         }
 
         public override string EnsureWrappedImpl(string databaseOrTableName)

@@ -64,6 +64,8 @@ namespace FAnsi.Discovery
             TableType = tableType;
 
             QuerySyntaxHelper = querySyntaxHelper;
+
+            QuerySyntaxHelper.ValidateTableName(_table);
         }
         
         /// <summary>

@@ -23,6 +23,11 @@ namespace FAnsi.Implementations.MicrosoftSQL
            get { return "."; }
         }
         
+        //See: https://stackoverflow.com/a/5096245/4824531
+        public override int MaximumDatabaseLength => 124;
+        public override int MaximumTableLength => 128;
+        public override int MaximumColumnLength => 128;
+
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
             return new TopXResponse("TOP " + x, QueryComponent.SELECT);

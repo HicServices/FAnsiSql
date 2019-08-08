@@ -775,6 +775,54 @@ namespace FAnsiTests
             }
         }
 
+        [TestCase(DatabaseType.MySql, "my (database)", "my (table)", "my (col)")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "my (database)", "my (table)", "my (col)")]
+        [TestCase(DatabaseType.Oracle, "my (database)", "my (table)", "my (col)")]
+        [TestCase(DatabaseType.MySql, "my.database", "my.table", "my.col")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "my.database", "my.table", "my.col")]
+        [TestCase(DatabaseType.Oracle, "my.database", "my.table", "my.col")]
+        public void UnsupportedEntityNames(DatabaseType type, string horribleDatabaseName, string horribleTableName,string columnName)
+        {
+            
+            var database = GetTestDatabase(type);
+
+            //ExpectDatabase with illegal name
+            StringAssert.IsMatch(
+                "Database .* contained unsupported .* characters",
+                Assert.Throws<RuntimeNameException>(()=>database.Server.ExpectDatabase(horribleDatabaseName))
+                    .Message);
+
+            //ExpectTable with illegal name
+            StringAssert.IsMatch(
+                "Table .* contained unsupported .* characters",
+                Assert.Throws<RuntimeNameException>(()=>database.ExpectTable(horribleTableName))
+                    .Message);
+            
+            //CreateTable with illegal name
+            StringAssert.IsMatch(
+                "Table .* contained unsupported .* characters",
+                Assert.Throws<RuntimeNameException>(()=> database.CreateTable(horribleTableName, new DatabaseColumnRequest[]
+                {
+                    new DatabaseColumnRequest("a", new DatabaseTypeRequest(typeof(string), 10))
+                })).Message);
+
+            //CreateTable with (column) illegal name
+            StringAssert.IsMatch(
+                "Column .* contained unsupported .* characters",
+                Assert.Throws<RuntimeNameException>(()=> database.CreateTable("f", new DatabaseColumnRequest[]
+                {
+                    new DatabaseColumnRequest(columnName, new DatabaseTypeRequest(typeof(string), 10))
+                })).Message);
+
+            AssertCanCreateDatabases();
+            
+            //CreateDatabase with illegal name
+            StringAssert.IsMatch(
+                "Database .* contained unsupported .* characters",
+                Assert.Throws<RuntimeNameException>(()=>database.Server.CreateDatabase(horribleDatabaseName))
+                    .Message);
+        }
+
         [TestCase(DatabaseType.MySql, "_-o-_", ":>0<:","-_")]
         [TestCase(DatabaseType.MySql, "Comment", "SSSS", "Space Out")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "_-o-_", ":>0<:", "-_")]
@@ -790,6 +838,8 @@ namespace FAnsiTests
 
             database = database.Server.ExpectDatabase(horribleDatabaseName);
             database.Create(true);
+            StringAssert.AreEqualIgnoringCase(horribleDatabaseName,database.GetRuntimeName());
+
             try
             {
                 var dt = new DataTable();

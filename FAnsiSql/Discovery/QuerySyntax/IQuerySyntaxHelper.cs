@@ -63,6 +63,23 @@ namespace FAnsi.Discovery.QuerySyntax
         bool IsValidParameterName(string parameterSQL);
 
         string AliasPrefix { get; }
+        
+        /// <summary>
+        /// The maximum number of characters allowed in database names according to the DBMS
+        /// </summary>
+        int MaximumDatabaseLength { get; }
+
+        /// <summary>
+        /// The maximum number of characters allowed in table names according to the DBMS
+        /// </summary>
+        int MaximumTableLength { get; }
+
+        /// <summary>
+        /// The maximum number of characters allowed in column names according to the DBMS
+        /// </summary>
+        int MaximumColumnLength { get; }
+
+
         bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string alias);
 
         string GetScalarFunctionSql(MandatoryScalarFunctions function);
@@ -114,6 +131,22 @@ namespace FAnsi.Discovery.QuerySyntax
         /// <param name="culture"></param>
         /// <returns></returns>
         DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn,object value,CultureInfo culture);
+
+        /// <summary>
+        /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        /// <param name="database"></param>
+        void ValidateDatabaseName(string database);
+
+        /// <summary>
+        /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        void ValidateTableName(string tableName);
+
+        /// <summary>
+        /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        void ValidateColumnName(string columnName);
     }
 
     public enum MandatoryScalarFunctions
