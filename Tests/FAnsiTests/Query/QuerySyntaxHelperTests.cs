@@ -116,5 +116,23 @@ namespace FAnsiTests.Query
             Assert.AreEqual("bob",alias);
         }
 
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.Oracle)]
+        public void Test_NameValidation(DatabaseType dbType)
+        {
+            ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
+            var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
+
+            Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName(null));
+            Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName("  "));
+            Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName("db.table"));
+            Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName("db(lol)"));
+            Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName(new string('A', syntaxHelper.MaximumDatabaseLength+1)));
+
+            Assert.DoesNotThrow(()=>syntaxHelper.ValidateDatabaseName("A"));
+            Assert.DoesNotThrow(()=>syntaxHelper.ValidateDatabaseName(new string('A', syntaxHelper.MaximumDatabaseLength)));
+        }
+
     }
 }

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added (DBMS specific) awareness of maximum table/database/column lengths into `IQuerySyntaxHelper`
+- Create / Discover methods now validate the provided names before sending Sql to the DBMS (prevents attempts to create table names that are too long for the DBMS or entities containing periods or brackets)
 
 ### Fixed 
 - Oracle no longer truncates strings in GetRuntimeName to 30

@@ -131,6 +131,22 @@ namespace FAnsi.Discovery.QuerySyntax
         /// <param name="culture"></param>
         /// <returns></returns>
         DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn,object value,CultureInfo culture);
+
+        /// <summary>
+        /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        /// <param name="database"></param>
+        void ValidateDatabaseName(string database);
+
+        /// <summary>
+        /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        void ValidateTableName(string tableName);
+
+        /// <summary>
+        /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        void ValidateColumnName(string columnName);
     }
 
     public enum MandatoryScalarFunctions

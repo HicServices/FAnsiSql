@@ -135,6 +135,11 @@ namespace FAnsi.Discovery
             var server = database.Server;
             var syntaxHelper = server.GetQuerySyntaxHelper();
 
+            syntaxHelper.ValidateTableName(tableName);
+
+            foreach (DatabaseColumnRequest c in columns)
+                syntaxHelper.ValidateColumnName(c.ColumnName);
+
             //the name sans brackets (hopefully they didn't pass any brackets)
             tableName = syntaxHelper.GetRuntimeName(tableName);
 

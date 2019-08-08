@@ -182,6 +182,8 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public DiscoveredDatabase ExpectDatabase(string database)
         {
+            GetQuerySyntaxHelper().ValidateDatabaseName(database);
+
             var builder = Helper.ChangeDatabase(Builder, database);
             var server = new DiscoveredServer(builder);
             return new DiscoveredDatabase(server, database, Helper.GetQuerySyntaxHelper());

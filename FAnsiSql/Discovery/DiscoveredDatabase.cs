@@ -41,6 +41,8 @@ namespace FAnsi.Discovery
             _database = database;
             _querySyntaxHelper = querySyntaxHelper;
             Helper = server.Helper.GetDatabaseHelper();
+
+            _querySyntaxHelper.ValidateDatabaseName(database);
         }
 
         /// <summary>

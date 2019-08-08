@@ -23,6 +23,8 @@ namespace FAnsi.Discovery
         public abstract int MaximumTableLength { get; }
         public abstract int MaximumColumnLength { get; }
 
+        public virtual char[] IllegalNameChars { get; } = new []{'.','(',')'};
+
         /// <summary>
         /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
         /// </summary>
@@ -381,6 +383,31 @@ namespace FAnsi.Discovery
             }            
 
             return p;
+        }
+
+        public void ValidateDatabaseName(string databaseName)
+        {
+            ValidateName(databaseName, "Database", MaximumDatabaseLength);
+        }
+        public void ValidateTableName(string tableName)
+        {
+            ValidateName(tableName, "Table", MaximumTableLength);
+        }
+        public void ValidateColumnName(string columnName)
+        {
+            ValidateName(columnName, "Column", MaximumColumnLength);
+        }
+
+        private void ValidateName(string candidate, string objectType, int maximumLengthAllowed)
+        {
+            if(string.IsNullOrWhiteSpace(candidate))
+                throw new RuntimeNameException($"{objectType} name cannot be blank");
+
+            if(candidate.Length > maximumLengthAllowed)
+                throw new RuntimeNameException($"{objectType} name \"{candidate.Substring(0,maximumLengthAllowed)}\" is too long for the DBMS ({DatabaseType} supports maximum length of {maximumLengthAllowed})");
+
+            if(candidate.IndexOfAny(IllegalNameChars) != -1)
+                throw new RuntimeNameException($"{objectType} name \"{candidate}\" contained unsupported (by FAnsi) characters.  Unsupported characters are:{new string(IllegalNameChars)}");
         }
 
         public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
