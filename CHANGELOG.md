@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+### Added
+
+- Added (DBMS specific) awareness of maximum table/database/column lengths into `IQuerySyntaxHelper`
+
+### Fixed 
+- Oracle no longer truncates strings in GetRuntimeName to 30
 
 ## [0.9.4] - 2019-07-29
 

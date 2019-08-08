@@ -63,6 +63,23 @@ namespace FAnsi.Discovery.QuerySyntax
         bool IsValidParameterName(string parameterSQL);
 
         string AliasPrefix { get; }
+        
+        /// <summary>
+        /// The maximum number of characters allowed in database names according to the DBMS
+        /// </summary>
+        int MaximumDatabaseLength { get; }
+
+        /// <summary>
+        /// The maximum number of characters allowed in table names according to the DBMS
+        /// </summary>
+        int MaximumTableLength { get; }
+
+        /// <summary>
+        /// The maximum number of characters allowed in column names according to the DBMS
+        /// </summary>
+        int MaximumColumnLength { get; }
+
+
         bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string alias);
 
         string GetScalarFunctionSql(MandatoryScalarFunctions function);

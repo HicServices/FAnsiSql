@@ -9,6 +9,10 @@ namespace FAnsi.Implementations.MySql
 {
     public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
     {
+        public override int MaximumDatabaseLength => 64;
+        public override int MaximumTableLength => 64;
+        public override int MaximumColumnLength => 64;
+
         public MySqlQuerySyntaxHelper() : base(new MySqlTypeTranslater(), new MySqlAggregateHelper(),new MySqlUpdateHelper(),DatabaseType.MySql)//no specific type translation required
         {
         }

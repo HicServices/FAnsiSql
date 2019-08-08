@@ -19,6 +19,10 @@ namespace FAnsi.Discovery
     {
         public abstract string DatabaseTableSeparator { get; }
         
+        public abstract int MaximumDatabaseLength { get; }
+        public abstract int MaximumTableLength { get; }
+        public abstract int MaximumColumnLength { get; }
+
         /// <summary>
         /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
         /// </summary>
