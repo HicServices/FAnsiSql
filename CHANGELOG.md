@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.9.6] - 2019-08-09
+
+### Fixed
+
+- Improved error messages in Sql Server for failed bulk insert
+- Reduced MaximumDatabaseLength in Sql Server to 100 (previously 124) to allow for longer default log file suffixes
+ 
+
 ## [0.9.5] - 2019-08-08
 
 ### Added
@@ -52,7 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.9.5...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.9.6...develop
+[0.9.6]: https://github.com/HicServices/FAnsiSql/compare/0.9.5...0.9.6
 [0.9.5]: https://github.com/HicServices/FAnsiSql/compare/0.9.4...0.9.5
 [0.9.4]: https://github.com/HicServices/FAnsiSql/compare/0.9.3...0.9.4
 [0.9.3]: https://github.com/HicServices/FAnsiSql/compare/0.9.2...0.9.3
