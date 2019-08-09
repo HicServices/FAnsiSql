@@ -289,8 +289,12 @@ namespace FAnsiTests.Table
 
             var table = db.CreateTable("GoGo",dt);
 
-            //It seems that some server versions return "???" instead of "?" for unknown unicode
-            StringAssert.StartsWith(expectedAnswer??testString, (string)table.GetDataTable().Rows[0][0]);
+            var dbValue = (string) table.GetDataTable().Rows[0][0];
+
+            if(expectedAnswer != null)
+                Assert.IsTrue(dbValue.Equals(testString) || dbValue.Equals(expectedAnswer),$"Database value was '{dbValue}' (expected it to be {testString} or {expectedAnswer}");
+            else
+                Assert.IsTrue(dbValue.Equals(testString),$"Database value was '{dbValue}' (expected it to be {testString}");
 
             table.Drop();
         }

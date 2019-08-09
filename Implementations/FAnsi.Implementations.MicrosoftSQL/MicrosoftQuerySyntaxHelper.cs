@@ -23,8 +23,11 @@ namespace FAnsi.Implementations.MicrosoftSQL
            get { return "."; }
         }
         
-        //See: https://stackoverflow.com/a/5096245/4824531
-        public override int MaximumDatabaseLength => 124;
+        /// <summary>
+        /// Maximum database name length.  This is less than 128 in order to allow for "_logs" etc getting appended to end.
+        /// See: https://stackoverflow.com/a/5096245/4824531 
+        /// </summary>
+        public override int MaximumDatabaseLength => 100; 
         public override int MaximumTableLength => 128;
         public override int MaximumColumnLength => 128;
 
