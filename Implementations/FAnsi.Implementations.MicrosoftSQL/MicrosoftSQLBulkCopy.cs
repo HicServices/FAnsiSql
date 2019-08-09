@@ -60,84 +60,162 @@ namespace FAnsi.Implementations.MicrosoftSQL
             {
                 //user does not want to replay the load one line at a time to get more specific error messages
                 if (serverForLineByLineInvestigation == null)
-                    throw;
+                {
+                    if(BcpColIdToString(insert,e as SqlException, out string result1, out _))
+                        throw new Exception("Failed to bulk insert:" + result1,e);  //but we can still give him a better message than "bcp colid 1 was bad"!
+                }
+                else
+                {
+                    Exception better;
+                    try
+                    {
+                        //we can attempt line by line insert to find the bad row
+                        better = AttemptLineByLineInsert(e,insert,dt,serverForLineByLineInvestigation);
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new AggregateException("Failed to bulk insert batch, line by line investigation also failed.  InnerException[0] is the original Exception, InnerException[1] is the line by line failure",e, exception);
+                    }
 
-                int line = 1;
-                string baseException = ExceptionToListOfInnerMessages(e, true);
-                baseException = baseException.Replace(Environment.NewLine, Environment.NewLine + "\t");
-                baseException = Environment.NewLine + "First Pass Exception:" + Environment.NewLine + baseException;
-                baseException += Environment.NewLine + "Second Pass Exception:";
+                    throw better;
+                }
+                    
 
-                DiscoveredColumn[] destinationColumnsContainedInMapping;
+                throw;
+                
+            }
+        }
+
+        /// <summary>
+        /// Creates a new transaction and does one line at a time bulk insertions of the <paramref name="insert"/> to determine which line (and value)
+        /// is causing the problem.  Transaction is always rolled back.
+        /// 
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="insert"></param>
+        /// <param name="dt"></param>
+        /// <param name="serverForLineByLineInvestigation"></param>
+        /// <returns></returns>
+        private Exception AttemptLineByLineInsert(Exception e, SqlBulkCopy insert, DataTable dt, DiscoveredServer serverForLineByLineInvestigation)
+        {
+            int line = 1;
+            string firstPass = ExceptionToListOfInnerMessages(e, true);
+            firstPass = firstPass.Replace(Environment.NewLine, Environment.NewLine + "\t");
+            firstPass = Environment.NewLine + "First Pass Exception:" + Environment.NewLine + firstPass;
+            
+            //have to use a new object because current one could have a broken transaction associated with it
+            using (var con = (SqlConnection)serverForLineByLineInvestigation.GetConnection())
+            {
+                con.Open();
+                SqlTransaction investigationTransaction = con.BeginTransaction("Investigate BulkCopyFailure");
+                SqlBulkCopy investigationOneLineAtATime = new SqlBulkCopy(con, SqlBulkCopyOptions.KeepIdentity, investigationTransaction)
+                {
+                    DestinationTableName = insert.DestinationTableName
+                };
+
+                foreach (SqlBulkCopyColumnMapping m in insert.ColumnMappings)
+                    investigationOneLineAtATime.ColumnMappings.Add(m);
+
+                //try a line at a time
+                foreach (DataRow dr in dt.Rows)
+                    try
+                    {
+                        investigationOneLineAtATime.WriteToServer(new[] { dr }); //try one line
+                        line++;
+                    }
+                    catch (Exception exception)
+                    {
+                        if (BcpColIdToString(investigationOneLineAtATime,exception as SqlException,out string result, out SqlBulkCopyColumnMapping badMapping))
+                        {
+                            if (dt.Columns.Contains(badMapping.SourceColumn))
+                            {
+                                var sourceValue = dr[badMapping.SourceColumn];
+                                var destColumn = base.TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
+
+                                if(destColumn != null)
+                                    return new FileLoadException(
+                                        "BulkInsert failed on data row " + line + " the complaint was about source column <<" + badMapping.SourceColumn + ">> which had value <<" + sourceValue + ">> destination data type was <<" + destColumn.DataType + ">>" + Environment.NewLine + result, exception);
+                            }
+
+                            return new Exception("BulkInsert failed on data row " + line + ":" + result, e);
+                        }
+                        
+                        return  new FileLoadException(
+                            "Second Pass Exception: Failed to load data row " + line + " the following values were rejected by the database: " +
+                            Environment.NewLine + 
+                            string.Join(Environment.NewLine,dr.ItemArray)
+                            + firstPass,
+                            exception);
+                    }
+
+                //it worked... how!?
+                investigationTransaction.Rollback();
+                con.Close();
+
+                return new Exception("Second Pass Exception: Bulk insert failed but when we tried to repeat it a line at a time it worked... very strange" + firstPass , e);
+            }
+        }
+
+        /// <summary>
+        /// Inspects exception message <paramref name="ex"/> for references to bcp client colid and displays the user recognizable name of the column.
+        /// </summary>
+        /// <param name="insert"></param>
+        /// <param name="ex">The Exception you caught.  If null method returns false and output variables are null.</param>
+        /// <param name="newMessage"></param>
+        /// <param name="badMapping"></param>
+        /// <returns></returns>
+        private bool BcpColIdToString(SqlBulkCopy insert, SqlException ex, out string newMessage, out SqlBulkCopyColumnMapping badMapping)
+        {
+            if (ex == null)
+            {
+                newMessage = null;
+                badMapping = null;
+                return false;
+            }
+
+            Regex columnLevelComplaint = new Regex("bcp client for colid (\\d+)");
+            Match match = columnLevelComplaint.Match(ex.Message);
+            
+            if (match.Success)
+            {
+                //it counts from 1 not 0.  Also it isn't an index into insert.ColumnMappings.  It's an index into a private field!
+                int columnItHates = Convert.ToInt32(match.Groups[1].Value) -1;
 
                 try
                 {
-                    var dest = serverForLineByLineInvestigation.GetCurrentDatabase().ExpectTable(insert.DestinationTableName);
-                    destinationColumnsContainedInMapping = dest.DiscoverColumns().Where(c => insert.ColumnMappings.Cast<SqlBulkCopyColumnMapping>().Any(m => m.DestinationColumn == c.GetRuntimeName())).ToArray();
+                    FieldInfo fi = typeof(SqlBulkCopy).GetField("_sortedColumnMappings", BindingFlags.NonPublic | BindingFlags.Instance);
+                    var sortedColumns = fi.GetValue(insert);
+                    var items = (Object[])sortedColumns.GetType().GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(sortedColumns);
+
+                    FieldInfo itemdata = items[columnItHates].GetType().GetField("_metadata", BindingFlags.NonPublic | BindingFlags.Instance);
+                    var metadata = itemdata.GetValue(items[columnItHates]);
+                
+                    string destinationColumn = (string)metadata.GetType().GetField("column", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetValue(metadata);
+                
+                    var length = metadata.GetType().GetField("length", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetValue(metadata);
+
+                    badMapping = insert.ColumnMappings.Cast<SqlBulkCopyColumnMapping>()
+                        .SingleOrDefault(m => string.Equals(m.DestinationColumn , destinationColumn, StringComparison.CurrentCultureIgnoreCase));
+                
+                    newMessage = ex.Message.Insert(match.Index + match.Length,
+                        $"(Source Column <<{badMapping?.SourceColumn??"unknown"}>> Dest Column <<{destinationColumn}>> which has MaxLength of {length})");
+                
+                    return true;
                 }
                 catch (Exception)
                 {
-                    throw e; //couldn't even enumerate the destination columns, whatever the original Exception was it must be serious, just rethrow it
+                    //private fields in SqlBulkCopy have changed name?
+                    newMessage = ex.Message;
+                    badMapping = null;
+                    return false;
                 }
-
-                //have to use a new object because current one could have a broken transaction associated with it
-                using (var con = (SqlConnection)serverForLineByLineInvestigation.GetConnection())
-                {
-                    con.Open();
-                    SqlTransaction investigationTransaction = con.BeginTransaction("Investigate BulkCopyFailure");
-                    SqlBulkCopy investigationOneLineAtATime = new SqlBulkCopy(con, SqlBulkCopyOptions.KeepIdentity, investigationTransaction)
-                    {
-                        DestinationTableName = insert.DestinationTableName
-                    };
-
-                    foreach (SqlBulkCopyColumnMapping m in insert.ColumnMappings)
-                        investigationOneLineAtATime.ColumnMappings.Add(m);
-
-                    //try a line at a time
-                    foreach (DataRow dr in dt.Rows)
-                        try
-                        {
-                            investigationOneLineAtATime.WriteToServer(new[] { dr }); //try one line
-                            line++;
-                        }
-                        catch (Exception exception)
-                        {
-                            Regex columnLevelComplaint = new Regex("bcp client for colid (\\d+)");
-
-                            Match match = columnLevelComplaint.Match(exception.Message);
-
-                            if (match.Success)
-                            {
-                                //it counts from 1 because its stupid, hence to get our column index we subtract 1 from whatever column it is complaining about
-                                int columnItHates = Convert.ToInt32(match.Groups[1].Value) - 1;
-
-                                if (destinationColumnsContainedInMapping.Length > columnItHates)
-                                {
-                                    var offendingColumn = destinationColumnsContainedInMapping[columnItHates];
-
-                                    if (dt.Columns.Contains(offendingColumn.GetRuntimeName()))
-                                    {
-                                        var sourceValue = dr[offendingColumn.GetRuntimeName()];
-                                        throw new FileLoadException(baseException + "BulkInsert complained on data row " + line + " the complaint was about column number " + columnItHates + ": <<" + offendingColumn.GetRuntimeName() + ">> which had value <<" + sourceValue + ">> destination data type was <<" + offendingColumn.DataType + ">>", exception);
-                                    }
-                                }
-                            }
-
-                            throw new FileLoadException(
-                                baseException + "Failed to load data row " + line + " the following values were rejected by the database: " +
-                                Environment.NewLine + dr.ItemArray.Aggregate((o, n) => o + Environment.NewLine + n),
-                                exception);
-                        }
-
-                    //it worked... how!?
-                    investigationTransaction.Rollback();
-                    con.Close();
-
-                    throw new Exception(baseException + "Bulk insert failed but when we tried to repeat it a line at a time it worked... very strange", e);
-                }
-
             }
+            
+            newMessage = ex.Message;
+            badMapping = null;
+            return false;
         }
+
         private static void EmptyStringsToNulls(DataTable dt)
         {
             foreach (var col in dt.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(string)))
