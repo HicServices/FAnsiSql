@@ -38,11 +38,13 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
                     //add views if we are including them
                     if (includeViews && r["TABLE_TYPE"].Equals("VIEW"))
-                        tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.View));
+                        if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
+                            tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.View));
 
                     //add tables
                     if (r["TABLE_TYPE"].Equals("TABLE"))
-                        tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.Table));
+                        if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
+                            tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.Table));
                 }
             
             return tables.ToArray();

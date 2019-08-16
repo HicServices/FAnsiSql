@@ -79,7 +79,11 @@ namespace FAnsi.Implementations.MySql
                 if(isView && !includeViews)
                     continue;
                 
-                tables.Add(new DiscoveredTable(parent,r[0] as string,querySyntaxHelper,null,isView ? TableType.View : TableType.Table));//this table fieldname will be something like Tables_in_mydbwhatevernameitis
+                //skip invalid table names
+                if(!querySyntaxHelper.IsValidTableName((string)r[0],out _))
+                    continue;
+
+                tables.Add(new DiscoveredTable(parent,(string)r[0],querySyntaxHelper,null,isView ? TableType.View : TableType.Table));//this table fieldname will be something like Tables_in_mydbwhatevernameitis
             }
                 
             
