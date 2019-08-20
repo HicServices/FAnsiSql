@@ -387,28 +387,60 @@ namespace FAnsi.Discovery
 
         public void ValidateDatabaseName(string databaseName)
         {
-            ValidateName(databaseName, "Database", MaximumDatabaseLength);
+            if(!IsValidDatabaseName(databaseName,out string reason))
+                throw new RuntimeNameException(reason);
         }
         public void ValidateTableName(string tableName)
         {
-            ValidateName(tableName, "Table", MaximumTableLength);
+            if(!IsValidTableName(tableName,out string reason))
+                throw new RuntimeNameException(reason);
         }
         public void ValidateColumnName(string columnName)
         {
-            ValidateName(columnName, "Column", MaximumColumnLength);
+            if(!IsValidColumnName(columnName,out string reason))
+                throw new RuntimeNameException(reason);
         }
 
-        private void ValidateName(string candidate, string objectType, int maximumLengthAllowed)
+        public bool IsValidDatabaseName(string databaseName,out string reason)
+        {
+            reason = ValidateName(databaseName, "Database", MaximumDatabaseLength);
+            return string.IsNullOrWhiteSpace(reason);
+        }
+        
+        public bool IsValidTableName(string tableName,out string reason)
+        {
+            reason = ValidateName(tableName, "Table", MaximumTableLength);
+            return string.IsNullOrWhiteSpace(reason);
+        }
+
+        public bool IsValidColumnName(string columnName,out string reason)
+        {
+            reason = ValidateName(columnName, "Column", MaximumColumnLength);
+            return string.IsNullOrWhiteSpace(reason);
+        }
+
+        /// <summary>
+        /// returns null if the name is valid.  Otherwise a string describing why it is invalid.
+        /// </summary>
+        /// <param name="candidate"></param>
+        /// <param name="objectType"></param>
+        /// <param name="maximumLengthAllowed"></param>
+        /// <returns></returns>
+        private string ValidateName(string candidate, string objectType, int maximumLengthAllowed)
         {
             if(string.IsNullOrWhiteSpace(candidate))
-                throw new RuntimeNameException($"{objectType} name cannot be blank");
+                return $"{objectType} name cannot be blank";
 
             if(candidate.Length > maximumLengthAllowed)
-                throw new RuntimeNameException($"{objectType} name \"{candidate.Substring(0,maximumLengthAllowed)}\" is too long for the DBMS ({DatabaseType} supports maximum length of {maximumLengthAllowed})");
+                return $"{objectType} name \"{candidate.Substring(0,maximumLengthAllowed)}\" is too long for the DBMS ({DatabaseType} supports maximum length of {maximumLengthAllowed})";
 
             if(candidate.IndexOfAny(IllegalNameChars) != -1)
-                throw new RuntimeNameException($"{objectType} name \"{candidate}\" contained unsupported (by FAnsi) characters.  Unsupported characters are:{new string(IllegalNameChars)}");
+                return $"{objectType} name \"{candidate}\" contained unsupported (by FAnsi) characters.  Unsupported characters are:{new string(IllegalNameChars)}";
+
+            return null;
         }
+
+        
 
         public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
         {

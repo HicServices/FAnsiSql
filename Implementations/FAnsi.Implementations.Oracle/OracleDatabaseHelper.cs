@@ -63,7 +63,9 @@ namespace FAnsi.Implementations.Oracle
                 var r = cmd.ExecuteReader();
 
                 while (r.Read())
-                    tables.Add(new DiscoveredTable(parent,r["table_name"].ToString(),querySyntaxHelper));
+                    //skip invalid table names
+                    if(querySyntaxHelper.IsValidTableName((string)r["table_name"],out _))
+                        tables.Add(new DiscoveredTable(parent,r["table_name"].ToString(),querySyntaxHelper));
             }
             
             //find all the views
@@ -74,7 +76,8 @@ namespace FAnsi.Implementations.Oracle
                     var r = cmd.ExecuteReader();
                 
                     while (r.Read())
-                        tables.Add(new DiscoveredTable(parent,r["view_name"].ToString(),querySyntaxHelper,null,TableType.View));
+                        if(querySyntaxHelper.IsValidTableName((string)r["view_name"],out _))
+                            tables.Add(new DiscoveredTable(parent,r["view_name"].ToString(),querySyntaxHelper,null,TableType.View));
                 }
 
             

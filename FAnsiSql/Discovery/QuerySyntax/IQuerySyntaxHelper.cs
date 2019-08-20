@@ -147,6 +147,22 @@ namespace FAnsi.Discovery.QuerySyntax
         /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
         /// </summary>
         void ValidateColumnName(string columnName);
+        
+        /// <summary>
+        /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        bool IsValidDatabaseName(string databaseName, out string reason);
+
+        /// <summary>
+        /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        bool IsValidTableName(string tableName, out string reason);
+
+        /// <summary>
+        /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
+        /// </summary>
+        bool IsValidColumnName(string columnName, out string reason);
+
     }
 
     public enum MandatoryScalarFunctions
