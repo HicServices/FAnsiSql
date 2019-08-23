@@ -22,8 +22,19 @@ namespace FAnsi.Implementations.MySql
             List<DiscoveredColumn> columns = new List<DiscoveredColumn>();
             var tableName = discoveredTable.GetRuntimeName();
             
-            DbCommand cmd = discoveredTable.Database.Server.Helper.GetCommand("SHOW FULL COLUMNS FROM `" + database + "`.`" + tableName + "`", connection.Connection);
+            DbCommand cmd = discoveredTable.Database.Server.Helper.GetCommand(
+                @"SELECT * FROM information_schema.`COLUMNS` 
+WHERE table_schema = @db
+  AND table_name = @tbl", connection.Connection);
             cmd.Transaction = connection.Transaction;
+
+            var p = new MySqlParameter("@db", MySqlDbType.String);
+            p.Value = discoveredTable.Database.GetRuntimeName();
+            cmd.Parameters.Add(p);
+
+            p = new MySqlParameter("@tbl", MySqlDbType.String);
+            p.Value = discoveredTable.GetRuntimeName();
+            cmd.Parameters.Add(p);
 
             using(DbDataReader r = cmd.ExecuteReader())
             {
@@ -32,15 +43,18 @@ namespace FAnsi.Implementations.MySql
 
                 while (r.Read())
                 {
-                    var toAdd = new DiscoveredColumn(discoveredTable, (string) r["Field"],YesNoToBool(r["Null"]));
+                    var toAdd = new DiscoveredColumn(discoveredTable, (string) r["COLUMN_NAME"],YesNoToBool(r["IS_NULLABLE"]));
 
-                    if (r["Key"].Equals("PRI"))
+                    if (r["COLUMN_KEY"].Equals("PRI"))
                         toAdd.IsPrimaryKey = true;
                     
                     toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
-                    toAdd.Collation = r["Collation"] as string;
-                    
-                    toAdd.DataType = new DiscoveredDataType(r,TrimIntDisplayValues(r["Type"].ToString()),toAdd);
+                    toAdd.Collation = r["COLLATION_NAME"] as string;
+
+                    //todo the only way to know if something in MySql is unicode is by r["character_set_name"] 
+
+
+                    toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
                     columns.Add(toAdd);
 
                 }

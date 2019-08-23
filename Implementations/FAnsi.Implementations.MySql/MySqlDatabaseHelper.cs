@@ -50,6 +50,25 @@ namespace FAnsi.Implementations.MySql
             return toReturn;
         }
 
+        protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
+        {
+            //if it is not unicode then that's fine
+            if(col.TypeRequested == null || !col.TypeRequested.Unicode)
+                return base.GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper);
+
+            //MySql unicode is not a data type it's a character set/collation only
+
+            return string.Format("{0} {1} {2} {3} {4} {5} {6}",
+                syntaxHelper.EnsureWrapped(col.ColumnName),
+                datatype,
+                "CHARACTER SET utf8",
+                col.Default != MandatoryScalarFunctions.None ? "default " + syntaxHelper.GetScalarFunctionSql(col.Default) : "",
+                string.IsNullOrWhiteSpace(col.Collation) ? "" : "COLLATE " + col.Collation,
+                col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL",
+                col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : ""
+            );
+        }
+
         public override DirectoryInfo Detach(DiscoveredDatabase database)
         {
             throw new NotImplementedException();
