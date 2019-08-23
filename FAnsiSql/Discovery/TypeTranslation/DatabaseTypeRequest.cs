@@ -31,6 +31,12 @@ namespace FAnsi.Discovery.TypeTranslation
         public int? MaxWidthForStrings { get; set; }
         public DecimalSize DecimalPlacesBeforeAndAfter { get; set; }
 
+        /// <summary>
+        /// Only applies when <see cref="CSharpType"/> is <see cref="string"/>.  True indicates that the column should be
+        /// nvarchar instead of varchar.
+        /// </summary>
+        public bool Unicode { get;set;}
+
         public DatabaseTypeRequest(Type cSharpType, int? maxWidthForStrings = null,
             DecimalSize decimalPlacesBeforeAndAfter = null)
         {
@@ -79,13 +85,21 @@ namespace FAnsi.Discovery.TypeTranslation
         {
             //if types differ
             if (PreferenceOrder.IndexOf(first.CSharpType) < PreferenceOrder.IndexOf(second.CSharpType))
+            {
+                second.Unicode = first.Unicode || second.Unicode;
                 return second;
-
+            }
+            
             if (PreferenceOrder.IndexOf(first.CSharpType) > PreferenceOrder.IndexOf(second.CSharpType))
+            {
+                first.Unicode = first.Unicode || second.Unicode;
                 return first;
+            }
             
             if(!(first.CSharpType == second.CSharpType))
                 throw new NotSupportedException("Cannot Max DatabaseTypeRequests because they were of differing Types and neither Type appeared in the PreferenceOrder (Types were '" + first.CSharpType +"' and '" + second.CSharpType + "')");
+
+            //Types are the same, so max the sub elements (width, DecimalSize etc)
 
             int? newMaxWidthIfStrings = first.MaxWidthForStrings;
 
@@ -100,7 +114,8 @@ namespace FAnsi.Discovery.TypeTranslation
                 first.CSharpType,
                 newMaxWidthIfStrings,
                 DecimalSize.Combine(first.DecimalPlacesBeforeAndAfter, second.DecimalPlacesBeforeAndAfter)
-                );
+                )
+                {Unicode = first.Unicode || second.Unicode};
 
         }
     }

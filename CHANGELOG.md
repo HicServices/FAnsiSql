@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added method `IsValidDatabaseName` (and table/column variants) to `QuerySyntaxHelper`.  This allows testing strings without try/catch
 - `DecimalTypeDecider` now recognises floating poing notation e.g. "-4.10235746055587E-05"
+- Support for unicode text
 
 ### Fixed
 

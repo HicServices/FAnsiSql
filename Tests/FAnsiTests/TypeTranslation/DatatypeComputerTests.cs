@@ -635,6 +635,9 @@ namespace FAnsiTests.TypeTranslation
         {
             var t = new DataTypeComputer();
             t.AdjustToCompensateForValue(word);
+            
+            //computer should have picked up that it needs unicode
+            Assert.IsTrue(t.UseUnicode);
 
             //in most DBMS
             Assert.AreEqual(t.Length,word.Length);

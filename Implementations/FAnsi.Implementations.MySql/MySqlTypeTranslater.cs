@@ -28,7 +28,12 @@ namespace FAnsi.Implementations.MySql
         {
             return "text";
         }
-        
+
+        public override string GetUnicodeStringDataTypeWithUnlimitedWidth()
+        {
+            return "text";
+        }
+
         protected override bool IsInt(string sqlType)
         {
             //not an int

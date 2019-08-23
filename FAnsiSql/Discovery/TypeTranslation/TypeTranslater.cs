@@ -75,7 +75,10 @@ namespace FAnsi.Discovery.TypeTranslation
                 return GetFloatingPointDataType(request.DecimalPlacesBeforeAndAfter);
 
             if (t == typeof(string))
-                return GetStringDataType(request.MaxWidthForStrings);
+                if(request.Unicode)
+                        return GetUnicodeStringDataType(request.MaxWidthForStrings);
+                    else
+                        return GetStringDataType(request.MaxWidthForStrings);
 
             if (t == typeof(DateTime) || t == typeof(DateTime?))
                 return GetDateDateTimeDataType();
@@ -133,6 +136,24 @@ namespace FAnsi.Discovery.TypeTranslation
 
         public abstract string GetStringDataTypeWithUnlimitedWidth();
         
+        
+        private string GetUnicodeStringDataType(int? maxExpectedStringWidth)
+        {
+            if (maxExpectedStringWidth == null)
+                return GetUnicodeStringDataTypeImpl(StringWidthWhenNotSupplied);
+
+            if (maxExpectedStringWidth > MaxStringWidthBeforeMax)
+                return GetUnicodeStringDataTypeWithUnlimitedWidth();
+            
+            return GetUnicodeStringDataTypeImpl(maxExpectedStringWidth.Value);
+        }
+
+        protected virtual string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth)
+        {
+            return "nvarchar(" + maxExpectedStringWidth + ")";
+        }
+
+        public abstract string GetUnicodeStringDataTypeWithUnlimitedWidth();
 
         protected virtual string GetTimeDataType()
         {
@@ -278,19 +299,35 @@ namespace FAnsi.Discovery.TypeTranslation
             if (cSharpType == typeof(TimeSpan))
                 lengthIfString = GetStringLengthForTimeSpan();
             
-            return new DatabaseTypeRequest(cSharpType,lengthIfString,digits);
+            var request = new DatabaseTypeRequest(cSharpType, lengthIfString, digits);
+
+            if (cSharpType == typeof(string))
+                request.Unicode = IsUnicode(sqlType);
+
+            return request;
+        }
+
+        /// <summary>
+        /// Returns true if the <paramref name="sqlType"/> (proprietary DBMS type) is a unicode string type e.g. "nvarchar".  Otherwise returns false
+        /// e.g. "varchar"
+        /// </summary>
+        /// <param name="sqlType"></param>
+        /// <returns></returns>
+        public virtual bool IsUnicode(string sqlType)
+        {
+            return sqlType != null && sqlType.StartsWith("n",StringComparison.CurrentCultureIgnoreCase);
         }
 
         public virtual DataTypeComputer GetDataTypeComputerFor(DiscoveredColumn discoveredColumn)
         {
             var reqType = GetDataTypeRequestForSQLDBType(discoveredColumn.DataType.SQLType);
-
-            return GetDataTypeComputer(reqType.CSharpType, reqType.DecimalPlacesBeforeAndAfter, reqType.MaxWidthForStrings??-1);
+            var req = GetDataTypeComputer(reqType.CSharpType, reqType.DecimalPlacesBeforeAndAfter, reqType.MaxWidthForStrings??-1,reqType.Unicode);
+            return req;
         }
 
-        protected virtual DataTypeComputer GetDataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString)
+        protected virtual DataTypeComputer GetDataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString, bool unicode)
         {
-            return new DataTypeComputer(currentEstimatedType,decimalSize,lengthIfString);
+            return new DataTypeComputer(currentEstimatedType,decimalSize,lengthIfString){UseUnicode = unicode};
         }
 
         public virtual int GetLengthIfString(string sqlType)
