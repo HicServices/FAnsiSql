@@ -510,6 +510,7 @@ namespace FAnsiTests.Table
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.MySql)]
         public void TestBulkInsert_Unicode(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);

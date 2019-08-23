@@ -61,9 +61,9 @@ namespace FAnsi.Implementations.MySql
             return string.Format("{0} {1} {2} {3} {4} {5} {6}",
                 syntaxHelper.EnsureWrapped(col.ColumnName),
                 datatype,
-                "CHARACTER SET utf8",
+                "CHARACTER SET utf8mb4",
                 col.Default != MandatoryScalarFunctions.None ? "default " + syntaxHelper.GetScalarFunctionSql(col.Default) : "",
-                string.IsNullOrWhiteSpace(col.Collation) ? "" : "COLLATE " + col.Collation,
+                "COLLATE " + (col.Collation  ?? "utf8mb4_bin"),
                 col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL",
                 col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : ""
             );
