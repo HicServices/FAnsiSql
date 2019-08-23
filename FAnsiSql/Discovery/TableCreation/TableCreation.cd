@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="FAnsi.Discovery.TableCreation.CreateTableArgs">
+    <Position X="0.5" Y="1.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAEAggAAEAAAgAAAABABAAUAAABAAAAAQAAAQAAAAA=</HashCode>
+      <FileName>Discovery\TableCreation\CreateTableArgs.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Adjuster" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="ColumnCreationLogic" />
+      <Property Name="ForeignKeyPairs" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="FAnsi.Discovery.TypeTranslation.DataTypeComputer">
+    <Position X="4.5" Y="2.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>CAABASAARAAgAAAAAAAAIgRAAAAACAgAIAAgAAQEAAA=</HashCode>
+      <FileName>Discovery\TypeTranslation\DataTypeComputer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FAnsi.Discovery.DiscoveredColumn" Collapsed="true">
+    <Position X="4.5" Y="8" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AARAIAAAAAIAAEAEgBAAQAAAABwAAICAAAAAAAACBAA=</HashCode>
+      <FileName>Discovery\DiscoveredColumn.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="FAnsi.Discovery.TableCreation.IDatabaseColumnRequestAdjuster" Collapsed="true">
+    <Position X="4.5" Y="1.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Discovery\TableCreation\IDatabaseColumnRequestAdjuster.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
