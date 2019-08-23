@@ -11,7 +11,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 
         protected override object ParseImpl(string value)
         {
-            return TryParseVague(value) != null;
+            return TryParseVague(value);
         }
 
         protected override bool IsAcceptableAsTypeImpl(string candidateString,DecimalSize sizeRecord)
