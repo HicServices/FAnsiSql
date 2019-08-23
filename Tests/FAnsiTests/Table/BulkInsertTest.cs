@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks.Dataflow;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
@@ -506,6 +507,42 @@ namespace FAnsiTests.Table
                 Assert.Fail();
 
         }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
+        public void TestBulkInsert_Unicode(DatabaseType dbType)
+        {
+            var db = GetTestDatabase(dbType);
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Yay");
+            dt.Rows.Add("乗 12345");
+
+            var table = db.CreateTable("GoGo", dt);
+
+            DataTable dt2 = new DataTable();
+            dt2.Columns.Add("yay");
+            dt2.Rows.Add("你好");
+
+            using (var insert = table.BeginBulkInsert())
+                insert.Upload(dt2);
+            
+            table.Insert(new Dictionary<string, object>() {{"Yay", "مرحبا"}});
+            
+            //now check that it all worked!
+
+            var dtResult = table.GetDataTable();
+            Assert.AreEqual(3,dtResult.Rows.Count);
+
+            //need to do this to allow Contains method to work
+            dtResult.PrimaryKey = new[] {dtResult.Columns[0]};
+            
+            //value fetched from database should match the one inserted
+            Assert.IsTrue(dtResult.Rows.Contains("乗 12345"));
+            Assert.IsTrue(dtResult.Rows.Contains("你好"));
+            Assert.IsTrue(dtResult.Rows.Contains("مرحبا"));
+            table.Drop();
+        }   
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
