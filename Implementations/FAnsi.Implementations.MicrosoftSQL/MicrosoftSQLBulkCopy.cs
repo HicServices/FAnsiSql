@@ -46,7 +46,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
             InspectDataTableForFloats(dt);
 
-            ConvertStringDatesToDateTime(dt);
+            ConvertStringTypesToHardTypes(dt);
 
             try
             {

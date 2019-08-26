@@ -36,6 +36,7 @@
   - [X] Decimal
   - [X] Date
   - [X] Auto Increment
+  - [ ] Unicode
 
 - Query
   - [X] Top X

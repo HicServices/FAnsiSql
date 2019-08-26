@@ -36,7 +36,8 @@
   - [X] Decimal
   - [X] Date
   - [X] Auto Increment (Requires Oracle 12c)
-
+  - [X] Unicode
+  
 - Query
   - [X] Top X (Requires Oracle 12c)
   - [X] JOIN UPDATE

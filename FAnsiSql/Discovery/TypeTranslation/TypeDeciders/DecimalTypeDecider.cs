@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 {
@@ -10,25 +11,38 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
 
         protected override object ParseImpl(string value)
         {
-            return decimal.Parse(value);
+            return TryParseVague(value);
         }
 
         protected override bool IsAcceptableAsTypeImpl(string candidateString,DecimalSize sizeRecord)
         {
-            decimal t;
+            decimal? t = TryParseVague(candidateString);
 
-            if (!decimal.TryParse(candidateString, out t))
+            if (t == null)
                 return false;
 
             int before;
             int after;
 
-            GetDecimalPlaces(t, out before, out after);
+            GetDecimalPlaces(t.Value, out before, out after);
 
             sizeRecord.IncreaseTo(before,after);
 
             //could be whole number with no decimal
             return true;
+        } 
+
+        private decimal? TryParseVague(string candidate)
+        {
+            decimal x;
+
+            if (decimal.TryParse(candidate, out x))
+                return x;
+
+            if (decimal.TryParse(candidate, NumberStyles.Float,CultureInfo.CurrentCulture, out x))
+                return x;
+
+            return null;
         }
 
         private void GetDecimalPlaces(decimal value, out int before, out int after)

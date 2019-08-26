@@ -270,16 +270,17 @@ namespace FAnsiTests.Table
         }
 
 
-        [TestCase(DatabaseType.MySql, "didn’t",null)] //<- it's a ’ not a '
-        [TestCase(DatabaseType.MicrosoftSQLServer, "didn’t",null)]
-        [TestCase(DatabaseType.Oracle, "didn’t",null)]
-        [TestCase(DatabaseType.MySql, "Æther",null)]
-        [TestCase(DatabaseType.MicrosoftSQLServer, "Æther",null)]
-        [TestCase(DatabaseType.Oracle,"Æther",null)]
-        [TestCase(DatabaseType.MySql,"乗","?")]
-        [TestCase(DatabaseType.MicrosoftSQLServer, "乗","?")]
-        [TestCase(DatabaseType.Oracle, "乗",null)]
-        public void Test_CreateTable_UnicodeStrings(DatabaseType type,string testString,string expectedAnswer)
+        
+        [TestCase(DatabaseType.MicrosoftSQLServer, "didn’t")] //<- it's a ’ not a '
+        [TestCase(DatabaseType.MicrosoftSQLServer, "Æther")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "乗")]
+        [TestCase(DatabaseType.Oracle, "didn’t")]
+        [TestCase(DatabaseType.Oracle,"Æther")]
+        [TestCase(DatabaseType.Oracle, "乗")]
+        //[TestCase(DatabaseType.MySql, "didn’t")]
+        //[TestCase(DatabaseType.MySql, "Æther")]
+        //[TestCase(DatabaseType.MySql,"乗")]
+        public void Test_CreateTable_UnicodeStrings(DatabaseType type,string testString)
         {
             var db = GetTestDatabase(type);
 
@@ -289,14 +290,21 @@ namespace FAnsiTests.Table
 
             var table = db.CreateTable("GoGo",dt);
 
-            var dbValue = (string) table.GetDataTable().Rows[0][0];
-
-            if(expectedAnswer != null)
-                Assert.IsTrue(dbValue.Equals(testString) || dbValue.Equals(expectedAnswer),$"Database value was '{dbValue}' (expected it to be {testString} or {expectedAnswer}");
-            else
-                Assert.IsTrue(dbValue.Equals(testString),$"Database value was '{dbValue}' (expected it to be {testString}");
-
+            //find the table column created
+            var col = table.DiscoverColumn("Yay");
+            
+            //value fetched from database should match the one inserted
+            var dbValue = (string) table.GetDataTable().Rows[0][0];           
+            Assert.AreEqual(testString,dbValue);
             table.Drop();
+
+            //column created should know it is unicode
+            var typeRequest = col.Table.GetQuerySyntaxHelper().TypeTranslater.GetDataTypeRequestForSQLDBType(col.DataType.SQLType);
+            Assert.IsTrue(typeRequest.Unicode, "Expected column DatabaseTypeRequest generated from column SQLType to be Unicode");
+
+            //Column created should use unicode when creating a new datatype computer from the col
+            var comp = col.GetDataTypeComputer();
+            Assert.IsTrue(comp.UseUnicode);
         }
     }
 }

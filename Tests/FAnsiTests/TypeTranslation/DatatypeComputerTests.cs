@@ -615,6 +615,19 @@ namespace FAnsiTests.TypeTranslation
             Assert.AreEqual(typeof(string), t.CurrentEstimate);
         }
         
+        [Test]
+        public void TestDataTypeComputer_ScientificNotation()
+        {
+            string val = "-4.10235746055587E-05"; //-0.0000410235746055587
+            DataTypeComputer t = new DataTypeComputer();
+            t.AdjustToCompensateForValue(val);
+            Assert.AreEqual(typeof(decimal), t.CurrentEstimate);
+            
+            //there is always 1 decimal place before point in order to allow for changing to string later on and retain a single leading 0.
+            Assert.AreEqual(1, t.DecimalSize.NumbersBeforeDecimalPlace);
+            Assert.AreEqual(19, t.DecimalSize.NumbersAfterDecimalPlace);
+        }
+
         [TestCase("didn’t")]
         [TestCase("Æther")]
         [TestCase("乗")]
@@ -622,6 +635,9 @@ namespace FAnsiTests.TypeTranslation
         {
             var t = new DataTypeComputer();
             t.AdjustToCompensateForValue(word);
+            
+            //computer should have picked up that it needs unicode
+            Assert.IsTrue(t.UseUnicode);
 
             //in most DBMS
             Assert.AreEqual(t.Length,word.Length);

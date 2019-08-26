@@ -28,9 +28,19 @@ namespace FAnsi.Implementations.Oracle
             return "varchar2(" + maxExpectedStringWidth + ")";
         }
 
+        protected override string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth)
+        {
+            return "nvarchar2(" + maxExpectedStringWidth + ")";
+        }
+
         public override string GetStringDataTypeWithUnlimitedWidth()
         {
             return "CLOB";
+        }
+
+        public override string GetUnicodeStringDataTypeWithUnlimitedWidth()
+        {
+            return "NCLOB";
         }
 
         protected override string GetTimeDataType()
@@ -112,9 +122,9 @@ namespace FAnsi.Implementations.Oracle
             return "DATE";
         }
 
-        protected override DataTypeComputer GetDataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString)
+        protected override DataTypeComputer GetDataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString, bool unicode)
         {
-            return new DataTypeComputer(currentEstimatedType, decimalSize, lengthIfString, ExtraLengthPerNonAsciiCharacter);
+            return new DataTypeComputer(currentEstimatedType, decimalSize, lengthIfString, ExtraLengthPerNonAsciiCharacter){UseUnicode = unicode};
         }
     }
 }

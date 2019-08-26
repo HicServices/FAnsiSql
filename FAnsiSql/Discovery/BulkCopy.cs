@@ -79,48 +79,61 @@ namespace FAnsi.Discovery
         /// <inheritdoc/>
         public virtual int Upload(DataTable dt)
         {
-            ConvertStringDatesToDateTime(dt);
-
+            ConvertStringTypesToHardTypes(dt);
+            
             return UploadImpl(dt);
         }
 
         public abstract int UploadImpl(DataTable dt);
 
         /// <summary>
-        /// Replaces all string representations destined to end up in DateTime or TimeSpan fields in the target database
-        /// into hard typed objects (using <see cref="DateTimeDecider"/>)
+        /// Replaces all string representations for data types that can be problematic/ambiguous (e.g. DateTime or TimeSpan)
+        ///  into hard typed objects using appropriate decider e.g. <see cref="DateTimeDecider"/>.
         /// </summary>
         /// <param name="dt"></param>
-        protected void ConvertStringDatesToDateTime(DataTable dt)
+        protected void ConvertStringTypesToHardTypes(DataTable dt)
         {
             var dict = GetMapping(dt.Columns.Cast<DataColumn>(),out _);
                     
+            //These are the problematic Types
+            Dictionary<Type,IDecideTypesForStrings> deciders = new Dictionary<Type, IDecideTypesForStrings>();
+            deciders.Add(typeof(DateTime),DateTimeDecider);
+            deciders.Add(typeof(TimeSpan),DateTimeDecider);
+            
+            var dec = new DecimalTypeDecider();
+            foreach (Type type in dec.TypesSupported)
+                deciders.Add(type, dec);
+            
             //for each column in the destination
             foreach(var kvp in dict)
             {
-                //if the destination column is a date based column
+                //if the destination column is a problematic type
                 var dataType = kvp.Value.DataType.GetCSharpDataType();
-                if(dataType == typeof(DateTime) || dataType == typeof(TimeSpan))
+                if(deciders.ContainsKey(dataType))
                 {
-                    //if it's already not a string then that's fine (hopefully its a DateTime!)
+                    //if it's already not a string then that's fine (hopefully its a legit Type e.g. DateTime!)
                     if(kvp.Key.DataType != typeof(string))
                         continue;
 
                     //create a new column hard typed to DateTime
                     var newColumn = dt.Columns.Add(kvp.Key.ColumnName + "_" + Guid.NewGuid().ToString(),dataType);
+
+                    var decider = deciders[dataType];
                     
-                    //guess the DateTime culture based on values in the table
-                    DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
+                    //if it's a DateTime decider then guess DateTime culture based on values in the table
+                    if(decider is DateTimeTypeDecider dtDecider)
+                        dtDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
 
                     foreach(DataRow dr in dt.Rows)
                     {
                         //parse the value
+                        var val = decider.Parse(dr[kvp.Key] as string)??DBNull.Value;
 
-                        var val = DateTimeDecider.Parse(dr[kvp.Key] as string)??DBNull.Value;
-                        if(dataType == typeof(DateTime))
-                            dr[newColumn] = val;
-                        else
+                        //if it's a timespan only use TimeOfDay
+                        if(dataType == typeof(TimeSpan))
                             dr[newColumn] = val == DBNull.Value? val:((DateTime)val).TimeOfDay;
+                        else
+                            dr[newColumn] = val;
                     }
 
                     //if the DataColumn is part of the Primary Key of the DataTable (in memory)

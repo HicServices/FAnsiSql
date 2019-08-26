@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Comment CommentText="FAnsi allows you to write CREATE table statements without knowing which DBMS you are targetting (Oracle, MySql, Sql Server).  Data types can either be expressed in C# e.g. &quot;Create a string type of 10 characters max length that can hold unicode&quot; or it can be calculated based on the data in an untyped/typed System.DataTable.">
+    <Position X="0.5" Y="0.5" Height="0.75" Width="6.679" />
+  </Comment>
+  <Class Name="FAnsi.Discovery.TableCreation.CreateTableArgs">
+    <Position X="0.5" Y="1.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAEAggAAEAAAgAAAABABAAUAAABAAAAAQAAAQAAAAA=</HashCode>
+      <FileName>Discovery\TableCreation\CreateTableArgs.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Adjuster" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="ColumnCreationLogic" />
+      <Property Name="ForeignKeyPairs" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="FAnsi.Discovery.TypeTranslation.DataTypeComputer">
+    <Position X="4.5" Y="2.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>CAABASAARAAgAAAAAAAAIgRAAAAACAgAIAAgAAQEAAA=</HashCode>
+      <FileName>Discovery\TypeTranslation\DataTypeComputer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FAnsi.Discovery.DiscoveredColumn" Collapsed="true">
+    <Position X="4.5" Y="8" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AARAIAAAAAIAAEAEgBAAQAAAABwAAICAAAAAAAACBAA=</HashCode>
+      <FileName>Discovery\DiscoveredColumn.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="FAnsi.Discovery.TableCreation.IDatabaseColumnRequestAdjuster" Collapsed="true">
+    <Position X="4.5" Y="1.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Discovery\TableCreation\IDatabaseColumnRequestAdjuster.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -43,6 +43,12 @@ namespace FAnsi.Discovery.TypeTranslation
 
         public DecimalSize DecimalSize = new DecimalSize();
 
+        /// <summary>
+        /// Indicates whether characters have been seen in strings which require non ASCII representation.  If this is true
+        /// then nvarchar instead of varchar should be created.
+        /// </summary>
+        public bool UseUnicode = false;
+
         public bool IsPrimedWithBonafideType = false;
 
         /// <summary>
@@ -232,10 +238,15 @@ namespace FAnsi.Discovery.TypeTranslation
 
         private int GetStringLength(string oToString)
         {
+            var nonAscii = oToString.Count(IsNotAscii);
+
+            if(nonAscii > 0)
+                UseUnicode = true;
+
             if(ExtraLengthPerNonAsciiCharacter == 0)
                 return oToString.Length;
 
-            return oToString.Length + (oToString.Count(IsNotAscii) * ExtraLengthPerNonAsciiCharacter);
+            return oToString.Length + (nonAscii * ExtraLengthPerNonAsciiCharacter);
         }
 
         private bool IsNotAscii(char arg)
@@ -286,7 +297,10 @@ namespace FAnsi.Discovery.TypeTranslation
             return new DatabaseTypeRequest(
                 CurrentEstimate,
                 Length == -1 ? (int?) null : Length,
-                DecimalSize);
+                DecimalSize)
+            {
+                Unicode =  UseUnicode
+            };
         }
 
         /// <summary>

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks.Dataflow;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
@@ -454,6 +456,94 @@ namespace FAnsiTests.Table
             Assert.AreEqual(1, result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 3));
 
         }
+
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.Oracle)]
+        public void TestBulkInsert_ScientificNotation(DatabaseType type)
+        {
+            var db = GetTestDatabase(type, true);
+
+            var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
+            {
+                new DatabaseColumnRequest("num", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(1,10)))
+                {
+                    AllowNulls = false,
+                }
+            });
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("num");
+            dt.Rows.Add("-4.10235746055587E-05"); //-0.0000410235746055587  <- this is what the number is
+                                                              //-0.0000410235           <- this is what goes into db since we only asked for 10 digits after decimal place
+            using (var blk = tbl.BeginBulkInsert())
+            {
+                Assert.AreEqual(1, blk.Upload(dt));
+            }
+
+            tbl.Insert(new Dictionary<string, object>() {{"num", "-4.10235746055587E-05"}});
+
+            //the numbers read from the database should be pretty much exactly -0.0000410235 but Decimals are always a pain so...
+            var result = tbl.GetDataTable();
+
+            //right number of rows/columns?
+            Assert.AreEqual(1, result.Columns.Count);
+            Assert.AreEqual(2, result.Rows.Count);
+
+            //get cell values rounded to 9 decimal places
+            var c1 = Math.Round((decimal) result.Rows[0][0], 9);
+            var c2 = Math.Round((decimal) result.Rows[1][0], 9);
+
+            //make sure they are basically what we are expecting (at the 9 decimal place point)
+            if (Math.Abs(-0.0000410235 - (double) c1) < 0.000000001)
+                Assert.Pass();
+            else 
+                Assert.Fail();
+
+            if(Math.Abs(-0.0000410235 - (double) c2) < 0.000000001)
+                Assert.Pass();
+            else
+                Assert.Fail();
+
+        }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.MySql)]
+        public void TestBulkInsert_Unicode(DatabaseType dbType)
+        {
+            var db = GetTestDatabase(dbType);
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Yay");
+            dt.Rows.Add("乗 12345");
+
+            var table = db.CreateTable("GoGo", dt);
+
+            DataTable dt2 = new DataTable();
+            dt2.Columns.Add("yay");
+            dt2.Rows.Add("你好");
+
+            using (var insert = table.BeginBulkInsert())
+                insert.Upload(dt2);
+            
+            table.Insert(new Dictionary<string, object>() {{"Yay", "مرحبا"}});
+            
+            //now check that it all worked!
+
+            var dtResult = table.GetDataTable();
+            Assert.AreEqual(3,dtResult.Rows.Count);
+
+            //need to do this to allow Contains method to work
+            dtResult.PrimaryKey = new[] {dtResult.Columns[0]};
+            
+            //value fetched from database should match the one inserted
+            Assert.IsTrue(dtResult.Rows.Contains("乗 12345"));
+            Assert.IsTrue(dtResult.Rows.Contains("你好"));
+            Assert.IsTrue(dtResult.Rows.Contains("مرحبا"));
+            table.Drop();
+        }   
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]

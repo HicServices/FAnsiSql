@@ -15,6 +15,7 @@ namespace FAnsi.Implementations.MySql
         {
             AddConnectionStringKeyword(DatabaseType.MySql, "AllowUserVariables","True",ConnectionStringKeywordPriority.ApiRule);
             AddConnectionStringKeyword(DatabaseType.MySql, "AllowBatch", "True", ConnectionStringKeywordPriority.ApiRule);
+            AddConnectionStringKeyword(DatabaseType.MySql, "CharSet", "utf8", ConnectionStringKeywordPriority.ApiRule);     
         }
 
         public MySqlServerHelper() : base(DatabaseType.MySql)

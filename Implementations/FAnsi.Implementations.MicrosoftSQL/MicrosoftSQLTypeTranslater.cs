@@ -22,6 +22,11 @@ namespace FAnsi.Implementations.MicrosoftSQL
             return "varchar(max)";
         }
 
+        public override string GetUnicodeStringDataTypeWithUnlimitedWidth()
+        {
+            return "nvarchar(max)";
+        }
+
         protected override bool IsByteArray(string sqlType)
         {
             return base.IsByteArray(sqlType) || AlsoBinaryRegex.IsMatch(sqlType);
