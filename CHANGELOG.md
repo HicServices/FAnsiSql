@@ -8,13 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.9.8] - 2019-08-26
+
+## Added
+- Support for unicode text
+- `DecimalTypeDecider` now recognises floating poing notation e.g. "-4.10235746055587E-05"
+
 ## [0.9.7] - 2019-08-20
 
 ## Added
 
 - Added method `IsValidDatabaseName` (and table/column variants) to `QuerySyntaxHelper`.  This allows testing strings without try/catch
-- `DecimalTypeDecider` now recognises floating poing notation e.g. "-4.10235746055587E-05"
-- Support for unicode text
 
 ### Fixed
 
@@ -71,7 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.9.7...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.9.8...develop
+[0.9.8]: https://github.com/HicServices/FAnsiSql/compare/0.9.7...0.9.8
 [0.9.7]: https://github.com/HicServices/FAnsiSql/compare/0.9.6...0.9.7
 [0.9.6]: https://github.com/HicServices/FAnsiSql/compare/0.9.5...0.9.6
 [0.9.5]: https://github.com/HicServices/FAnsiSql/compare/0.9.4...0.9.5
