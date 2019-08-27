@@ -170,7 +170,7 @@ namespace FAnsi.Discovery
                 if (match == null)
                 {
                     if (!AllowUnmatchedInputColumns)
-                        throw new KeyNotFoundException("Column '" + colInSource.ColumnName + "' appears in pipeline but not destination table (" + TargetTable + ")");
+                        throw new KeyNotFoundException(string.Format(FAnsiStrings.BulkCopy_ColumnNotInDestinationTable, colInSource.ColumnName, TargetTable));
 
                     //user is ignoring the fact there are unmatched items in DataTable!
                 }
