@@ -274,13 +274,14 @@ namespace FAnsi.Discovery
                 contents = lineToSplit.Substring(firstBracket + 1, length).Trim();
         }
 
-        public static string MakeHeaderNameSane(string header)
+        public static string MakeHeaderNameSensible(string header)
         {
             if (string.IsNullOrWhiteSpace(header))
                 return header;
 
             //replace anything that isn't a digit, letter or underscore with emptiness (except spaces - these will go but first...)
-            Regex r = new Regex("[^A-Za-z0-9_ ]");
+            //also accept anything above ASCII 256
+            Regex r = new Regex("[^A-Za-z0-9_ \u0101-\uFFFF]");
 
             string adjustedHeader = r.Replace(header, "");
 
@@ -305,7 +306,7 @@ namespace FAnsi.Discovery
             return adjustedHeader;
         }
 
-        public string GetSensibleTableNameFromString(string potentiallyDodgyName)
+        public string GetSensibleEntityNameFromString(string potentiallyDodgyName)
         {
             potentiallyDodgyName = GetRuntimeName(potentiallyDodgyName);
 

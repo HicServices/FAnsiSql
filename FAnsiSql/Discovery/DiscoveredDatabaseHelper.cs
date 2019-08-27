@@ -196,7 +196,7 @@ namespace FAnsi.Discovery
             //@"    CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID) REFERENCES Persons(PersonID) on delete cascade";
             var otherTable = foreignKeyPairs.Values.Select(v => v.Table).Distinct().Single();
             
-            string constraintName = MakeSaneConstraintName("FK_", tableName + "_" + otherTable);
+            string constraintName = MakeSensibleConstraintName("FK_", tableName + "_" + otherTable);
 
             return string.Format(
 @"CONSTRAINT {0} FOREIGN KEY ({1})
@@ -215,14 +215,14 @@ REFERENCES {2}({3}) {4}",
 
         protected virtual string GetPrimaryKeyDeclarationSql(string tableName, DatabaseColumnRequest[] pks, IQuerySyntaxHelper syntaxHelper)
         {
-            var constraintName = MakeSaneConstraintName("PK_", tableName);
+            var constraintName = MakeSensibleConstraintName("PK_", tableName);
 
             return string.Format(" CONSTRAINT {0} PRIMARY KEY ({1})", constraintName, string.Join(",", pks.Select(c => syntaxHelper.EnsureWrapped(c.ColumnName)))) + "," + Environment.NewLine;
         }
 
-        private string MakeSaneConstraintName(string prefix, string tableName)
+        private string MakeSensibleConstraintName(string prefix, string tableName)
         {
-            var constraintName = QuerySyntaxHelper.MakeHeaderNameSane(tableName);
+            var constraintName = QuerySyntaxHelper.MakeHeaderNameSensible(tableName);
 
             if (string.IsNullOrWhiteSpace(constraintName))
             {

@@ -83,7 +83,7 @@ namespace FAnsi.Discovery.QuerySyntax
         bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string alias);
 
         string GetScalarFunctionSql(MandatoryScalarFunctions function);
-        string GetSensibleTableNameFromString(string potentiallyDodgyName);
+        string GetSensibleEntityNameFromString(string potentiallyDodgyName);
         
         /// <summary>
         /// The SQL that would be valid for a CREATE TABLE statement that would result in a given column becoming auto increment e.g. "IDENTITY(1,1)"

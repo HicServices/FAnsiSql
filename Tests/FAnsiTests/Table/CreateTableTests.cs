@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using FAnsi;
@@ -305,6 +306,47 @@ namespace FAnsiTests.Table
             //Column created should use unicode when creating a new datatype computer from the col
             var comp = col.GetDataTypeComputer();
             Assert.IsTrue(comp.UseUnicode);
+        }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.MySql)]
+        public void Test_CreateTable_UnicodeNames(DatabaseType dbType)
+        {
+            var db = GetTestDatabase(dbType);
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("微笑");
+            dt.Rows.Add("50");     
+
+            var table = db.CreateTable("你好", dt);
+
+            Assert.IsTrue(table.Exists());
+            Assert.AreEqual("你好",table.GetRuntimeName());
+
+            Assert.IsTrue(db.ExpectTable("你好").Exists());
+
+            var col = table.DiscoverColumn("微笑");
+            Assert.AreEqual("微笑", col.GetRuntimeName());
+
+            table.Insert(new Dictionary<string, object>()
+            {{ "微笑","10" } });
+            
+            Assert.AreEqual(2, table.GetRowCount());
+
+            table.Insert(new Dictionary<DiscoveredColumn, object>()
+            {{ col,"11" } });
+
+            Assert.AreEqual(3,table.GetRowCount());
+
+            var dt2 = new DataTable();
+            dt2.Columns.Add("微笑");
+            dt2.Rows.Add(23);
+
+            using(var bulk = table.BeginBulkInsert())
+                bulk.Upload(dt2);
+            
+            Assert.AreEqual(4,table.GetRowCount());
         }
     }
 }

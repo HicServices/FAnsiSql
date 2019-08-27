@@ -6,7 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+### Changed
+
+- Table/column name suggester now allows unicode characters (now called `GetSensibleEntityNameFromString`)
+
+### Fixed
+
+- Fixed support for Unicode in table/column names in Sql Server
 
 ## [0.9.8] - 2019-08-26
 

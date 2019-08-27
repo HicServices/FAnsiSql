@@ -30,7 +30,12 @@ sys.columns.collation_name
 from sys.columns 
 join 
 sys.types on sys.columns.user_type_id = sys.types.user_type_id
-where object_id =OBJECT_ID('" + GetObjectName(discoveredTable) + "')", connection.Connection, connection.Transaction);
+where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Transaction);
+
+            var p = cmd.CreateParameter();
+            p.ParameterName = "@tableName";
+            p.Value = GetObjectName(discoveredTable);
+            cmd.Parameters.Add(p);
 
             List<DiscoveredColumn> toReturn = new List<DiscoveredColumn>();
 
