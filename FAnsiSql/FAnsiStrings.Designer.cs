@@ -77,5 +77,102 @@ namespace FAnsi {
                 return ResourceManager.GetString("ConnectionStringKeyword_ValueNotSupported", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CreateTable completed but TableCreated property was not correctly set by the implementing Helper API.
+        /// </summary>
+        public static string DiscoveredDatabase_CreateTableDidNotPopulateTableCreatedProperty {
+            get {
+                return ResourceManager.GetString("DiscoveredDatabase_CreateTableDidNotPopulateTableCreatedProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Database {0} does not exist so cannot be dropped.
+        /// </summary>
+        public static string DiscoveredDatabase_DatabaseDoesNotExistSoCannotBeDropped {
+            get {
+                return ResourceManager.GetString("DiscoveredDatabase_DatabaseDoesNotExistSoCannotBeDropped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DatabaseColumnRequest for column {0} must have either TypeRequested or ExplicitDbType.
+        /// </summary>
+        public static string DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType {
+            get {
+                return ResourceManager.GetString("DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeReque" +
+                        "stedOrExplicitDbType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Table name cannot be null.
+        /// </summary>
+        public static string DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null {
+            get {
+                return ResourceManager.GetString("DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot resize DataType because it does not have a reference to a Column to which it belongs (possibly you are trying to resize a data type associated with a TableValuedFunction Parameter?).
+        /// </summary>
+        public static string DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_reference_to_a_Column_to_which_it_belongs {
+            get {
+                return ResourceManager.GetString("DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_" +
+                        "reference_to_a_Column_to_which_it_belongs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot shrink column, number of digits after the decimal point is currently {0} and you asked to set it to {1} (Current SQLType is {2}).
+        /// </summary>
+        public static string DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__ {
+            get {
+                return ResourceManager.GetString("DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decima" +
+                        "l_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__" +
+                        "", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot shrink column, number of digits before the decimal point is currently {0} and you asked to set it to {1} (Current SQLType is {2}).
+        /// </summary>
+        public static string DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_before_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__ {
+            get {
+                return ResourceManager.GetString("DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_before_the_decim" +
+                        "al_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2_" +
+                        "_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Illegal attempt to resize column to a smaller size.  You can only grow columns.  Request was to convert from &apos;{0}&apos; to &apos;{1}&apos;.
+        /// </summary>
+        public static string DiscoveredDataType_Resize_CannotResizeSmaller {
+            get {
+                return ResourceManager.GetString("DiscoveredDataType_Resize_CannotResizeSmaller", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DataType cannot be resized to decimal because it is of data type {0}.
+        /// </summary>
+        public static string DiscoveredDataType_Resize_DataType_cannot_be_resized_to_decimal_because_it_is_of_data_type__0_ {
+            get {
+                return ResourceManager.GetString("DiscoveredDataType_Resize_DataType_cannot_be_resized_to_decimal_because_it_is_of_" +
+                        "data_type__0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found at least one cycle in relationship dependency.
+        /// </summary>
+        public static string RelationshipTopologicalSort_FoundCircularDependencies {
+            get {
+                return ResourceManager.GetString("RelationshipTopologicalSort_FoundCircularDependencies", resourceCulture);
+            }
+        }
     }
 }

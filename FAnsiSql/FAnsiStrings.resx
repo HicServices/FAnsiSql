@@ -124,4 +124,34 @@
     <value>Connection string keyword '{0}' did not support supplied value</value>
     <comment>We tell them the keyword that is bad but not the value because that could leak secure info e.g. port numbers? IP or passwords?</comment>
   </data>
+  <data name="RelationshipTopologicalSort_FoundCircularDependencies" xml:space="preserve">
+    <value>Found at least one cycle in relationship dependency</value>
+  </data>
+  <data name="DiscoveredDatabase_DatabaseDoesNotExistSoCannotBeDropped" xml:space="preserve">
+    <value>Database {0} does not exist so cannot be dropped</value>
+  </data>
+  <data name="DiscoveredDatabase_CreateTableDidNotPopulateTableCreatedProperty" xml:space="preserve">
+    <value>CreateTable completed but TableCreated property was not correctly set by the implementing Helper API</value>
+  </data>
+  <data name="DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType" xml:space="preserve">
+    <value>DatabaseColumnRequest for column {0} must have either TypeRequested or ExplicitDbType</value>
+  </data>
+  <data name="DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null" xml:space="preserve">
+    <value>Table name cannot be null</value>
+  </data>
+  <data name="DiscoveredDataType_Resize_CannotResizeSmaller" xml:space="preserve">
+    <value>Illegal attempt to resize column to a smaller size.  You can only grow columns.  Request was to convert from '{0}' to '{1}'</value>
+  </data>
+  <data name="DiscoveredDataType_Resize_DataType_cannot_be_resized_to_decimal_because_it_is_of_data_type__0_" xml:space="preserve">
+    <value>DataType cannot be resized to decimal because it is of data type {0}</value>
+  </data>
+  <data name="DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_before_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__" xml:space="preserve">
+    <value>Cannot shrink column, number of digits before the decimal point is currently {0} and you asked to set it to {1} (Current SQLType is {2})</value>
+  </data>
+  <data name="DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__" xml:space="preserve">
+    <value>Cannot shrink column, number of digits after the decimal point is currently {0} and you asked to set it to {1} (Current SQLType is {2})</value>
+  </data>
+  <data name="DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_reference_to_a_Column_to_which_it_belongs" xml:space="preserve">
+    <value>Cannot resize DataType because it does not have a reference to a Column to which it belongs (possibly you are trying to resize a data type associated with a TableValuedFunction Parameter?)</value>
+  </data>
 </root>

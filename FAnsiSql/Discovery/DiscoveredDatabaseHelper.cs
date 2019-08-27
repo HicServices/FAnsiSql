@@ -67,7 +67,7 @@ namespace FAnsi.Discovery
                                     tt.GetDigitsBeforeAndAfterDecimalPointIfDecimal(overriding.ExplicitDbType));
                             }
                             else
-                                throw new Exception("explicitColumnDefinitions for column " + column + " did not contain either a TypeRequested or ExplicitDbType");
+                                throw new Exception(string.Format(FAnsiStrings.DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType, column));
                     
                         typeDictionary.Add(overriding.ColumnName, GetDataTypeComputer(request));
                     }
@@ -128,7 +128,7 @@ namespace FAnsi.Discovery
         public virtual string GetCreateTableSql(DiscoveredDatabase database, string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string schema)
         {
             if (string.IsNullOrWhiteSpace(tableName))
-                throw new ArgumentNullException("Table name cannot be null", "tableName");
+                throw new ArgumentNullException(FAnsiStrings.DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null, "tableName");
 
             string bodySql = "";
 

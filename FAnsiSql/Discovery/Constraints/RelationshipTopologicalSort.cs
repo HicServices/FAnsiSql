@@ -92,7 +92,7 @@ namespace FAnsi.Discovery.Constraints
             // if graph has edges then
             if (edges.Any())
                 // return error (graph has at least one cycle)
-                throw new CircularDependencyException("Found at least one cycle in relationship dependency");
+                throw new CircularDependencyException(FAnsiStrings.RelationshipTopologicalSort_FoundCircularDependencies);
             
             
             // return L (a topologically sorted order)

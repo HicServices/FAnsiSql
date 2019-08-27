@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Table/column name suggester now allows unicode characters (now called `GetSensibleEntityNameFromString`)
+- Attempting to resize a column to the same size it is currently is now ignored (previously `InvalidResizeException` was thrown)
 
 ### Fixed
 
