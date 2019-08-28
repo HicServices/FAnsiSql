@@ -293,6 +293,35 @@ namespace FAnsi {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No implementation found for ADO.Net object of Type {0}.
+        /// </summary>
+        public static string ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_ {
+            get {
+                return ResourceManager.GetString("ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_objec" +
+                        "t_of_Type__0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No implementation found for DatabaseType {0}.
+        /// </summary>
+        public static string ImplementationManager_GetImplementation_No_implementation_found_for_DatabaseType__0_ {
+            get {
+                return ResourceManager.GetString("ImplementationManager_GetImplementation_No_implementation_found_for_DatabaseType_" +
+                        "_0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Directory &apos;{0}&apos;did not exist.
+        /// </summary>
+        public static string ImplementationManager_Load_Directory___0__did_not_exist {
+            get {
+                return ResourceManager.GetString("ImplementationManager_Load_Directory___0__did_not_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to String passed to EnsureWrapped &apos;{0}&apos; contained separators (not allowed).  Prohibited Separator is &apos;{1}&apos;.
         /// </summary>
         public static string QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__ {
@@ -303,12 +332,79 @@ namespace FAnsi {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not GetParameter for column &apos;{0}&apos;.  See InnerException for details.
+        /// </summary>
+        public static string QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__ {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Line must contain at least one pair of parentheses.
+        /// </summary>
+        public static string QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_contain_at_least_one_pair_of_parentheses {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_contain_at_le" +
+                        "ast_one_pair_of_parentheses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Line must not be blank.
+        /// </summary>
+        public static string QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_not_be_blank {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_not_be_blank", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of opening and closing parentheses must match.
+        /// </summary>
+        public static string QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_and_closing_parentheses_must_match {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_a" +
+                        "nd_closing_parentheses_must_match", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not split SQL line because there were {0} instances of the alias regex.  Sql line was: 
         ///{1}.
         /// </summary>
         public static string QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_ {
             get {
                 return ResourceManager.GetString("QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} name &apos;{1}&apos; contained unsupported (by FAnsi) characters.  Unsupported characters are:{2}.
+        /// </summary>
+        public static string QuerySyntaxHelper_ValidateName__0__name___1___contained_unsupported__by_FAnsi__characters___Unsupported_characters_are__2_ {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_ValidateName__0__name___1___contained_unsupported__by_FAnsi__ch" +
+                        "aracters___Unsupported_characters_are__2_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} name &apos;{1}&apos; is too long for the DBMS ({2} supports maximum length of {3}).
+        /// </summary>
+        public static string QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__supports_maximum_length_of__3__ {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__suppo" +
+                        "rts_maximum_length_of__3__", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} name cannot be blank.
+        /// </summary>
+        public static string QuerySyntaxHelper_ValidateName__0__name_cannot_be_blank {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_ValidateName__0__name_cannot_be_blank", resourceCulture);
             }
         }
         

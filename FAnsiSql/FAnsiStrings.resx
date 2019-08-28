@@ -209,4 +209,35 @@
     <value>Could not split SQL line because there were {0} instances of the alias regex.  Sql line was: 
 {1}</value>
   </data>
+  <data name="QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_not_be_blank" xml:space="preserve">
+    <value>Line must not be blank</value>
+  </data>
+  <data name="QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_and_closing_parentheses_must_match" xml:space="preserve">
+    <value>The number of opening and closing parentheses must match</value>
+  </data>
+  <data name="QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_contain_at_least_one_pair_of_parentheses" xml:space="preserve">
+    <value>Line must contain at least one pair of parentheses</value>
+  </data>
+  <data name="QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__" xml:space="preserve">
+    <value>Could not GetParameter for column '{0}'.  See InnerException for details</value>
+  </data>
+  <data name="QuerySyntaxHelper_ValidateName__0__name_cannot_be_blank" xml:space="preserve">
+    <value>{0} name cannot be blank</value>
+    <comment>{0} is an database object type e.g. "Database", "Table" etc</comment>
+  </data>
+  <data name="QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__supports_maximum_length_of__3__" xml:space="preserve">
+    <value>{0} name '{1}' is too long for the DBMS ({2} supports maximum length of {3})</value>
+  </data>
+  <data name="QuerySyntaxHelper_ValidateName__0__name___1___contained_unsupported__by_FAnsi__characters___Unsupported_characters_are__2_" xml:space="preserve">
+    <value>{0} name '{1}' contained unsupported (by FAnsi) characters.  Unsupported characters are:{2}</value>
+  </data>
+  <data name="ImplementationManager_Load_Directory___0__did_not_exist" xml:space="preserve">
+    <value>Directory '{0}'did not exist</value>
+  </data>
+  <data name="ImplementationManager_GetImplementation_No_implementation_found_for_DatabaseType__0_" xml:space="preserve">
+    <value>No implementation found for DatabaseType {0}</value>
+  </data>
+  <data name="ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_" xml:space="preserve">
+    <value>No implementation found for ADO.Net object of Type {0}</value>
+  </data>
 </root>

@@ -213,7 +213,7 @@ EXECUTE(@Query)
  syntaxHelper.Escape(string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert < QueryComponent.SELECT))),
  syntaxHelper.Escape(GetDateAxisTableDeclaration(axis)),
  
- //the entire select query up to the end of the group by (ommitting any Top X)
+ //the entire select query up to the end of the group by (omitting any Top X)
  syntaxHelper.Escape(string.Join(Environment.NewLine, lines.Where(c =>
      c.LocationToInsert >= QueryComponent.SELECT && 
      c.LocationToInsert < QueryComponent.OrderBy  &&

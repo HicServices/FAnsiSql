@@ -8,7 +8,7 @@ using System.Text;
 namespace FAnsi.Discovery.QuerySyntax
 {
     /// <summary>
-    /// Exception thrown when <see cref="IQuerySyntaxHelper.GetRuntimeName"/> cannot determine the runtime name for a section of SQL
+    /// thrown when there is a problem with the name of an object (e.g. a column / table) or when one could not be calculated from a piece of SQL
     /// </summary>
     public class RuntimeNameException:Exception
     {

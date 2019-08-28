@@ -249,18 +249,27 @@ namespace FAnsi.Discovery
         /// <param name="lineToSplit"></param>
         /// <param name="method"></param>
         /// <param name="contents"></param>
+        /// <exception cref="ArgumentException">If <paramref name="lineToSplit"/> was badly formed, blank etc</exception>
         public void SplitLineIntoOuterMostMethodAndContents(string lineToSplit, out string method, out string contents)
         {
             if (string.IsNullOrWhiteSpace(lineToSplit))
-                throw new ArgumentException("line must not be blank", lineToSplit);
+                throw new ArgumentException(
+                    FAnsiStrings.QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_not_be_blank,
+                    nameof(lineToSplit));
 
             if (lineToSplit.Count(c => c.Equals('(')) != lineToSplit.Count(c => c.Equals(')')))
-                throw new ArgumentException("The number of opening parentheses must match the number of closing parentheses", "lineToSplit");
+                throw new ArgumentException(
+                    FAnsiStrings
+                        .QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_and_closing_parentheses_must_match,
+                    nameof(lineToSplit));
 
             int firstBracket = lineToSplit.IndexOf('(');
 
             if (firstBracket == -1)
-                throw new ArgumentException("Line must contain at least one pair of parentheses", "lineToSplit");
+                throw new ArgumentException(
+                    FAnsiStrings
+                        .QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_contain_at_least_one_pair_of_parentheses,
+                    nameof(lineToSplit));
 
             method = lineToSplit.Substring(0, firstBracket).Trim();
 
@@ -380,7 +389,7 @@ namespace FAnsi.Discovery
             }
             catch(Exception ex)
             {
-                throw new Exception("Could not GetParameter for column '" + discoveredColumn.GetFullyQualifiedName() + "'",ex);
+                throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__, discoveredColumn.GetFullyQualifiedName()),ex);
             }            
 
             return p;
@@ -424,19 +433,22 @@ namespace FAnsi.Discovery
         /// returns null if the name is valid.  Otherwise a string describing why it is invalid.
         /// </summary>
         /// <param name="candidate"></param>
-        /// <param name="objectType"></param>
+        /// <param name="objectType">Type of object being validated e.g. "Database", "Table" etc</param>
         /// <param name="maximumLengthAllowed"></param>
         /// <returns></returns>
         private string ValidateName(string candidate, string objectType, int maximumLengthAllowed)
         {
             if(string.IsNullOrWhiteSpace(candidate))
-                return $"{objectType} name cannot be blank";
+                return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name_cannot_be_blank, objectType);
 
             if(candidate.Length > maximumLengthAllowed)
-                return $"{objectType} name \"{candidate.Substring(0,maximumLengthAllowed)}\" is too long for the DBMS ({DatabaseType} supports maximum length of {maximumLengthAllowed})";
+                return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__supports_maximum_length_of__3__,
+                    objectType, candidate.Substring(0, maximumLengthAllowed), DatabaseType, maximumLengthAllowed);
 
             if(candidate.IndexOfAny(IllegalNameChars) != -1)
-                return $"{objectType} name \"{candidate}\" contained unsupported (by FAnsi) characters.  Unsupported characters are:{new string(IllegalNameChars)}";
+                return string.Format(
+                    FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___contained_unsupported__by_FAnsi__characters___Unsupported_characters_are__2_,
+                    objectType, candidate, new string(IllegalNameChars));
 
             return null;
         }
