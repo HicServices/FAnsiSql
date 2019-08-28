@@ -6,6 +6,7 @@ using System.Linq;
 using System.Xml.Linq;
 using FAnsi;
 using FAnsi.Discovery;
+using FAnsi.Discovery.Constraints;
 using FAnsi.Implementation;
 using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
@@ -102,7 +103,20 @@ namespace FAnsiTests
             {
                 if (cleanDatabase)
                 {
-                    foreach (var t in db.DiscoverTables(true))
+                    IEnumerable<DiscoveredTable> deleteTableOrder;
+
+                    try
+                    {
+                        //delete in reverse dependency order to avoid foreign key constraint issues preventing deleting
+                        var tree = new RelationshipTopologicalSort(db.DiscoverTables(true));
+                        deleteTableOrder = tree.Order.Reverse();
+                    }
+                    catch (Exception)
+                    {
+                        deleteTableOrder = db.DiscoverTables(true);
+                    }
+
+                    foreach (var t in deleteTableOrder)
                         t.Drop();
 
                     foreach (var func in db.DiscoverTableValuedFunctions())
