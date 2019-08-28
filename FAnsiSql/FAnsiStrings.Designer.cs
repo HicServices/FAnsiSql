@@ -61,6 +61,16 @@ namespace FAnsi {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AggregateCustomLineCollection is missing some (but not all) Axis components.
+        /// </summary>
+        public static string AggregateCustomLineCollection_Validate_AggregateCustomLineCollection_is_missing_some__but_not_all__Axis_components {
+            get {
+                return ResourceManager.GetString("AggregateCustomLineCollection_Validate_AggregateCustomLineCollection_is_missing_s" +
+                        "ome__but_not_all__Axis_components", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Column &apos;{0}&apos; appears in bulk insert DataTable but not in destination table &apos;{1}&apos;.
         /// </summary>
         public static string BulkCopy_ColumnNotInDestinationTable {

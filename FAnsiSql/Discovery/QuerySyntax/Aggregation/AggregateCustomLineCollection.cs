@@ -31,7 +31,7 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation
             {
                 //we must have all the axis bits
                 if(AxisSelect == null || AxisGroupBy == null || AxisGroupBy == null)
-                    throw new AggregateCustomLineCollectionException("Collection is missing some (but not all) Axis components");
+                    throw new AggregateCustomLineCollectionException(FAnsiStrings.AggregateCustomLineCollection_Validate_AggregateCustomLineCollection_is_missing_some__but_not_all__Axis_components);
             }
         }
 

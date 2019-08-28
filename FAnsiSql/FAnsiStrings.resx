@@ -240,4 +240,7 @@
   <data name="ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_" xml:space="preserve">
     <value>No implementation found for ADO.Net object of Type {0}</value>
   </data>
+  <data name="AggregateCustomLineCollection_Validate_AggregateCustomLineCollection_is_missing_some__but_not_all__Axis_components" xml:space="preserve">
+    <value>AggregateCustomLineCollection is missing some (but not all) Axis components</value>
+  </data>
 </root>
