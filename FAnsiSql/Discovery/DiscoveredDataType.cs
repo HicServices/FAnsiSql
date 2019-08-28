@@ -159,7 +159,7 @@ namespace FAnsi.Discovery
                 }
                 catch (Exception e)
                 {
-                    throw new AlterFailedException("Failed to send resize SQL:" + sql, e);
+                    throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredDataType_AlterTypeTo_Failed_to_send_resize_SQL__0_, sql), e);
                 }
             }
 

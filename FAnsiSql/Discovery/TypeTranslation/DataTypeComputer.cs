@@ -174,11 +174,9 @@ namespace FAnsi.Discovery.TypeTranslation
             //if we have previously seen a hard typed value then we can't just change datatypes to something else!
             if (IsPrimedWithBonafideType)
                 if (CurrentEstimate != o.GetType())
-                {
-                    throw new DataTypeComputerException("We were adjusting to compensate for object " + o + " which is of Type " +
-                                        o.GetType() + " , we were previously passed a " + CurrentEstimate +
-                                        " type, is your column of mixed type? this is unacceptable");
-                }
+                    throw new DataTypeComputerException(string.Format(
+                        FAnsiStrings.DataTypeComputer_AdjustToCompensateForValue_DataTypeComputerPassedMixedTypeValues,
+                        o, o.GetType(), CurrentEstimate));
 
             var oToString = o.ToString();
             var oAsString = o as string;
@@ -219,9 +217,9 @@ namespace FAnsi.Discovery.TypeTranslation
             }
             else
             {
-                //if we ever made a descision about a string inputs then we won't accept hard typed objects now
+                //if we ever made a decision about a string inputs then we won't accept hard typed objects now
                 if(_validTypesSeen != TypeCompatibilityGroup.None || CurrentEstimate == typeof(string))
-                    throw new DataTypeComputerException("We were adjusting to compensate for hard Typed object '" + o + "' which is of Type " + o.GetType() + ", but previously we were passed string values, is your column of mixed type? that is unacceptable");
+                    throw new DataTypeComputerException(string.Format(FAnsiStrings.DataTypeComputer_AdjustToCompensateForValue_DataTypeComputerPassedMixedTypeValues,o,o.GetType(),CurrentEstimate));
 
                 //if we have yet to see a proper type
                 if (!IsPrimedWithBonafideType)
@@ -333,7 +331,7 @@ namespace FAnsi.Discovery.TypeTranslation
                 return;
 
             if (!_typeDeciders.IsSupported(CurrentEstimate))
-                throw new NotSupportedException("We do not have a type decider for type:" + CurrentEstimate);
+                throw new NotSupportedException(string.Format(FAnsiStrings.DataTypeComputer_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_, CurrentEstimate));
         }
 
     }

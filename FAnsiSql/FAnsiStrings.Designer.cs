@@ -19,7 +19,7 @@ namespace FAnsi {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class FAnsiStrings {
@@ -79,6 +79,64 @@ namespace FAnsi {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not combine Types &apos;{0}&apos; and &apos;{1}&apos; because they were of differing Types and neither Type appeared in the PreferenceOrder.
+        /// </summary>
+        public static string DatabaseTypeRequest_Max_Could_not_combine_Types___0___and___1___because_they_were_of_differing_Types_and_neither_Type_appeared_in_the_PreferenceOrder {
+            get {
+                return ResourceManager.GetString("DatabaseTypeRequest_Max_Could_not_combine_Types___0___and___1___because_they_were" +
+                        "_of_differing_Types_and_neither_Type_appeared_in_the_PreferenceOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DataTypeComputer does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object &apos;{0}&apos; which is of Type &apos;{1}&apos;, we were previously passed a &apos;{2}&apos; type.
+        /// </summary>
+        public static string DataTypeComputer_AdjustToCompensateForValue_DataTypeComputerPassedMixedTypeValues {
+            get {
+                return ResourceManager.GetString("DataTypeComputer_AdjustToCompensateForValue_DataTypeComputerPassedMixedTypeValues" +
+                        "", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Type Decider exists for Type:{0}.
+        /// </summary>
+        public static string DataTypeComputer_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_ {
+            get {
+                return ResourceManager.GetString("DataTypeComputer_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not parse &apos;{0}&apos; to a valid DateTime.
+        /// </summary>
+        public static string DateTimeTypeDecider_ParseImpl_Could_not_parse___0___to_a_valid_DateTime {
+            get {
+                return ResourceManager.GetString("DateTimeTypeDecider_ParseImpl_Could_not_parse___0___to_a_valid_DateTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DecideTypesForStrings abstract base was not passed any typesSupported by implementing derived class.
+        /// </summary>
+        public static string DecideTypesForStrings_DecideTypesForStrings_DecideTypesForStrings_abstract_base_was_not_passed_any_typesSupported_by_implementing_derived_class {
+            get {
+                return ResourceManager.GetString("DecideTypesForStrings_DecideTypesForStrings_DecideTypesForStrings_abstract_base_w" +
+                        "as_not_passed_any_typesSupported_by_implementing_derived_class", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not parse string value &apos;{0}&apos; with Decider Type:{1}.
+        /// </summary>
+        public static string DecideTypesForStrings_Parse_Could_not_parse_string_value___0___with_Decider_Type__1_ {
+            get {
+                return ResourceManager.GetString("DecideTypesForStrings_Parse_Could_not_parse_string_value___0___with_Decider_Type_" +
+                        "_1_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CreateTable completed but TableCreated property was not correctly set by the implementing Helper API.
         /// </summary>
         public static string DiscoveredDatabase_CreateTableDidNotPopulateTableCreatedProperty {
@@ -126,6 +184,15 @@ namespace FAnsi {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to send resize SQL:{0}.
+        /// </summary>
+        public static string DiscoveredDataType_AlterTypeTo_Failed_to_send_resize_SQL__0_ {
+            get {
+                return ResourceManager.GetString("DiscoveredDataType_AlterTypeTo_Failed_to_send_resize_SQL__0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot shrink column, number of digits after the decimal point is currently {0} and you asked to set it to {1} (Current SQLType is {2}).
         /// </summary>
         public static string DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__ {
@@ -167,11 +234,120 @@ namespace FAnsi {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Helper &apos;{0}&apos; tried to create database &apos;{1}&apos; but the database didn&apos;t exist after the creation attempt.
+        /// </summary>
+        public static string DiscoveredServer_CreateDatabase_Helper___0___tried_to_create_database___1___but_the_database_didn_t_exist_after_the_creation_attempt {
+            get {
+                return ResourceManager.GetString("DiscoveredServer_CreateDatabase_Helper___0___tried_to_create_database___1___but_t" +
+                        "he_database_didn_t_exist_after_the_creation_attempt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not connect to server &apos;{0}&apos; after timeout of {1} milliseconds).
+        /// </summary>
+        public static string DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_ {
+            get {
+                return ResourceManager.GetString("DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_o" +
+                        "f__1__milliseconds_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DiscoverColumn failed, could not find column called &apos;{0}&apos; in table &apos;{1}&apos;.
+        /// </summary>
+        public static string DiscoveredTable_DiscoverColumn_DiscoverColumn_failed__could_not_find_column_called___0___in_table___1__ {
+            get {
+                return ResourceManager.GetString("DiscoveredTable_DiscoverColumn_DiscoverColumn_failed__could_not_find_column_calle" +
+                        "d___0___in_table___1__", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insert failed, could not find column called &apos;{0}&apos; in table &apos;{1}&apos;.
+        /// </summary>
+        public static string DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__ {
+            get {
+                return ResourceManager.GetString("DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table" +
+                        "___1__", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to create primary key on table {0} using columns ({1}).
+        /// </summary>
+        public static string DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__ {
+            get {
+                return ResourceManager.GetString("DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__" +
+                        "using_columns___1__", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rename is not supported for TableType {0}.
+        /// </summary>
+        public static string DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_ {
+            get {
+                return ResourceManager.GetString("DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to String passed to EnsureWrapped &apos;{0}&apos; contained separators (not allowed).  Prohibited Separator is &apos;{1}&apos;.
+        /// </summary>
+        public static string QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__ {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_se" +
+                        "parators__not_allowed____Prohibited_Separator_is___1__", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not split SQL line because there were {0} instances of the alias regex.  Sql line was: 
+        ///{1}.
+        /// </summary>
+        public static string QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_ {
+            get {
+                return ResourceManager.GetString("QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found at least one cycle in relationship dependency.
         /// </summary>
         public static string RelationshipTopologicalSort_FoundCircularDependencies {
             get {
                 return ResourceManager.GetString("RelationshipTopologicalSort_FoundCircularDependencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DataType {0} does not have an associated IDecideTypesForStrings.
+        /// </summary>
+        public static string TypeDeciderFactory_Create_DataType__0__does_not_have_an_associated_IDecideTypesForStrings {
+            get {
+                return ResourceManager.GetString("TypeDeciderFactory_Create_DataType__0__does_not_have_an_associated_IDecideTypesFo" +
+                        "rStrings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No CSharp type mapping exists for SQL type &apos;{0}&apos;. TypeTranslater was &apos;{1}&apos;).
+        /// </summary>
+        public static string TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___ {
+            get {
+                return ResourceManager.GetString("TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_ty" +
+                        "pe___0____TypeTranslater_was___1___", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsure what SQL type to use for CSharp Type &apos;{0}&apos;.  TypeTranslater was &apos;{1}&apos;.
+        /// </summary>
+        public static string TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__ {
+            get {
+                return ResourceManager.GetString("TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_T" +
+                        "ype___0_____TypeTranslater_was___1__", resourceCulture);
             }
         }
     }

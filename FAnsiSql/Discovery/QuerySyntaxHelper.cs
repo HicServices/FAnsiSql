@@ -157,7 +157,7 @@ namespace FAnsi.Discovery
         public string EnsureWrapped(string databaseOrTableName)
         {
             if (databaseOrTableName.Contains(DatabaseTableSeparator))
-                throw new Exception("Strings passed to EnsureWrapped cannot contain separators i.e. '" + DatabaseTableSeparator + "'");
+                throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__,databaseOrTableName, DatabaseTableSeparator));
 
             return EnsureWrappedImpl(databaseOrTableName);
         }
@@ -221,7 +221,7 @@ namespace FAnsi.Discovery
             var matches = GetAliasRegex().Matches(lineToSplit);
 
             if (matches.Count >1)
-                throw new SyntaxErrorException("Found 2+ instances of the alias regex");
+                throw new SyntaxErrorException(string.Format(FAnsiStrings.QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_,matches.Count,lineToSplit));
 
             if (matches.Count == 0)
             {

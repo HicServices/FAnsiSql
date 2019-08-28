@@ -147,7 +147,9 @@ namespace FAnsi.Discovery
             }
             catch (Exception e)
             {
-                throw new Exception("Could not find column called " + specificColumnName + " in table " + this ,e);
+                throw new ColumnMappingException(string.Format(
+                    FAnsiStrings.DiscoveredTable_DiscoverColumn_DiscoverColumn_failed__could_not_find_column_called___0___in_table___1__, specificColumnName,
+                    _table), e);
             }
         }
 
@@ -417,7 +419,7 @@ namespace FAnsi.Discovery
             {
                 var match = cols.SingleOrDefault(c => c.GetRuntimeName().Equals(k, StringComparison.CurrentCultureIgnoreCase));
                 if(match == null)
-                    throw new Exception("Could not find column called " + k);
+                    throw new ColumnMappingException(string.Format(FAnsiStrings.DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__, k,_table));
 
                 foundColumns.Add(match,toInsert[k]);
             }

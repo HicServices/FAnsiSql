@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery.Constraints;
+using FAnsi.Exceptions;
 using FAnsi.Naming;
 
 namespace FAnsi.Discovery
@@ -124,7 +125,7 @@ namespace FAnsi.Discovery
         public virtual void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection)
         {
             if(discoveredTable.TableType != TableType.Table)
-                throw new NotSupportedException("Rename is not supported for TableType " + discoveredTable.TableType);
+                throw new NotSupportedException(string.Format(FAnsiStrings.DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_, discoveredTable.TableType));
 
             discoveredTable.GetQuerySyntaxHelper().ValidateTableName(newName);
 
@@ -147,7 +148,7 @@ namespace FAnsi.Discovery
             }
             catch (Exception e)
             {
-                throw new Exception("Failed to create primary key on table " + table + " using columns (" + string.Join(",", discoverColumns.Select(c => c.GetRuntimeName())) + ")", e);
+                throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
             }
         }
 
@@ -179,10 +180,9 @@ namespace FAnsi.Discovery
         {
             var server = discoveredTable.Database.Server;
 
-            //note to future developers, this method has horrible side effects e.g. column defaults might be recalculated, foreign key CASCADE Deletes might happen
-            //to other tables we can help the user not make such mistakes with this check.
-            if(discoveredTable.DiscoverColumns().Any(c => c.IsPrimaryKey))
-                throw new NotSupportedException("Table "+discoveredTable+" has primary keys, why are you calling MakeDistinct on it!");
+            //if it's got a primary key they it's distinct! job done
+            if (discoveredTable.DiscoverColumns().Any(c => c.IsPrimaryKey))
+                return;
 
             var tableName = discoveredTable.GetFullyQualifiedName();
             var tempTable = discoveredTable.Database.ExpectTable(discoveredTable.GetRuntimeName() + "_DistinctingTemp").GetFullyQualifiedName();

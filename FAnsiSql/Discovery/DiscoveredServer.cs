@@ -209,7 +209,7 @@ namespace FAnsi.Discovery
                     catch (AggregateException e)
                     {
                         if (openTask.IsCanceled)
-                            throw new TimeoutException(string.Format("Could not connect to server '" + Name + "' after timeout of {0} milliseconds)", timeoutInMillis), e);
+                            throw new TimeoutException(string.Format(FAnsiStrings.DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,Name, timeoutInMillis), e);
 
                         throw;
                     }
@@ -360,7 +360,7 @@ namespace FAnsi.Discovery
             Helper.CreateDatabase(Builder, db);
             
             if(!db.Exists())
-                throw new Exception("Helper tried to create database " + newDatabaseName + " but the database didn't exist after the creation attempt");
+                throw new Exception(string.Format(FAnsiStrings.DiscoveredServer_CreateDatabase_Helper___0___tried_to_create_database___1___but_the_database_didn_t_exist_after_the_creation_attempt, Helper.GetType().Name,newDatabaseName));
 
             return db;
         }

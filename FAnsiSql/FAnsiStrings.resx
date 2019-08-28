@@ -154,4 +154,59 @@
   <data name="DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_reference_to_a_Column_to_which_it_belongs" xml:space="preserve">
     <value>Cannot resize DataType because it does not have a reference to a Column to which it belongs (possibly you are trying to resize a data type associated with a TableValuedFunction Parameter?)</value>
   </data>
+  <data name="DateTimeTypeDecider_ParseImpl_Could_not_parse___0___to_a_valid_DateTime" xml:space="preserve">
+    <value>Could not parse '{0}' to a valid DateTime</value>
+  </data>
+  <data name="DecideTypesForStrings_DecideTypesForStrings_DecideTypesForStrings_abstract_base_was_not_passed_any_typesSupported_by_implementing_derived_class" xml:space="preserve">
+    <value>DecideTypesForStrings abstract base was not passed any typesSupported by implementing derived class</value>
+  </data>
+  <data name="DecideTypesForStrings_Parse_Could_not_parse_string_value___0___with_Decider_Type__1_" xml:space="preserve">
+    <value>Could not parse string value '{0}' with Decider Type:{1}</value>
+  </data>
+  <data name="TypeDeciderFactory_Create_DataType__0__does_not_have_an_associated_IDecideTypesForStrings" xml:space="preserve">
+    <value>DataType {0} does not have an associated IDecideTypesForStrings</value>
+  </data>
+  <data name="DatabaseTypeRequest_Max_Could_not_combine_Types___0___and___1___because_they_were_of_differing_Types_and_neither_Type_appeared_in_the_PreferenceOrder" xml:space="preserve">
+    <value>Could not combine Types '{0}' and '{1}' because they were of differing Types and neither Type appeared in the PreferenceOrder</value>
+  </data>
+  <data name="DataTypeComputer_AdjustToCompensateForValue_DataTypeComputerPassedMixedTypeValues" xml:space="preserve">
+    <value>DataTypeComputer does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object '{0}' which is of Type '{1}', we were previously passed a '{2}' type</value>
+  </data>
+  <data name="DataTypeComputer_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_" xml:space="preserve">
+    <value>No Type Decider exists for Type:{0}</value>
+  </data>
+  <data name="TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__" xml:space="preserve">
+    <value>Unsure what SQL type to use for CSharp Type '{0}'.  TypeTranslater was '{1}'</value>
+  </data>
+  <data name="TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___" xml:space="preserve">
+    <value>No CSharp type mapping exists for SQL type '{0}'. TypeTranslater was '{1}')</value>
+  </data>
+  <data name="DiscoveredDataType_AlterTypeTo_Failed_to_send_resize_SQL__0_" xml:space="preserve">
+    <value>Failed to send resize SQL:{0}</value>
+  </data>
+  <data name="DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_" xml:space="preserve">
+    <value>Could not connect to server '{0}' after timeout of {1} milliseconds)</value>
+  </data>
+  <data name="DiscoveredServer_CreateDatabase_Helper___0___tried_to_create_database___1___but_the_database_didn_t_exist_after_the_creation_attempt" xml:space="preserve">
+    <value>Helper '{0}' tried to create database '{1}' but the database didn't exist after the creation attempt</value>
+  </data>
+  <data name="DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__" xml:space="preserve">
+    <value>Insert failed, could not find column called '{0}' in table '{1}'</value>
+  </data>
+  <data name="DiscoveredTable_DiscoverColumn_DiscoverColumn_failed__could_not_find_column_called___0___in_table___1__" xml:space="preserve">
+    <value>DiscoverColumn failed, could not find column called '{0}' in table '{1}'</value>
+  </data>
+  <data name="DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_" xml:space="preserve">
+    <value>Rename is not supported for TableType {0}</value>
+  </data>
+  <data name="DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__" xml:space="preserve">
+    <value>Failed to create primary key on table {0} using columns ({1})</value>
+  </data>
+  <data name="QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__" xml:space="preserve">
+    <value>String passed to EnsureWrapped '{0}' contained separators (not allowed).  Prohibited Separator is '{1}'</value>
+  </data>
+  <data name="QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_" xml:space="preserve">
+    <value>Could not split SQL line because there were {0} instances of the alias regex.  Sql line was: 
+{1}</value>
+  </data>
 </root>

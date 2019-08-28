@@ -194,7 +194,7 @@ namespace FAnsiTests.TypeTranslation
             t.AdjustToCompensateForValue(o1); 
 
             var ex = Assert.Throws<DataTypeComputerException>(() => t.AdjustToCompensateForValue(o2)); 
-            Assert.IsTrue(ex.Message.Contains("mixed type"));
+            StringAssert.Contains("mixed with untyped objects",ex.Message);
         }
 
         [Test]
@@ -368,7 +368,7 @@ namespace FAnsiTests.TypeTranslation
             t.AdjustToCompensateForValue((Int16)5);
             var ex = Assert.Throws<DataTypeComputerException>(()=>t.AdjustToCompensateForValue((Int32)1000));
 
-            Assert.IsTrue(ex.Message.Contains("We were adjusting to compensate for object 1000 which is of Type System.Int32 , we were previously passed a System.Int16 type, is your column of mixed type? this is unacceptable"));
+            StringAssert.Contains("We were adjusting to compensate for object '1000' which is of Type 'System.Int32', we were previously passed a 'System.Int16' type",ex.Message);
         }
         [Test]
         public void TestDatatypeComputer_Int16s()

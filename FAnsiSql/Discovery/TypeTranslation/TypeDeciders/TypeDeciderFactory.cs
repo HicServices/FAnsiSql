@@ -46,7 +46,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
         public IDecideTypesForStrings Create(Type forDataType)
         {
             if(!Dictionary.ContainsKey(forDataType))
-                throw new NotSupportedException("DataType " + forDataType + " does not have an associated IDecideTypesForStrings");
+                throw new NotSupportedException(string.Format(FAnsiStrings.TypeDeciderFactory_Create_DataType__0__does_not_have_an_associated_IDecideTypesForStrings, forDataType));
 
             return Dictionary[forDataType];
         }

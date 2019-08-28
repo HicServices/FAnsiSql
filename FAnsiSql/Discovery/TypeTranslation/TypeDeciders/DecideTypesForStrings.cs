@@ -22,14 +22,14 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
         /// </summary>
         readonly Regex zeroPrefixedNumber = new Regex(@"^\s*-?0+[1-9]+\.?[0-9]*\s*$");
 
-        protected DecideTypesForStrings(TypeCompatibilityGroup compatibilityGroup,params Type[] typesSupportedSupported)
+        protected DecideTypesForStrings(TypeCompatibilityGroup compatibilityGroup,params Type[] typesSupported)
         {
             CompatibilityGroup = compatibilityGroup;
             
-            if(typesSupportedSupported.Length == 0)
-                throw new ArgumentException("There must be at least one supported type");
+            if(typesSupported.Length == 0)
+                throw new ArgumentException(FAnsiStrings.DecideTypesForStrings_DecideTypesForStrings_DecideTypesForStrings_abstract_base_was_not_passed_any_typesSupported_by_implementing_derived_class);
             
-            TypesSupported = new HashSet<Type>(typesSupportedSupported);
+            TypesSupported = new HashSet<Type>(typesSupported);
         }
 
         public bool IsAcceptableAsType(string candidateString,DecimalSize sizeRecord)
@@ -51,7 +51,7 @@ namespace FAnsi.Discovery.TypeTranslation.TypeDeciders
                 return ParseImpl(value);
             }catch(Exception ex)
             {
-                throw new FormatException("Could not parse string value '" + value + "' with Decider Type:" + GetType().Name,ex);
+                throw new FormatException(string.Format(FAnsiStrings.DecideTypesForStrings_Parse_Could_not_parse_string_value___0___with_Decider_Type__1_, value, GetType().Name),ex);
             }            
         }
 

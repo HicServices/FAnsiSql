@@ -92,7 +92,7 @@ namespace FAnsi.Discovery.TypeTranslation
             if (t == typeof (Guid))
                 return GetGuidDataType();
 
-            throw new NotSupportedException("Unsure what SQL Database type to use for Property Type " + t.Name);
+            throw new TypeNotMappedException(string.Format(FAnsiStrings.TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__, t.Name, GetType().Name));
         }
         
         protected virtual string GetByteArrayDataType()
@@ -191,7 +191,10 @@ namespace FAnsi.Discovery.TypeTranslation
             Type result = TryGetCSharpTypeForSQLDBType(sqlType);
 
             if (result == null)
-                throw new NotSupportedException("Not sure what type of C# datatype to use for SQL type :" + sqlType);
+                throw new TypeNotMappedException(string.Format(
+                    FAnsiStrings
+                        .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
+                    sqlType, GetType().Name));
 
             return result;
         }
@@ -278,7 +281,10 @@ namespace FAnsi.Discovery.TypeTranslation
             if (IsGuid(sqlType))
                 return DbType.Guid;
 
-            throw new NotSupportedException("Not sure what type of C# datatype to use for SQL type :" + sqlType);
+            throw new TypeNotMappedException(string.Format(
+                FAnsiStrings
+                    .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
+                sqlType, GetType().Name));
         }
 
         public virtual DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string sqlType)

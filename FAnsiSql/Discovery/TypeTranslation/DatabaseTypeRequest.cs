@@ -97,7 +97,7 @@ namespace FAnsi.Discovery.TypeTranslation
             }
             
             if(!(first.CSharpType == second.CSharpType))
-                throw new NotSupportedException("Cannot Max DatabaseTypeRequests because they were of differing Types and neither Type appeared in the PreferenceOrder (Types were '" + first.CSharpType +"' and '" + second.CSharpType + "')");
+                throw new NotSupportedException(string.Format(FAnsiStrings.DatabaseTypeRequest_Max_Could_not_combine_Types___0___and___1___because_they_were_of_differing_Types_and_neither_Type_appeared_in_the_PreferenceOrder, first.CSharpType, second.CSharpType));
 
             //Types are the same, so max the sub elements (width, DecimalSize etc)
 

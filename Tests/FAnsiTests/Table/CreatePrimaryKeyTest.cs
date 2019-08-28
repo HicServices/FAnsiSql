@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using FAnsi;
+using FAnsi.Exceptions;
 using FAnsiTests;
 using NUnit.Framework;
 
@@ -66,7 +67,7 @@ namespace FAnsiTests.Table
             Assert.IsTrue(colB.AllowNulls);
             Assert.IsFalse(colB.IsPrimaryKey);
 
-            var ex = Assert.Throws<Exception>(()=>tbl.CreatePrimaryKey(new []{colA,colB}));
+            var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(new []{colA,colB}));
             Assert.IsTrue(ex.Message.Contains("Failed to create primary key on table"));
 
             colA = tbl.DiscoverColumn("A");

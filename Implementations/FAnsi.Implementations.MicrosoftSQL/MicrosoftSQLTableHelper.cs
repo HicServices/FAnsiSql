@@ -8,6 +8,7 @@ using FAnsi;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
+using FAnsi.Exceptions;
 using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MicrosoftSQL
@@ -215,7 +216,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             }
             catch (Exception e)
             {
-                throw new Exception("Failed to create primary key on table " + table + " using columns (" + string.Join(",", discoverColumns.Select(c => c.GetRuntimeName())) + ")", e);
+                throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
             }
 
             base.CreatePrimaryKey(table, discoverColumns, connection, timeoutInSeconds);

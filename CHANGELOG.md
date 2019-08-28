@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Table/column name suggester now allows unicode characters (now called `GetSensibleEntityNameFromString`)
 - Attempting to resize a column to the same size it is currently is now ignored (previously `InvalidResizeException` was thrown)
+- Added new Exception types (instead of generic .net Exceptions)
+  - ColumnMappingException when insert / bulk insert fails to match input columns to destination table
+  - TypeNotMappedException when there is a problem translating a C# Type to a proprietary SQL datatype (or vice versa)
+- MakeDistinct on DiscoveredTable no longer throws an Exception if the table has a Primary Key (instead the method exits without doing anything)
 
 ### Fixed
 
