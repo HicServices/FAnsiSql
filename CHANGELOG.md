@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ColumnMappingException when insert / bulk insert fails to match input columns to destination table
   - TypeNotMappedException when there is a problem translating a C# Type to a proprietary SQL datatype (or vice versa)
 - MakeDistinct on DiscoveredTable no longer throws an Exception if the table has a Primary Key (instead the method exits without doing anything)
+- Reduced code duplication in AggregateHelper implementations by centralising code in new class AggregateCustomLineCollection
 
 ### Fixed
 

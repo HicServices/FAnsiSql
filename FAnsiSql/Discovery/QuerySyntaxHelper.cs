@@ -242,14 +242,7 @@ namespace FAnsi.Discovery
 
         public abstract string GetScalarFunctionSql(MandatoryScalarFunctions function);
 
-        /// <summary>
-        /// Takes a line line " count(*) " and returns "count" and "*"
-        /// Also handles LTRIM(RTRIM(FishFishFish)) by returning "LTRIM" and  "RTRIM(FishFishFish)"
-        /// </summary>
-        /// <param name="lineToSplit"></param>
-        /// <param name="method"></param>
-        /// <param name="contents"></param>
-        /// <exception cref="ArgumentException">If <paramref name="lineToSplit"/> was badly formed, blank etc</exception>
+        /// <inheritdoc/>
         public void SplitLineIntoOuterMostMethodAndContents(string lineToSplit, out string method, out string contents)
         {
             if (string.IsNullOrWhiteSpace(lineToSplit))

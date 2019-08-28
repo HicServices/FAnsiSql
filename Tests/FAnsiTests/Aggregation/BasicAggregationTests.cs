@@ -24,7 +24,7 @@ namespace FAnsiTests.Aggregation
             lines.Add(new CustomLine("count(*)", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
             lines.Add(new CustomLine("FROM " + tbl.GetFullyQualifiedName(), QueryComponent.FROM));
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null, false);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null);
 
             using (var con = svr.GetConnection())
             {
@@ -60,7 +60,7 @@ namespace FAnsiTests.Aggregation
             lines.Add(new CustomLine("Category", QueryComponent.OrderBy));
 
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null, false);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null);
 
             using (var con = svr.GetConnection())
             {

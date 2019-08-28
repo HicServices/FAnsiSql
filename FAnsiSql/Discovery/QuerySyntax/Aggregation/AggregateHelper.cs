@@ -1,4 +1,5 @@
-﻿using FAnsi;
+﻿using System;
+using FAnsi;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using System.Collections.Generic;
@@ -8,38 +9,55 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation
 {
     public abstract class AggregateHelper:IAggregateHelper
     {
-        public abstract string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot);
+        public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny)
+        {
+            var lines = new AggregateCustomLineCollection(queryLines, axisIfAny, GetQuerySyntaxHelper());
+            
+            //no axis no pivot
+            if (lines.AxisSelect == null  && lines.PivotSelect == null)
+                return BuildBasicAggregate(lines);  
+
+            //axis (no pivot)
+            if (lines.PivotSelect == null)
+                return BuildAxisAggregate(lines);
+            
+            //pivot (no axis)
+            if (lines.AxisSelect == null)
+                return BuildPivotOnlyAggregate(lines,GetPivotOnlyNonPivotColumn(lines));
+
+            //pivot and axis
+            return BuildPivotAndAxisAggregate(lines);
+        }
+
+        private CustomLine GetPivotOnlyNonPivotColumn(AggregateCustomLineCollection query)
+        {
+            var nonPivotColumn = query.Lines.Where(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.None).ToArray();
+            if(nonPivotColumn.Length != 1)
+                throw new Exception("Pivot is only valid when there are 3 SELECT columns, an aggregate (e.g. count(*)), a pivot and a final column");
+
+            return nonPivotColumn[0];
+        }
+
+        protected abstract IQuerySyntaxHelper GetQuerySyntaxHelper();
+
+        protected virtual string BuildBasicAggregate(AggregateCustomLineCollection query)
+        {
+            return string.Join(Environment.NewLine, query.Lines);
+        }
 
         /// <summary>
-        /// Provides useful bits of SQL you need to build an axis only aggregate
+        /// Builds an SQL GROUP BY query in from the lines in <paramref name="query"/> where records are counted and put into
+        /// buckets according to the interval defined in <see cref="AggregateCustomLineCollection.Axis"/> based on the date SQL
+        /// (usually a column name) in <see cref="AggregateCustomLineCollection.AxisSelect"/>
         /// </summary>
-        /// <param name="syntaxHelper">Your DBMS specific syntax helper</param>
-        /// <param name="lines">The lines you were given in <see cref="BuildAggregate"/></param>
-        /// <param name="countSelectLine">The single aggregate function line e.g. "count(distinct chi) as Fish,"</param>
-        /// <param name="countSqlWithoutAlias">The portion of <paramref name="countSelectLine"/> which excludes the alias e.g. "count(distinct chi)"</param>
-        /// <param name="countAlias">The portion of <paramref name="countSelectLine"/> which is the alias e.g. "Fish" (or null if no AS is specified)</param>
-        /// <param name="axisColumn">The single line of SELECT SQL which is the Axis join column e.g. "[MyDb]..[mytbl].[AdmissionDate] as Admt,"</param>
-        /// <param name="axisColumnWithoutAlias">The portion of <paramref name="axisColumn"/> which excludes the alias e.g. "[MyDb]..[mytbl].[AdmissionDate]"</param>
-        /// <param name="axisColumnAlias">The portion of <paramref name="axisColumn"/> which is the alias e.g. "Admt" (or "joinDt" if no AS is specified)</param>
-        protected void GetAggregateAxisBits(IQuerySyntaxHelper syntaxHelper, List<CustomLine> lines,
-            out CustomLine countSelectLine,
-            out string countSqlWithoutAlias,
-            out string countAlias,
-            out CustomLine axisColumn,
-            out string axisColumnWithoutAlias,
-            out string axisColumnAlias)
-        {
-            countSelectLine = lines.Single(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.CountFunction);
-            syntaxHelper.SplitLineIntoSelectSQLAndAlias(countSelectLine.Text, out countSqlWithoutAlias, out countAlias);
-            
-            //Deal with the axis dimension which is currently `mydb`.`mytbl`.`mycol` and needs to become YEAR(`mydb`.`mytbl`.`mycol`) As joinDt 
-            axisColumn = lines.Single(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.Axis);
+        /// <param name="query"></param>
+        /// <returns></returns>
+        protected abstract string BuildAxisAggregate(AggregateCustomLineCollection query);
+        
+        protected abstract string BuildPivotOnlyAggregate(AggregateCustomLineCollection query,CustomLine nonPivotColumn);
 
-            syntaxHelper.SplitLineIntoSelectSQLAndAlias(axisColumn.Text, out axisColumnWithoutAlias, out axisColumnAlias);
+        protected abstract string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query);
 
-            if (string.IsNullOrWhiteSpace(axisColumnAlias))
-                axisColumnAlias = "joinDt";
-        }
 
         /// <summary>
         /// Changes the axis column in the GROUP BY section of the query (e.g. "[MyDb]..[mytbl].[AdmissionDate],") and
@@ -51,15 +69,19 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation
         /// <param name="axis"></param>
         /// <param name="axisColumnWithoutAlias"></param>
         /// <param name="axisColumnAlias"></param>
-        protected void WrapAxisColumnWithDatePartFunction(CustomLine axisColumn, List<CustomLine> lines, IQueryAxis axis, string axisColumnWithoutAlias, string axisColumnAlias)
+        protected void WrapAxisColumnWithDatePartFunction(AggregateCustomLineCollection query, string axisColumnAlias)
         {
-            var axisGroupBy = lines.Single(l => l.LocationToInsert == QueryComponent.GroupBy && l.Role == CustomLineRole.Axis);
+            if(string.IsNullOrWhiteSpace(axisColumnAlias))
+                throw new ArgumentNullException(nameof(axisColumnAlias));
 
-            var axisColumnEndedWithComma = axisColumn.Text.EndsWith(",");
-            axisColumn.Text = GetDatePartOfColumn(axis.AxisIncrement, axisColumnWithoutAlias) + " AS " + axisColumnAlias + (axisColumnEndedWithComma ? "," : "");
+            var axisGroupBy = query.AxisGroupBy;
+            var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
+
+            var axisColumnEndedWithComma = query.AxisSelect.Text.EndsWith(",");
+            query.AxisSelect.Text = GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias) + " AS " + axisColumnAlias + (axisColumnEndedWithComma ? "," : "");
 
             var groupByEndedWithComma = axisGroupBy.Text.EndsWith(",");
-            axisGroupBy.Text = GetDatePartOfColumn(axis.AxisIncrement, axisColumnWithoutAlias) + (groupByEndedWithComma ? "," : "");
+            axisGroupBy.Text = GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias) + (groupByEndedWithComma ? "," : "");
         }
 
         public abstract string GetDatePartOfColumn(AxisIncrement increment, string columnSql);

@@ -37,7 +37,7 @@ namespace FAnsiTests.Aggregation
             };
 
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, true);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
             using (var con = svr.GetConnection())
             {

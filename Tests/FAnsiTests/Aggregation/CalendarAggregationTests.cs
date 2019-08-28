@@ -35,7 +35,7 @@ namespace FAnsiTests.Aggregation
                 AxisIncrement = AxisIncrement.Year //by year
             };
             
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, false);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
             using (var con = svr.GetConnection())
             {
@@ -94,7 +94,7 @@ namespace FAnsiTests.Aggregation
             };
 
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, false);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
             using (var con = svr.GetConnection())
             {
@@ -138,7 +138,7 @@ namespace FAnsiTests.Aggregation
             };
 
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, false);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
             using (var con = svr.GetConnection())
             {
@@ -182,7 +182,7 @@ namespace FAnsiTests.Aggregation
             };
 
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, false);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
             using (var con = svr.GetConnection())
             {
@@ -229,7 +229,7 @@ namespace FAnsiTests.Aggregation
             };
 
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, false);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
             using (var con = svr.GetConnection())
             {
@@ -296,7 +296,7 @@ namespace FAnsiTests.Aggregation
             };
 
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, false);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
             using (var con = svr.GetConnection())
             {

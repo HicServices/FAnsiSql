@@ -31,7 +31,7 @@ namespace FAnsiTests.Aggregation
             lines.Add(new CustomLine("Category,", QueryComponent.GroupBy));
             lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot });
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null, true);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null);
 
             using (var con = svr.GetConnection())
             {

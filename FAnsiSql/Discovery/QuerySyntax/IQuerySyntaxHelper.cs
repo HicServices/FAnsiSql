@@ -84,7 +84,17 @@ namespace FAnsi.Discovery.QuerySyntax
 
         string GetScalarFunctionSql(MandatoryScalarFunctions function);
         string GetSensibleEntityNameFromString(string potentiallyDodgyName);
-        
+
+        /// <summary>
+        /// Takes a line line " count(*) " and returns "count" and "*"
+        /// Also handles LTRIM(RTRIM(FishFishFish)) by returning "LTRIM" and  "RTRIM(FishFishFish)"
+        /// </summary>
+        /// <param name="lineToSplit"></param>
+        /// <param name="method"></param>
+        /// <param name="contents"></param>
+        /// <exception cref="ArgumentException">If <paramref name="lineToSplit"/> was badly formed, blank etc</exception>
+        void SplitLineIntoOuterMostMethodAndContents(string lineToSplit, out string method, out string contents);
+
         /// <summary>
         /// The SQL that would be valid for a CREATE TABLE statement that would result in a given column becoming auto increment e.g. "IDENTITY(1,1)"
         /// </summary>
