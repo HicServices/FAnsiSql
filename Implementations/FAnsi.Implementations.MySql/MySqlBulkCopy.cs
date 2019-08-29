@@ -1,11 +1,11 @@
 using System;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
-using FAnsi.Discovery.TypeTranslation.TypeDeciders;
 using MySql.Data.MySqlClient;
 
 namespace FAnsi.Implementations.MySql
@@ -29,7 +29,7 @@ namespace FAnsi.Implementations.MySql
         /// </summary>
         public static int BulkInsertRowsPerNetworkPacket = 500;
 
-        public MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection) : base(targetTable, connection)
+        public MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture) : base(targetTable, connection,culture)
         {
         }
 

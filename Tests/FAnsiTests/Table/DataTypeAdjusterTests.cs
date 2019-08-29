@@ -2,9 +2,8 @@
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.TableCreation;
-using FAnsi.Discovery.TypeTranslation;
-using FAnsiTests;
 using NUnit.Framework;
+using TypeGuesser;
 
 namespace FAnsiTests.Table
 {
@@ -28,7 +27,7 @@ namespace FAnsiTests.Table
         {
             public void AdjustColumns(List<DatabaseColumnRequest> columns)
             {
-                columns[0].TypeRequested.MaxWidthForStrings = 12;
+                columns[0].TypeRequested.Width = 12;
             }
         }
     }

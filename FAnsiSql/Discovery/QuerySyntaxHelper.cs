@@ -10,7 +10,7 @@ using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using FAnsi.Discovery.QuerySyntax.Update;
 using FAnsi.Discovery.TypeTranslation;
-using FAnsi.Discovery.TypeTranslation.TypeDeciders;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {
@@ -37,7 +37,8 @@ namespace FAnsi.Discovery
         public static char[] TableNameQualifiers = { '[', ']', '`' };
 
         public ITypeTranslater TypeTranslater { get; private set; }
-        readonly TypeDeciderFactory typeDeciderFactory = new TypeDeciderFactory();
+        
+        private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = new Dictionary<CultureInfo, TypeDeciderFactory>();
 
         public IAggregateHelper AggregateHelper { get; private set; }
         public IUpdateHelper UpdateHelper { get; set; }
@@ -349,10 +350,18 @@ namespace FAnsi.Discovery
 
         public abstract string HowDoWeAchieveMd5(string selectSql);
         
+        
+
         public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value,CultureInfo culture)
         {
             try
             {
+                if(culture == null)
+                    culture = CultureInfo.CurrentCulture;
+                
+                if(!factories.ContainsKey(culture))
+                    factories.Add(culture,new TypeDeciderFactory(culture));
+
                 var tt = TypeTranslater;
                 p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
                 var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType.SQLType);
@@ -360,14 +369,9 @@ namespace FAnsi.Discovery
                 if (IsBasicallyNull(value))
                     p.Value = DBNull.Value;
                 else
-                    if (value is string strVal && typeDeciderFactory.IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan 
+                    if (value is string strVal && factories[culture].IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan 
                     {
-                        var decider = typeDeciderFactory.Create(cSharpType);
-
-                        if(decider is DateTimeTypeDecider dt)
-                            if(culture != null)
-                                dt.Culture = culture;
-                        
+                        var decider = factories[culture].Create(cSharpType);
                         var o = decider.Parse(strVal);
 
                         //Not all DBMS support DBParameter.Value = new TimeSpan(...);

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using FAnsi;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 
@@ -17,7 +17,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
     {
         private readonly SqlBulkCopy _bulkcopy;
 
-        public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection): base(targetTable, connection)
+        public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
         {
             _bulkcopy = new SqlBulkCopy((SqlConnection)connection.Connection, SqlBulkCopyOptions.KeepIdentity, (SqlTransaction)connection.Transaction)
             {
@@ -62,7 +62,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
                 if (serverForLineByLineInvestigation == null)
                 {
                     if(BcpColIdToString(insert,e as SqlException, out string result1, out _))
-                        throw new Exception("Failed to bulk insert:" + result1,e);  //but we can still give him a better message than "bcp colid 1 was bad"!
+                        throw new Exception(string.Format(SR.MicrosoftSQLBulkCopy_BulkInsertWithBetterErrorMessages_Failed_to_bulk_insert__0_, result1),e);  //but we can still give him a better message than "bcp colid 1 was bad"!
                 }
                 else
                 {
@@ -74,7 +74,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
                     }
                     catch (Exception exception)
                     {
-                        throw new AggregateException("Failed to bulk insert batch, line by line investigation also failed.  InnerException[0] is the original Exception, InnerException[1] is the line by line failure",e, exception);
+                        throw new AggregateException(SR.MicrosoftSQLBulkCopy_BulkInsertWithBetterErrorMessages_Failed_to_bulk_insert_batch__line_by_line_investigation_also_failed___InnerException_0__is_the_original_Exception__InnerException_1__is_the_line_by_line_failure,e, exception);
                     }
 
                     throw better;
@@ -101,7 +101,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
             int line = 1;
             string firstPass = ExceptionToListOfInnerMessages(e, true);
             firstPass = firstPass.Replace(Environment.NewLine, Environment.NewLine + "\t");
-            firstPass = Environment.NewLine + "First Pass Exception:" + Environment.NewLine + firstPass;
+            firstPass = Environment.NewLine + SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_First_Pass_Exception_ + Environment.NewLine + firstPass;
             
             //have to use a new object because current one could have a broken transaction associated with it
             using (var con = (SqlConnection)serverForLineByLineInvestigation.GetConnection())
@@ -134,17 +134,14 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
                                 if(destColumn != null)
                                     return new FileLoadException(
-                                        "BulkInsert failed on data row " + line + " the complaint was about source column <<" + badMapping.SourceColumn + ">> which had value <<" + sourceValue + ">> destination data type was <<" + destColumn.DataType + ">>" + Environment.NewLine + result, exception);
+                                        string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0__the_complaint_was_about_source_column____1____which_had_value____2____destination_data_type_was____3____4__5_, line, badMapping.SourceColumn, sourceValue, destColumn.DataType, Environment.NewLine, result), exception);
                             }
 
-                            return new Exception("BulkInsert failed on data row " + line + ":" + result, e);
+                            return new Exception(string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_, line, result), e);
                         }
                         
                         return  new FileLoadException(
-                            "Second Pass Exception: Failed to load data row " + line + " the following values were rejected by the database: " +
-                            Environment.NewLine + 
-                            string.Join(Environment.NewLine,dr.ItemArray)
-                            + firstPass,
+                            string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_, line, Environment.NewLine, string.Join(Environment.NewLine,dr.ItemArray), firstPass),
                             exception);
                     }
 
@@ -152,7 +149,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
                 investigationTransaction.Rollback();
                 con.Close();
 
-                return new Exception("Second Pass Exception: Bulk insert failed but when we tried to repeat it a line at a time it worked... very strange" + firstPass , e);
+                return new Exception(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Bulk_insert_failed_but_when_we_tried_to_repeat_it_a_line_at_a_time_it_worked + firstPass , e);
             }
         }
 

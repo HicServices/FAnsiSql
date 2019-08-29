@@ -7,7 +7,6 @@ using FAnsi.Discovery.ConnectionStringDefaults;
 using FAnsi.Implementations.MicrosoftSQL;
 using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
-using FAnsiTests;
 using NUnit.Framework;
 
 namespace FAnsiTests.Server

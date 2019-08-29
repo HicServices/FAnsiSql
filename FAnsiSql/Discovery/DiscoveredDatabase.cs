@@ -6,8 +6,8 @@ using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
-using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Naming;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {
@@ -245,7 +245,7 @@ namespace FAnsi.Discovery
         /// <param name="createEmpty"></param>
         /// <param name="adjuster"></param>
         /// <returns></returns>
-        public DiscoveredTable CreateTable(out Dictionary<string, DataTypeComputer> typeDictionary, string tableName, DataTable dt, DatabaseColumnRequest[] explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster adjuster = null)
+        public DiscoveredTable CreateTable(out Dictionary<string, Guesser> typeDictionary, string tableName, DataTable dt, DatabaseColumnRequest[] explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster adjuster = null)
         {
             var args = new CreateTableArgs(this, tableName, null, dt, createEmpty)
             {

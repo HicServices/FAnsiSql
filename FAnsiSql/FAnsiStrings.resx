@@ -169,10 +169,10 @@
   <data name="DatabaseTypeRequest_Max_Could_not_combine_Types___0___and___1___because_they_were_of_differing_Types_and_neither_Type_appeared_in_the_PreferenceOrder" xml:space="preserve">
     <value>Could not combine Types '{0}' and '{1}' because they were of differing Types and neither Type appeared in the PreferenceOrder</value>
   </data>
-  <data name="DataTypeComputer_AdjustToCompensateForValue_DataTypeComputerPassedMixedTypeValues" xml:space="preserve">
-    <value>DataTypeComputer does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object '{0}' which is of Type '{1}', we were previously passed a '{2}' type</value>
+  <data name="Guesser_AdjustToCompensateForValue_GuesserPassedMixedTypeValues" xml:space="preserve">
+    <value>Guesser does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object '{0}' which is of Type '{1}', we were previously passed a '{2}' type</value>
   </data>
-  <data name="DataTypeComputer_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_" xml:space="preserve">
+  <data name="Guesser_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_" xml:space="preserve">
     <value>No Type Decider exists for Type:{0}</value>
   </data>
   <data name="TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__" xml:space="preserve">

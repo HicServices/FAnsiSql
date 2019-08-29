@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
-using FAnsi;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
@@ -196,9 +196,9 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             return toReturn.ToArray();
         }
 
-        public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection)
+        public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture)
         {
-            return new MicrosoftSQLBulkCopy(discoveredTable,connection);
+            return new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
         }
 
         public override void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0)

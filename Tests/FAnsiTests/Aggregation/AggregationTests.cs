@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using FAnsi;
 using FAnsi.Discovery;
-using FAnsi.Discovery.QuerySyntax;
-using FAnsi.Discovery.QuerySyntax.Aggregation;
 using NUnit.Framework;
 using System.Linq;
 

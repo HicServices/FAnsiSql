@@ -15,14 +15,14 @@
   <Comment CommentText="All strings are represented with one of the following (or left as System.String).">
     <Position X="9.25" Y="7.25" Height="0.75" Width="1.7" />
   </Comment>
-  <Comment CommentText="Fallback compatibility between types e.g. when DataTypeComputer sees &quot;1&quot; followed by &quot;1.1&quot;.">
+  <Comment CommentText="Fallback compatibility between types e.g. when Guesser sees &quot;1&quot; followed by &quot;1.1&quot;.">
     <Position X="11.704" Y="3.652" Height="0.918" Width="1.7" />
   </Comment>
-  <Class Name="FAnsi.Discovery.TypeTranslation.DataTypeComputer" Collapsed="true">
+  <Class Name="FAnsi.Discovery.TypeTranslation.Guesser" Collapsed="true">
     <Position X="2.5" Y="0.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>CAABASAARAAgAAAAAAAAIgRAAAAACAgAIAAgAAQEAAA=</HashCode>
-      <FileName>Discovery\TypeTranslation\DataTypeComputer.cs</FileName>
+      <FileName>Discovery\TypeTranslation\Guesser.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="_typeDeciders" />

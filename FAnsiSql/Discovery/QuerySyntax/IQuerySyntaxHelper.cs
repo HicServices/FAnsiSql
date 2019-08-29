@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using FAnsi.Discovery.QuerySyntax.Update;
 using FAnsi.Discovery.TypeTranslation;
+using TypeGuesser;
 
 namespace FAnsi.Discovery.QuerySyntax
 {

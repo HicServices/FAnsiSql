@@ -6,8 +6,8 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Exceptions;
 using FAnsi.Implementation;
-using FAnsiTests;
 using NUnit.Framework;
+using TypeGuesser;
 
 namespace FAnsiTests.TypeTranslation
 {
@@ -213,9 +213,9 @@ namespace FAnsiTests.TypeTranslation
 
                 //Does FAnsi understand the datatype that was actually created on the server (sometimes you specify something and it is an
                 //alias for something else e.g. Oracle creates 'varchar2' when you ask for 'CHAR VARYING'
-                var datatypeComputer = col.GetDataTypeComputer();
-                Assert.IsNotNull(datatypeComputer.CurrentEstimate);
-                var tAfter = datatypeComputer.CurrentEstimate;
+                var Guesser = col.GetGuesser();
+                Assert.IsNotNull(Guesser.Guess.CSharpType);
+                var tAfter = Guesser.Guess.CSharpType;
                 
                 //was the Type REQUESTED correct according to the test case expectation
                 Assert.AreEqual(expectedType, tBefore,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'",sqlType,col.DataType.SQLType,tBefore,tAfter);

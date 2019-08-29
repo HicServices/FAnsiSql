@@ -1,10 +1,9 @@
 ﻿using FAnsi;
 using FAnsi.Implementation;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using TypeGuesser;
 
 namespace FAnsiTests.Parameters
 {
@@ -17,7 +16,7 @@ namespace FAnsiTests.Parameters
         {
             var syntax = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
                         
-            var declaration = syntax.GetParameterDeclaration("@bob",new FAnsi.Discovery.TypeTranslation.DatabaseTypeRequest(typeof(string),10));
+            var declaration = syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10));
             
             StringAssert.Contains("@bob",declaration);
         }
@@ -40,7 +39,7 @@ namespace FAnsiTests.Parameters
             StringBuilder sb = new StringBuilder();
                         
             //declare the variable
-            sb.AppendLine(tbl.GetQuerySyntaxHelper().GetParameterDeclaration("@bob",new FAnsi.Discovery.TypeTranslation.DatabaseTypeRequest(typeof(string),10)));
+            sb.AppendLine(tbl.GetQuerySyntaxHelper().GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)));
 
             sb.AppendLine("SET @bob='armag';");
             //set the variable

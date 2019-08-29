@@ -1,10 +1,8 @@
 ﻿using FAnsi;
 using FAnsi.Discovery;
-using FAnsi.Discovery.TypeTranslation;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using TypeGuesser;
 
 namespace FAnsiTests.Table
 {

@@ -4,8 +4,8 @@ using System.Data;
 using System.Linq;
 using FAnsi;
 using FAnsi.Discovery;
-using FAnsi.Discovery.TypeTranslation;
 using NUnit.Framework;
+using TypeGuesser;
 
 namespace FAnsiTests.Table
 {
@@ -222,12 +222,12 @@ namespace FAnsiTests.Table
             if (type == DatabaseType.Oracle)
             {
                 //Oracle doesn't have a bit datatype
-                Assert.AreEqual(typeof(string), tbl.DiscoverColumn("MyBoolCol").GetDataTypeComputer().CurrentEstimate);
+                Assert.AreEqual(typeof(string), tbl.DiscoverColumn("MyBoolCol").GetGuesser().Guess.CSharpType);
                 Assert.AreEqual("true", tbl.GetDataTable().Rows[0][0]);
                 return;
             }
 
-            Assert.AreEqual(typeof(bool),tbl.DiscoverColumn("MyBoolCol").GetDataTypeComputer().CurrentEstimate);
+            Assert.AreEqual(typeof(bool),tbl.DiscoverColumn("MyBoolCol").GetGuesser().Guess.CSharpType);
             Assert.AreEqual(true,tbl.GetDataTable().Rows[0][0]);
         }
 
@@ -304,8 +304,8 @@ namespace FAnsiTests.Table
             Assert.IsTrue(typeRequest.Unicode, "Expected column DatabaseTypeRequest generated from column SQLType to be Unicode");
 
             //Column created should use unicode when creating a new datatype computer from the col
-            var comp = col.GetDataTypeComputer();
-            Assert.IsTrue(comp.UseUnicode);
+            var comp = col.GetGuesser();
+            Assert.IsTrue(comp.Guess.Unicode);
         }
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]

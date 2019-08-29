@@ -1,7 +1,6 @@
-﻿using FAnsi.Discovery.TypeTranslation.TypeDeciders;
-using System;
+﻿using System;
 using System.Data;
-using System.Globalization;
+using TypeGuesser.Deciders;
 
 namespace FAnsi.Discovery
 {

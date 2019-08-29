@@ -1,9 +1,4 @@
-﻿using FAnsi;
-using FAnsi.Discovery.QuerySyntax;
-using FAnsi.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace FAnsi.Discovery.QuerySyntax
 {

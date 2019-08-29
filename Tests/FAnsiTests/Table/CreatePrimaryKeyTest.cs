@@ -1,8 +1,6 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using FAnsi;
 using FAnsi.Exceptions;
-using FAnsiTests;
 using NUnit.Framework;
 
 namespace FAnsiTests.Table

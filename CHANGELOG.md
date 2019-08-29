@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Type Guessing rules adjusted (and moved to [new repository TypeGuesser](https://github.com/HicServices/TypeGuesser))
+  - Bit strings now include "Y", "N" "1" and "0".
+  - Zeros after decimal point no longer prohibit guessing int (e.g. 1.00 is the now `int` instead of `decimal(3,2)`) 
+- DecimalSize class now uses `int` instead of nullable int (`int?`) for number of digits before/after decimal point.
 - Table/column name suggester now allows unicode characters (now called `GetSensibleEntityNameFromString`)
 - Attempting to resize a column to the same size it is currently is now ignored (previously `InvalidResizeException` was thrown)
 - Added new Exception types (instead of generic .net Exceptions)

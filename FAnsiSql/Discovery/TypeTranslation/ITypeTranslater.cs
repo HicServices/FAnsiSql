@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using TypeGuesser;
 
 namespace FAnsi.Discovery.TypeTranslation
 {
@@ -59,7 +60,7 @@ namespace FAnsi.Discovery.TypeTranslation
 
         DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string sqlType);
 
-        DataTypeComputer GetDataTypeComputerFor(DiscoveredColumn discoveredColumn);
+        Guesser GetGuesserFor(DiscoveredColumn discoveredColumn);
 
         int GetLengthIfString(string sqlType);
         DecimalSize GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType);

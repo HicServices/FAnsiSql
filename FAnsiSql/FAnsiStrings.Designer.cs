@@ -99,11 +99,11 @@ namespace FAnsi {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DataTypeComputer does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object &apos;{0}&apos; which is of Type &apos;{1}&apos;, we were previously passed a &apos;{2}&apos; type.
+        ///   Looks up a localized string similar to Guesser does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object &apos;{0}&apos; which is of Type &apos;{1}&apos;, we were previously passed a &apos;{2}&apos; type.
         /// </summary>
-        public static string DataTypeComputer_AdjustToCompensateForValue_DataTypeComputerPassedMixedTypeValues {
+        public static string Guesser_AdjustToCompensateForValue_GuesserPassedMixedTypeValues {
             get {
-                return ResourceManager.GetString("DataTypeComputer_AdjustToCompensateForValue_DataTypeComputerPassedMixedTypeValues" +
+                return ResourceManager.GetString("Guesser_AdjustToCompensateForValue_GuesserPassedMixedTypeValues" +
                         "", resourceCulture);
             }
         }
@@ -111,9 +111,9 @@ namespace FAnsi {
         /// <summary>
         ///   Looks up a localized string similar to No Type Decider exists for Type:{0}.
         /// </summary>
-        public static string DataTypeComputer_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_ {
+        public static string Guesser_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_ {
             get {
-                return ResourceManager.GetString("DataTypeComputer_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_", resourceCulture);
+                return ResourceManager.GetString("Guesser_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_", resourceCulture);
             }
         }
         

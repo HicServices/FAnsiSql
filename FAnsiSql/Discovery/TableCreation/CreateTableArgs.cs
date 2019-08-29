@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using FAnsi.Discovery.TypeTranslation;
+using System.Globalization;
+using TypeGuesser;
 
 namespace FAnsi.Discovery.TableCreation
 {
@@ -63,10 +64,15 @@ namespace FAnsi.Discovery.TableCreation
         public bool TableCreated { get; private set; }
 
         /// <summary>
-        /// Populated after the table has been created (See <see cref="TableCreated"/>), list of the <see cref="DataTypeComputer"/> used to create the columns in the table.
+        /// Populated after the table has been created (See <see cref="TableCreated"/>), list of the <see cref="Guesser"/> used to create the columns in the table.
         /// <para>This will be null if no <see cref="DataTable"/> was provided when creating the table</para>
         /// </summary>
-        public Dictionary<string, DataTypeComputer> ColumnCreationLogic { get; private set; }
+        public Dictionary<string, Guesser> ColumnCreationLogic { get; private set; }
+
+        /// <summary>
+        /// Used to determine what how to parse untyped strings in <see cref="DataTable"/> (if building schema from data table).
+        /// </summary>
+        public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
 
         /// <summary>
         /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
@@ -114,7 +120,7 @@ namespace FAnsi.Discovery.TableCreation
         /// Declare that the table has been created and the provided <paramref name="columnsCreated"/> were used to determine the column schema
         /// </summary>
         /// <param name="columnsCreated"></param>
-        public void OnTableCreated(Dictionary<string, DataTypeComputer> columnsCreated)
+        public void OnTableCreated(Dictionary<string, Guesser> columnsCreated)
         {
             ColumnCreationLogic = columnsCreated;
             TableCreated = true;

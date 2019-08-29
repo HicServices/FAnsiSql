@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery;
@@ -192,9 +193,9 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             throw new NotImplementedException();
         }
 
-        public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection)
+        public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture)
         {
-            return new OracleBulkCopy(discoveredTable,connection);
+            return new OracleBulkCopy(discoveredTable,connection,culture);
         }
 
         public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction = null)

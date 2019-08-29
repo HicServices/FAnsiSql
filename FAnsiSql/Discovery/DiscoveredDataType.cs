@@ -4,6 +4,7 @@ using System.Data.Common;
 using FAnsi.Connections;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Exceptions;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {

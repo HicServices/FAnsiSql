@@ -9,9 +9,10 @@ using System.Text;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
-using FAnsi.Discovery.TypeTranslation;
-using FAnsi.Discovery.TypeTranslation.TypeDeciders;
+using FAnsiTests.TypeTranslation;
 using NUnit.Framework;
+using TypeGuesser;
+using TypeGuesser.Deciders;
 
 namespace FAnsiTests
 {
@@ -67,15 +68,14 @@ namespace FAnsiTests
             var db = GetTestDatabase(type, true);
             var tbl = db.CreateTable("MyTable",new []{new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))});
 
-            var c = new CultureInfo (culture);
+            var cultureInfo = new CultureInfo (culture);
 
             //basic insert
-            tbl.Insert(new Dictionary<string, object>() { { "MyDate", input } },c);
+            tbl.Insert(new Dictionary<string, object>() { { "MyDate", input } },cultureInfo);
             
             //then bulk insert, both need to work
-            using (var blk = tbl.BeginBulkInsert())
+            using (var blk = tbl.BeginBulkInsert(cultureInfo))
             {
-                blk.DateTimeDecider.Culture = c;
                 var dt = new DataTable();
                 dt.Columns.Add("MyDate");
                 dt.Rows.Add(input);
@@ -109,9 +109,8 @@ namespace FAnsiTests
                 });
 
             //then bulk insert, both need to work
-            using (var blk = tbl.BeginBulkInsert())
+            using (var blk = tbl.BeginBulkInsert(new CultureInfo(culture)))
             {
-                blk.DateTimeDecider.Culture = new CultureInfo (culture);
                 var dt = new DataTable();
                 dt.Columns.Add("MyDate");
                 dt.Rows.Add(input);
@@ -259,15 +258,15 @@ namespace FAnsiTests
         }
 
         [Test]
-        [TestCase(DatabaseType.MicrosoftSQLServer, "decimal(4,2)", "-23.00")]
-        [TestCase(DatabaseType.MicrosoftSQLServer, "decimal(3,1)", "23.0")]
-        [TestCase(DatabaseType.MicrosoftSQLServer, "int", "0")]
-        [TestCase(DatabaseType.MicrosoftSQLServer, "decimal(1,0)", "00.0")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "int", "-23.00")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "int", "23.0")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "bit", "0")]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "int", "00.0")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "int", "-24")]
-        [TestCase(DatabaseType.MySql, "decimal(4,2)", "-23.00")]
+        [TestCase(DatabaseType.MySql, "int", "-23.00")]
         [TestCase(DatabaseType.MySql, "int", "-25")]
-        [TestCase(DatabaseType.MySql, "int", "0")]
-        public void TypeConsensusBetweenDataTypeComputerAndDiscoveredTableTest(DatabaseType type, string datatType,string insertValue)
+        [TestCase(DatabaseType.MySql, "bit", "0")]
+        public void TypeConsensusBetweenGuesserAndDiscoveredTableTest(DatabaseType type, string datatType,string insertValue)
         {
             var database = GetTestDatabase(type);
 
@@ -280,7 +279,7 @@ namespace FAnsiTests
             dt.Columns.Add("mycol");
             dt.Rows.Add(insertValue);
 
-            var c = new DataTypeComputer();
+            var c = new Guesser();
 
             var tt = tbl.GetQuerySyntaxHelper().TypeTranslater;
             c.AdjustToCompensateForValue(insertValue);
@@ -947,6 +946,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MySql)]
         public void Test_BulkInserting_LotsOfDates(DatabaseType type)
         {
+            CultureInfo culture = new CultureInfo("en-gb");
             var db = GetTestDatabase(type);
 
             var tbl = db.CreateTable("LotsOfDatesTest",new DatabaseColumnRequest[]
@@ -963,7 +963,7 @@ namespace FAnsiTests
                     {"ID",1}, 
                     {"MyDate",s}, 
                     {"MyString",Guid.NewGuid().ToString()}
-                    }
+                    },culture
                     );
             }
 
@@ -977,10 +977,9 @@ namespace FAnsiTests
             foreach(string s in someDates)
                 dt.Rows.Add(2,s,Guid.NewGuid().ToString());
 
-
             Assert.AreEqual(someDates.Length,tbl.GetRowCount());
 
-            using(var bulkInsert = tbl.BeginBulkInsert())
+            using(var bulkInsert = tbl.BeginBulkInsert(culture))
             {
                 bulkInsert.Upload(dt);
             }
@@ -1237,7 +1236,7 @@ namespace FAnsiTests
         [Test]
         public void DateTimeTypeDeciderPerformance()
         {
-            var d = new DateTimeTypeDecider();
+            var d = new DateTimeTypeDecider(new CultureInfo("en-gb"));
             
             var sw = Stopwatch.StartNew();
 

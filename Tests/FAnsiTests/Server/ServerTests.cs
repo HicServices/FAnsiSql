@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Implementation;
