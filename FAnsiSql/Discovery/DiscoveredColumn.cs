@@ -1,6 +1,6 @@
 ﻿using FAnsi.Discovery.QuerySyntax;
-using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Naming;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {
@@ -109,13 +109,13 @@ namespace FAnsi.Discovery
         }
 
         /// <summary>
-        /// Generates a <see cref="DataTypeComputer"/> primed with the <see cref="DataType"/> of this column.  This can be used to inspect new
+        /// Generates a <see cref="Guesser"/> primed with the <see cref="DataType"/> of this column.  This can be used to inspect new
         /// untyped (string) data to determine whether it will fit into the column.
         /// </summary>
         /// <returns></returns>
-        public DataTypeComputer GetDataTypeComputer()
+        public Guesser GetGuesser()
         {
-            return Table.GetQuerySyntaxHelper().TypeTranslater.GetDataTypeComputerFor(this);
+            return Table.GetQuerySyntaxHelper().TypeTranslater.GetGuesserFor(this);
         }
 
         /// <summary>

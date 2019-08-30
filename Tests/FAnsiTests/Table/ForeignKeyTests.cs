@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
-using FAnsi.Discovery.TypeTranslation;
-using FAnsiTests;
 using NUnit.Framework;
+using TypeGuesser;
 
 namespace FAnsiTests.Table
 {

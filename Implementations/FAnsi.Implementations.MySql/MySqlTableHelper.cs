@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
@@ -125,9 +126,9 @@ WHERE table_schema = @db
             throw new NotImplementedException();
         }
 
-        public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection)
+        public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture)
         {
-            return new MySqlBulkCopy(discoveredTable, connection);
+            return new MySqlBulkCopy(discoveredTable, connection,culture);
         }
 
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.IO;
-using System.Linq;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
-using FAnsi.Discovery.TypeTranslation;
 using Oracle.ManagedDataAccess.Client;
+using TypeGuesser;
 
 namespace FAnsi.Implementations.Oracle
 {
@@ -95,13 +94,19 @@ namespace FAnsi.Implementations.Oracle
             return new DiscoveredStoredprocedure[0];
         }
 
-        protected override DataTypeComputer GetDataTypeComputer(DatabaseTypeRequest request)
+        protected override Guesser GetGuesser(DatabaseTypeRequest request)
         {
-            return new DataTypeComputer(request, OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter);
+            return new Guesser(request)
+                {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
         }
-        protected override DataTypeComputer GetDataTypeComputer(DataColumn column)
+        protected override Guesser GetGuesser(DataColumn column)
         {
-            return new DataTypeComputer(column, OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter);
+            var guesser = new Guesser()
+                {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
+
+            guesser.AdjustToCompensateForValues(column);
+
+            return guesser;
         }
 
 

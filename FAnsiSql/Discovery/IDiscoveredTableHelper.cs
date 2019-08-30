@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using FAnsi.Connections;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
@@ -29,7 +30,7 @@ namespace FAnsi.Discovery
 
         DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
 
-        IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection);
+        IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture);
         
         void TruncateTable(DiscoveredTable discoveredTable);
         void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds);

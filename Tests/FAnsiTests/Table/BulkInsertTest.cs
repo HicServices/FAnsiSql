@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks.Dataflow;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
-using FAnsi.Discovery.TypeTranslation;
-using FAnsiTests;
 using NUnit.Framework;
+using TypeGuesser;
 
 namespace FAnsiTests.Table
 {
@@ -534,14 +532,11 @@ namespace FAnsiTests.Table
 
             var dtResult = table.GetDataTable();
             Assert.AreEqual(3,dtResult.Rows.Count);
-
-            //need to do this to allow Contains method to work
-            dtResult.PrimaryKey = new[] {dtResult.Columns[0]};
             
             //value fetched from database should match the one inserted
-            Assert.IsTrue(dtResult.Rows.Contains("乗 12345"));
-            Assert.IsTrue(dtResult.Rows.Contains("你好"));
-            Assert.IsTrue(dtResult.Rows.Contains("مرحبا"));
+            Assert.Contains("乗 12345",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
+            Assert.Contains("你好",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
+            Assert.Contains("مرحبا",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
             table.Drop();
         }   
 

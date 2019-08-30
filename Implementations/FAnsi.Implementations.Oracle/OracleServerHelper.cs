@@ -20,7 +20,7 @@ namespace FAnsi.Implementations.Oracle
         }
 
         protected override string ServerKeyName { get { return "DATA SOURCE"; } }
-        protected override string DatabaseKeyName { get { return "USER ID"; } }//this is pretty insane is this really what oracle does?
+        protected override string DatabaseKeyName { get { return "USER ID"; } }//ok is this really what oracle does?
 
 
         protected override string  ConnectionTimeoutKeyName { get { return "Connection Timeout"; } }

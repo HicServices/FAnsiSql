@@ -5,7 +5,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
 
 namespace FAnsiTests.Aggregation
 {
@@ -37,7 +36,7 @@ namespace FAnsiTests.Aggregation
             };
 
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis, true);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
             using (var con = svr.GetConnection())
             {

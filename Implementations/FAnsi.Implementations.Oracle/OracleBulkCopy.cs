@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
-using FAnsi.Discovery.TypeTranslation.TypeDeciders;
 using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Implementations.Oracle
@@ -15,7 +14,7 @@ namespace FAnsi.Implementations.Oracle
         private readonly DiscoveredServer _server;
         private const char ParameterSymbol = ':';
 
-        public OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection): base(targetTable, connection)
+        public OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
         {
             _server = targetTable.Database.Server;
         }

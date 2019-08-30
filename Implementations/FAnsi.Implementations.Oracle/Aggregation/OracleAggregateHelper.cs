@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 
@@ -10,18 +7,11 @@ namespace FAnsi.Implementations.Oracle.Aggregation
 {
     public class OracleAggregateHelper : AggregateHelper
     {
-        public override string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot)
+        protected override IQuerySyntaxHelper GetQuerySyntaxHelper()
         {
-            if (!pivot && axisIfAny == null)
-                return string.Join(Environment.NewLine, queryLines);
-
-
-            //axis only
-            if (!pivot)
-                return BuildAxisOnlyAggregate(queryLines, axisIfAny);
-
-            throw new System.NotImplementedException();
+            return new OracleQuerySyntaxHelper();
         }
+
         public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
         {
             switch (increment)
@@ -115,8 +105,8 @@ floor(months_between({1}, {0}) /3)
                     throw new NotImplementedException();
             }         
         }
-
-        private string BuildAxisOnlyAggregate(List<CustomLine> lines, IQueryAxis axis)
+        
+        protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
         {
             //we are trying to produce something like this:
             /*
@@ -137,19 +127,12 @@ group by
 dt
 order by dt*/
 
-            var syntaxHelper = new OracleQuerySyntaxHelper();
+            var countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);
+            var axisColumnAlias = query.AxisSelect.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
 
-            GetAggregateAxisBits(syntaxHelper,lines,
-                out CustomLine countSelectLine,
-                out string countSqlWithoutAlias,
-                out string countAlias,
-                out CustomLine axisColumn,
-                out string axisColumnWithoutAlias,
-                out string axisColumnAlias);
+            WrapAxisColumnWithDatePartFunction(query, axisColumnAlias);
 
-            WrapAxisColumnWithDatePartFunction(axisColumn, lines, axis, axisColumnWithoutAlias, axisColumnAlias);
-
-            string calendar = GetDateAxisTableDeclaration(axis);
+            string calendar = GetDateAxisTableDeclaration(query.Axis);
 
             return string.Format(
                 @"
@@ -168,18 +151,27 @@ ORDER BY
 {2}
 ",
                 //add everything pre SELECT
-                string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
+                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
                 //then add the calendar
                 calendar,
-                GetDatePartOfColumn(axis.AxisIncrement, "dt"),
+                GetDatePartOfColumn(query.Axis.AxisIncrement, "dt"),
                 countAlias,
                 //the entire query
-                string.Join(Environment.NewLine, lines.Where(c => c.LocationToInsert >= QueryComponent.SELECT && c.LocationToInsert <= QueryComponent.Having)),
+                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.SELECT && c.LocationToInsert <= QueryComponent.Having)),
                 axisColumnAlias
 
                 );
 
         }
 
+        protected override string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

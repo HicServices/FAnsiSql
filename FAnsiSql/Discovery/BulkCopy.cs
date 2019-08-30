@@ -4,13 +4,16 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using FAnsi.Connections;
-using FAnsi.Discovery.TypeTranslation.TypeDeciders;
+using TypeGuesser;
+using TypeGuesser.Deciders;
 
 namespace FAnsi.Discovery
 {
     /// <inheritdoc/>
     public abstract class BulkCopy:IBulkCopy
     {
+        public CultureInfo Culture { get; }
+
         /// <summary>
         /// The database connection on which the bulk insert operation is underway
         /// </summary>
@@ -46,15 +49,15 @@ namespace FAnsi.Discovery
         /// </summary>
         /// <param name="targetTable"></param>
         /// <param name="connection"></param>
-        protected BulkCopy(DiscoveredTable targetTable, IManagedConnection connection)
+        protected BulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture)
         {
+            Culture = culture;
             TargetTable = targetTable;
             Connection = connection;
             InvalidateTableSchema();
             AllowUnmatchedInputColumns = false;
-            DateTimeDecider = new DateTimeTypeDecider();
+            DateTimeDecider = new DateTimeTypeDecider(culture);
         }
-
 
         /// <inheritdoc/>
         public virtual int Timeout { get; set; }
@@ -94,15 +97,11 @@ namespace FAnsi.Discovery
         protected void ConvertStringTypesToHardTypes(DataTable dt)
         {
             var dict = GetMapping(dt.Columns.Cast<DataColumn>(),out _);
-                    
-            //These are the problematic Types
-            Dictionary<Type,IDecideTypesForStrings> deciders = new Dictionary<Type, IDecideTypesForStrings>();
-            deciders.Add(typeof(DateTime),DateTimeDecider);
-            deciders.Add(typeof(TimeSpan),DateTimeDecider);
+
+            var factory = new TypeDeciderFactory(Culture);
             
-            var dec = new DecimalTypeDecider();
-            foreach (Type type in dec.TypesSupported)
-                deciders.Add(type, dec);
+            //These are the problematic Types
+            Dictionary<Type, IDecideTypesForStrings> deciders = factory.Dictionary;
             
             //for each column in the destination
             foreach(var kvp in dict)
@@ -127,13 +126,7 @@ namespace FAnsi.Discovery
                     foreach(DataRow dr in dt.Rows)
                     {
                         //parse the value
-                        var val = decider.Parse(dr[kvp.Key] as string)??DBNull.Value;
-
-                        //if it's a timespan only use TimeOfDay
-                        if(dataType == typeof(TimeSpan))
-                            dr[newColumn] = val == DBNull.Value? val:((DateTime)val).TimeOfDay;
-                        else
-                            dr[newColumn] = val;
+                        dr[newColumn] = decider.Parse(dr[kvp.Key] as string)??DBNull.Value;
                     }
 
                     //if the DataColumn is part of the Primary Key of the DataTable (in memory)
@@ -170,7 +163,7 @@ namespace FAnsi.Discovery
                 if (match == null)
                 {
                     if (!AllowUnmatchedInputColumns)
-                        throw new KeyNotFoundException("Column '" + colInSource.ColumnName + "' appears in pipeline but not destination table (" + TargetTable + ")");
+                        throw new ColumnMappingException(string.Format(FAnsiStrings.BulkCopy_ColumnNotInDestinationTable, colInSource.ColumnName, TargetTable));
 
                     //user is ignoring the fact there are unmatched items in DataTable!
                 }

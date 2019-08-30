@@ -17,11 +17,11 @@
       <Property Name="ForeignKeyPairs" />
     </ShowAsCollectionAssociation>
   </Class>
-  <Class Name="FAnsi.Discovery.TypeTranslation.DataTypeComputer">
+  <Class Name="FAnsi.Discovery.TypeTranslation.Guesser">
     <Position X="4.5" Y="2.25" Width="2.5" />
     <TypeIdentifier>
       <HashCode>CAABASAARAAgAAAAAAAAIgRAAAAACAgAIAAgAAQEAAA=</HashCode>
-      <FileName>Discovery\TypeTranslation\DataTypeComputer.cs</FileName>
+      <FileName>Discovery\TypeTranslation\Guesser.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FAnsi.Discovery.DiscoveredColumn" Collapsed="true">

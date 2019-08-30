@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Text.RegularExpressions;
+using TypeGuesser;
 
 namespace FAnsi.Discovery.TypeTranslation
 {
@@ -35,7 +36,7 @@ namespace FAnsi.Discovery.TypeTranslation
 
         /// <summary>
         /// The size to declare string fields when the API user has neglected to supply a length.  This should be high, if you want to avoid lots of extra long columns
-        /// use <see cref="DataTypeComputer"/> to determine the required length/type at runtime.
+        /// use <see cref="Guesser"/> to determine the required length/type at runtime.
         /// </summary>
         protected int StringWidthWhenNotSupplied = 4000;
         
@@ -72,13 +73,13 @@ namespace FAnsi.Discovery.TypeTranslation
             if (t == typeof(float) || t == typeof(float?) || t == typeof(double) ||
                 t == typeof(double?) || t == typeof(decimal) ||
                 t == typeof(decimal?))
-                return GetFloatingPointDataType(request.DecimalPlacesBeforeAndAfter);
+                return GetFloatingPointDataType(request.Size);
 
             if (t == typeof(string))
                 if(request.Unicode)
-                        return GetUnicodeStringDataType(request.MaxWidthForStrings);
+                        return GetUnicodeStringDataType(request.Width);
                     else
-                        return GetStringDataType(request.MaxWidthForStrings);
+                        return GetStringDataType(request.Width);
 
             if (t == typeof(DateTime) || t == typeof(DateTime?))
                 return GetDateDateTimeDataType();
@@ -92,7 +93,7 @@ namespace FAnsi.Discovery.TypeTranslation
             if (t == typeof (Guid))
                 return GetGuidDataType();
 
-            throw new NotSupportedException("Unsure what SQL Database type to use for Property Type " + t.Name);
+            throw new TypeNotMappedException(string.Format(FAnsiStrings.TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__, t.Name, GetType().Name));
         }
         
         protected virtual string GetByteArrayDataType()
@@ -191,7 +192,10 @@ namespace FAnsi.Discovery.TypeTranslation
             Type result = TryGetCSharpTypeForSQLDBType(sqlType);
 
             if (result == null)
-                throw new NotSupportedException("Not sure what type of C# datatype to use for SQL type :" + sqlType);
+                throw new TypeNotMappedException(string.Format(
+                    FAnsiStrings
+                        .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
+                    sqlType, GetType().Name));
 
             return result;
         }
@@ -278,7 +282,10 @@ namespace FAnsi.Discovery.TypeTranslation
             if (IsGuid(sqlType))
                 return DbType.Guid;
 
-            throw new NotSupportedException("Not sure what type of C# datatype to use for SQL type :" + sqlType);
+            throw new TypeNotMappedException(string.Format(
+                FAnsiStrings
+                    .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
+                sqlType, GetType().Name));
         }
 
         public virtual DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string sqlType)
@@ -318,18 +325,13 @@ namespace FAnsi.Discovery.TypeTranslation
             return sqlType != null && sqlType.StartsWith("n",StringComparison.CurrentCultureIgnoreCase);
         }
 
-        public virtual DataTypeComputer GetDataTypeComputerFor(DiscoveredColumn discoveredColumn)
+        public virtual Guesser GetGuesserFor(DiscoveredColumn discoveredColumn)
         {
             var reqType = GetDataTypeRequestForSQLDBType(discoveredColumn.DataType.SQLType);
-            var req = GetDataTypeComputer(reqType.CSharpType, reqType.DecimalPlacesBeforeAndAfter, reqType.MaxWidthForStrings??-1,reqType.Unicode);
+            var req = new Guesser(reqType);
             return req;
         }
-
-        protected virtual DataTypeComputer GetDataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString, bool unicode)
-        {
-            return new DataTypeComputer(currentEstimatedType,decimalSize,lengthIfString){UseUnicode = unicode};
-        }
-
+        
         public virtual int GetLengthIfString(string sqlType)
         {
             if (string.IsNullOrWhiteSpace(sqlType))
@@ -433,7 +435,7 @@ alter table omgdates alter column dt varchar(100)
 select LEN(dt) from omgdates
              */
 
-            return DataTypeComputer.MinimumLengthRequiredForDateStringRepresentation; //e.g. "2018-01-30 13:05:45.1266667"
+            return Guesser.MinimumLengthRequiredForDateStringRepresentation; //e.g. "2018-01-30 13:05:45.1266667"
         }
 
         protected virtual bool IsBit(string sqlType)

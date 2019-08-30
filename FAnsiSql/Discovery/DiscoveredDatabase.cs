@@ -6,8 +6,8 @@ using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
-using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Naming;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {
@@ -142,7 +142,7 @@ namespace FAnsi.Discovery
         public void Drop()
         {
             if (!Exists())
-                throw new InvalidOperationException("Database " + this + " does not exist so cannot be dropped");
+                throw new InvalidOperationException(string.Format(FAnsiStrings.DiscoveredDatabase_DatabaseDoesNotExistSoCannotBeDropped, this));
 
             // Pass in a copy of ourself, the Drop can mutate the connection string which can cause nasty side-effects (because many classes, e.g. attachers, hold references to these objects)
             Helper.DropDatabase(new DiscoveredDatabase(Server, _database, _querySyntaxHelper));
@@ -245,7 +245,7 @@ namespace FAnsi.Discovery
         /// <param name="createEmpty"></param>
         /// <param name="adjuster"></param>
         /// <returns></returns>
-        public DiscoveredTable CreateTable(out Dictionary<string, DataTypeComputer> typeDictionary, string tableName, DataTable dt, DatabaseColumnRequest[] explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster adjuster = null)
+        public DiscoveredTable CreateTable(out Dictionary<string, Guesser> typeDictionary, string tableName, DataTable dt, DatabaseColumnRequest[] explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster adjuster = null)
         {
             var args = new CreateTableArgs(this, tableName, null, dt, createEmpty)
             {
@@ -255,7 +255,7 @@ namespace FAnsi.Discovery
             var table = Helper.CreateTable(args);
 
             if(!args.TableCreated)
-                throw new Exception("CreateTable completed but arguments were not Consumed");
+                throw new Exception(FAnsiStrings.DiscoveredDatabase_CreateTableDidNotPopulateTableCreatedProperty);
 
             typeDictionary = args.ColumnCreationLogic;
 

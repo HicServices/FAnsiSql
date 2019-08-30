@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using FAnsi;
+﻿using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Implementation;
 using FAnsi.Implementations.MicrosoftSQL;

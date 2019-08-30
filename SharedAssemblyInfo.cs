@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Reflection;
 
 [assembly: AssemblyCompany("Health Informatics Centre, University of Dundee")]
@@ -7,6 +6,6 @@ using System.Reflection;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("0.9.8")]
-[assembly: AssemblyFileVersion("0.9.8")]
-[assembly: AssemblyInformationalVersion("0.9.8")]
+[assembly: AssemblyVersion("0.10.0")]
+[assembly: AssemblyFileVersion("0.10.0")]
+[assembly: AssemblyInformationalVersion("0.10.0")]

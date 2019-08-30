@@ -4,6 +4,7 @@ using System.Data.Common;
 using FAnsi.Connections;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Exceptions;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {
@@ -92,10 +93,10 @@ namespace FAnsi.Discovery
             int toReplace = GetLengthIfString();
             
             if(newSize == toReplace)
-                throw new InvalidResizeException("Why are you trying to resize a column that is already " + newSize + " long (" + SQLType + ")?");
+                return;
 
             if(newSize < toReplace)
-                throw new InvalidResizeException("You can only grow columns, you cannot shrink them with this method.  You asked to turn the current datatype from " + SQLType + " to reduced size " + newSize);
+                throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_CannotResizeSmaller, SQLType, newSize));
 
             var newType = SQLType.Replace(toReplace.ToString(), newSize.ToString());
 
@@ -118,13 +119,13 @@ namespace FAnsi.Discovery
             DecimalSize toReplace = GetDecimalSize();
 
             if (toReplace == null || toReplace.IsEmpty)
-                throw new InvalidResizeException("DataType cannot be resized to decimal because it is of data type " + SQLType);
+                throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_DataType_cannot_be_resized_to_decimal_because_it_is_of_data_type__0_, SQLType));
 
             if (toReplace.NumbersBeforeDecimalPlace > numberOfDigitsBeforeDecimalPoint)
-                throw new InvalidResizeException("Cannot shrink column, number of digits before the decimal point is currently " + toReplace.NumbersBeforeDecimalPlace + " and you asked to set it to " + numberOfDigitsBeforeDecimalPoint + " (Current SQLType is " + SQLType + ")");
+                throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_before_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__, toReplace.NumbersBeforeDecimalPlace, numberOfDigitsBeforeDecimalPoint, SQLType));
 
             if (toReplace.NumbersAfterDecimalPlace> numberOfDigitsAfterDecimalPoint)
-                throw new InvalidResizeException("Cannot shrink column, number of digits after the decimal point is currently " + toReplace.NumbersAfterDecimalPlace + " and you asked to set it to " + numberOfDigitsAfterDecimalPoint + " (Current SQLType is " + SQLType + ")");
+                throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__, toReplace.NumbersAfterDecimalPlace, numberOfDigitsAfterDecimalPoint, SQLType));
             
             var newDataType = Column.Table.GetQuerySyntaxHelper()
                 .TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof (decimal), null,
@@ -145,7 +146,7 @@ namespace FAnsi.Discovery
         public void AlterTypeTo(string newType, IManagedTransaction managedTransaction = null,int altertimeoutInSeconds = 500)
         {
             if(Column == null)
-                throw new NotSupportedException("Cannot resize DataType because it does not have a reference to a Column to which it belongs (possibly you are trying to resize a data type associated with a TableValuedFunction Parameter?)");
+                throw new NotSupportedException(FAnsiStrings.DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_reference_to_a_Column_to_which_it_belongs);
 
             var server = Column.Table.Database.Server;
             using (var connection = server.GetManagedConnection(managedTransaction))
@@ -159,7 +160,7 @@ namespace FAnsi.Discovery
                 }
                 catch (Exception e)
                 {
-                    throw new AlterFailedException("Failed to send resize SQL:" + sql, e);
+                    throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredDataType_AlterTypeTo_Failed_to_send_resize_SQL__0_, sql), e);
                 }
             }
 

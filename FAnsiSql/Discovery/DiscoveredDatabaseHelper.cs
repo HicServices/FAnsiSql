@@ -7,8 +7,8 @@ using System.IO;
 using System.Linq;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
-using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Implementation;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {
@@ -31,7 +31,7 @@ namespace FAnsi.Discovery
 
         public DiscoveredTable CreateTable(CreateTableArgs args)
         {
-            var typeDictionary = new Dictionary<string, DataTypeComputer>(StringComparer.CurrentCultureIgnoreCase);
+            var typeDictionary = new Dictionary<string, Guesser>(StringComparer.CurrentCultureIgnoreCase);
 
             List<DatabaseColumnRequest> columns = new List<DatabaseColumnRequest>();
             List<DatabaseColumnRequest> customRequests = args.ExplicitColumnDefinitions != null
@@ -67,17 +67,18 @@ namespace FAnsi.Discovery
                                     tt.GetDigitsBeforeAndAfterDecimalPointIfDecimal(overriding.ExplicitDbType));
                             }
                             else
-                                throw new Exception("explicitColumnDefinitions for column " + column + " did not contain either a TypeRequested or ExplicitDbType");
+                                throw new Exception(string.Format(FAnsiStrings.DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType, column));
                     
-                        typeDictionary.Add(overriding.ColumnName, GetDataTypeComputer(request));
+                        typeDictionary.Add(overriding.ColumnName, GetGuesser(request));
                     }
                     else
                     {
                         //no, work out the column definition using a datatype computer
-                        DataTypeComputer computer = GetDataTypeComputer(column);
+                        Guesser computer = GetGuesser(column);
+                        computer.Culture = args.Culture;
                         typeDictionary.Add(column.ColumnName,computer);
 
-                        columns.Add(new DatabaseColumnRequest(column.ColumnName, computer.GetTypeRequest(), column.AllowDBNull) { IsPrimaryKey = args.DataTable.PrimaryKey.Contains(column)});
+                        columns.Add(new DatabaseColumnRequest(column.ColumnName, computer.Guess, column.AllowDBNull) { IsPrimaryKey = args.DataTable.PrimaryKey.Contains(column)});
                     }
                 }
             }
@@ -115,20 +116,22 @@ namespace FAnsi.Discovery
             return tbl;
         }
 
-        protected virtual DataTypeComputer GetDataTypeComputer(DataColumn column)
+        protected virtual Guesser GetGuesser(DataColumn column)
         {
-            return new DataTypeComputer(column);
+            var g = new Guesser();
+            g.AdjustToCompensateForValues(column);
+            return g;
         }
 
-        protected virtual DataTypeComputer GetDataTypeComputer(DatabaseTypeRequest request)
+        protected virtual Guesser GetGuesser(DatabaseTypeRequest request)
         {
-            return new DataTypeComputer(request);
+            return new Guesser(request);
         }
 
         public virtual string GetCreateTableSql(DiscoveredDatabase database, string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string schema)
         {
             if (string.IsNullOrWhiteSpace(tableName))
-                throw new ArgumentNullException("Table name cannot be null", "tableName");
+                throw new ArgumentNullException(FAnsiStrings.DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null, "tableName");
 
             string bodySql = "";
 
@@ -196,7 +199,7 @@ namespace FAnsi.Discovery
             //@"    CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID) REFERENCES Persons(PersonID) on delete cascade";
             var otherTable = foreignKeyPairs.Values.Select(v => v.Table).Distinct().Single();
             
-            string constraintName = MakeSaneConstraintName("FK_", tableName + "_" + otherTable);
+            string constraintName = MakeSensibleConstraintName("FK_", tableName + "_" + otherTable);
 
             return string.Format(
 @"CONSTRAINT {0} FOREIGN KEY ({1})
@@ -215,14 +218,14 @@ REFERENCES {2}({3}) {4}",
 
         protected virtual string GetPrimaryKeyDeclarationSql(string tableName, DatabaseColumnRequest[] pks, IQuerySyntaxHelper syntaxHelper)
         {
-            var constraintName = MakeSaneConstraintName("PK_", tableName);
+            var constraintName = MakeSensibleConstraintName("PK_", tableName);
 
             return string.Format(" CONSTRAINT {0} PRIMARY KEY ({1})", constraintName, string.Join(",", pks.Select(c => syntaxHelper.EnsureWrapped(c.ColumnName)))) + "," + Environment.NewLine;
         }
 
-        private string MakeSaneConstraintName(string prefix, string tableName)
+        private string MakeSensibleConstraintName(string prefix, string tableName)
         {
-            var constraintName = QuerySyntaxHelper.MakeHeaderNameSane(tableName);
+            var constraintName = QuerySyntaxHelper.MakeHeaderNameSensible(tableName);
 
             if (string.IsNullOrWhiteSpace(constraintName))
             {

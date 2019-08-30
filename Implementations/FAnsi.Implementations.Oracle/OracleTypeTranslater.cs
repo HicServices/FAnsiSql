@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using FAnsi.Discovery;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Extensions;
+using TypeGuesser;
 
 namespace FAnsi.Implementations.Oracle
 {
@@ -122,9 +123,11 @@ namespace FAnsi.Implementations.Oracle
             return "DATE";
         }
 
-        protected override DataTypeComputer GetDataTypeComputer(Type currentEstimatedType, DecimalSize decimalSize, int lengthIfString, bool unicode)
+        public override Guesser GetGuesserFor(DiscoveredColumn discoveredColumn)
         {
-            return new DataTypeComputer(currentEstimatedType, decimalSize, lengthIfString, ExtraLengthPerNonAsciiCharacter){UseUnicode = unicode};
+            var guesser = base.GetGuesserFor(discoveredColumn);
+            guesser.ExtraLengthPerNonAsciiCharacter = ExtraLengthPerNonAsciiCharacter;
+            return guesser;
         }
     }
 }

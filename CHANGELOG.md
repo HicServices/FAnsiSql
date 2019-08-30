@@ -6,7 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+## [0.10.0] - 2019-08-30
+
+### Changed
+
+- Type Guessing rules adjusted (and moved to [new repository TypeGuesser](https://github.com/HicServices/TypeGuesser))
+  - Bit strings now include "Y", "N" "1" and "0".
+  - Zeros after decimal point no longer prohibit guessing int (e.g. 1.00 is the now `int` instead of `decimal(3,2)`) 
+- DecimalSize class now uses `int` instead of nullable int (`int?`) for number of digits before/after decimal point.
+- Table/column name suggester now allows unicode characters (now called `GetSensibleEntityNameFromString`)
+- Attempting to resize a column to the same size it is currently is now ignored (previously `InvalidResizeException` was thrown)
+- Added new Exception types (instead of generic .net Exceptions)
+  - ColumnMappingException when insert / bulk insert fails to match input columns to destination table
+  - TypeNotMappedException when there is a problem translating a C# Type to a proprietary SQL datatype (or vice versa)
+- MakeDistinct on DiscoveredTable no longer throws an Exception if the table has a Primary Key (instead the method exits without doing anything)
+- Reduced code duplication in AggregateHelper implementations by centralising code in new class AggregateCustomLineCollection
+
+### Fixed
+
+- Fixed support for Unicode in table/column names in Sql Server
 
 ## [0.9.8] - 2019-08-26
 
@@ -75,7 +93,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.9.8...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.0...develop
+[0.10.0]: https://github.com/HicServices/FAnsiSql/compare/0.9.8...0.10.0
 [0.9.8]: https://github.com/HicServices/FAnsiSql/compare/0.9.7...0.9.8
 [0.9.7]: https://github.com/HicServices/FAnsiSql/compare/0.9.6...0.9.7
 [0.9.6]: https://github.com/HicServices/FAnsiSql/compare/0.9.5...0.9.6

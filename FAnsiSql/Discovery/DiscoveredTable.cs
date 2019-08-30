@@ -7,8 +7,8 @@ using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Discovery.QuerySyntax;
-using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Naming;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {
@@ -147,7 +147,9 @@ namespace FAnsi.Discovery
             }
             catch (Exception e)
             {
-                throw new Exception("Could not find column called " + specificColumnName + " in table " + this ,e);
+                throw new ColumnMappingException(string.Format(
+                    FAnsiStrings.DiscoveredTable_DiscoverColumn_DiscoverColumn_failed__could_not_find_column_called___0___in_table___1__, specificColumnName,
+                    _table), e);
             }
         }
 
@@ -266,9 +268,20 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public IBulkCopy BeginBulkInsert(IManagedTransaction transaction = null)
         {
+            return BeginBulkInsert(CultureInfo.CurrentCulture, transaction);
+        }
+
+        /// <summary>
+        /// Creates a new object for bulk inserting records into the table.  You should use a using block since <see cref="IBulkCopy"/> is <see cref="IDisposable"/>.
+        /// Depending on implementation, records may not be committed to the server until the <see cref="IBulkCopy"/> is disposed.
+        /// </summary>
+        /// <param name="transaction">Optional - records inserted should form part of the supplied ongoing transaction</param>
+        /// <returns></returns>
+        public IBulkCopy BeginBulkInsert(CultureInfo culture,IManagedTransaction transaction = null)
+        {
             Database.Server.EnableAsync();
             IManagedConnection connection = Database.Server.GetManagedConnection(transaction);
-            return Helper.BeginBulkInsert(this, connection);
+            return Helper.BeginBulkInsert(this, connection,culture);
         }
 
         /// <summary>
@@ -417,7 +430,7 @@ namespace FAnsi.Discovery
             {
                 var match = cols.SingleOrDefault(c => c.GetRuntimeName().Equals(k, StringComparison.CurrentCultureIgnoreCase));
                 if(match == null)
-                    throw new Exception("Could not find column called " + k);
+                    throw new ColumnMappingException(string.Format(FAnsiStrings.DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__, k,_table));
 
                 foundColumns.Add(match,toInsert[k]);
             }

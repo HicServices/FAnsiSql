@@ -1,10 +1,8 @@
 ﻿using FAnsi;
 using FAnsi.Discovery.QuerySyntax;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
 
 namespace FAnsiTests.Aggregation
 {
@@ -31,7 +29,7 @@ namespace FAnsiTests.Aggregation
             lines.Add(new CustomLine("Category,", QueryComponent.GroupBy));
             lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot });
 
-            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null, true);
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null);
 
             using (var con = svr.GetConnection())
             {

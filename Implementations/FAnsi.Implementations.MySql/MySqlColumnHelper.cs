@@ -1,5 +1,4 @@
-﻿using System;
-using FAnsi.Discovery;
+﻿using FAnsi.Discovery;
 using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MySql

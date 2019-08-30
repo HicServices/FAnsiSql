@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Naming;
 

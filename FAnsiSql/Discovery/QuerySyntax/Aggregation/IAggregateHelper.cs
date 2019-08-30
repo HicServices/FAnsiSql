@@ -18,8 +18,7 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation
         /// </summary>
         /// <param name="queryLines"></param>
         /// <param name="axisIfAny"></param>
-        /// <param name="pivot"></param>
         /// <returns></returns>
-        string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny, bool pivot);
+        string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny);
     }
 }

@@ -3,7 +3,6 @@ using System.Data.SqlClient;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementation;
-using FAnsi.Implementations.MicrosoftSQL;
 
 namespace FAnsi.Implementations.MicrosoftSQL
 {

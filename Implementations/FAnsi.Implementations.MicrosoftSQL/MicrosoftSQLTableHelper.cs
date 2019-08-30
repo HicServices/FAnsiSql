@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
-using FAnsi;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
+using FAnsi.Exceptions;
 using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MicrosoftSQL
@@ -30,7 +31,12 @@ sys.columns.collation_name
 from sys.columns 
 join 
 sys.types on sys.columns.user_type_id = sys.types.user_type_id
-where object_id =OBJECT_ID('" + GetObjectName(discoveredTable) + "')", connection.Connection, connection.Transaction);
+where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Transaction);
+
+            var p = cmd.CreateParameter();
+            p.ParameterName = "@tableName";
+            p.Value = GetObjectName(discoveredTable);
+            cmd.Parameters.Add(p);
 
             List<DiscoveredColumn> toReturn = new List<DiscoveredColumn>();
 
@@ -190,9 +196,9 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             return toReturn.ToArray();
         }
 
-        public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection)
+        public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture)
         {
-            return new MicrosoftSQLBulkCopy(discoveredTable,connection);
+            return new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
         }
 
         public override void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0)
@@ -210,7 +216,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             }
             catch (Exception e)
             {
-                throw new Exception("Failed to create primary key on table " + table + " using columns (" + string.Join(",", discoverColumns.Select(c => c.GetRuntimeName())) + ")", e);
+                throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
             }
 
             base.CreatePrimaryKey(table, discoverColumns, connection, timeoutInSeconds);

@@ -1,5 +1,6 @@
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TypeTranslation;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {

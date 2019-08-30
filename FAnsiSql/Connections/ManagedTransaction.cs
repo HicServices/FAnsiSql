@@ -29,7 +29,6 @@ namespace FAnsi.Connections
             }
             catch (Exception)
             {
-                Console.WriteLine("Couldn't rollback transactiton, nevermind");
             }
             finally
             {

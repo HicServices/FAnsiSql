@@ -5,7 +5,6 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Data.Common;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -49,7 +48,7 @@ namespace FAnsi.Implementation
             currentDirectory = currentDirectory ?? new DirectoryInfo(Environment.CurrentDirectory);
 
             if(!currentDirectory.Exists)
-                throw new Exception("Directory '"+currentDirectory+"'did not exist");
+                throw new Exception(string.Format(FAnsiStrings.ImplementationManager_Load_Directory___0__did_not_exist, currentDirectory));
 
             var catalog = new DirectoryCatalog(currentDirectory.FullName,"*FAnsi*");
                         
@@ -95,17 +94,28 @@ namespace FAnsi.Implementation
 
         public static IImplementation GetImplementation(DatabaseType databaseType)
         {
-            return GetImplementation(i => i.IsFor(databaseType),"No implementation found for DatabaseType " + databaseType);
+            return GetImplementation(i => i.IsFor(databaseType),
+                string.Format(
+                    FAnsiStrings.ImplementationManager_GetImplementation_No_implementation_found_for_DatabaseType__0_,
+                    databaseType));
         }
 
         public static IImplementation GetImplementation(DbConnectionStringBuilder connectionStringBuilder)
         {
-            return GetImplementation(i => i.IsFor(connectionStringBuilder),"No implementation found for Type " + connectionStringBuilder.GetType());
+            return GetImplementation(i => i.IsFor(connectionStringBuilder),
+                string.Format(
+                    FAnsiStrings
+                        .ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_,
+                    connectionStringBuilder.GetType()));
         }
 
         public static IImplementation GetImplementation(DbConnection connection)
         {
-            return GetImplementation(i => i.IsFor(connection), "No implementation found for Type " + connection.GetType());
+            return GetImplementation(i => i.IsFor(connection), 
+                string.Format(
+                    FAnsiStrings
+                        .ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_,
+                    connection.GetType()));
         }
         private static IImplementation GetImplementation(Func<IImplementation,bool> condition, string errorIfNotFound)
         {

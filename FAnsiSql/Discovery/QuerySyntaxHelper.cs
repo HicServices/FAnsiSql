@@ -10,7 +10,7 @@ using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using FAnsi.Discovery.QuerySyntax.Update;
 using FAnsi.Discovery.TypeTranslation;
-using FAnsi.Discovery.TypeTranslation.TypeDeciders;
+using TypeGuesser;
 
 namespace FAnsi.Discovery
 {
@@ -37,7 +37,8 @@ namespace FAnsi.Discovery
         public static char[] TableNameQualifiers = { '[', ']', '`' };
 
         public ITypeTranslater TypeTranslater { get; private set; }
-        readonly TypeDeciderFactory typeDeciderFactory = new TypeDeciderFactory();
+        
+        private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = new Dictionary<CultureInfo, TypeDeciderFactory>();
 
         public IAggregateHelper AggregateHelper { get; private set; }
         public IUpdateHelper UpdateHelper { get; set; }
@@ -157,7 +158,7 @@ namespace FAnsi.Discovery
         public string EnsureWrapped(string databaseOrTableName)
         {
             if (databaseOrTableName.Contains(DatabaseTableSeparator))
-                throw new Exception("Strings passed to EnsureWrapped cannot contain separators i.e. '" + DatabaseTableSeparator + "'");
+                throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__,databaseOrTableName, DatabaseTableSeparator));
 
             return EnsureWrappedImpl(databaseOrTableName);
         }
@@ -221,7 +222,7 @@ namespace FAnsi.Discovery
             var matches = GetAliasRegex().Matches(lineToSplit);
 
             if (matches.Count >1)
-                throw new SyntaxErrorException("Found 2+ instances of the alias regex");
+                throw new SyntaxErrorException(string.Format(FAnsiStrings.QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_,matches.Count,lineToSplit));
 
             if (matches.Count == 0)
             {
@@ -242,25 +243,27 @@ namespace FAnsi.Discovery
 
         public abstract string GetScalarFunctionSql(MandatoryScalarFunctions function);
 
-        /// <summary>
-        /// Takes a line line " count(*) " and returns "count" and "*"
-        /// Also handles LTRIM(RTRIM(FishFishFish)) by returning "LTRIM" and  "RTRIM(FishFishFish)"
-        /// </summary>
-        /// <param name="lineToSplit"></param>
-        /// <param name="method"></param>
-        /// <param name="contents"></param>
+        /// <inheritdoc/>
         public void SplitLineIntoOuterMostMethodAndContents(string lineToSplit, out string method, out string contents)
         {
             if (string.IsNullOrWhiteSpace(lineToSplit))
-                throw new ArgumentException("line must not be blank", lineToSplit);
+                throw new ArgumentException(
+                    FAnsiStrings.QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_not_be_blank,
+                    nameof(lineToSplit));
 
             if (lineToSplit.Count(c => c.Equals('(')) != lineToSplit.Count(c => c.Equals(')')))
-                throw new ArgumentException("The number of opening parentheses must match the number of closing parentheses", "lineToSplit");
+                throw new ArgumentException(
+                    FAnsiStrings
+                        .QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_and_closing_parentheses_must_match,
+                    nameof(lineToSplit));
 
             int firstBracket = lineToSplit.IndexOf('(');
 
             if (firstBracket == -1)
-                throw new ArgumentException("Line must contain at least one pair of parentheses", "lineToSplit");
+                throw new ArgumentException(
+                    FAnsiStrings
+                        .QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_contain_at_least_one_pair_of_parentheses,
+                    nameof(lineToSplit));
 
             method = lineToSplit.Substring(0, firstBracket).Trim();
 
@@ -274,13 +277,14 @@ namespace FAnsi.Discovery
                 contents = lineToSplit.Substring(firstBracket + 1, length).Trim();
         }
 
-        public static string MakeHeaderNameSane(string header)
+        public static string MakeHeaderNameSensible(string header)
         {
             if (string.IsNullOrWhiteSpace(header))
                 return header;
 
             //replace anything that isn't a digit, letter or underscore with emptiness (except spaces - these will go but first...)
-            Regex r = new Regex("[^A-Za-z0-9_ ]");
+            //also accept anything above ASCII 256
+            Regex r = new Regex("[^A-Za-z0-9_ \u0101-\uFFFF]");
 
             string adjustedHeader = r.Replace(header, "");
 
@@ -305,7 +309,7 @@ namespace FAnsi.Discovery
             return adjustedHeader;
         }
 
-        public string GetSensibleTableNameFromString(string potentiallyDodgyName)
+        public string GetSensibleEntityNameFromString(string potentiallyDodgyName)
         {
             potentiallyDodgyName = GetRuntimeName(potentiallyDodgyName);
 
@@ -346,10 +350,18 @@ namespace FAnsi.Discovery
 
         public abstract string HowDoWeAchieveMd5(string selectSql);
         
+        
+
         public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value,CultureInfo culture)
         {
             try
             {
+                if(culture == null)
+                    culture = CultureInfo.CurrentCulture;
+                
+                if(!factories.ContainsKey(culture))
+                    factories.Add(culture,new TypeDeciderFactory(culture));
+
                 var tt = TypeTranslater;
                 p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
                 var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType.SQLType);
@@ -357,14 +369,9 @@ namespace FAnsi.Discovery
                 if (IsBasicallyNull(value))
                     p.Value = DBNull.Value;
                 else
-                    if (value is string strVal && typeDeciderFactory.IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan 
+                    if (value is string strVal && factories[culture].IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan 
                     {
-                        var decider = typeDeciderFactory.Create(cSharpType);
-
-                        if(decider is DateTimeTypeDecider dt)
-                            if(culture != null)
-                                dt.Culture = culture;
-                        
+                        var decider = factories[culture].Create(cSharpType);
                         var o = decider.Parse(strVal);
 
                         //Not all DBMS support DBParameter.Value = new TimeSpan(...);
@@ -379,7 +386,7 @@ namespace FAnsi.Discovery
             }
             catch(Exception ex)
             {
-                throw new Exception("Could not GetParameter for column '" + discoveredColumn.GetFullyQualifiedName() + "'",ex);
+                throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__, discoveredColumn.GetFullyQualifiedName()),ex);
             }            
 
             return p;
@@ -423,19 +430,22 @@ namespace FAnsi.Discovery
         /// returns null if the name is valid.  Otherwise a string describing why it is invalid.
         /// </summary>
         /// <param name="candidate"></param>
-        /// <param name="objectType"></param>
+        /// <param name="objectType">Type of object being validated e.g. "Database", "Table" etc</param>
         /// <param name="maximumLengthAllowed"></param>
         /// <returns></returns>
         private string ValidateName(string candidate, string objectType, int maximumLengthAllowed)
         {
             if(string.IsNullOrWhiteSpace(candidate))
-                return $"{objectType} name cannot be blank";
+                return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name_cannot_be_blank, objectType);
 
             if(candidate.Length > maximumLengthAllowed)
-                return $"{objectType} name \"{candidate.Substring(0,maximumLengthAllowed)}\" is too long for the DBMS ({DatabaseType} supports maximum length of {maximumLengthAllowed})";
+                return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__supports_maximum_length_of__3__,
+                    objectType, candidate.Substring(0, maximumLengthAllowed), DatabaseType, maximumLengthAllowed);
 
             if(candidate.IndexOfAny(IllegalNameChars) != -1)
-                return $"{objectType} name \"{candidate}\" contained unsupported (by FAnsi) characters.  Unsupported characters are:{new string(IllegalNameChars)}";
+                return string.Format(
+                    FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___contained_unsupported__by_FAnsi__characters___Unsupported_characters_are__2_,
+                    objectType, candidate, new string(IllegalNameChars));
 
             return null;
         }

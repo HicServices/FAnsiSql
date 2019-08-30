@@ -5,7 +5,6 @@ using System.Data.Common;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
-using FAnsiTests;
 using NUnit.Framework;
 
 namespace FAnsiTests.Table

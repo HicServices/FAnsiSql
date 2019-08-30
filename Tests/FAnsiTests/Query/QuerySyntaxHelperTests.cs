@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using FAnsi;
+using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementation;
 using NUnit.Framework;
@@ -134,5 +135,12 @@ namespace FAnsiTests.Query
             Assert.DoesNotThrow(()=>syntaxHelper.ValidateDatabaseName(new string('A', syntaxHelper.MaximumDatabaseLength)));
         }
 
+        [Test]
+        public void Test_MakeHeaderNameSensible_Unicode()
+        {
+            //normal unicode is fine
+            Assert.AreEqual("你好", QuerySyntaxHelper.MakeHeaderNameSensible("你好"));
+            Assert.AreEqual("你好DropDatabaseBob", QuerySyntaxHelper.MakeHeaderNameSensible("你好; drop database bob;"));
+        }
     }
 }

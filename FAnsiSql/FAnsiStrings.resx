@@ -1,0 +1,246 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BulkCopy_ColumnNotInDestinationTable" xml:space="preserve">
+    <value>Column '{0}' appears in bulk insert DataTable but not in destination table '{1}'</value>
+  </data>
+  <data name="ConnectionStringKeyword_ValueNotSupported" xml:space="preserve">
+    <value>Connection string keyword '{0}' did not support supplied value</value>
+    <comment>We tell them the keyword that is bad but not the value because that could leak secure info e.g. port numbers? IP or passwords?</comment>
+  </data>
+  <data name="RelationshipTopologicalSort_FoundCircularDependencies" xml:space="preserve">
+    <value>Found at least one cycle in relationship dependency</value>
+  </data>
+  <data name="DiscoveredDatabase_DatabaseDoesNotExistSoCannotBeDropped" xml:space="preserve">
+    <value>Database {0} does not exist so cannot be dropped</value>
+  </data>
+  <data name="DiscoveredDatabase_CreateTableDidNotPopulateTableCreatedProperty" xml:space="preserve">
+    <value>CreateTable completed but TableCreated property was not correctly set by the implementing Helper API</value>
+  </data>
+  <data name="DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType" xml:space="preserve">
+    <value>DatabaseColumnRequest for column {0} must have either TypeRequested or ExplicitDbType</value>
+  </data>
+  <data name="DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null" xml:space="preserve">
+    <value>Table name cannot be null</value>
+  </data>
+  <data name="DiscoveredDataType_Resize_CannotResizeSmaller" xml:space="preserve">
+    <value>Illegal attempt to resize column to a smaller size.  You can only grow columns.  Request was to convert from '{0}' to '{1}'</value>
+  </data>
+  <data name="DiscoveredDataType_Resize_DataType_cannot_be_resized_to_decimal_because_it_is_of_data_type__0_" xml:space="preserve">
+    <value>DataType cannot be resized to decimal because it is of data type {0}</value>
+  </data>
+  <data name="DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_before_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__" xml:space="preserve">
+    <value>Cannot shrink column, number of digits before the decimal point is currently {0} and you asked to set it to {1} (Current SQLType is {2})</value>
+  </data>
+  <data name="DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__" xml:space="preserve">
+    <value>Cannot shrink column, number of digits after the decimal point is currently {0} and you asked to set it to {1} (Current SQLType is {2})</value>
+  </data>
+  <data name="DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_reference_to_a_Column_to_which_it_belongs" xml:space="preserve">
+    <value>Cannot resize DataType because it does not have a reference to a Column to which it belongs (possibly you are trying to resize a data type associated with a TableValuedFunction Parameter?)</value>
+  </data>
+  <data name="DateTimeTypeDecider_ParseImpl_Could_not_parse___0___to_a_valid_DateTime" xml:space="preserve">
+    <value>Could not parse '{0}' to a valid DateTime</value>
+  </data>
+  <data name="DecideTypesForStrings_DecideTypesForStrings_DecideTypesForStrings_abstract_base_was_not_passed_any_typesSupported_by_implementing_derived_class" xml:space="preserve">
+    <value>DecideTypesForStrings abstract base was not passed any typesSupported by implementing derived class</value>
+  </data>
+  <data name="DecideTypesForStrings_Parse_Could_not_parse_string_value___0___with_Decider_Type__1_" xml:space="preserve">
+    <value>Could not parse string value '{0}' with Decider Type:{1}</value>
+  </data>
+  <data name="TypeDeciderFactory_Create_DataType__0__does_not_have_an_associated_IDecideTypesForStrings" xml:space="preserve">
+    <value>DataType {0} does not have an associated IDecideTypesForStrings</value>
+  </data>
+  <data name="DatabaseTypeRequest_Max_Could_not_combine_Types___0___and___1___because_they_were_of_differing_Types_and_neither_Type_appeared_in_the_PreferenceOrder" xml:space="preserve">
+    <value>Could not combine Types '{0}' and '{1}' because they were of differing Types and neither Type appeared in the PreferenceOrder</value>
+  </data>
+  <data name="Guesser_AdjustToCompensateForValue_GuesserPassedMixedTypeValues" xml:space="preserve">
+    <value>Guesser does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object '{0}' which is of Type '{1}', we were previously passed a '{2}' type</value>
+  </data>
+  <data name="Guesser_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_" xml:space="preserve">
+    <value>No Type Decider exists for Type:{0}</value>
+  </data>
+  <data name="TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__" xml:space="preserve">
+    <value>Unsure what SQL type to use for CSharp Type '{0}'.  TypeTranslater was '{1}'</value>
+  </data>
+  <data name="TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___" xml:space="preserve">
+    <value>No CSharp type mapping exists for SQL type '{0}'. TypeTranslater was '{1}')</value>
+  </data>
+  <data name="DiscoveredDataType_AlterTypeTo_Failed_to_send_resize_SQL__0_" xml:space="preserve">
+    <value>Failed to send resize SQL:{0}</value>
+  </data>
+  <data name="DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_" xml:space="preserve">
+    <value>Could not connect to server '{0}' after timeout of {1} milliseconds)</value>
+  </data>
+  <data name="DiscoveredServer_CreateDatabase_Helper___0___tried_to_create_database___1___but_the_database_didn_t_exist_after_the_creation_attempt" xml:space="preserve">
+    <value>Helper '{0}' tried to create database '{1}' but the database didn't exist after the creation attempt</value>
+  </data>
+  <data name="DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__" xml:space="preserve">
+    <value>Insert failed, could not find column called '{0}' in table '{1}'</value>
+  </data>
+  <data name="DiscoveredTable_DiscoverColumn_DiscoverColumn_failed__could_not_find_column_called___0___in_table___1__" xml:space="preserve">
+    <value>DiscoverColumn failed, could not find column called '{0}' in table '{1}'</value>
+  </data>
+  <data name="DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_" xml:space="preserve">
+    <value>Rename is not supported for TableType {0}</value>
+  </data>
+  <data name="DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__" xml:space="preserve">
+    <value>Failed to create primary key on table {0} using columns ({1})</value>
+  </data>
+  <data name="QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__" xml:space="preserve">
+    <value>String passed to EnsureWrapped '{0}' contained separators (not allowed).  Prohibited Separator is '{1}'</value>
+  </data>
+  <data name="QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_" xml:space="preserve">
+    <value>Could not split SQL line because there were {0} instances of the alias regex.  Sql line was: 
+{1}</value>
+  </data>
+  <data name="QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_not_be_blank" xml:space="preserve">
+    <value>Line must not be blank</value>
+  </data>
+  <data name="QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_and_closing_parentheses_must_match" xml:space="preserve">
+    <value>The number of opening and closing parentheses must match</value>
+  </data>
+  <data name="QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_contain_at_least_one_pair_of_parentheses" xml:space="preserve">
+    <value>Line must contain at least one pair of parentheses</value>
+  </data>
+  <data name="QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__" xml:space="preserve">
+    <value>Could not GetParameter for column '{0}'.  See InnerException for details</value>
+  </data>
+  <data name="QuerySyntaxHelper_ValidateName__0__name_cannot_be_blank" xml:space="preserve">
+    <value>{0} name cannot be blank</value>
+    <comment>{0} is an database object type e.g. "Database", "Table" etc</comment>
+  </data>
+  <data name="QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__supports_maximum_length_of__3__" xml:space="preserve">
+    <value>{0} name '{1}' is too long for the DBMS ({2} supports maximum length of {3})</value>
+  </data>
+  <data name="QuerySyntaxHelper_ValidateName__0__name___1___contained_unsupported__by_FAnsi__characters___Unsupported_characters_are__2_" xml:space="preserve">
+    <value>{0} name '{1}' contained unsupported (by FAnsi) characters.  Unsupported characters are:{2}</value>
+  </data>
+  <data name="ImplementationManager_Load_Directory___0__did_not_exist" xml:space="preserve">
+    <value>Directory '{0}'did not exist</value>
+  </data>
+  <data name="ImplementationManager_GetImplementation_No_implementation_found_for_DatabaseType__0_" xml:space="preserve">
+    <value>No implementation found for DatabaseType {0}</value>
+  </data>
+  <data name="ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_" xml:space="preserve">
+    <value>No implementation found for ADO.Net object of Type {0}</value>
+  </data>
+  <data name="AggregateCustomLineCollection_Validate_AggregateCustomLineCollection_is_missing_some__but_not_all__Axis_components" xml:space="preserve">
+    <value>AggregateCustomLineCollection is missing some (but not all) Axis components</value>
+  </data>
+</root>

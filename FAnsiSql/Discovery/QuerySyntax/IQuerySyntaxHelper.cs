@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using FAnsi.Discovery.QuerySyntax.Aggregation;
 using FAnsi.Discovery.QuerySyntax.Update;
 using FAnsi.Discovery.TypeTranslation;
+using TypeGuesser;
 
 namespace FAnsi.Discovery.QuerySyntax
 {
@@ -83,8 +83,18 @@ namespace FAnsi.Discovery.QuerySyntax
         bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string alias);
 
         string GetScalarFunctionSql(MandatoryScalarFunctions function);
-        string GetSensibleTableNameFromString(string potentiallyDodgyName);
-        
+        string GetSensibleEntityNameFromString(string potentiallyDodgyName);
+
+        /// <summary>
+        /// Takes a line line " count(*) " and returns "count" and "*"
+        /// Also handles LTRIM(RTRIM(FishFishFish)) by returning "LTRIM" and  "RTRIM(FishFishFish)"
+        /// </summary>
+        /// <param name="lineToSplit"></param>
+        /// <param name="method"></param>
+        /// <param name="contents"></param>
+        /// <exception cref="ArgumentException">If <paramref name="lineToSplit"/> was badly formed, blank etc</exception>
+        void SplitLineIntoOuterMostMethodAndContents(string lineToSplit, out string method, out string contents);
+
         /// <summary>
         /// The SQL that would be valid for a CREATE TABLE statement that would result in a given column becoming auto increment e.g. "IDENTITY(1,1)"
         /// </summary>

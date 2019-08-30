@@ -35,5 +35,27 @@ namespace FAnsi.Discovery.QuerySyntax
         {
             return Text;
         }
+
+        /// <summary>
+        /// Returns the section of <see cref="Text"/> which does not include any alias e.g. returns "UPPER('a')" from "UPPER('a') as a"
+        /// </summary>
+        /// <param name="syntaxHelper"></param>
+        /// <returns></returns>
+        public string GetTextWithoutAlias(IQuerySyntaxHelper syntaxHelper)
+        {
+            syntaxHelper.SplitLineIntoSelectSQLAndAlias(Text, out string withoutAlias, out _);
+            return withoutAlias;
+        }
+
+        /// <summary>
+        /// Returns the alias section of <see cref="Text"/> e.g. returns "a" from "UPPER('a') as a"
+        /// </summary>
+        /// <param name="syntaxHelper"></param>
+        /// <returns></returns>
+        public string GetAliasFromText(IQuerySyntaxHelper syntaxHelper)
+        {
+            syntaxHelper.SplitLineIntoSelectSQLAndAlias(Text, out string _, out string alias);
+            return string.IsNullOrWhiteSpace(alias) ? null : alias;
+        }
     }
 }
