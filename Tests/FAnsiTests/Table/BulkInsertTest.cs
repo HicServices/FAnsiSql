@@ -55,6 +55,45 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        public void TestBulkInsert_ColumnOrdinals(DatabaseType type)
+        {
+            DiscoveredDatabase db = GetTestDatabase(type);
+
+            DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+                new[]
+                {
+                    new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
+                    new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
+                });
+
+            //There are no rows in the table yet
+            Assert.AreEqual(0, tbl.GetRowCount());
+
+            var dt = new DataTable();
+            dt.Columns.Add("Age");
+            dt.Columns.Add("Name");
+            dt.Rows.Add( "50","David");
+            dt.Rows.Add("60","Jamie");
+
+            Assert.AreEqual("Age",dt.Columns[0].ColumnName);
+            Assert.AreEqual(typeof(string),dt.Columns[0].DataType);
+
+            using (IBulkCopy bulk = tbl.BeginBulkInsert())
+            {
+                bulk.Timeout = 30;
+                bulk.Upload(dt);
+
+                Assert.AreEqual(2, tbl.GetRowCount());
+            }
+
+            //columns should not be reordered
+            Assert.AreEqual("Age",dt.Columns[0].ColumnName);
+            Assert.AreEqual(typeof(int),dt.Columns[0].DataType); //but the data type was changed by HardTyping it
+        }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.Oracle)]
         public void TestBulkInsert_Transaction(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
