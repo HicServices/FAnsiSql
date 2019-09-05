@@ -8,6 +8,7 @@ using System.Linq;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
 using FAnsi.Implementation;
+using FAnsi.Naming;
 using TypeGuesser;
 
 namespace FAnsi.Discovery
@@ -165,7 +166,8 @@ namespace FAnsi.Discovery
             
             if (foreignKeyPairs != null)
             {
-                bodySql += Environment.NewLine + GetForeignKeyConstraintSql(tableName, syntaxHelper, foreignKeyPairs, cascadeDelete) + Environment.NewLine;
+                bodySql += Environment.NewLine + GetForeignKeyConstraintSql(tableName, syntaxHelper, 
+                               foreignKeyPairs.ToDictionary(k=>(IHasRuntimeName)k.Key,v=>v.Value), cascadeDelete,null) + Environment.NewLine;
             }
 
             bodySql = bodySql.TrimEnd('\r', '\n', ',');
@@ -194,28 +196,39 @@ namespace FAnsi.Discovery
             );
         }
 
-        private string GetForeignKeyConstraintSql(string tableName, IQuerySyntaxHelper syntaxHelper, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete)
+        public virtual string GetForeignKeyConstraintSql(string foreignTable, IQuerySyntaxHelper syntaxHelper,
+            Dictionary<IHasRuntimeName, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string constraintName)
         {
-            //@"    CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID) REFERENCES Persons(PersonID) on delete cascade";
-            var otherTable = foreignKeyPairs.Values.Select(v => v.Table).Distinct().Single();
-            
-            string constraintName = MakeSensibleConstraintName("FK_", tableName + "_" + otherTable);
+            var primaryKeyTable = foreignKeyPairs.Values.Select(v => v.Table).Distinct().Single();
 
+            if (constraintName == null)
+                constraintName = GetForeignKeyConstraintNameFor(foreignTable, primaryKeyTable.GetRuntimeName());
+
+            //@"    CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID) REFERENCES Persons(PersonID) on delete cascade";
             return string.Format(
-@"CONSTRAINT {0} FOREIGN KEY ({1})
+                @"CONSTRAINT {0} FOREIGN KEY ({1})
 REFERENCES {2}({3}) {4}",
-                                               constraintName,
-                string.Join(",",foreignKeyPairs.Keys.Select(k=>syntaxHelper.EnsureWrapped(k.ColumnName))),
-                otherTable.GetFullyQualifiedName(),
+                constraintName,
+                string.Join(",",foreignKeyPairs.Keys.Select(k=>syntaxHelper.EnsureWrapped(k.GetRuntimeName()))),
+                primaryKeyTable.GetFullyQualifiedName(),
                 string.Join(",",foreignKeyPairs.Values.Select(v=>syntaxHelper.EnsureWrapped(v.GetRuntimeName()))),
                 cascadeDelete ? " on delete cascade": ""
-                );
+            );
+        }
+        public string GetForeignKeyConstraintNameFor(DiscoveredTable foreignTable, DiscoveredTable primaryTable)
+        {
+            return GetForeignKeyConstraintNameFor(foreignTable.GetRuntimeName(), primaryTable.GetRuntimeName());
+        }
+
+        protected virtual string GetForeignKeyConstraintNameFor(string foreignTable, string primaryTable)
+        {
+            return MakeSensibleConstraintName("FK_", foreignTable + "_" + primaryTable);
         }
 
         public abstract DirectoryInfo Detach(DiscoveredDatabase database);
 
         public abstract void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName);
-
+        
         protected virtual string GetPrimaryKeyDeclarationSql(string tableName, DatabaseColumnRequest[] pks, IQuerySyntaxHelper syntaxHelper)
         {
             var constraintName = MakeSensibleConstraintName("PK_", tableName);

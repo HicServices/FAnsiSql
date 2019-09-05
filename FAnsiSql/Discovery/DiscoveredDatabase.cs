@@ -194,7 +194,12 @@ namespace FAnsi.Discovery
         /// <param name="columns">List of columns you want in your table</param>
         /// <param name="adjuster">Last minute delegate class for modifying the <paramref name="columns"/> data types prior to executing SQL</param>
         /// <param name="foreignKeyPairs">Creates a single foreign key between the table created (parent) and a child table.  Columns in this parameter
-        ///  must be a subset of <paramref name="columns"/></param>
+        ///  must be a subset of <paramref name="columns"/>
+        ///
+        /// Key is the foreign key column (and the table the constraint will be put on).
+        /// Value is the primary key table column (which the constraint reference points to)
+        /// 
+        /// </param>
         /// <param name="cascadeDelete">True to set CASCADE DELETE on the foreign key created by <paramref name="foreignKeyPairs"/></param>
         /// <returns>The table created</returns>
         public DiscoveredTable CreateTable(string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, IDatabaseColumnRequestAdjuster adjuster = null)

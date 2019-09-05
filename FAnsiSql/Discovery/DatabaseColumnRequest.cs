@@ -1,5 +1,6 @@
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TypeTranslation;
+using FAnsi.Naming;
 using TypeGuesser;
 
 namespace FAnsi.Discovery
@@ -10,7 +11,7 @@ namespace FAnsi.Discovery
     /// 
     /// <para>Type specification is defined in the DatabaseTypeRequest but can also be specified explicitly (e.g. 'varchar(10)').</para>
     /// </summary>
-    public class DatabaseColumnRequest:ISupplementalColumnInformation
+    public class DatabaseColumnRequest:ISupplementalColumnInformation,IHasRuntimeName
     {
         /// <summary>
         /// The fixed string proprietary data type to use.  This overrides <see cref="TypeRequested"/> if specified.
@@ -79,6 +80,11 @@ namespace FAnsi.Discovery
         public string GetSQLDbType(ITypeTranslater typeTranslater)
         {
             return ExplicitDbType??typeTranslater.GetSQLDBTypeForCSharpType(TypeRequested);
+        }
+
+        public string GetRuntimeName()
+        {
+            return ColumnName;
         }
     }
 }

@@ -39,7 +39,10 @@ namespace FAnsi.Discovery.TableCreation
 
         /// <summary>
         /// Link between columns that you want to create in your table <see cref="DatabaseColumnRequest"/> and existing columns (<see cref="DiscoveredColumn"/>) that
-        /// should be paired with a foreign key constraint
+        /// should be paired with a foreign key constraint.
+        ///
+        /// Key is the foreign key column (and the table the constraint will be put on).
+        /// Value is the primary key table column (which the constraint reference points to)
         /// </summary>
         public Dictionary<DatabaseColumnRequest, DiscoveredColumn> ForeignKeyPairs { get; private set; }
 

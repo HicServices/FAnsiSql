@@ -504,5 +504,24 @@ namespace FAnsi.Discovery
                 return hashCode;
             }
         }
+
+        public DiscoveredRelationship AddForeignKey(DiscoveredColumn foreignKey, DiscoveredColumn primaryKey, bool cascadeDeletes,string constraintName = null)
+        {
+            return AddForeignKey(new Dictionary<DiscoveredColumn,DiscoveredColumn>{{foreignKey,primaryKey}},cascadeDeletes,constraintName);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="foreignKeyPairs">
+        /// Key is the foreign key column (and the table the constraint will be put on).
+        /// Value is the primary key table column (which the constraint reference points to)</param>
+        /// <param name="cascadeDeletes"></param>
+        /// <returns></returns>
+        public DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs,
+            bool cascadeDeletes,string constraintName = null)
+        {
+            return Helper.AddForeignKey(foreignKeyPairs, cascadeDeletes,constraintName);
+        }
     }
 }

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Foreign Key constraints can now be added to tables using new method `DiscoveredTable.AddForeignKey`
+
+### Fixed
+
+- Fixed bug in MySql where `DiscoveredTable.DiscoverRelationships(...)` could throw an ArgumentException ("same key has already been added [...]") in some circumstances
+ 
 ## [0.10.1] - 2019-09-05
 
 ### Fixed
