@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] - 2019-09-05
+
+### Fixed
+
+- Fixed bug in bulk insert where the uploaded DataTable column Order (DataColumn.Ordinal) would change when creating Hard Typed columns out of untyped string columns.  This bug only manifested if you did operations based on column order on the DataTable after it had been inserted into the database succesfully.
+- Fixed bug in DiscoveredTableValuedFunction that prevented dropping if they were not in the default schema "dbo"
+
 ## [0.10.0] - 2019-08-30
 
 ### Changed
@@ -93,7 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.0...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.1...develop
+[0.10.1]: https://github.com/HicServices/FAnsiSql/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/HicServices/FAnsiSql/compare/0.9.8...0.10.0
 [0.9.8]: https://github.com/HicServices/FAnsiSql/compare/0.9.7...0.9.8
 [0.9.7]: https://github.com/HicServices/FAnsiSql/compare/0.9.6...0.9.7

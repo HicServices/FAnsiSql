@@ -133,12 +133,16 @@ namespace FAnsi.Discovery
                     //then we need to update the primary key to include the new column not the old one
                     if(dt.PrimaryKey != null && dt.PrimaryKey.Contains(kvp.Key))
                         dt.PrimaryKey = dt.PrimaryKey.Except(new []{kvp.Key }).Union(new []{newColumn }).ToArray();
-                    
+
+                    var oldOrdinal  = kvp.Key.Ordinal;
+
                     //drop the original column
                     dt.Columns.Remove(kvp.Key);
 
                     //rename the hard typed column to match the old column name
-                    newColumn.ColumnName = kvp.Key.ColumnName;                    
+                    newColumn.ColumnName = kvp.Key.ColumnName;
+                    if(oldOrdinal != -1)
+                        newColumn.SetOrdinal(oldOrdinal);
                 }
             }
         }
