@@ -133,7 +133,7 @@ WHERE table_schema = @db
 
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
         {
-            string sql = @"SELECT 
+            string sql = @"SELECT DISTINCT
 u.CONSTRAINT_NAME,
 u.TABLE_SCHEMA,
 u.TABLE_NAME,

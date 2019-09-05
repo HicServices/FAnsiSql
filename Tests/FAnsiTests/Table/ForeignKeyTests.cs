@@ -18,15 +18,8 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.Oracle, false)]
         public void TestForeignKey_OneColumnKey(DatabaseType dbType, bool cascade)
         {
-            var db = GetTestDatabase(dbType,false);
+            var db = GetTestDatabase(dbType);
 
-            //cleanup remnants
-            foreach (var t in new[] { db.ExpectTable("Child1"), db.ExpectTable("Table1")})
-                if(t.Exists())
-                    t.Drop();
-            
-            foreach (var t in db.DiscoverTables(false))
-                t.Drop();
 
             var parentTable = db.CreateTable("Table1",
                 new[]
@@ -87,15 +80,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.Oracle)]
         public void TestForeignKey_TwoColumnKey(DatabaseType dbType)
         {
-            var db = GetTestDatabase(dbType, false);
-
-            //cleanup remnants
-            foreach (var t in new[] { db.ExpectTable("Child2"), db.ExpectTable("Table2") })
-                if (t.Exists())
-                    t.Drop();
-
-            foreach (var t in db.DiscoverTables(false))
-                t.Drop();
+            var db = GetTestDatabase(dbType);
 
             var parentTable = db.CreateTable("Table2",
                 new[]
@@ -146,6 +131,102 @@ namespace FAnsiTests.Table
             
             childTable.Drop();
             parentTable.Drop();
+        }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.Oracle)]
+        public void Test_ThreeTables_OnePrimary(DatabaseType dbType)
+        {
+            /*       t2
+             *     ↙
+             *  t1
+             *    ↖
+             *      t3
+             */
+             
+            var db = GetTestDatabase(dbType);
+
+            var t2 = db.CreateTable("T2", new DatabaseColumnRequest[]
+            {
+                new DatabaseColumnRequest("c2", new DatabaseTypeRequest(typeof(int)))
+            });
+
+            var t3 = db.CreateTable("T3", new DatabaseColumnRequest[]
+            {
+                new DatabaseColumnRequest("c3", new DatabaseTypeRequest(typeof(int)))
+            });
+            
+            var t1 = db.CreateTable("T1", new DatabaseColumnRequest[]
+            {
+                new DatabaseColumnRequest("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            });
+
+            var c1 = t1.DiscoverColumns().Single();
+            var c2 = t2.DiscoverColumns().Single();
+            var c3 = t3.DiscoverColumns().Single();
+
+            var constraint1 = t1.AddForeignKey(c2,c1,true);
+            var constraint2 = t1.AddForeignKey(c3,c1,true,"FK_Lol");
+
+            Assert.IsNotNull(constraint1);
+            Assert.IsNotNull(constraint2);
+
+            StringAssert.AreEqualIgnoringCase("FK_T2_T1",constraint1.Name);
+            StringAssert.AreEqualIgnoringCase("FK_Lol",constraint2.Name);
+
+            var sort2 = new RelationshipTopologicalSort(new DiscoveredTable[] { t1,t2,t3 });
+            
+            
+            Assert.Contains(t1, sort2.Order.ToList());
+            Assert.Contains(t2, sort2.Order.ToList());
+            Assert.Contains(t3, sort2.Order.ToList());
+        }
+        
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.Oracle)]
+        public void Test_ThreeTables_TwoPrimary(DatabaseType dbType)
+        {
+            /*  t1
+             *      ↖
+             *       t3
+             *      ↙
+             *  t2
+             */
+             
+            var db = GetTestDatabase(dbType);
+            
+            var t1 = db.CreateTable("T1", new DatabaseColumnRequest[]
+            {
+                new DatabaseColumnRequest("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            });
+
+            var t2 = db.CreateTable("T2", new DatabaseColumnRequest[]
+            {
+                new DatabaseColumnRequest("c2", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            });
+
+            var t3 = db.CreateTable("T3", new DatabaseColumnRequest[]
+            {
+                new DatabaseColumnRequest("c3", new DatabaseTypeRequest(typeof(int)))
+            });
+
+            var c1 = t1.DiscoverColumns().Single();
+            var c2 = t2.DiscoverColumns().Single();
+            var c3 = t3.DiscoverColumns().Single();
+
+            var constraint1 = t1.AddForeignKey(c3,c1,true);
+            var constraint2 = t1.AddForeignKey(c3,c2,true);
+
+            Assert.IsNotNull(constraint1);
+            Assert.IsNotNull(constraint2);
+
+            var sort2 = new RelationshipTopologicalSort(new DiscoveredTable[] { t1,t2,t3 });
+            
+            Assert.Contains(t1, sort2.Order.ToList());
+            Assert.Contains(t2, sort2.Order.ToList());
+            Assert.Contains(t3, sort2.Order.ToList());
         }
 
         [Test]

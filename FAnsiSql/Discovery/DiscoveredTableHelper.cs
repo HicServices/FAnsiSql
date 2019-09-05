@@ -175,6 +175,48 @@ namespace FAnsi.Discovery
             da.Fill(dt);
         }
 
+        /// <inheritdoc/>
+        public virtual DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string constraintName = null)
+        {
+            var foreignTables = foreignKeyPairs.Select(c => c.Key.Table).Distinct().ToArray();
+            var primaryTables= foreignKeyPairs.Select(c => c.Value.Table).Distinct().ToArray();
+
+            if(primaryTables.Length != 1 || foreignTables.Length != 1)
+                throw new ArgumentException("Primary and foreign keys must all belong to the same table",nameof(foreignKeyPairs));
+
+
+            var primary = primaryTables[0];
+            var foreign = foreignTables[0];
+
+            if (constraintName == null)
+                constraintName = primary.Database.Helper.GetForeignKeyConstraintNameFor(foreign, primary);
+
+            string constraintBit = primary.Database.Helper.GetForeignKeyConstraintSql(foreign.GetRuntimeName(), primary.GetQuerySyntaxHelper(),
+                foreignKeyPairs
+                    .ToDictionary(k=>(IHasRuntimeName)k.Key,v=>v.Value), cascadeDeletes, constraintName);
+
+            string sql = $@"ALTER TABLE {foreign.GetFullyQualifiedName()}
+                ADD " + constraintBit;
+
+            using (var con = primary.Database.Server.GetConnection())
+            {
+                con.Open();
+
+                try
+                {
+                    primary.Database.Server.GetCommand(sql, con).ExecuteNonQuery();
+                }
+                catch (Exception e)
+                {
+                    throw new AlterFailedException("Failed to create relationship using SQL:" + sql,e);
+                }
+            }
+
+            return primary.DiscoverRelationships().Single(
+                r =>r.Name.Equals(constraintName,StringComparison.CurrentCultureIgnoreCase)
+            );
+        }
+
         protected abstract string GetRenameTableSql(DiscoveredTable discoveredTable, string newName);
 
         public virtual void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds)

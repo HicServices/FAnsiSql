@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using FAnsi.Connections;
@@ -43,5 +44,19 @@ namespace FAnsi.Discovery
         int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null);
         DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction transaction = null);
         void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection, DbTransaction transaction = null);
+        
+        
+        /// <summary>
+        /// Creates a new primary key relationship in a foreign key table that points to a primary key table (which must have a primary key)
+        /// </summary>
+        /// <param name="foreignKeyPairs">
+        /// Columns to join up.
+        /// Key is the foreign key column (and the table the constraint will be put on).
+        /// Value is the primary key table column (which the constraint reference points to)
+        /// </param>
+        /// <param name="cascadeDeletes"></param>
+        /// <param name="constraintName">The name to give the foreign key constraint created, if null then a default name will be picked e.g. FK_Tbl1_Tbl2</param>
+        /// <returns></returns>
+        DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes,string constraintName =null);
     }
 }

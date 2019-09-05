@@ -225,7 +225,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             IManagedTransaction transaction = null)
         {
             string sql = @"
-SELECT a.table_name
+SELECT DISTINCT a.table_name
      , a.column_name
      , a.constraint_name
      , c.owner
