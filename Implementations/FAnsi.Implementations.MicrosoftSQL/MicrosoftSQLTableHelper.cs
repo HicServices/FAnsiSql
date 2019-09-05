@@ -127,7 +127,7 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
 
         public override void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop)
         {
-            SqlCommand cmd = new SqlCommand("DROP FUNCTION " + functionToDrop.GetRuntimeName(), (SqlConnection)connection);
+            SqlCommand cmd = new SqlCommand($"DROP FUNCTION {functionToDrop.Schema??"dbo"}.{functionToDrop.GetRuntimeName()}", (SqlConnection)connection);
             cmd.ExecuteNonQuery();
         }
 
