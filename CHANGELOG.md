@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.3] - 2019-09-10
+
 ### Changed
 
 - Updated TypeGuesser to 0.0.3 (improves performance and trims trailing zeros from decimals).
@@ -114,7 +116,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.2...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.3...develop
+[0.10.3]: https://github.com/HicServices/FAnsiSql/compare/0.10.2...0.10.3
 [0.10.2]: https://github.com/HicServices/FAnsiSql/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/HicServices/FAnsiSql/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/HicServices/FAnsiSql/compare/0.9.8...0.10.0
