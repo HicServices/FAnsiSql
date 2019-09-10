@@ -6,7 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+### Changed
+
+- Updated TypeGuesser to 0.0.3 (improves performance and trims trailing zeros from decimals).
 
 ## [0.10.2] - 2019-09-05
 
