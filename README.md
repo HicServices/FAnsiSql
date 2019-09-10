@@ -1,5 +1,9 @@
 # FAnsiSql
 
+- [Nuget](https://www.nuget.org/packages/HIC.FansiSql/)
+- [Dependencies](./Packages.md)
+- [Changelog](./CHANGELOG.md)
+
 <p align="right">
 <a href="https://www.publicdomainpictures.net/en/view-image.php?image=184699&picture=a-laugh-every-day-126">
   <img src="FansiHammerSmall.png" align="right"/>
