@@ -627,8 +627,7 @@ namespace FAnsiTests.TypeTranslation
             t.AdjustToCompensateForValue(val);
             Assert.AreEqual(typeof(decimal), t.Guess.CSharpType);
             
-            //there is always 1 decimal place before point in order to allow for changing to string later on and retain a single leading 0.
-            Assert.AreEqual(1, t.Guess.Size.NumbersBeforeDecimalPlace);
+            Assert.AreEqual(0, t.Guess.Size.NumbersBeforeDecimalPlace);
             Assert.AreEqual(19, t.Guess.Size.NumbersAfterDecimalPlace);
         }
 
