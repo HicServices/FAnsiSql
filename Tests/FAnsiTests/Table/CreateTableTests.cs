@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using FAnsi;
 using FAnsi.Discovery;
+using FAnsi.Extensions;
 using NUnit.Framework;
 using TypeGuesser;
 
@@ -347,6 +348,91 @@ namespace FAnsiTests.Table
                 bulk.Upload(dt2);
             
             Assert.AreEqual(4,table.GetRowCount());
+        }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        //[TestCase(DatabaseType.Oracle)] // Oracle doesn't really support bits https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns
+        [TestCase(DatabaseType.MySql)]
+        public void Test_CreateTable_TF(DatabaseType dbType)
+        {
+            //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
+            var db = GetTestDatabase(dbType);
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Hb");
+            dt.Rows.Add("T");
+            dt.Rows.Add("F");
+
+            var tbl = db.CreateTable("T1", dt);
+
+            Assert.AreEqual(typeof(bool), tbl.DiscoverColumn("Hb").DataType.GetCSharpDataType());
+
+            var dt2 = tbl.GetDataTable();
+            Assert.Contains(true, dt2.Rows.Cast<DataRow>().Select(c => c[0]).ToArray());
+            Assert.Contains(false, dt2.Rows.Cast<DataRow>().Select(c => c[0]).ToArray());
+            
+            tbl.Drop();
+        }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)] 
+        [TestCase(DatabaseType.MySql)]
+        public void Test_CreateTable_DoNotRetype(DatabaseType dbType)
+        {
+            //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
+            var db = GetTestDatabase(dbType);
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Hb");
+            dt.Rows.Add("T");
+            dt.Rows.Add("F");
+
+            //do not retype string to bool
+            dt.Columns["Hb"].SetDoNotReType(true);
+
+            var tbl = db.CreateTable("T1", dt);
+
+            Assert.AreEqual(typeof(string), tbl.DiscoverColumn("Hb").DataType.GetCSharpDataType());
+
+            var dt2 = tbl.GetDataTable();
+            Assert.Contains("T", dt2.Rows.Cast<DataRow>().Select(c => c[0]).ToArray());
+            Assert.Contains("F", dt2.Rows.Cast<DataRow>().Select(c => c[0]).ToArray());
+
+            tbl.Drop();
+        }
+        
+        /// <summary>
+        /// Just to check that clone on <see cref="DataTable"/> properly clones <see cref="DataColumn.ExtendedProperties"/>
+        /// </summary>
+        [Test]
+        public void Test_DataTableClone_ExtendedProperties()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("C1");
+
+            //the default Type for a DataColumn is string
+            Assert.AreEqual(typeof(string),dt.Columns[0].DataType);
+
+            dt.Columns["C1"].ExtendedProperties.Add("ff",true);
+
+            var dt2 = dt.Clone();
+            Assert.IsTrue(dt2.Columns["C1"].ExtendedProperties.ContainsKey("ff"));
+        }
+
+        [Test]
+        public void Test_GetDoNotRetype_OnlyStringColumns()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("C1",typeof(int));
+        
+            dt.SetDoNotReType(true);
+
+            //do not retype only applies when it is a string
+            Assert.IsFalse(dt.Columns[0].GetDoNotReType());
+
+            dt.Columns[0].DataType = typeof(string);
+
+            //change it to a string and it applies
+            Assert.IsTrue(dt.Columns[0].GetDoNotReType());
+            
         }
     }
 }

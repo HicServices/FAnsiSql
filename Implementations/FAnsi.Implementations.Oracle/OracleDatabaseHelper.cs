@@ -101,12 +101,7 @@ namespace FAnsi.Implementations.Oracle
         }
         protected override Guesser GetGuesser(DataColumn column)
         {
-            var guesser = new Guesser()
-                {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
-
-            guesser.AdjustToCompensateForValues(column);
-
-            return guesser;
+            return new Guesser {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
         }
 
 

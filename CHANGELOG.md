@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added extension method `DataColumn.DoNotReType()` which suppresses Type changes on a column (e.g. during CreateTable calls)
+
+### Fixed
+- Fixed bug where culture was set after evaluating DataColumn contents during CreateTable
+- 
 ## [0.10.3] - 2019-09-10
 
 ### Changed

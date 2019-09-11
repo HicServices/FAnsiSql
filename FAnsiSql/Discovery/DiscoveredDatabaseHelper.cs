@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
+using FAnsi.Extensions;
 using FAnsi.Implementation;
 using FAnsi.Naming;
 using TypeGuesser;
@@ -53,19 +54,19 @@ namespace FAnsi.Discovery
                         columns.Add(overriding);
                         customRequests.Remove(overriding);
 
-                        //Type reqeuested 
+                        //Type requested is a proper FAnsi type (e.g. string, at least 5 long)
                         var request = overriding.TypeRequested;
-
-                        //Type is for an explicit Type e.g. datetime
+                        
                         if(request == null)
                             if(!string.IsNullOrWhiteSpace(overriding.ExplicitDbType))
                             {
+                                //Type is for an explicit SQL Type e.g. varchar(5)
+
+                                //Translate the sql type to a FAnsi type definition 
                                 var tt = args.Database.Server.GetQuerySyntaxHelper().TypeTranslater;
-                        
-                                request = new DatabaseTypeRequest(
-                                    tt.GetCSharpTypeForSQLDBType(overriding.ExplicitDbType),
-                                    tt.GetLengthIfString(overriding.ExplicitDbType),
-                                    tt.GetDigitsBeforeAndAfterDecimalPointIfDecimal(overriding.ExplicitDbType));
+
+                                request = tt.GetDataTypeRequestForSQLDBType(overriding.ExplicitDbType);
+                                
                             }
                             else
                                 throw new Exception(string.Format(FAnsiStrings.DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType, column));
@@ -74,9 +75,15 @@ namespace FAnsi.Discovery
                     }
                     else
                     {
-                        //no, work out the column definition using a datatype computer
+                        //no, work out the column definition using a guesser
                         Guesser computer = GetGuesser(column);
                         computer.Culture = args.Culture;
+                        computer.AdjustToCompensateForValues(column);
+
+                        //if DoNotRetype is set on the column adjust the requested CSharpType to be the original type
+                        if (column.GetDoNotReType())
+                            computer.Guess.CSharpType = column.DataType;
+                        
                         typeDictionary.Add(column.ColumnName,computer);
 
                         columns.Add(new DatabaseColumnRequest(column.ColumnName, computer.Guess, column.AllowDBNull) { IsPrimaryKey = args.DataTable.PrimaryKey.Contains(column)});
@@ -119,9 +126,7 @@ namespace FAnsi.Discovery
 
         protected virtual Guesser GetGuesser(DataColumn column)
         {
-            var g = new Guesser();
-            g.AdjustToCompensateForValues(column);
-            return g;
+            return new Guesser();
         }
 
         protected virtual Guesser GetGuesser(DatabaseTypeRequest request)
