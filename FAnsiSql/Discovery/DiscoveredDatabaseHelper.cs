@@ -42,7 +42,10 @@ namespace FAnsi.Discovery
 
             if(args.DataTable != null)
             {
-//If we have a data table from which to create the table from
+
+                ThrowIfObjectColumns(args.DataTable);
+
+                //If we have a data table from which to create the table from
                 foreach (DataColumn column in args.DataTable.Columns)
                 {
                     //do we have an explicit overriding column definition?
@@ -122,6 +125,24 @@ namespace FAnsi.Discovery
             args.OnTableCreated(typeDictionary);
 
             return tbl;
+        }
+
+        /// <summary>
+        /// Throws an <see cref="NotSupportedException"/> if the <paramref name="dt"/> contains <see cref="DataColumn"/> with
+        /// the <see cref="DataColumn.DataType"/> of <see cref="System.Object"/>
+        /// </summary>
+        /// <param name="dt"></param>
+        public void ThrowIfObjectColumns(DataTable dt)
+        {
+            var objCol = dt.Columns.Cast<DataColumn>().FirstOrDefault(c => c.DataType == typeof(object));
+            
+            if(objCol != null)
+                throw new NotSupportedException(
+                    string.Format(
+                        FAnsiStrings.DataTable_Column__0__was_of_DataType__1___this_is_not_allowed___Use_String_for_untyped_data,
+                        objCol.ColumnName,
+                        objCol.DataType
+                        ));
         }
 
         protected virtual Guesser GetGuesser(DataColumn column)

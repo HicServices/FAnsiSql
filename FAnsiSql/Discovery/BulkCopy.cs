@@ -82,6 +82,8 @@ namespace FAnsi.Discovery
         /// <inheritdoc/>
         public virtual int Upload(DataTable dt)
         {
+            TargetTable.Database.Helper.ThrowIfObjectColumns(dt);
+
             ConvertStringTypesToHardTypes(dt);
             
             return UploadImpl(dt);

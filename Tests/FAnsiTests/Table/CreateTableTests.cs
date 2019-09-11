@@ -432,7 +432,28 @@ namespace FAnsiTests.Table
 
             //change it to a string and it applies
             Assert.IsTrue(dt.Columns[0].GetDoNotReType());
-            
         }
+
+        /// <summary>
+        /// Tests how CreateTable interacts with <see cref="DataColumn"/> of type Object
+        /// </summary>
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)] 
+        [TestCase(DatabaseType.MySql)]
+        public void CreateTable_ObjectColumns_StringContent(DatabaseType dbType)
+        {
+            //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
+            var db = GetTestDatabase(dbType);
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Hb",typeof(object));
+            dt.Rows.Add("T");
+            dt.Rows.Add("F");
+
+            var ex = Assert.Throws<NotSupportedException>(()=>db.CreateTable("T1", dt));
+
+            StringAssert.Contains("System.Object",ex.Message);
+
+        }
+        
     }
 }

@@ -243,4 +243,7 @@
   <data name="AggregateCustomLineCollection_Validate_AggregateCustomLineCollection_is_missing_some__but_not_all__Axis_components" xml:space="preserve">
     <value>AggregateCustomLineCollection is missing some (but not all) Axis components</value>
   </data>
+  <data name="DataTable_Column__0__was_of_DataType__1___this_is_not_allowed___Use_String_for_untyped_data" xml:space="preserve">
+    <value>DataTable column {0} was of DataType {1}, this is not allowed.  Use String for untyped data</value>
+  </data>
 </root>

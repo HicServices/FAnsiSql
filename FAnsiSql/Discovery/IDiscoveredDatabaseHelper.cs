@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.IO;
 using FAnsi.Discovery.QuerySyntax;
@@ -53,5 +55,12 @@ namespace FAnsi.Discovery
         /// <param name="primaryTable"></param>
         /// <returns></returns>
         string GetForeignKeyConstraintNameFor(DiscoveredTable foreignTable, DiscoveredTable primaryTable);
+
+        /// <summary>
+        /// Throws an <see cref="NotSupportedException"/> if the <paramref name="dt"/> contains <see cref="DataColumn"/> with
+        /// the <see cref="DataColumn.DataType"/> of <see cref="System.Object"/>
+        /// </summary>
+        /// <param name="dt"></param>
+        void ThrowIfObjectColumns(DataTable dt);
     }
 }

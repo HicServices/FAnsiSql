@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed bug where culture was set after evaluating DataColumn contents during CreateTable
-- 
+- Trying to create / upload DataTables which have columns of type System.Object now results in NotSupportedException (previously caused unstable behaviour depending on what object Types were put in table)
+
 ## [0.10.3] - 2019-09-10
 
 ### Changed

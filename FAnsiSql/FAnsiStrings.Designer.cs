@@ -99,21 +99,12 @@ namespace FAnsi {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Guesser does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object &apos;{0}&apos; which is of Type &apos;{1}&apos;, we were previously passed a &apos;{2}&apos; type.
+        ///   Looks up a localized string similar to DataTable column {0} was of DataType {1}, this is not allowed.  Use String for untyped data.
         /// </summary>
-        public static string Guesser_AdjustToCompensateForValue_GuesserPassedMixedTypeValues {
+        public static string DataTable_Column__0__was_of_DataType__1___this_is_not_allowed___Use_String_for_untyped_data {
             get {
-                return ResourceManager.GetString("Guesser_AdjustToCompensateForValue_GuesserPassedMixedTypeValues" +
-                        "", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No Type Decider exists for Type:{0}.
-        /// </summary>
-        public static string Guesser_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_ {
-            get {
-                return ResourceManager.GetString("Guesser_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_", resourceCulture);
+                return ResourceManager.GetString("DataTable_Column__0__was_of_DataType__1___this_is_not_allowed___Use_String_for_un" +
+                        "typed_data", resourceCulture);
             }
         }
         
@@ -299,6 +290,24 @@ namespace FAnsi {
         public static string DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_ {
             get {
                 return ResourceManager.GetString("DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Guesser does not support being passed hard typed objects (e.g. int) mixed with untyped objects (e.g. string).  We were adjusting to compensate for object &apos;{0}&apos; which is of Type &apos;{1}&apos;, we were previously passed a &apos;{2}&apos; type.
+        /// </summary>
+        public static string Guesser_AdjustToCompensateForValue_GuesserPassedMixedTypeValues {
+            get {
+                return ResourceManager.GetString("Guesser_AdjustToCompensateForValue_GuesserPassedMixedTypeValues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Type Decider exists for Type:{0}.
+        /// </summary>
+        public static string Guesser_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_ {
+            get {
+                return ResourceManager.GetString("Guesser_ThrowIfNotSupported_No_Type_Decider_exists_for_Type__0_", resourceCulture);
             }
         }
         
