@@ -6,28 +6,20 @@
   <Class Name="FAnsi.Discovery.TableCreation.CreateTableArgs">
     <Position X="0.5" Y="1.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAEAggAAEAAAgAAAABABAAUAAABAAAAAQAAAQAAAAA=</HashCode>
+      <HashCode>AAAEAggAAEAAAgAAAAhABAAUAQABAAAAAQAAAQAAAAA=</HashCode>
       <FileName>Discovery\TableCreation\CreateTableArgs.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="Adjuster" />
     </ShowAsAssociation>
     <ShowAsCollectionAssociation>
-      <Property Name="ColumnCreationLogic" />
       <Property Name="ForeignKeyPairs" />
     </ShowAsCollectionAssociation>
   </Class>
-  <Class Name="FAnsi.Discovery.TypeTranslation.Guesser">
-    <Position X="4.5" Y="2.25" Width="2.5" />
-    <TypeIdentifier>
-      <HashCode>CAABASAARAAgAAAAAAAAIgRAAAAACAgAIAAgAAQEAAA=</HashCode>
-      <FileName>Discovery\TypeTranslation\Guesser.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="FAnsi.Discovery.DiscoveredColumn" Collapsed="true">
-    <Position X="4.5" Y="8" Width="2.5" />
+    <Position X="4.75" Y="6" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AARAIAAAAAIAAEAEgBAAQAAAABwAAICAAAAAAAACBAA=</HashCode>
+      <HashCode>AARAIAAAAAIAAEAEgAAAQAAAABwAAIDAAAAAAAACBAA=</HashCode>
       <FileName>Discovery\DiscoveredColumn.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />

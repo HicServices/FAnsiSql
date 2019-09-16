@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added ability to control T/F Y/N interpretation (as either bit or varchar column)
+
+### Changed
+
+- Updated TypeGuesser to 0.0.4
+
 ## [0.10.4] - 2019-09-11
 
 ### Added
