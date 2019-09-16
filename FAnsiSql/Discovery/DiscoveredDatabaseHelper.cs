@@ -73,23 +73,31 @@ namespace FAnsi.Discovery
                             }
                             else
                                 throw new Exception(string.Format(FAnsiStrings.DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType, column));
-                    
-                        typeDictionary.Add(overriding.ColumnName, GetGuesser(request));
+
+                        var guesser = GetGuesser(request);
+                        CopySettings(guesser, args);
+                        typeDictionary.Add(overriding.ColumnName, guesser);
                     }
                     else
                     {
                         //no, work out the column definition using a guesser
-                        Guesser computer = GetGuesser(column);
-                        computer.Culture = args.Culture;
-                        computer.AdjustToCompensateForValues(column);
+                        Guesser guesser = GetGuesser(column);
+                        guesser.Culture = args.Culture;
+                        
+                        CopySettings(guesser,args);
+                        //cannot change the instance so have to copy across the values.  If this gets new properties that's a problem
+                        //See tests GuessSettings_CopyProperties
+                        guesser.Settings.CharCanBeBoolean = args.GuessSettings.CharCanBeBoolean;
 
+                        guesser.AdjustToCompensateForValues(column);
+                        
                         //if DoNotRetype is set on the column adjust the requested CSharpType to be the original type
                         if (column.GetDoNotReType())
-                            computer.Guess.CSharpType = column.DataType;
+                            guesser.Guess.CSharpType = column.DataType;
                         
-                        typeDictionary.Add(column.ColumnName,computer);
+                        typeDictionary.Add(column.ColumnName,guesser);
 
-                        columns.Add(new DatabaseColumnRequest(column.ColumnName, computer.Guess, column.AllowDBNull) { IsPrimaryKey = args.DataTable.PrimaryKey.Contains(column)});
+                        columns.Add(new DatabaseColumnRequest(column.ColumnName, guesser.Guess, column.AllowDBNull) { IsPrimaryKey = args.DataTable.PrimaryKey.Contains(column)});
                     }
                 }
             }
@@ -125,6 +133,13 @@ namespace FAnsi.Discovery
             args.OnTableCreated(typeDictionary);
 
             return tbl;
+        }
+
+        private void CopySettings(Guesser guesser, CreateTableArgs args)
+        {
+            //cannot change the instance so have to copy across the values.  If this gets new properties that's a problem
+            //See tests GuessSettings_CopyProperties
+            guesser.Settings.CharCanBeBoolean = args.GuessSettings.CharCanBeBoolean;
         }
 
         /// <summary>

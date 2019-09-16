@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using FAnsi;
 using FAnsi.Discovery;
+using FAnsi.Discovery.TableCreation;
 using FAnsi.Extensions;
 using NUnit.Framework;
 using TypeGuesser;
@@ -455,5 +457,74 @@ namespace FAnsiTests.Table
 
         }
         
+        /// <summary>
+        /// Tests how we can customize how "T" and "F" etc are interpreted (either as boolean true/false or as string). This test
+        /// uses the static defaults in <see cref="GuessSettingsFactory.Defaults"/>.
+        /// </summary>
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        public void CreateTable_GuessSettings_StaticDefaults_TF(DatabaseType dbType, bool treatAsBoolean)
+        {
+            //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
+            var db = GetTestDatabase(dbType);
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Hb");
+            dt.Rows.Add("T");
+            dt.Rows.Add("F");
+
+            bool initialDefault = GuessSettingsFactory.Defaults.CharCanBeBoolean;
+
+            try
+            {
+                //change the static default option
+                GuessSettingsFactory.Defaults.CharCanBeBoolean = treatAsBoolean;
+
+                var tbl = db.CreateTable("T1", dt);
+                var col = tbl.DiscoverColumn("Hb");
+
+                Assert.AreEqual(treatAsBoolean ? typeof(bool): typeof(string),col.DataType.GetCSharpDataType());
+                Assert.AreEqual(treatAsBoolean ? -1: 1,col.DataType.GetLengthIfString(),"Expected string length to be 1 for 'T'");
+            }
+            finally
+            {
+                GuessSettingsFactory.Defaults.CharCanBeBoolean = initialDefault;
+            }
+        }
+
+        /// <summary>
+        /// Tests how we can customize how "T" and "F" etc are interpreted (either as boolean true/false or as string). This test
+        /// uses the <see cref="CreateTableArgs.GuessSettings"/> injection.
+        /// </summary>
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        public void CreateTable_GuessSettings_InArgs_TF(DatabaseType dbType, bool treatAsBoolean)
+        {
+            //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
+            var db = GetTestDatabase(dbType);
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Hb");
+            dt.Rows.Add("T");
+            dt.Rows.Add("F");
+            
+            var args = new CreateTableArgs(db,"Hb",null,dt,false);
+            Assert.AreEqual(args.GuessSettings.CharCanBeBoolean, GuessSettingsFactory.Defaults.CharCanBeBoolean,"Default should match the static default");
+            Assert.IsFalse(args.GuessSettings == GuessSettingsFactory.Defaults,"Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
+
+            //change the args settings
+            args.GuessSettings.CharCanBeBoolean = treatAsBoolean;
+            
+            var tbl = db.CreateTable(args);
+            var col = tbl.DiscoverColumn("Hb");
+
+            Assert.AreEqual(treatAsBoolean ? typeof(bool): typeof(string),col.DataType.GetCSharpDataType());
+            Assert.AreEqual(treatAsBoolean ? -1: 1,col.DataType.GetLengthIfString(),"Expected string length to be 1 for 'T'");
+        }
+
+        [Test]
+        public void GuessSettings_CopyProperties()
+        {
+            var props = typeof(GuessSettings).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty).Select(p => p.Name).ToArray();
+            Assert.AreEqual(1,props.Length,"There are new settable Properties in GuessSettings, we should copy them across in DiscoveredDatabaseHelper.CreateTable");
+        }
     }
 }

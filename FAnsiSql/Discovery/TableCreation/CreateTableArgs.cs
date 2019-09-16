@@ -67,6 +67,11 @@ namespace FAnsi.Discovery.TableCreation
         public bool TableCreated { get; private set; }
 
         /// <summary>
+        /// Customise guessing behaviour 
+        /// </summary>
+        public GuessSettings GuessSettings { get; set; }
+
+        /// <summary>
         /// Populated after the table has been created (See <see cref="TableCreated"/>), list of the <see cref="Guesser"/> used to create the columns in the table.
         /// <para>This will be null if no <see cref="DataTable"/> was provided when creating the table</para>
         /// </summary>
@@ -85,6 +90,7 @@ namespace FAnsi.Discovery.TableCreation
             Database = database;
             TableName = tableName;
             Schema = schema;
+            GuessSettings = new GuessSettingsFactory().Create();
         }
         
         /// <summary>
