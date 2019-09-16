@@ -24,7 +24,10 @@ namespace FAnsi.Extensions
         /// <param name="dc"></param>
         public static void SetDoNotReType(this DataColumn dc, bool value)
         {
-            dc.ExtendedProperties.Add(DoNotReTypeExtendedProperty, value);
+            if(!dc.ExtendedProperties.ContainsKey(DoNotReTypeExtendedProperty))
+                dc.ExtendedProperties.Add(DoNotReTypeExtendedProperty, value);
+            else
+                dc.ExtendedProperties[DoNotReTypeExtendedProperty] = value;
         }
 
         /// <summary>
