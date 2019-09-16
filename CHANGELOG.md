@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.5] - 2019-09-16
+
 ### Added
 
 - Added ability to control T/F Y/N interpretation (as either bit or varchar column)
@@ -133,7 +135,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.4...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.5...develop
+[0.10.5]: https://github.com/HicServices/FAnsiSql/compare/0.10.4...0.10.5
 [0.10.4]: https://github.com/HicServices/FAnsiSql/compare/0.10.3...0.10.4
 [0.10.3]: https://github.com/HicServices/FAnsiSql/compare/0.10.2...0.10.3
 [0.10.2]: https://github.com/HicServices/FAnsiSql/compare/0.10.1...0.10.2
