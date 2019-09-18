@@ -164,5 +164,24 @@ namespace FAnsiTests
             //this is the using on the transaction this one should now close itself
             Assert.AreEqual(ConnectionState.Closed,ongoingCon.Connection.State);
         }
+
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.Oracle)]
+        public void Test_ManagedTransaction_MultipleCancel(DatabaseType dbType)
+        {
+            DiscoveredDatabase db = GetTestDatabase(dbType);
+            
+            IManagedConnection ongoingCon;
+            //pretend that there is an ongoing transaction already
+            using (ongoingCon = db.Server.BeginNewTransactedConnection())
+            {
+                ongoingCon.ManagedTransaction.AbandonAndCloseConnection();
+                ongoingCon.ManagedTransaction.AbandonAndCloseConnection();
+                ongoingCon.ManagedTransaction.AbandonAndCloseConnection();
+                ongoingCon.ManagedTransaction.CommitAndCloseConnection();
+            }
+        }
     }
 }
