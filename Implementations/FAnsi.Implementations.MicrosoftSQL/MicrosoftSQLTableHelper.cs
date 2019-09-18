@@ -201,17 +201,19 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             return new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
         }
 
-        public override void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0)
+        public override void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
         {
             try
             {
-                var columnHelper = GetColumnHelper();
-                foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))
+                using (var connection = table.Database.Server.GetManagedConnection(args.TransactionIfAny))
                 {
-                    var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
-                    var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
-                    alterCmd.CommandTimeout = timeoutInSeconds;
-                    alterCmd.ExecuteNonQuery();
+                    var columnHelper = GetColumnHelper();
+                    foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))
+                    {
+                        var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
+                        var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
+                        args.ExecuteNonQuery(alterCmd);
+                    }
                 }
             }
             catch (Exception e)
@@ -219,7 +221,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
                 throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
             }
 
-            base.CreatePrimaryKey(table, discoverColumns, connection, timeoutInSeconds);
+            base.CreatePrimaryKey(args,table, discoverColumns);
         }
 
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null)

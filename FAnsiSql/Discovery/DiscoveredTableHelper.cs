@@ -134,23 +134,27 @@ namespace FAnsi.Discovery
             cmd.ExecuteNonQuery();
         }
 
-        public virtual void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0)
+        public virtual void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
         {
-            try{
+            using (var connection = table.Database.Server.GetManagedConnection(args.TransactionIfAny))
+            {
+                try{
 
-                string sql = string.Format("ALTER TABLE {0} ADD PRIMARY KEY ({1})",
-                    table.GetFullyQualifiedName(),
-                    string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))
+                    string sql = string.Format("ALTER TABLE {0} ADD PRIMARY KEY ({1})",
+                        table.GetFullyQualifiedName(),
+                        string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))
                     );
 
-                DbCommand cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
-                cmd.CommandTimeout = timeoutInSeconds;
-                cmd.ExecuteNonQuery();
+                    DbCommand cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
+
+                    args.ExecuteNonQuery(cmd);
+                }
+                catch (Exception e)
+                {
+                    throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
+                }
             }
-            catch (Exception e)
-            {
-                throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
-            }
+            
         }
 
         public virtual int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null)

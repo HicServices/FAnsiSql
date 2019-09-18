@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Task cancellation support for various long running operations (e.g. CreatePrimaryKey)
+
 ## [0.10.6] - 2019-09-16
 
 ### Fixed

@@ -40,7 +40,7 @@ namespace FAnsi.Discovery
         string ScriptTableCreation(DiscoveredTable constraints, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable toCreateTable = null);
         bool IsEmpty(DbConnection connection, DiscoveredTable discoveredTable, DbTransaction transaction);
         void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection);
-        void CreatePrimaryKey(DiscoveredTable columns, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0);
+        void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable columns, DiscoveredColumn[] discoverColumns);
         int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null);
         DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction transaction = null);
         void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection, DbTransaction transaction = null);

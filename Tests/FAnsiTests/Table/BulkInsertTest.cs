@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using FAnsi;
+using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
+using FAnsi.Exceptions;
 using NUnit.Framework;
 using TypeGuesser;
 
@@ -315,6 +319,12 @@ namespace FAnsiTests.Table
             tbl.Drop();
         }
 
+        /// <summary>
+        /// Tests creating large batches and inserting them into the database.  This test is expected to take a while.  Since at the end of the test we have a lot of data
+        /// in the database we take the opportunity to test timeout/command cancellation.  The cancellation window is 100ms so if a DBMS can make the primary key within that window
+        /// then maybe this test will be inconsistent?
+        /// </summary>
+        /// <param name="type"></param>
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
@@ -328,7 +338,6 @@ namespace FAnsiTests.Table
             {
                 new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
                 {
-                    IsPrimaryKey = true,
                     AllowNulls = false
                 },
                 new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
@@ -420,7 +429,41 @@ namespace FAnsiTests.Table
             Assert.NotNull(result.Rows[0]["frank"]);
             Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString().Length, 5); //should be a date
             Assert.AreEqual("no", result.Rows[0]["peter"]);
+            
+            //while we have a ton of data in there lets test some cancellation operations
+            
+            //no primary key
+            var bobCol = tbl.DiscoverColumn("bob");
+            Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
 
+
+            CancellationTokenSource cts;
+            using (var con = tbl.Database.Server.BeginNewTransactedConnection())
+            {
+                //give it 100 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
+                cts = new CancellationTokenSource(100);
+
+                //creation should have been cancelled at the database level
+                var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
+                
+                //MySql seems to be throwing null reference inside ExecuteNonQueryAsync.  No idea why but it is still cancelled
+                if(type != DatabaseType.MySql)
+                    StringAssert.Contains("cancel",ex.InnerException.Message);
+                else
+                    Console.WriteLine("MySql error was:" + ex.InnerException);
+            }
+
+            
+            //and there should not be any primary keys
+            Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
+
+            //now give it a bit longer to create it
+            cts = new CancellationTokenSource(50000000);
+            tbl.CreatePrimaryKey(null, cts.Token, 50000, bobCol);
+
+            bobCol = tbl.DiscoverColumn("bob");
+            Assert.IsTrue(bobCol.IsPrimaryKey);
+            
             tbl.Drop();
         }
 

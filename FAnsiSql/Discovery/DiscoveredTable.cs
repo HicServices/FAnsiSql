@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using FAnsi.Connections;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Discovery.QuerySyntax;
@@ -339,7 +340,7 @@ namespace FAnsi.Discovery
         /// <param name="discoverColumns">Columns that should become part of the primary key</param>
         public void CreatePrimaryKey(params DiscoveredColumn[] discoverColumns)
         {
-            CreatePrimaryKey(0, discoverColumns);
+            CreatePrimaryKey(new DatabaseOperationArgs(), discoverColumns);
         }
 
         /// <summary>
@@ -349,8 +350,29 @@ namespace FAnsi.Discovery
         /// <param name="discoverColumns">Columns that should become part of the primary key</param>
         public void CreatePrimaryKey(int timeoutInSeconds, params DiscoveredColumn[] discoverColumns)
         {
-            using (var connection = Database.Server.GetManagedConnection())
-                Helper.CreatePrimaryKey(this, discoverColumns, connection, timeoutInSeconds);
+            CreatePrimaryKey(new DatabaseOperationArgs(){TimeoutInSeconds = timeoutInSeconds}, discoverColumns);
+        }
+
+        /// <summary>
+        /// Creates a primary key on the table if none exists yet
+        /// </summary>
+        /// <param name="transaction">Optional ongoing transaction to use (leave null if not needed)</param>
+        /// <param name="token">Token for cancelling the command mid execution (leave null if not needed)</param>
+        /// <param name="timeoutInSeconds">The number of seconds to wait for the operation to complete</param>
+        /// <param name="discoverColumns">Columns that should become part of the primary key</param>
+        public void CreatePrimaryKey(IManagedTransaction transaction ,CancellationToken token, int timeoutInSeconds, params DiscoveredColumn[] discoverColumns)
+        {
+            Helper.CreatePrimaryKey(new DatabaseOperationArgs{
+                TransactionIfAny = transaction,
+                CancellationToken = token,
+                TimeoutInSeconds = timeoutInSeconds
+            }, this, discoverColumns);
+        }
+
+        
+        public void CreatePrimaryKey(DatabaseOperationArgs args, params DiscoveredColumn[] discoverColumns)
+        {
+            Helper.CreatePrimaryKey(args,this, discoverColumns);
         }
 
         /// <summary>
