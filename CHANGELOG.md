@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Task cancellation support for various long running operations (e.g. CreatePrimaryKey)
 
+### Changed
+
+- Sql Server `GetRowCount` no longer uses `sys.partitions` which is unreliable (now just runs `select count(*)` like other implementations)
+
 ### Fixed
 
 - Fixed connection leaking when using `BeginNewTransactedConnection` in a `using` block without calling either `CommitAndCloseConnection` or `AbandonAndCloseConnection`

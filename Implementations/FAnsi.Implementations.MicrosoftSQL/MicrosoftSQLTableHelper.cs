@@ -139,27 +139,8 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
 
         public override int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null)
         {
-                    SqlCommand cmdCount = new SqlCommand(@"/*Do not lock anything, and do not get held up by any locks.*/
-SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
- 
--- Quickly get row counts.
-declare @rowcount int = (SELECT distinct max(p.rows) AS [Row Count]
-FROM sys.partitions p
-INNER JOIN sys.indexes i ON p.object_id = i.object_id
-                         AND p.index_id = i.index_id
-WHERE OBJECT_NAME(p.object_id) = @tableName)
-
--- if we could not get it quickly then it is probably a view or something so have to return the slow count
-if @rowcount is null 
-	set @rowcount = (select count(*) from "+table.GetFullyQualifiedName()+@")
-
-select @rowcount", (SqlConnection) connection);
-
-                    cmdCount.Transaction = dbTransaction as SqlTransaction;
-                    cmdCount.Parameters.Add(new SqlParameter("@tableName",SqlDbType.VarChar));
-                    cmdCount.Parameters["@tableName"].Value = table.GetRuntimeName();
-
-                    return Convert.ToInt32(cmdCount.ExecuteScalar());
+            SqlCommand cmdCount = new SqlCommand(@"select count(*) from "+table.GetFullyQualifiedName(), (SqlConnection) connection);
+            return Convert.ToInt32(cmdCount.ExecuteScalar());
         }
         
         public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
