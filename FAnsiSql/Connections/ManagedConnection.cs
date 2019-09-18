@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Xml.Schema;
 using FAnsi.Discovery;
 
 namespace FAnsi.Connections
@@ -16,9 +17,10 @@ namespace FAnsi.Connections
 
         /// <inheritdoc/>
         public IManagedTransaction ManagedTransaction { get; private set; }
-        
-        private readonly bool _hadToOpenConnection = false;
 
+        /// <inheritdoc/>
+        public bool CloseOnDispose { get; set; }
+        
         internal ManagedConnection(DiscoveredServer discoveredServer, IManagedTransaction managedTransaction)
         {
             //get a new connection or use the existing one within the transaction
@@ -31,7 +33,7 @@ namespace FAnsi.Connections
             //if there isn't a transaction then we opened a new connection so we had better remember to close it again
             if(managedTransaction == null)
             {
-                _hadToOpenConnection = true;
+                CloseOnDispose = true;
                 Debug.Assert(Connection.State == ConnectionState.Closed);
                 Connection.Open();
             }
@@ -42,7 +44,7 @@ namespace FAnsi.Connections
         /// </summary>
         public void Dispose()
         {
-            if (_hadToOpenConnection)
+            if (CloseOnDispose)
                 Connection.Dispose();
         }
     }

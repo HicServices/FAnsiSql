@@ -372,7 +372,7 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public IManagedConnection BeginNewTransactedConnection()
         {
-            return new ManagedConnection(this, Helper.BeginTransaction(Builder));
+            return new ManagedConnection(this, Helper.BeginTransaction(Builder)){CloseOnDispose = true};
         }
 
         /// <summary>
