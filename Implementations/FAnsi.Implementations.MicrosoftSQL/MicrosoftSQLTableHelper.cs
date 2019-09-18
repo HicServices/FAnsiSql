@@ -139,7 +139,7 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
 
         public override int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null)
         {
-            SqlCommand cmdCount = new SqlCommand(@"select count(*) from "+table.GetFullyQualifiedName(), (SqlConnection) connection);
+            SqlCommand cmdCount = new SqlCommand(@"select count(*) from "+table.GetFullyQualifiedName(), (SqlConnection) connection,(SqlTransaction)dbTransaction);
             return Convert.ToInt32(cmdCount.ExecuteScalar());
         }
         
