@@ -25,7 +25,7 @@ namespace FAnsi.Discovery
         void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
         void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
 
-        void AddColumn(DiscoveredTable table, DbConnection connection, string name, string dataType, bool allowNulls, int timeoutInSeconds);
+        void AddColumn(DatabaseOperationArgs args,DiscoveredTable table, string name, string dataType, bool allowNulls);
 
         int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null);
 

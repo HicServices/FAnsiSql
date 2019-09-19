@@ -186,7 +186,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
         {
             try
             {
-                using (var connection = table.Database.Server.GetManagedConnection(args.TransactionIfAny))
+                using (var connection = args.GetManagedConnection(table))
                 {
                     var columnHelper = GetColumnHelper();
                     foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))

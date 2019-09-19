@@ -243,10 +243,12 @@ namespace FAnsi.Discovery
         /// <param name="timeoutInSeconds">The length of time to wait in seconds before giving up (See <see cref="DbCommand.CommandTimeout"/>)</param>
         public void AddColumn(string name, string databaseType, bool allowNulls, int timeoutInSeconds)
         {
-            using (IManagedConnection connection = Database.Server.GetManagedConnection())
-            {
-                Helper.AddColumn(this, connection.Connection, name, databaseType, allowNulls, timeoutInSeconds);
-            }
+            AddColumn(name,databaseType,allowNulls,new DatabaseOperationArgs{TimeoutInSeconds = timeoutInSeconds});
+        }
+
+        public void AddColumn(string name, string databaseType, bool allowNulls, DatabaseOperationArgs args)
+        {
+            Helper.AddColumn(args,this, name, databaseType, allowNulls);
         }
 
         /// <summary>

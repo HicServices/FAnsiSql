@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FAnsi.Connections;
+using FAnsi.Discovery;
 
 namespace FAnsi
 {
@@ -72,5 +73,39 @@ namespace FAnsi
 
             return t.Result;
         }
+
+        /// <summary>
+        /// Opens a new connection or passes back an existing opened connection (that matches
+        /// <see cref="TransactionIfAny"/>).  This command should be wrapped in a using statement
+        /// </summary>
+        /// <param name="table"></param>
+        /// <returns></returns>
+        public IManagedConnection GetManagedConnection(DiscoveredTable table)
+        {
+            return GetManagedConnection(table.Database.Server);
+        }
+
+        /// <summary>
+        /// Opens a new connection or passes back an existing opened connection (that matches
+        /// <see cref="TransactionIfAny"/>).  This command should be wrapped in a using statement
+        /// </summary>
+        /// <param name="table"></param>
+        /// <returns></returns>
+        public IManagedConnection GetManagedConnection(DiscoveredDatabase database)
+        {
+            return GetManagedConnection(database.Server);
+        }
+
+        /// <summary>
+        /// Opens a new connection or passes back an existing opened connection (that matches
+        /// <see cref="TransactionIfAny"/>).  This command should be wrapped in a using statement
+        /// </summary>
+        /// <param name="table"></param>
+        /// <returns></returns>
+        public IManagedConnection GetManagedConnection(DiscoveredServer server)
+        {
+            return server.GetManagedConnection(TransactionIfAny);
+        }
+
     }
 }

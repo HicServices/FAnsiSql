@@ -44,11 +44,13 @@ namespace FAnsi.Discovery
         public abstract void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
         public abstract void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
 
-        public virtual void AddColumn(DiscoveredTable table, DbConnection connection, string name, string dataType, bool allowNulls, int timeoutInSeconds)
+        public virtual void AddColumn(DatabaseOperationArgs args,DiscoveredTable table, string name, string dataType, bool allowNulls)
         {
-            var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + name + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"), connection);
-            cmd.CommandTimeout = timeoutInSeconds;
-            cmd.ExecuteNonQuery();
+            using (var con = args.GetManagedConnection(table))
+            {
+                var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + name + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"),con);
+                args.ExecuteNonQuery(cmd);
+            }
         }
 
         public abstract int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null);
@@ -136,7 +138,7 @@ namespace FAnsi.Discovery
 
         public virtual void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
         {
-            using (var connection = table.Database.Server.GetManagedConnection(args.TransactionIfAny))
+            using (var connection = args.GetManagedConnection(table))
             {
                 try{
 
