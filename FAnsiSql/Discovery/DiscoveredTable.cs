@@ -230,9 +230,19 @@ namespace FAnsi.Discovery
         /// <param name="timeoutInSeconds">The length of time to wait in seconds before giving up (See <see cref="DbCommand.CommandTimeout"/>)</param>
         public void AddColumn(string name, DatabaseTypeRequest type,bool allowNulls,int timeoutInSeconds)
         {
-            AddColumn(name, Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(type), allowNulls, timeoutInSeconds);
+            AddColumn(name, type, allowNulls, new DatabaseOperationArgs {TimeoutInSeconds = timeoutInSeconds});
         }
-
+        
+        /// <summary>
+        /// Creates and runs an ALTER TABLE SQL statement that adds a new column to the table
+        /// </summary>
+        /// <param name="name">The unqualified name for the new column e.g. "MyCol2"</param>
+        /// <param name="type">The data type for the new column</param>
+        /// <param name="allowNulls">True to allow null</param>
+        public void AddColumn(string name, DatabaseTypeRequest type, bool allowNulls, DatabaseOperationArgs args)
+        {
+            AddColumn(name, Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(type), allowNulls, args);
+        }
 
         /// <summary>
         /// Creates and runs an ALTER TABLE SQL statement that adds a new column to the table
@@ -529,9 +539,9 @@ namespace FAnsi.Discovery
             }
         }
 
-        public DiscoveredRelationship AddForeignKey(DiscoveredColumn foreignKey, DiscoveredColumn primaryKey, bool cascadeDeletes,string constraintName = null)
+        public DiscoveredRelationship AddForeignKey(DiscoveredColumn foreignKey, DiscoveredColumn primaryKey, bool cascadeDeletes,string constraintName = null, DatabaseOperationArgs args = null)
         {
-            return AddForeignKey(new Dictionary<DiscoveredColumn,DiscoveredColumn>{{foreignKey,primaryKey}},cascadeDeletes,constraintName);
+            return AddForeignKey(new Dictionary<DiscoveredColumn,DiscoveredColumn>{{foreignKey,primaryKey}},cascadeDeletes,constraintName,args);
         }
 
         /// <summary>
@@ -543,9 +553,10 @@ namespace FAnsi.Discovery
         /// <param name="cascadeDeletes"></param>
         /// <returns></returns>
         public DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs,
-            bool cascadeDeletes,string constraintName = null)
+            bool cascadeDeletes,string constraintName = null, DatabaseOperationArgs args = null)
         {
-            return Helper.AddForeignKey(foreignKeyPairs, cascadeDeletes,constraintName);
+            return Helper.AddForeignKey(args??new DatabaseOperationArgs(),foreignKeyPairs, cascadeDeletes,constraintName);
         }
+
     }
 }

@@ -231,65 +231,64 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             p.DbType = DbType.String;
             cmd.Parameters.Add(p);
             
+            DataTable dt = new DataTable();
 
-            Dictionary<string,DiscoveredRelationship> toReturn = new Dictionary<string,DiscoveredRelationship>();
-
-            using (var r = cmd.ExecuteReader())
+            var da = table.Database.Server.GetDataAdapter(cmd);
+            da.Fill(dt);
+            var toReturn = new Dictionary<string,DiscoveredRelationship>();
+            
+            foreach(DataRow r in dt.Rows)
             {
-                while (r.Read())
+                var fkName = r["FK_NAME"].ToString();
+                
+                DiscoveredRelationship current;
+
+                //could be a 2+ columns foreign key?
+                if (toReturn.ContainsKey(fkName))
                 {
-                    var fkName = r["FK_NAME"].ToString();
+                    current = toReturn[fkName];
+                }
+                else
+                {
+                    var pkdb = r["PKTABLE_QUALIFIER"].ToString();
+                    var pkschema = r["PKTABLE_OWNER"].ToString();
+                    var pktableName = r["PKTABLE_NAME"].ToString();
+
+                    var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
+
+                    var fkdb = r["FKTABLE_QUALIFIER"].ToString();
+                    var fkschema = r["FKTABLE_OWNER"].ToString();
+                    var fktableName = r["FKTABLE_NAME"].ToString();
+
+                    var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
+
+                    var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
+                    CascadeRule deleteRule = CascadeRule.Unknown;
                     
-                    DiscoveredRelationship current;
 
-                    //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
-                    {
-                        current = toReturn[fkName];
-                    }
-                    else
-                    {
-                        var pkdb = r["PKTABLE_QUALIFIER"].ToString();
-                        var pkschema = r["PKTABLE_OWNER"].ToString();
-                        var pktableName = r["PKTABLE_NAME"].ToString();
+                    if(deleteRuleInt == 0)
+                        deleteRule = CascadeRule.Delete;
+                    else if(deleteRuleInt == 1)
+                        deleteRule = CascadeRule.NoAction;
+                    else if (deleteRuleInt == 2)
+                        deleteRule = CascadeRule.SetNull;
+                    else if (deleteRuleInt == 3)
+                        deleteRule = CascadeRule.SetDefault;
 
-                        var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
-
-                        var fkdb = r["FKTABLE_QUALIFIER"].ToString();
-                        var fkschema = r["FKTABLE_OWNER"].ToString();
-                        var fktableName = r["FKTABLE_NAME"].ToString();
-
-                        var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
-
-                        var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
-                        CascadeRule deleteRule = CascadeRule.Unknown;
-                        
-
-                        if(deleteRuleInt == 0)
-                            deleteRule = CascadeRule.Delete;
-                        else if(deleteRuleInt == 1)
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleInt == 2)
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleInt == 3)
-                            deleteRule = CascadeRule.SetDefault;
-
-                        
-                        /*
+                    
+                    /*
 https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-fkeys-transact-sql?view=sql-server-2017
-                         
+                     
 0=CASCADE changes to foreign key.
 1=NO ACTION changes if foreign key is present.
 2 = set null
 3 = set default*/
 
-                        current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                        toReturn.Add(current.Name,current);
-                    }
-
-
-                    current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
+                    current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                    toReturn.Add(current.Name,current);
                 }
+
+                current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
             }
 
             return toReturn.Values.ToArray();

@@ -516,9 +516,13 @@ namespace FAnsiTests
             Assert.AreEqual(new DateTime(2001,01,22), dt.Rows[0][0]);
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        public void AddColumnTest(DatabaseType type)
+        [TestCase(DatabaseType.MySql,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.Oracle,true)]
+        [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        [TestCase(DatabaseType.Oracle,false)]
+        public void AddColumnTest(DatabaseType type,bool useTransaction)
         {
             var database = GetTestDatabase(type);
 
@@ -539,7 +543,19 @@ namespace FAnsiTests
             Assert.IsTrue(tbl.DiscoverColumn("Field1").IsPrimaryKey);
 
             //ALTER TABLE to ADD COLUMN of date type
-            tbl.AddColumn("Field2", new DatabaseTypeRequest(typeof(DateTime)), true, 1000);
+            if (useTransaction)
+            {
+                using (var con = database.Server.BeginNewTransactedConnection())
+                {
+                    tbl.AddColumn("Field2", new DatabaseTypeRequest(typeof(DateTime)), true,new DatabaseOperationArgs{TimeoutInSeconds = 1000,TransactionIfAny = con.ManagedTransaction});
+                    con.ManagedTransaction.CommitAndCloseConnection();
+                }   
+            }
+            else
+            {
+                tbl.AddColumn("Field2", new DatabaseTypeRequest(typeof(DateTime)), true, 1000);
+            }
+            
 
             //new column should exist
             var newCol = tbl.DiscoverColumn("Field2");

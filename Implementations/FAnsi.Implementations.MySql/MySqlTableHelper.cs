@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.Linq;
@@ -161,55 +162,56 @@ WHERE
             cmd.Parameters.Add(p);
 
             Dictionary<string,DiscoveredRelationship> toReturn = new Dictionary<string,DiscoveredRelationship>();
-            
-            using (var r = cmd.ExecuteReader())
+
+            var dt = new DataTable();
+            var da = table.Database.Server.GetDataAdapter(cmd);
+            da.Fill(dt);
+
+            foreach(DataRow r in dt.Rows)
             {
-                while (r.Read())
+                var fkName = r["CONSTRAINT_NAME"].ToString();
+                
+                DiscoveredRelationship current;
+
+                //could be a 2+ columns foreign key?
+                if (toReturn.ContainsKey(fkName))
                 {
-                    var fkName = r["CONSTRAINT_NAME"].ToString();
-                    
-                    DiscoveredRelationship current;
-
-                    //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
-                    {
-                        current = toReturn[fkName];
-                    }
-                    else
-                    {
-                        
-                        var pkDb = r["REFERENCED_TABLE_SCHEMA"].ToString();
-                        var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
-
-                        var fkDb = r["TABLE_SCHEMA"].ToString();
-                        var fkTableName =  r["TABLE_NAME"].ToString();
-
-                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
-                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
-
-                        //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
-                        var deleteRuleString = r["DELETE_RULE"].ToString();
-
-                        CascadeRule deleteRule = CascadeRule.Unknown;
-                        
-                        if(deleteRuleString == "CASCADE")
-                            deleteRule = CascadeRule.Delete;
-                        else if(deleteRuleString == "NO ACTION")
-                            deleteRule = CascadeRule.NoAction;
-                        else if(deleteRuleString == "RESTRICT")
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleString == "SET NULL")
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleString == "SET DEFAULT")
-                            deleteRule = CascadeRule.SetDefault;
-
-                        current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                        toReturn.Add(current.Name,current);
-                    }
-
-                    current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
+                    current = toReturn[fkName];
                 }
+                else
+                {
+                    var pkDb = r["REFERENCED_TABLE_SCHEMA"].ToString();
+                    var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
+
+                    var fkDb = r["TABLE_SCHEMA"].ToString();
+                    var fkTableName =  r["TABLE_NAME"].ToString();
+
+                    var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
+                    var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
+
+                    //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
+                    var deleteRuleString = r["DELETE_RULE"].ToString();
+
+                    CascadeRule deleteRule = CascadeRule.Unknown;
+                    
+                    if(deleteRuleString == "CASCADE")
+                        deleteRule = CascadeRule.Delete;
+                    else if(deleteRuleString == "NO ACTION")
+                        deleteRule = CascadeRule.NoAction;
+                    else if(deleteRuleString == "RESTRICT")
+                        deleteRule = CascadeRule.NoAction;
+                    else if (deleteRuleString == "SET NULL")
+                        deleteRule = CascadeRule.SetNull;
+                    else if (deleteRuleString == "SET DEFAULT")
+                        deleteRule = CascadeRule.SetDefault;
+
+                    current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                    toReturn.Add(current.Name,current);
+                }
+
+                current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
             }
+            
             
             return toReturn.Values.ToArray();
         }

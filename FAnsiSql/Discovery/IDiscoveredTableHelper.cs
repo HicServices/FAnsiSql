@@ -57,6 +57,6 @@ namespace FAnsi.Discovery
         /// <param name="cascadeDeletes"></param>
         /// <param name="constraintName">The name to give the foreign key constraint created, if null then a default name will be picked e.g. FK_Tbl1_Tbl2</param>
         /// <returns></returns>
-        DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes,string constraintName =null);
+        DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args, Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes,string constraintName =null);
     }
 }

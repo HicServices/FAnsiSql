@@ -182,7 +182,7 @@ namespace FAnsi.Discovery
         }
 
         /// <inheritdoc/>
-        public virtual DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string constraintName = null)
+        public virtual DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args,Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string constraintName = null)
         {
             var foreignTables = foreignKeyPairs.Select(c => c.Key.Table).Distinct().ToArray();
             var primaryTables= foreignKeyPairs.Select(c => c.Value.Table).Distinct().ToArray();
@@ -204,13 +204,11 @@ namespace FAnsi.Discovery
             string sql = $@"ALTER TABLE {foreign.GetFullyQualifiedName()}
                 ADD " + constraintBit;
 
-            using (var con = primary.Database.Server.GetConnection())
+            using (var con = args.GetManagedConnection(primary))
             {
-                con.Open();
-
                 try
                 {
-                    primary.Database.Server.GetCommand(sql, con).ExecuteNonQuery();
+                    args.ExecuteNonQuery(primary.Database.Server.GetCommand(sql, con));
                 }
                 catch (Exception e)
                 {
@@ -218,7 +216,7 @@ namespace FAnsi.Discovery
                 }
             }
 
-            return primary.DiscoverRelationships().Single(
+            return primary.DiscoverRelationships(args.TransactionIfAny).Single(
                 r =>r.Name.Equals(constraintName,StringComparison.CurrentCultureIgnoreCase)
             );
         }
