@@ -173,12 +173,16 @@ namespace FAnsi.Discovery
 
         public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null);
 
-        public virtual void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection, DbTransaction transaction = null)
+        public virtual void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt)
         {
             string sql = GetTopXSqlForTable(table, topX);
 
-            var da = table.Database.Server.GetDataAdapter(sql, connection);
-            da.Fill(dt);
+            using (var con = args.GetManagedConnection(table))
+            {
+                var cmd = table.Database.Server.GetCommand(sql, con);
+                var da = table.Database.Server.GetDataAdapter(cmd);
+                args.Fill(da,cmd, dt);
+            }
         }
 
         /// <inheritdoc/>

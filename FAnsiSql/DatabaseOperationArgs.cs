@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Text;
 using System.Threading;
@@ -29,6 +30,17 @@ namespace FAnsi
         /// </summary>
         public CancellationToken CancellationToken =  default(CancellationToken);
 
+        public DatabaseOperationArgs()
+        {
+            
+        }
+        public DatabaseOperationArgs(IManagedTransaction transactionIfAny, in CancellationToken cancellationToken, int timeoutInSeconds)
+        {
+            TransactionIfAny = transactionIfAny;
+            CancellationToken = cancellationToken;
+            TimeoutInSeconds = timeoutInSeconds;
+        }
+
         /// <summary>
         /// Sets the timeout and cancellation on <paramref name="cmd"/> then runs <see cref="DbCommand.ExecuteNonQueryAsync()"/> with the
         /// <see cref="CancellationToken"/> (if any) and blocks till the call completes.
@@ -38,9 +50,7 @@ namespace FAnsi
         /// <exception cref="OperationCanceledException"></exception>
         public int ExecuteNonQuery(DbCommand cmd)
         {
-            cmd.CommandTimeout = TimeoutInSeconds;
-            CancellationToken.ThrowIfCancellationRequested();
-            
+            Hydrate(cmd);
             var t = cmd.ExecuteNonQueryAsync(CancellationToken);
             
             try
@@ -72,6 +82,30 @@ namespace FAnsi
                     throw t.Exception;
 
             return t.Result;
+        }
+        
+        public void Fill(DbDataAdapter da, DbCommand cmd, DataTable dt)
+        {
+            Hydrate(cmd);
+
+            CancellationToken.ThrowIfCancellationRequested();
+
+            if(CancellationToken.CanBeCanceled)
+                dt.RowChanged += ThrowIfCancelled;  
+
+            da.Fill(dt);
+            CancellationToken.ThrowIfCancellationRequested();
+        }
+
+        private void ThrowIfCancelled(object sender, DataRowChangeEventArgs e)
+        {
+            CancellationToken.ThrowIfCancellationRequested();
+        }
+
+        private void Hydrate(DbCommand cmd)
+        {
+            cmd.CommandTimeout = TimeoutInSeconds;
+            CancellationToken.ThrowIfCancellationRequested();
         }
 
         /// <summary>

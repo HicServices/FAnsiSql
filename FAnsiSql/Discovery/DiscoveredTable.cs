@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -171,18 +172,22 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public virtual DataTable GetDataTable(int topX = int.MaxValue,bool enforceTypesAndNullness = true, IManagedTransaction transaction = null)
         {
+            return  GetDataTable(new DatabaseOperationArgs(){TransactionIfAny = transaction},topX,enforceTypesAndNullness);
+        }
+
+        public virtual DataTable GetDataTable(DatabaseOperationArgs args,int topX = int.MaxValue, bool enforceTypesAndNullness = true)
+        {
             var dt = new DataTable();
             
             if (enforceTypesAndNullness)
-                foreach (DiscoveredColumn c in DiscoverColumns(transaction))
+                foreach (DiscoveredColumn c in DiscoverColumns(args.TransactionIfAny))
                 {
                     var col = dt.Columns.Add(c.GetRuntimeName());
                     col.AllowDBNull = c.AllowNulls;
                     col.DataType = c.DataType.GetCSharpDataType();
                 }
 
-            using(var con = Database.Server.GetManagedConnection(transaction))
-                Helper.FillDataTableWithTopX(this,topX,dt,con.Connection,con.Transaction);
+            Helper.FillDataTableWithTopX(args,this,topX,dt);
 
             return dt;
         }

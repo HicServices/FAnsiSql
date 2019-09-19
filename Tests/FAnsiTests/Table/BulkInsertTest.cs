@@ -453,6 +453,17 @@ namespace FAnsiTests.Table
                     Console.WriteLine("MySql error was:" + ex.InnerException);
             }
 
+            //Now lets test cancelling GetDataTable
+            using (var con = tbl.Database.Server.BeginNewTransactedConnection())
+            {
+                //give it 100 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
+                cts = new CancellationTokenSource(300);
+
+                //GetDataTable should have been cancelled at the database level
+                var ex = Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,cts.Token,50000)));
+                tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default,50000));
+            }
+
             
             //and there should not be any primary keys
             Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
