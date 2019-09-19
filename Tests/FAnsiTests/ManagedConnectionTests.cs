@@ -183,5 +183,41 @@ namespace FAnsiTests
                 ongoingCon.ManagedTransaction.CommitAndCloseConnection();
             }
         }
+
+        /// <summary>
+        /// Tests that a managed connection is automatically opened and closed in dispose when starting
+        /// a new transaction
+        /// </summary>
+        /// <param name="dbType"></param>
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.Oracle)]
+        public void Test_Clone_AutoOpenClose(DatabaseType dbType)
+        {
+            var db = GetTestDatabase(dbType);
+
+            IManagedConnection con;
+            using (con = db.Server.BeginNewTransactedConnection())
+            {
+                //GetManagedConnection should open itself
+                Assert.AreEqual(ConnectionState.Open,con.Connection.State);
+
+                using (var clone = con.Clone())
+                {
+                    clone.CloseOnDispose = false;
+                    //GetManagedConnection should open itself
+                    Assert.AreEqual(ConnectionState.Open,clone.Connection.State);
+
+                    Assert.IsTrue(clone.Connection == con.Connection);
+                }
+
+                //GetManagedConnection should not have closed because we told the clone not to
+                Assert.AreEqual(ConnectionState.Open,con.Connection.State);
+
+            } //now disposing the non clone
+            
+            //finally should close it
+            Assert.AreEqual(ConnectionState.Closed,con.Connection.State);
+        }
     }
 }

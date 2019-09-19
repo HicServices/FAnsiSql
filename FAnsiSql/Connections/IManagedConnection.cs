@@ -29,5 +29,12 @@ namespace FAnsi.Connections
         /// to true otherwise it will default to false.
         /// </summary>
         bool CloseOnDispose { get; set; }
+
+        /// <summary>
+        /// Creates a new shallow copy instance of the <see cref="IManagedConnection"/>.  This will point to the same
+        /// underlying <see cref="DbConnection"/> and <see cref="DbTransaction"/> (if any).
+        /// </summary>
+        /// <returns></returns>
+        ManagedConnection Clone();
     }
 }

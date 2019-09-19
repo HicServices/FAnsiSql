@@ -39,6 +39,11 @@ namespace FAnsi.Connections
             }
         }
 
+        public ManagedConnection Clone()
+        {
+            return (ManagedConnection) MemberwiseClone();
+        }
+
         /// <summary>
         /// Closes and disposes the DbConnection unless this class is part of an <see cref="IManagedTransaction"/>
         /// </summary>
