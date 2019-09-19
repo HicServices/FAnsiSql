@@ -50,8 +50,24 @@ namespace FAnsi
         /// <exception cref="OperationCanceledException"></exception>
         public int ExecuteNonQuery(DbCommand cmd)
         {
+            return Execute<int>(cmd, ()=>cmd.ExecuteNonQueryAsync(CancellationToken));
+        }
+        /// <summary>
+        /// Sets the timeout and cancellation on <paramref name="cmd"/> then runs <see cref="DbCommand.ExecuteScalar()"/> with the
+        /// <see cref="CancellationToken"/> (if any) and blocks till the call completes.
+        /// 
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <exception cref="OperationCanceledException"></exception>
+        public object ExecuteScalar(DbCommand cmd)
+        {
+            return Execute<object>(cmd, ()=>cmd.ExecuteScalarAsync(CancellationToken));
+        }
+
+        private T Execute<T>(DbCommand cmd, Func<Task<T>> method)
+        {
             Hydrate(cmd);
-            var t = cmd.ExecuteNonQueryAsync(CancellationToken);
+            var t = method();
             
             try
             {

@@ -203,16 +203,20 @@ namespace FAnsi.Discovery
             }
         }
 
+        public int GetRowCount(IManagedTransaction transaction = null)
+        {
+            return GetRowCount(new DatabaseOperationArgs(){ TransactionIfAny = transaction});
+        }
+
         /// <summary>
         /// Returns the estimated number of rows in the table.  This may use a short cut e.g. consulting sys.partitions in Sql
         /// Server (https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-partitions-transact-sql?view=sql-server-2017)
         /// </summary>
         /// <param name="transaction">Optional - if set the query will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
         /// <returns></returns>
-        public int GetRowCount(IManagedTransaction transaction = null)
+        public int GetRowCount(DatabaseOperationArgs args)
         {
-            using (IManagedConnection connection = Database.Server.GetManagedConnection(transaction))
-                return Helper.GetRowCount(connection.Connection, this, connection.Transaction);
+            return Helper.GetRowCount(args, this);
         }
         
         /// <summary>
@@ -222,8 +226,17 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public bool IsEmpty(IManagedTransaction transaction = null)
         {
-            using (IManagedConnection connection = Database.Server.GetManagedConnection(transaction))
-                return Helper.IsEmpty(connection.Connection, this, connection.Transaction);
+            return IsEmpty(new DatabaseOperationArgs() {TransactionIfAny = transaction});
+        }
+
+        /// <summary>
+        /// Returns true if there are no rows in the table
+        /// </summary>
+        /// <param name="transaction">Optional - if set the query will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
+        /// <returns></returns>
+        public bool IsEmpty(DatabaseOperationArgs args)
+        {
+            return Helper.IsEmpty(args,this);
         }
 
         /// <summary>
@@ -317,7 +330,16 @@ namespace FAnsi.Discovery
         /// <param name="timeoutInSeconds">The length of time to allow for the command to complete (See <see cref="DbCommand.CommandTimeout"/>)</param>
         public void MakeDistinct(int timeoutInSeconds=30)
         {
-            Helper.MakeDistinct(this,timeoutInSeconds);
+            MakeDistinct(new DatabaseOperationArgs(){TimeoutInSeconds = timeoutInSeconds});
+        }
+
+        /// <summary>
+        /// Deletes all EXACT duplicate rows from the table leaving only unique records.  This is method may not be transaction/threadsafe
+        /// </summary>
+        /// <param name="timeoutInSeconds">The length of time to allow for the command to complete (See <see cref="DbCommand.CommandTimeout"/>)</param>
+        public void MakeDistinct(DatabaseOperationArgs args)
+        {
+            Helper.MakeDistinct(args,this);
         }
 
 

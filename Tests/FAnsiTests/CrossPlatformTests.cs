@@ -609,11 +609,11 @@ namespace FAnsiTests
             Assert.AreEqual(stringBefore, database1.Server.Builder.ConnectionString);
         }
 
-
-        [Test]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        public void TestDistincting(DatabaseType type)
+        [TestCase(DatabaseType.MySql,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        public void TestDistincting(DatabaseType type,bool useTransaction)
         {
             var database = GetTestDatabase(type);
 
@@ -645,7 +645,16 @@ namespace FAnsiTests
 
             Assert.AreEqual(7, tbl.GetRowCount());
 
-            tbl.MakeDistinct();
+            if(useTransaction)
+            {
+                using (var con = tbl.Database.Server.BeginNewTransactedConnection())
+                {
+                    tbl.MakeDistinct(new DatabaseOperationArgs(){TransactionIfAny = con.ManagedTransaction});
+                    con.ManagedTransaction.CommitAndCloseConnection();
+                }
+            }
+            else
+                tbl.MakeDistinct();
 
             Assert.AreEqual(3, tbl.GetRowCount());
             Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Count());

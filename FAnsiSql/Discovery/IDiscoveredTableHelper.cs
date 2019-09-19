@@ -27,18 +27,18 @@ namespace FAnsi.Discovery
 
         void AddColumn(DatabaseOperationArgs args,DiscoveredTable table, string name, string dataType, bool allowNulls);
 
-        int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null);
+        int GetRowCount(DatabaseOperationArgs args, DiscoveredTable table);
 
         DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
 
         IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture);
         
         void TruncateTable(DiscoveredTable discoveredTable);
-        void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds);
+        void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable);
 
         /// <inheritdoc cref="DiscoveredTable.ScriptTableCreation"/>
         string ScriptTableCreation(DiscoveredTable constraints, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable toCreateTable = null);
-        bool IsEmpty(DbConnection connection, DiscoveredTable discoveredTable, DbTransaction transaction);
+        bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable);
         void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection);
         void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable columns, DiscoveredColumn[] discoverColumns);
         int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null);

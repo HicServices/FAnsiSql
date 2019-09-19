@@ -120,13 +120,6 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             var cmd = new OracleCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + "  DROP COLUMN " + columnToDrop.GetRuntimeName(), (OracleConnection)connection);
             cmd.ExecuteNonQuery();
         }
-
-        public override int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null)
-        {
-            var cmd = new OracleCommand("select count(*) from " + table.GetFullyQualifiedName(), (OracleConnection) connection);
-            cmd.Transaction = dbTransaction as OracleTransaction;
-            return Convert.ToInt32(cmd.ExecuteScalar());
-        }
         
         private string GetBasicTypeFromOracleType(DbDataReader r)
         {

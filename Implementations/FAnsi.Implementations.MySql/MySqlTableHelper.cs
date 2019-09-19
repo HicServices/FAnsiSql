@@ -114,12 +114,6 @@ WHERE table_schema = @db
             cmd.ExecuteNonQuery();
         }
 
-        public override int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null)
-        {
-            var cmd = new MySqlCommand("select count(*) from " + table.GetFullyQualifiedName(),(MySqlConnection) connection);
-            cmd.Transaction = dbTransaction as MySqlTransaction;
-            return Convert.ToInt32(cmd.ExecuteScalar());
-        }
 
         public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,
             DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)

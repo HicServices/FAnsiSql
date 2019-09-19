@@ -53,7 +53,14 @@ namespace FAnsi.Discovery
             }
         }
 
-        public abstract int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null);
+        public virtual int GetRowCount(DatabaseOperationArgs args, DiscoveredTable table)
+        {
+            using (IManagedConnection connection = args.GetManagedConnection(table))
+            {
+                var cmd  = table.Database.Server.GetCommand("SELECT count(*) FROM " + table.GetFullyQualifiedName(), connection);
+                return Convert.ToInt32(args.ExecuteScalar(cmd));
+            }
+        }
 
         public abstract DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
 
@@ -120,9 +127,9 @@ namespace FAnsi.Discovery
             return table.Database.Helper.GetCreateTableSql(destinationTable.Database, destinationTable.GetRuntimeName(), columns.ToArray(), null, false, schema);
         }
 
-        public virtual bool IsEmpty(DbConnection connection, DiscoveredTable discoveredTable, DbTransaction transaction)
+        public virtual bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable)
         {
-            return GetRowCount(connection, discoveredTable, transaction) == 0;
+            return GetRowCount(args, discoveredTable) == 0;
         }
 
         public virtual void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection)
@@ -227,7 +234,7 @@ namespace FAnsi.Discovery
 
         protected abstract string GetRenameTableSql(DiscoveredTable discoveredTable, string newName);
 
-        public virtual void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds)
+        public virtual void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)
         {
             var server = discoveredTable.Database.Server;
 
@@ -238,33 +245,30 @@ namespace FAnsi.Discovery
             var tableName = discoveredTable.GetFullyQualifiedName();
             var tempTable = discoveredTable.Database.ExpectTable(discoveredTable.GetRuntimeName() + "_DistinctingTemp").GetFullyQualifiedName();
 
-            using (var con = server.BeginNewTransactedConnection())
+
+            using (var con = args.TransactionIfAny  == null ? 
+                server.BeginNewTransactedConnection():  //start a new transaction
+                args.GetManagedConnection(server))      //or continue the ongoing transaction
             {
-                try
-                {
-                    var cmdDistinct = server.GetCommand(string.Format("CREATE TABLE {1} AS SELECT distinct * FROM {0}", tableName, tempTable), con);
-                    cmdDistinct.CommandTimeout = timeoutInSeconds;
-                    cmdDistinct.ExecuteNonQuery();
+                var cmdDistinct = server.GetCommand(string.Format("CREATE TABLE {1} AS SELECT distinct * FROM {0}", tableName, tempTable), con);
+                args.ExecuteNonQuery(cmdDistinct);
 
-                    var cmdTruncate = server.GetCommand(string.Format("DELETE FROM {0}", tableName), con);
-                    cmdTruncate.CommandTimeout = timeoutInSeconds;
-                    cmdTruncate.ExecuteNonQuery();
+                //this is the point of no return so don't cancel after this point
+                var cmdTruncate = server.GetCommand(string.Format("DELETE FROM {0}", tableName), con);
+                cmdTruncate.CommandTimeout = args.TimeoutInSeconds;
+                cmdTruncate.ExecuteNonQuery();
 
-                    var cmdBack = server.GetCommand(string.Format("INSERT INTO {0} (SELECT * FROM {1})", tableName, tempTable), con);
-                    cmdBack.CommandTimeout = timeoutInSeconds;
-                    cmdBack.ExecuteNonQuery();
+                var cmdBack = server.GetCommand(string.Format("INSERT INTO {0} (SELECT * FROM {1})", tableName, tempTable), con);
+                cmdBack.CommandTimeout = args.TimeoutInSeconds;
+                cmdBack.ExecuteNonQuery();
 
-                    var cmdDropDistinctTable = server.GetCommand(string.Format("DROP TABLE {0}", tempTable), con);
-                    cmdDropDistinctTable.CommandTimeout = timeoutInSeconds;
-                    cmdDropDistinctTable.ExecuteNonQuery();
+                var cmdDropDistinctTable = server.GetCommand(string.Format("DROP TABLE {0}", tempTable), con);
+                cmdDropDistinctTable.CommandTimeout = args.TimeoutInSeconds;
+                cmdDropDistinctTable.ExecuteNonQuery();
 
-                    con.ManagedTransaction.CommitAndCloseConnection();
-                }
-                catch (Exception)
-                {
-                    con.ManagedTransaction.AbandonAndCloseConnection();
-                    throw;
-                }
+                //if we opened a new transaction we should commit it
+                if(args.TransactionIfAny == null)
+                    con.ManagedTransaction?.CommitAndCloseConnection();
             }
         }
 

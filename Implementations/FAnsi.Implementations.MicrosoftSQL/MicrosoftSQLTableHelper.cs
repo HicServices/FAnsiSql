@@ -137,11 +137,6 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
             cmd.ExecuteNonQuery();
         }
 
-        public override int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null)
-        {
-            SqlCommand cmdCount = new SqlCommand(@"select count(*) from "+table.GetFullyQualifiedName(), (SqlConnection) connection,(SqlTransaction)dbTransaction);
-            return Convert.ToInt32(cmdCount.ExecuteScalar());
-        }
         
         public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
         {
@@ -305,7 +300,7 @@ https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedur
             return string.Format("exec sp_rename '{0}', '{1}'", oldName, newName);
         }
 
-        public override void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds)
+        public override void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)
         {
             string sql = 
             @"DELETE f
@@ -322,12 +317,10 @@ https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedur
 
             var server = discoveredTable.Database.Server;
 
-            using (var con = server.GetConnection())
+            using (var con = args.GetManagedConnection(server))
             {
-                con.Open();
                 var cmd = server.GetCommand(sqlToExecute, con);
-                cmd.CommandTimeout = timeoutInSeconds;
-                cmd.ExecuteNonQuery();
+                args.ExecuteNonQuery(cmd);
             }
         }
 
