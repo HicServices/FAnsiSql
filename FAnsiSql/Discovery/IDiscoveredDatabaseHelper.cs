@@ -62,5 +62,14 @@ namespace FAnsi.Discovery
         /// </summary>
         /// <param name="dt"></param>
         void ThrowIfObjectColumns(DataTable dt);
+
+        /// <summary>
+        /// Creates a new schema within the database if the DBMS supports it (Sql Server does, MySql doesn't) and it does not already exist.  Schema
+        /// is a layer below server and database but above table it groups tables within a single database.
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        void CreateSchema(DiscoveredDatabase discoveredDatabase, string name);
     }
 }

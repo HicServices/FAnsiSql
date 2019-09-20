@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Task cancellation support for various long running operations (e.g. CreatePrimaryKey)
+- Added Schema creation method to `DiscoveredDatabase`
 
 ### Changed
 

@@ -1,7 +1,9 @@
-﻿using FAnsi;
+﻿using System.Data;
+using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Implementation;
 using NUnit.Framework;
+using TypeGuesser;
 
 namespace FAnsiTests.Database
 {
@@ -27,5 +29,27 @@ namespace FAnsiTests.Database
             var db = server.ExpectDatabase("omg");
             Assert.AreEqual(upperCase?"OMG":"omg",db.GetRuntimeName());
         }
+
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
+        public void Test_CreateSchema(DatabaseType type)
+        {
+            var db = GetTestDatabase(type);
+
+            Assert.DoesNotThrow(()=>db.CreateSchema("Frank"));
+
+            if (type == DatabaseType.MicrosoftSQLServer)
+            {
+                var tbl = db.CreateTable("Heyyy",
+                    new[] {new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))},"Frank");
+
+                Assert.IsTrue(tbl.Exists());
+
+                if(type == DatabaseType.MicrosoftSQLServer)
+                    Assert.AreEqual("Frank",tbl.Schema);
+            }
+        }
+
     }
 }

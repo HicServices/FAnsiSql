@@ -215,5 +215,19 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
                 cmd.ExecuteNonQuery();
             }
         }
+
+        public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
+        {
+            using (var con = discoveredDatabase.Server.GetConnection())
+            {
+                con.Open();
+
+                string sql = $@"if not exists (select 1 from sys.schemas where name = '{name}')
+	    EXEC('CREATE SCHEMA {name}')";
+
+                var cmd = discoveredDatabase.Server.GetCommand(sql, con);
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }
