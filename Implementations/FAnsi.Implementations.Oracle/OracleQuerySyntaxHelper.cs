@@ -42,7 +42,7 @@ namespace FAnsi.Implementations.Oracle
         {
             //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
             if (!string.IsNullOrWhiteSpace(schema))
-                throw new NotSupportedException("Schema (e.g. .dbo. not supported by MySql)");
+                throw new NotSupportedException("Schema (e.g. .dbo. not supported by Oracle)");
 
             return '"' + GetRuntimeName(databaseName) + '"' + DatabaseTableSeparator + '"' + GetRuntimeName(tableName) + '"';
         }

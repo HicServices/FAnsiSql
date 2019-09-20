@@ -18,11 +18,17 @@ namespace FAnsi.Connections
             Transaction = transaction;
         }
 
+        private bool closed = false;
+
         /// <summary>
         /// Attempts to rollback the DbTransaction (swallowing any Exception) and closes/disposes the DbConnection
         /// </summary>
         public void AbandonAndCloseConnection()
         {
+            if(closed)
+                return;
+            closed = true;
+
             try
             {
                 Transaction.Rollback();
@@ -42,6 +48,9 @@ namespace FAnsi.Connections
         /// </summary>
         public void CommitAndCloseConnection()
         {
+            if(closed)
+                return;
+            closed = true;
 
             try
             {

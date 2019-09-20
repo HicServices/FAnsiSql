@@ -99,6 +99,12 @@ namespace FAnsi.Implementations.Oracle
             return new Guesser(request)
                 {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
         }
+
+        public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
+        {
+            //Oracle doesn't really have schemas especially since a User is a Database
+        }
+
         protected override Guesser GetGuesser(DataColumn column)
         {
             return new Guesser {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};

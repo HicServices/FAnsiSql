@@ -120,13 +120,6 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             var cmd = new OracleCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + "  DROP COLUMN " + columnToDrop.GetRuntimeName(), (OracleConnection)connection);
             cmd.ExecuteNonQuery();
         }
-
-        public override int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null)
-        {
-            var cmd = new OracleCommand("select count(*) from " + table.GetFullyQualifiedName(), (OracleConnection) connection);
-            cmd.Transaction = dbTransaction as OracleTransaction;
-            return Convert.ToInt32(cmd.ExecuteScalar());
-        }
         
         private string GetBasicTypeFromOracleType(DbDataReader r)
         {
@@ -307,16 +300,21 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
             return toReturn.Values.ToArray();
         }
 
-        public override void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection,DbTransaction transaction = null)
+        public override void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt)
         {
-            ((OracleConnection)connection).PurgeStatementCache();
+            using (var con = args.GetManagedConnection(table))
+            {
+                ((OracleConnection)con.Connection).PurgeStatementCache();
 
-            var cols = table.DiscoverColumns();
+                var cols = table.DiscoverColumns();
 
-            string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY" ;
+                //apparently * doesn't fly with Oracle DataAdapter
+                string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY" ;
 
-            var da = table.Database.Server.GetDataAdapter(sql, connection);
-            da.Fill(dt);
+                var cmd = table.Database.Server.GetCommand(sql, con);
+                var da = table.Database.Server.GetDataAdapter(cmd);
+                args.Fill(da,cmd, dt);
+            }
         }
 
 

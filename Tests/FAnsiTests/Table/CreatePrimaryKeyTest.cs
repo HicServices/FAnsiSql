@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
+using System.Data.Common;
 using FAnsi;
 using FAnsi.Exceptions;
 using NUnit.Framework;
@@ -67,6 +69,8 @@ namespace FAnsiTests.Table
 
             var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(new []{colA,colB}));
             Assert.IsTrue(ex.Message.Contains("Failed to create primary key on table"));
+            Assert.IsNotInstanceOf(typeof(AggregateException), ex.InnerException);
+            Assert.IsInstanceOf<DbException>(ex.InnerException);
 
             colA = tbl.DiscoverColumn("A");
             colB = tbl.DiscoverColumn("B");

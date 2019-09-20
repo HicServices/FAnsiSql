@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using FAnsi.Connections;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Discovery.QuerySyntax;
@@ -170,18 +172,22 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public virtual DataTable GetDataTable(int topX = int.MaxValue,bool enforceTypesAndNullness = true, IManagedTransaction transaction = null)
         {
+            return  GetDataTable(new DatabaseOperationArgs(){TransactionIfAny = transaction},topX,enforceTypesAndNullness);
+        }
+
+        public virtual DataTable GetDataTable(DatabaseOperationArgs args,int topX = int.MaxValue, bool enforceTypesAndNullness = true)
+        {
             var dt = new DataTable();
             
             if (enforceTypesAndNullness)
-                foreach (DiscoveredColumn c in DiscoverColumns(transaction))
+                foreach (DiscoveredColumn c in DiscoverColumns(args.TransactionIfAny))
                 {
                     var col = dt.Columns.Add(c.GetRuntimeName());
                     col.AllowDBNull = c.AllowNulls;
                     col.DataType = c.DataType.GetCSharpDataType();
                 }
 
-            using(var con = Database.Server.GetManagedConnection(transaction))
-                Helper.FillDataTableWithTopX(this,topX,dt,con.Connection,con.Transaction);
+            Helper.FillDataTableWithTopX(args,this,topX,dt);
 
             return dt;
         }
@@ -197,16 +203,20 @@ namespace FAnsi.Discovery
             }
         }
 
+        public int GetRowCount(IManagedTransaction transaction = null)
+        {
+            return GetRowCount(new DatabaseOperationArgs(){ TransactionIfAny = transaction});
+        }
+
         /// <summary>
         /// Returns the estimated number of rows in the table.  This may use a short cut e.g. consulting sys.partitions in Sql
         /// Server (https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-partitions-transact-sql?view=sql-server-2017)
         /// </summary>
         /// <param name="transaction">Optional - if set the query will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
         /// <returns></returns>
-        public int GetRowCount(IManagedTransaction transaction = null)
+        public int GetRowCount(DatabaseOperationArgs args)
         {
-            using (IManagedConnection connection = Database.Server.GetManagedConnection(transaction))
-                return Helper.GetRowCount(connection.Connection, this, connection.Transaction);
+            return Helper.GetRowCount(args, this);
         }
         
         /// <summary>
@@ -216,8 +226,17 @@ namespace FAnsi.Discovery
         /// <returns></returns>
         public bool IsEmpty(IManagedTransaction transaction = null)
         {
-            using (IManagedConnection connection = Database.Server.GetManagedConnection(transaction))
-                return Helper.IsEmpty(connection.Connection, this, connection.Transaction);
+            return IsEmpty(new DatabaseOperationArgs() {TransactionIfAny = transaction});
+        }
+
+        /// <summary>
+        /// Returns true if there are no rows in the table
+        /// </summary>
+        /// <param name="transaction">Optional - if set the query will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
+        /// <returns></returns>
+        public bool IsEmpty(DatabaseOperationArgs args)
+        {
+            return Helper.IsEmpty(args,this);
         }
 
         /// <summary>
@@ -229,9 +248,19 @@ namespace FAnsi.Discovery
         /// <param name="timeoutInSeconds">The length of time to wait in seconds before giving up (See <see cref="DbCommand.CommandTimeout"/>)</param>
         public void AddColumn(string name, DatabaseTypeRequest type,bool allowNulls,int timeoutInSeconds)
         {
-            AddColumn(name, Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(type), allowNulls, timeoutInSeconds);
+            AddColumn(name, type, allowNulls, new DatabaseOperationArgs {TimeoutInSeconds = timeoutInSeconds});
         }
-
+        
+        /// <summary>
+        /// Creates and runs an ALTER TABLE SQL statement that adds a new column to the table
+        /// </summary>
+        /// <param name="name">The unqualified name for the new column e.g. "MyCol2"</param>
+        /// <param name="type">The data type for the new column</param>
+        /// <param name="allowNulls">True to allow null</param>
+        public void AddColumn(string name, DatabaseTypeRequest type, bool allowNulls, DatabaseOperationArgs args)
+        {
+            AddColumn(name, Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(type), allowNulls, args);
+        }
 
         /// <summary>
         /// Creates and runs an ALTER TABLE SQL statement that adds a new column to the table
@@ -242,10 +271,12 @@ namespace FAnsi.Discovery
         /// <param name="timeoutInSeconds">The length of time to wait in seconds before giving up (See <see cref="DbCommand.CommandTimeout"/>)</param>
         public void AddColumn(string name, string databaseType, bool allowNulls, int timeoutInSeconds)
         {
-            using (IManagedConnection connection = Database.Server.GetManagedConnection())
-            {
-                Helper.AddColumn(this, connection.Connection, name, databaseType, allowNulls, timeoutInSeconds);
-            }
+            AddColumn(name,databaseType,allowNulls,new DatabaseOperationArgs{TimeoutInSeconds = timeoutInSeconds});
+        }
+
+        public void AddColumn(string name, string databaseType, bool allowNulls, DatabaseOperationArgs args)
+        {
+            Helper.AddColumn(args,this, name, databaseType, allowNulls);
         }
 
         /// <summary>
@@ -299,7 +330,16 @@ namespace FAnsi.Discovery
         /// <param name="timeoutInSeconds">The length of time to allow for the command to complete (See <see cref="DbCommand.CommandTimeout"/>)</param>
         public void MakeDistinct(int timeoutInSeconds=30)
         {
-            Helper.MakeDistinct(this,timeoutInSeconds);
+            MakeDistinct(new DatabaseOperationArgs(){TimeoutInSeconds = timeoutInSeconds});
+        }
+
+        /// <summary>
+        /// Deletes all EXACT duplicate rows from the table leaving only unique records.  This is method may not be transaction/threadsafe
+        /// </summary>
+        /// <param name="timeoutInSeconds">The length of time to allow for the command to complete (See <see cref="DbCommand.CommandTimeout"/>)</param>
+        public void MakeDistinct(DatabaseOperationArgs args)
+        {
+            Helper.MakeDistinct(args,this);
         }
 
 
@@ -339,7 +379,7 @@ namespace FAnsi.Discovery
         /// <param name="discoverColumns">Columns that should become part of the primary key</param>
         public void CreatePrimaryKey(params DiscoveredColumn[] discoverColumns)
         {
-            CreatePrimaryKey(0, discoverColumns);
+            CreatePrimaryKey(new DatabaseOperationArgs(), discoverColumns);
         }
 
         /// <summary>
@@ -349,8 +389,29 @@ namespace FAnsi.Discovery
         /// <param name="discoverColumns">Columns that should become part of the primary key</param>
         public void CreatePrimaryKey(int timeoutInSeconds, params DiscoveredColumn[] discoverColumns)
         {
-            using (var connection = Database.Server.GetManagedConnection())
-                Helper.CreatePrimaryKey(this, discoverColumns, connection, timeoutInSeconds);
+            CreatePrimaryKey(new DatabaseOperationArgs(){TimeoutInSeconds = timeoutInSeconds}, discoverColumns);
+        }
+
+        /// <summary>
+        /// Creates a primary key on the table if none exists yet
+        /// </summary>
+        /// <param name="transaction">Optional ongoing transaction to use (leave null if not needed)</param>
+        /// <param name="token">Token for cancelling the command mid execution (leave null if not needed)</param>
+        /// <param name="timeoutInSeconds">The number of seconds to wait for the operation to complete</param>
+        /// <param name="discoverColumns">Columns that should become part of the primary key</param>
+        public void CreatePrimaryKey(IManagedTransaction transaction ,CancellationToken token, int timeoutInSeconds, params DiscoveredColumn[] discoverColumns)
+        {
+            Helper.CreatePrimaryKey(new DatabaseOperationArgs{
+                TransactionIfAny = transaction,
+                CancellationToken = token,
+                TimeoutInSeconds = timeoutInSeconds
+            }, this, discoverColumns);
+        }
+
+        
+        public void CreatePrimaryKey(DatabaseOperationArgs args, params DiscoveredColumn[] discoverColumns)
+        {
+            Helper.CreatePrimaryKey(args,this, discoverColumns);
         }
 
         /// <summary>
@@ -505,9 +566,9 @@ namespace FAnsi.Discovery
             }
         }
 
-        public DiscoveredRelationship AddForeignKey(DiscoveredColumn foreignKey, DiscoveredColumn primaryKey, bool cascadeDeletes,string constraintName = null)
+        public DiscoveredRelationship AddForeignKey(DiscoveredColumn foreignKey, DiscoveredColumn primaryKey, bool cascadeDeletes,string constraintName = null, DatabaseOperationArgs args = null)
         {
-            return AddForeignKey(new Dictionary<DiscoveredColumn,DiscoveredColumn>{{foreignKey,primaryKey}},cascadeDeletes,constraintName);
+            return AddForeignKey(new Dictionary<DiscoveredColumn,DiscoveredColumn>{{foreignKey,primaryKey}},cascadeDeletes,constraintName,args);
         }
 
         /// <summary>
@@ -519,9 +580,10 @@ namespace FAnsi.Discovery
         /// <param name="cascadeDeletes"></param>
         /// <returns></returns>
         public DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs,
-            bool cascadeDeletes,string constraintName = null)
+            bool cascadeDeletes,string constraintName = null, DatabaseOperationArgs args = null)
         {
-            return Helper.AddForeignKey(foreignKeyPairs, cascadeDeletes,constraintName);
+            return Helper.AddForeignKey(args??new DatabaseOperationArgs(),foreignKeyPairs, cascadeDeletes,constraintName);
         }
+
     }
 }

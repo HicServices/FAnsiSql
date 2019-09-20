@@ -25,25 +25,25 @@ namespace FAnsi.Discovery
         void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
         void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
 
-        void AddColumn(DiscoveredTable table, DbConnection connection, string name, string dataType, bool allowNulls, int timeoutInSeconds);
+        void AddColumn(DatabaseOperationArgs args,DiscoveredTable table, string name, string dataType, bool allowNulls);
 
-        int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null);
+        int GetRowCount(DatabaseOperationArgs args, DiscoveredTable table);
 
         DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
 
         IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture);
         
         void TruncateTable(DiscoveredTable discoveredTable);
-        void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds);
+        void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable);
 
         /// <inheritdoc cref="DiscoveredTable.ScriptTableCreation"/>
         string ScriptTableCreation(DiscoveredTable constraints, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable toCreateTable = null);
-        bool IsEmpty(DbConnection connection, DiscoveredTable discoveredTable, DbTransaction transaction);
+        bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable);
         void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection);
-        void CreatePrimaryKey(DiscoveredTable columns, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0);
+        void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable columns, DiscoveredColumn[] discoverColumns);
         int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null);
         DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction transaction = null);
-        void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection, DbTransaction transaction = null);
+        void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt);
         
         
         /// <summary>
@@ -57,6 +57,6 @@ namespace FAnsi.Discovery
         /// <param name="cascadeDeletes"></param>
         /// <param name="constraintName">The name to give the foreign key constraint created, if null then a default name will be picked e.g. FK_Tbl1_Tbl2</param>
         /// <returns></returns>
-        DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes,string constraintName =null);
+        DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args, Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes,string constraintName =null);
     }
 }

@@ -44,14 +44,23 @@ namespace FAnsi.Discovery
         public abstract void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
         public abstract void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
 
-        public virtual void AddColumn(DiscoveredTable table, DbConnection connection, string name, string dataType, bool allowNulls, int timeoutInSeconds)
+        public virtual void AddColumn(DatabaseOperationArgs args,DiscoveredTable table, string name, string dataType, bool allowNulls)
         {
-            var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + name + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"), connection);
-            cmd.CommandTimeout = timeoutInSeconds;
-            cmd.ExecuteNonQuery();
+            using (var con = args.GetManagedConnection(table))
+            {
+                var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + name + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"),con);
+                args.ExecuteNonQuery(cmd);
+            }
         }
 
-        public abstract int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null);
+        public virtual int GetRowCount(DatabaseOperationArgs args, DiscoveredTable table)
+        {
+            using (IManagedConnection connection = args.GetManagedConnection(table))
+            {
+                var cmd  = table.Database.Server.GetCommand("SELECT count(*) FROM " + table.GetFullyQualifiedName(), connection);
+                return Convert.ToInt32(args.ExecuteScalar(cmd));
+            }
+        }
 
         public abstract DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
 
@@ -118,9 +127,9 @@ namespace FAnsi.Discovery
             return table.Database.Helper.GetCreateTableSql(destinationTable.Database, destinationTable.GetRuntimeName(), columns.ToArray(), null, false, schema);
         }
 
-        public virtual bool IsEmpty(DbConnection connection, DiscoveredTable discoveredTable, DbTransaction transaction)
+        public virtual bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable)
         {
-            return GetRowCount(connection, discoveredTable, transaction) == 0;
+            return GetRowCount(args, discoveredTable) == 0;
         }
 
         public virtual void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection)
@@ -134,23 +143,27 @@ namespace FAnsi.Discovery
             cmd.ExecuteNonQuery();
         }
 
-        public virtual void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0)
+        public virtual void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
         {
-            try{
+            using (var connection = args.GetManagedConnection(table))
+            {
+                try{
 
-                string sql = string.Format("ALTER TABLE {0} ADD PRIMARY KEY ({1})",
-                    table.GetFullyQualifiedName(),
-                    string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))
+                    string sql = string.Format("ALTER TABLE {0} ADD PRIMARY KEY ({1})",
+                        table.GetFullyQualifiedName(),
+                        string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))
                     );
 
-                DbCommand cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
-                cmd.CommandTimeout = timeoutInSeconds;
-                cmd.ExecuteNonQuery();
+                    DbCommand cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
+
+                    args.ExecuteNonQuery(cmd);
+                }
+                catch (Exception e)
+                {
+                    throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
+                }
             }
-            catch (Exception e)
-            {
-                throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
-            }
+            
         }
 
         public virtual int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null)
@@ -167,16 +180,20 @@ namespace FAnsi.Discovery
 
         public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null);
 
-        public virtual void FillDataTableWithTopX(DiscoveredTable table, int topX, DataTable dt, DbConnection connection, DbTransaction transaction = null)
+        public virtual void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt)
         {
             string sql = GetTopXSqlForTable(table, topX);
 
-            var da = table.Database.Server.GetDataAdapter(sql, connection);
-            da.Fill(dt);
+            using (var con = args.GetManagedConnection(table))
+            {
+                var cmd = table.Database.Server.GetCommand(sql, con);
+                var da = table.Database.Server.GetDataAdapter(cmd);
+                args.Fill(da,cmd, dt);
+            }
         }
 
         /// <inheritdoc/>
-        public virtual DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string constraintName = null)
+        public virtual DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args,Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string constraintName = null)
         {
             var foreignTables = foreignKeyPairs.Select(c => c.Key.Table).Distinct().ToArray();
             var primaryTables= foreignKeyPairs.Select(c => c.Value.Table).Distinct().ToArray();
@@ -198,13 +215,11 @@ namespace FAnsi.Discovery
             string sql = $@"ALTER TABLE {foreign.GetFullyQualifiedName()}
                 ADD " + constraintBit;
 
-            using (var con = primary.Database.Server.GetConnection())
+            using (var con = args.GetManagedConnection(primary))
             {
-                con.Open();
-
                 try
                 {
-                    primary.Database.Server.GetCommand(sql, con).ExecuteNonQuery();
+                    args.ExecuteNonQuery(primary.Database.Server.GetCommand(sql, con));
                 }
                 catch (Exception e)
                 {
@@ -212,14 +227,14 @@ namespace FAnsi.Discovery
                 }
             }
 
-            return primary.DiscoverRelationships().Single(
+            return primary.DiscoverRelationships(args.TransactionIfAny).Single(
                 r =>r.Name.Equals(constraintName,StringComparison.CurrentCultureIgnoreCase)
             );
         }
 
         protected abstract string GetRenameTableSql(DiscoveredTable discoveredTable, string newName);
 
-        public virtual void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds)
+        public virtual void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)
         {
             var server = discoveredTable.Database.Server;
 
@@ -230,33 +245,30 @@ namespace FAnsi.Discovery
             var tableName = discoveredTable.GetFullyQualifiedName();
             var tempTable = discoveredTable.Database.ExpectTable(discoveredTable.GetRuntimeName() + "_DistinctingTemp").GetFullyQualifiedName();
 
-            using (var con = server.BeginNewTransactedConnection())
+
+            using (var con = args.TransactionIfAny  == null ? 
+                server.BeginNewTransactedConnection():  //start a new transaction
+                args.GetManagedConnection(server))      //or continue the ongoing transaction
             {
-                try
-                {
-                    var cmdDistinct = server.GetCommand(string.Format("CREATE TABLE {1} AS SELECT distinct * FROM {0}", tableName, tempTable), con);
-                    cmdDistinct.CommandTimeout = timeoutInSeconds;
-                    cmdDistinct.ExecuteNonQuery();
+                var cmdDistinct = server.GetCommand(string.Format("CREATE TABLE {1} AS SELECT distinct * FROM {0}", tableName, tempTable), con);
+                args.ExecuteNonQuery(cmdDistinct);
 
-                    var cmdTruncate = server.GetCommand(string.Format("DELETE FROM {0}", tableName), con);
-                    cmdTruncate.CommandTimeout = timeoutInSeconds;
-                    cmdTruncate.ExecuteNonQuery();
+                //this is the point of no return so don't cancel after this point
+                var cmdTruncate = server.GetCommand(string.Format("DELETE FROM {0}", tableName), con);
+                cmdTruncate.CommandTimeout = args.TimeoutInSeconds;
+                cmdTruncate.ExecuteNonQuery();
 
-                    var cmdBack = server.GetCommand(string.Format("INSERT INTO {0} (SELECT * FROM {1})", tableName, tempTable), con);
-                    cmdBack.CommandTimeout = timeoutInSeconds;
-                    cmdBack.ExecuteNonQuery();
+                var cmdBack = server.GetCommand(string.Format("INSERT INTO {0} (SELECT * FROM {1})", tableName, tempTable), con);
+                cmdBack.CommandTimeout = args.TimeoutInSeconds;
+                cmdBack.ExecuteNonQuery();
 
-                    var cmdDropDistinctTable = server.GetCommand(string.Format("DROP TABLE {0}", tempTable), con);
-                    cmdDropDistinctTable.CommandTimeout = timeoutInSeconds;
-                    cmdDropDistinctTable.ExecuteNonQuery();
+                var cmdDropDistinctTable = server.GetCommand(string.Format("DROP TABLE {0}", tempTable), con);
+                cmdDropDistinctTable.CommandTimeout = args.TimeoutInSeconds;
+                cmdDropDistinctTable.ExecuteNonQuery();
 
-                    con.ManagedTransaction.CommitAndCloseConnection();
-                }
-                catch (Exception)
-                {
-                    con.ManagedTransaction.AbandonAndCloseConnection();
-                    throw;
-                }
+                //if we opened a new transaction we should commit it
+                if(args.TransactionIfAny == null)
+                    con.ManagedTransaction?.CommitAndCloseConnection();
             }
         }
 

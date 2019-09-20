@@ -267,6 +267,18 @@ namespace FAnsi.Discovery
             return table;
         }
         
+
+        /// <summary>
+        /// Creates a new schema within the database if the DBMS supports it (Sql Server does, MySql doesn't) and it does not already exist.  Schema
+        /// is a layer below server and database but above table it groups tables within a single database.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public void CreateSchema(string name)
+        {
+            Helper.CreateSchema(this,name);
+        }
+
         /// <summary>
         /// <para>Detach this DiscoveredDatabase and returns the data path where the files are stored (local to the DBMS server).</para>
         /// 

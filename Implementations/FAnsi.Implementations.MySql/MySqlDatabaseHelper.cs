@@ -79,6 +79,11 @@ namespace FAnsi.Implementations.MySql
             throw new NotImplementedException();
         }
 
+        public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
+        {
+            
+        }
+
         public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
         {
             if (connection.State == ConnectionState.Closed)

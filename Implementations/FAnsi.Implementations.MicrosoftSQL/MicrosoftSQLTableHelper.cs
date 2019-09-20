@@ -137,30 +137,6 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
             cmd.ExecuteNonQuery();
         }
 
-        public override int GetRowCount(DbConnection connection, IHasFullyQualifiedNameToo table, DbTransaction dbTransaction = null)
-        {
-                    SqlCommand cmdCount = new SqlCommand(@"/*Do not lock anything, and do not get held up by any locks.*/
-SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
- 
--- Quickly get row counts.
-declare @rowcount int = (SELECT distinct max(p.rows) AS [Row Count]
-FROM sys.partitions p
-INNER JOIN sys.indexes i ON p.object_id = i.object_id
-                         AND p.index_id = i.index_id
-WHERE OBJECT_NAME(p.object_id) = @tableName)
-
--- if we could not get it quickly then it is probably a view or something so have to return the slow count
-if @rowcount is null 
-	set @rowcount = (select count(*) from "+table.GetFullyQualifiedName()+@")
-
-select @rowcount", (SqlConnection) connection);
-
-                    cmdCount.Transaction = dbTransaction as SqlTransaction;
-                    cmdCount.Parameters.Add(new SqlParameter("@tableName",SqlDbType.VarChar));
-                    cmdCount.Parameters["@tableName"].Value = table.GetRuntimeName();
-
-                    return Convert.ToInt32(cmdCount.ExecuteScalar());
-        }
         
         public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
         {
@@ -201,17 +177,19 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             return new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
         }
 
-        public override void CreatePrimaryKey(DiscoveredTable table, DiscoveredColumn[] discoverColumns, IManagedConnection connection, int timeoutInSeconds = 0)
+        public override void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
         {
             try
             {
-                var columnHelper = GetColumnHelper();
-                foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))
+                using (var connection = args.GetManagedConnection(table))
                 {
-                    var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
-                    var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
-                    alterCmd.CommandTimeout = timeoutInSeconds;
-                    alterCmd.ExecuteNonQuery();
+                    var columnHelper = GetColumnHelper();
+                    foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))
+                    {
+                        var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
+                        var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
+                        args.ExecuteNonQuery(alterCmd);
+                    }
                 }
             }
             catch (Exception e)
@@ -219,7 +197,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
                 throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
             }
 
-            base.CreatePrimaryKey(table, discoverColumns, connection, timeoutInSeconds);
+            base.CreatePrimaryKey(args,table, discoverColumns);
         }
 
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null)
@@ -248,65 +226,64 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             p.DbType = DbType.String;
             cmd.Parameters.Add(p);
             
+            DataTable dt = new DataTable();
 
-            Dictionary<string,DiscoveredRelationship> toReturn = new Dictionary<string,DiscoveredRelationship>();
-
-            using (var r = cmd.ExecuteReader())
+            var da = table.Database.Server.GetDataAdapter(cmd);
+            da.Fill(dt);
+            var toReturn = new Dictionary<string,DiscoveredRelationship>();
+            
+            foreach(DataRow r in dt.Rows)
             {
-                while (r.Read())
+                var fkName = r["FK_NAME"].ToString();
+                
+                DiscoveredRelationship current;
+
+                //could be a 2+ columns foreign key?
+                if (toReturn.ContainsKey(fkName))
                 {
-                    var fkName = r["FK_NAME"].ToString();
+                    current = toReturn[fkName];
+                }
+                else
+                {
+                    var pkdb = r["PKTABLE_QUALIFIER"].ToString();
+                    var pkschema = r["PKTABLE_OWNER"].ToString();
+                    var pktableName = r["PKTABLE_NAME"].ToString();
+
+                    var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
+
+                    var fkdb = r["FKTABLE_QUALIFIER"].ToString();
+                    var fkschema = r["FKTABLE_OWNER"].ToString();
+                    var fktableName = r["FKTABLE_NAME"].ToString();
+
+                    var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
+
+                    var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
+                    CascadeRule deleteRule = CascadeRule.Unknown;
                     
-                    DiscoveredRelationship current;
 
-                    //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
-                    {
-                        current = toReturn[fkName];
-                    }
-                    else
-                    {
-                        var pkdb = r["PKTABLE_QUALIFIER"].ToString();
-                        var pkschema = r["PKTABLE_OWNER"].ToString();
-                        var pktableName = r["PKTABLE_NAME"].ToString();
+                    if(deleteRuleInt == 0)
+                        deleteRule = CascadeRule.Delete;
+                    else if(deleteRuleInt == 1)
+                        deleteRule = CascadeRule.NoAction;
+                    else if (deleteRuleInt == 2)
+                        deleteRule = CascadeRule.SetNull;
+                    else if (deleteRuleInt == 3)
+                        deleteRule = CascadeRule.SetDefault;
 
-                        var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
-
-                        var fkdb = r["FKTABLE_QUALIFIER"].ToString();
-                        var fkschema = r["FKTABLE_OWNER"].ToString();
-                        var fktableName = r["FKTABLE_NAME"].ToString();
-
-                        var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
-
-                        var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
-                        CascadeRule deleteRule = CascadeRule.Unknown;
-                        
-
-                        if(deleteRuleInt == 0)
-                            deleteRule = CascadeRule.Delete;
-                        else if(deleteRuleInt == 1)
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleInt == 2)
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleInt == 3)
-                            deleteRule = CascadeRule.SetDefault;
-
-                        
-                        /*
+                    
+                    /*
 https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-fkeys-transact-sql?view=sql-server-2017
-                         
+                     
 0=CASCADE changes to foreign key.
 1=NO ACTION changes if foreign key is present.
 2 = set null
 3 = set default*/
 
-                        current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                        toReturn.Add(current.Name,current);
-                    }
-
-
-                    current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
+                    current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                    toReturn.Add(current.Name,current);
                 }
+
+                current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
             }
 
             return toReturn.Values.ToArray();
@@ -323,7 +300,7 @@ https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedur
             return string.Format("exec sp_rename '{0}', '{1}'", oldName, newName);
         }
 
-        public override void MakeDistinct(DiscoveredTable discoveredTable, int timeoutInSeconds)
+        public override void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)
         {
             string sql = 
             @"DELETE f
@@ -340,12 +317,10 @@ https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedur
 
             var server = discoveredTable.Database.Server;
 
-            using (var con = server.GetConnection())
+            using (var con = args.GetManagedConnection(server))
             {
-                con.Open();
                 var cmd = server.GetCommand(sqlToExecute, con);
-                cmd.CommandTimeout = timeoutInSeconds;
-                cmd.ExecuteNonQuery();
+                args.ExecuteNonQuery(cmd);
             }
         }
 

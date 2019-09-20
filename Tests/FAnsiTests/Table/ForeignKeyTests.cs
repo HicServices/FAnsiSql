@@ -133,10 +133,13 @@ namespace FAnsiTests.Table
             parentTable.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        public void Test_ThreeTables_OnePrimary(DatabaseType dbType)
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.MySql,true)]
+        [TestCase(DatabaseType.Oracle,true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.Oracle,false)]
+        public void Test_ThreeTables_OnePrimary(DatabaseType dbType, bool useTransaction)
         {
             /*       t2
              *     ↙
@@ -166,8 +169,26 @@ namespace FAnsiTests.Table
             var c2 = t2.DiscoverColumns().Single();
             var c3 = t3.DiscoverColumns().Single();
 
-            var constraint1 = t1.AddForeignKey(c2,c1,true);
-            var constraint2 = t1.AddForeignKey(c3,c1,true,"FK_Lol");
+            DiscoveredRelationship constraint1;
+            DiscoveredRelationship constraint2;
+
+            if (useTransaction)
+            {
+                using (var con = t1.Database.Server.BeginNewTransactedConnection())
+                {
+                    constraint1 = t1.AddForeignKey(c2,c1,true,null,new DatabaseOperationArgs(){TransactionIfAny = con.ManagedTransaction});
+                    constraint2 = t1.AddForeignKey(c3,c1,true,"FK_Lol",new DatabaseOperationArgs(){TransactionIfAny = con.ManagedTransaction});
+                    con.ManagedTransaction.CommitAndCloseConnection();
+                }
+            }
+            else
+            {
+                constraint1 = t1.AddForeignKey(c2,c1,true);
+                constraint2 = t1.AddForeignKey(c3,c1,true,"FK_Lol");
+            }
+
+            
+            
 
             Assert.IsNotNull(constraint1);
             Assert.IsNotNull(constraint2);

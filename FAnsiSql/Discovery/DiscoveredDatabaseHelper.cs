@@ -160,6 +160,9 @@ namespace FAnsi.Discovery
                         ));
         }
 
+        /// <inheritdoc/>
+        public abstract void CreateSchema(DiscoveredDatabase discoveredDatabase, string name);
+
         protected virtual Guesser GetGuesser(DataColumn column)
         {
             return new Guesser();
