@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+...
+
+## [0.10.7] - 2019-09-20
+
 ### Added
 
 - Task cancellation support for various long running operations (e.g. CreatePrimaryKey)
@@ -154,7 +158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.6...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.7...develop
+[0.10.7]: https://github.com/HicServices/FAnsiSql/compare/0.10.6...0.10.7
 [0.10.6]: https://github.com/HicServices/FAnsiSql/compare/0.10.5...0.10.6
 [0.10.5]: https://github.com/HicServices/FAnsiSql/compare/0.10.4...0.10.5
 [0.10.4]: https://github.com/HicServices/FAnsiSql/compare/0.10.3...0.10.4
