@@ -11,6 +11,7 @@ using FAnsi.Implementation;
 using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
 using FAnsi.Implementations.MicrosoftSQL;
+using FAnsi.Implementations.PostgreSql;
 using NUnit.Framework;
 
 namespace FAnsiTests
@@ -32,7 +33,8 @@ namespace FAnsiTests
             ImplementationManager.Load(
                 typeof(MicrosoftSQLServerHelper).Assembly,
                 typeof(OracleServerHelper).Assembly,
-                typeof(MySqlServerHelper).Assembly);
+                typeof(MySqlServerHelper).Assembly,
+                typeof(PostgreSqlServerHelper).Assembly);
 
             var file = Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilename);
             

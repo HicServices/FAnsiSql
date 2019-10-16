@@ -12,6 +12,7 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Server_Exists(DatabaseType type)
         {
             var server = GetTestServer(type);

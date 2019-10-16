@@ -1,0 +1,121 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Threading;
+using FAnsi.Connections;
+using FAnsi.Discovery;
+using FAnsi.Discovery.QuerySyntax;
+using FAnsi.Naming;
+using Npgsql;
+
+namespace FAnsi.Implementations.PostgreSql
+{
+    public class PostgreSqlServerHelper : DiscoveredServerHelper
+    {
+
+        public PostgreSqlServerHelper() : base(DatabaseType.PostgreSql)
+        {
+        }
+
+        protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString)
+        {
+            return new NpgsqlConnectionStringBuilder(connectionString);
+        }
+
+        protected override string ServerKeyName => "Host";
+        protected override string DatabaseKeyName => "Database";
+
+        public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)
+        {
+            //nothing special we need to turn on
+            return builder;
+        }
+
+        public override IDiscoveredDatabaseHelper GetDatabaseHelper()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IQuerySyntaxHelper GetQuerySyntaxHelper()
+        {
+            return new PostgreSqlSyntaxHelper();
+        }
+
+        public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder)
+        {
+            return ((NpgsqlConnectionStringBuilder) builder).Username;
+        }
+
+        public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder)
+        {
+            return ((NpgsqlConnectionStringBuilder) builder).Password;
+        }
+
+        public override string[] ListDatabases(DbConnectionStringBuilder builder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string[] ListDatabases(DbConnection con)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
+        {
+            return new NpgsqlCommand(s, (NpgsqlConnection) con, (NpgsqlTransaction) transaction);
+        }
+
+        public override DbDataAdapter GetDataAdapter(DbCommand cmd)
+        {
+            return new NpgsqlDataAdapter((NpgsqlCommand) cmd);
+        }
+
+        public override DbCommandBuilder GetCommandBuilder(DbCommand cmd)
+        {
+            return new NpgsqlCommandBuilder(new NpgsqlDataAdapter((NpgsqlCommand) cmd));
+        }
+
+        public override DbParameter GetParameter(string parameterName)
+        {
+            return new NpgsqlParameter(){ParameterName = parameterName};
+        }
+
+        public override DbConnection GetConnection(DbConnectionStringBuilder builder)
+        {
+            return new NpgsqlConnection(builder.ConnectionString);
+        }
+
+        protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database,
+            string username, string password)
+        {
+            var toReturn = new NpgsqlConnectionStringBuilder()
+            {
+                Host = server
+            };
+
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                toReturn.Username = username;
+                toReturn.Password = password;
+            }
+            else
+                toReturn.IntegratedSecurity = true;
+
+            if (!string.IsNullOrWhiteSpace(database))
+                toReturn.Database = database;
+
+            return toReturn;
+        }
+    }
+}

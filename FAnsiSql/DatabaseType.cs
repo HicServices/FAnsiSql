@@ -18,6 +18,11 @@
         /// <summary>
         /// Oracle database engine
         /// </summary>
-        Oracle
+        Oracle,
+
+        /// <summary>
+        /// PostgreSql database engine
+        /// </summary>
+        PostgreSql
     }
 }
