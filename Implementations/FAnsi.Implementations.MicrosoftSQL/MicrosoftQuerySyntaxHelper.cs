@@ -15,11 +15,6 @@ namespace FAnsi.Implementations.MicrosoftSQL
         {
         }
 
-        public override string DatabaseTableSeparator
-        {
-           get { return "."; }
-        }
-        
         /// <summary>
         /// Maximum database name length.  This is less than 128 in order to allow for "_logs" etc getting appended to end.
         /// See: https://stackoverflow.com/a/5096245/4824531 

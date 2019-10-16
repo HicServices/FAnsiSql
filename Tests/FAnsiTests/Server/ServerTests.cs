@@ -22,6 +22,7 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Server_RespondsWithinTime(DatabaseType type)
         {
             var server = GetTestServer(type);
@@ -36,6 +37,7 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void ServerHelper_GetCurrentDatabase_WhenNoneSpecified(DatabaseType type)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();            
@@ -49,6 +51,7 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void ServerHelper_GetConnectionStringBuilder(DatabaseType type)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
@@ -75,6 +78,9 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
         [TestCase(DatabaseType.Oracle,true)]
         [TestCase(DatabaseType.Oracle,false)]
+        [TestCase(DatabaseType.PostgreSql,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
+
         public void ServerHelper_GetConnectionStringBuilder_NoDatabase(DatabaseType type,bool useWhitespace)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
@@ -100,6 +106,7 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
         [TestCase(DatabaseType.Oracle,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
         public void ServerHelper_ChangeDatabase(DatabaseType type,bool expectCaps)
         {
             var server = new DiscoveredServer("loco","bob",type,"franko","wacky");
@@ -132,6 +139,8 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql,true)]
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.PostgreSql,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
         public void ServerHelper_ChangeDatabase_AdHoc(DatabaseType type, bool useApiFirst)
         {
             //create initial server reference
@@ -160,6 +169,9 @@ namespace FAnsiTests.Server
 
         [TestCase(DatabaseType.MicrosoftSQLServer,DatabaseType.MySql)]
         [TestCase(DatabaseType.MySql, DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,DatabaseType.PostgreSql)]
+        [TestCase(DatabaseType.PostgreSql, DatabaseType.MicrosoftSQLServer)]
+
         public void MoveData_BetweenServerTypes(DatabaseType from, DatabaseType to)
         {
             //Create some test data

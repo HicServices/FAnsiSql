@@ -16,18 +16,17 @@ namespace FAnsi.Implementations.PostgreSql
         {
         }
 
-        public override string DatabaseTableSeparator { get; }
-        public override int MaximumDatabaseLength { get; }
-        public override int MaximumTableLength { get; }
-        public override int MaximumColumnLength { get; }
+        public override int MaximumDatabaseLength => 63;
+        public override int MaximumTableLength => 63;
+        public override int MaximumColumnLength => 63;
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
-            throw new NotImplementedException();
+            return '"' + GetRuntimeName(databaseOrTableName) + '"';
         }
 
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
-            throw new NotImplementedException();
+            return new TopXResponse("fetch first " + x + " rows only", QueryComponent.Postfix);
         }
 
         public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)

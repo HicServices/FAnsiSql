@@ -17,7 +17,7 @@ namespace FAnsi.Discovery
     /// <inheritdoc/>
     public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     {
-        public abstract string DatabaseTableSeparator { get; }
+        public virtual string DatabaseTableSeparator => ".";
         
         public abstract int MaximumDatabaseLength { get; }
         public abstract int MaximumTableLength { get; }

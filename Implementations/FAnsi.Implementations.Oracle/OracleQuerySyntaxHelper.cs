@@ -105,11 +105,6 @@ namespace FAnsi.Implementations.Oracle
             return Convert.ToDateTime(timeSpan.ToString());
         }
 
-        public override string DatabaseTableSeparator
-        {
-            get { return "."; }
-        }
-        
         static readonly HashSet<string> ReservedWords = new HashSet<string>( new []
         {
             

@@ -24,6 +24,8 @@ namespace FAnsi.Implementations.PostgreSql
 
         protected override string ServerKeyName => "Host";
         protected override string DatabaseKeyName => "Database";
+        protected override string ConnectionTimeoutKeyName => "Timeout";
+
 
         public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)
         {
@@ -33,7 +35,7 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override IDiscoveredDatabaseHelper GetDatabaseHelper()
         {
-            throw new NotImplementedException();
+            return new PostgreSqlDatabaseHelper();
         }
 
         public override IQuerySyntaxHelper GetQuerySyntaxHelper()
@@ -114,7 +116,7 @@ namespace FAnsi.Implementations.PostgreSql
 
             if (!string.IsNullOrWhiteSpace(database))
                 toReturn.Database = database;
-
+            
             return toReturn;
         }
     }

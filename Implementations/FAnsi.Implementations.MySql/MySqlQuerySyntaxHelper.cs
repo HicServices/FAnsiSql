@@ -31,11 +31,6 @@ namespace FAnsi.Implementations.MySql
             return "`" + GetRuntimeName(databaseName) + "`" + DatabaseTableSeparator + "`" + GetRuntimeName(tableName) + "`";
         }
 
-        public override string DatabaseTableSeparator
-        {
-            get { return "."; }
-        }
-        
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
             return new TopXResponse("LIMIT " + x,QueryComponent.Postfix);
