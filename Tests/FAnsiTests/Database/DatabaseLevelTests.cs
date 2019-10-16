@@ -12,6 +12,7 @@ namespace FAnsiTests.Database
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Database_Exists(DatabaseType type)
         {
             var server = GetTestDatabase(type);
@@ -22,6 +23,7 @@ namespace FAnsiTests.Database
         [TestCase(DatabaseType.MySql,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
         [TestCase(DatabaseType.Oracle,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
         public void Test_ExpectDatabase(DatabaseType type, bool upperCase)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
@@ -33,6 +35,7 @@ namespace FAnsiTests.Database
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_CreateSchema(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -50,6 +53,5 @@ namespace FAnsiTests.Database
                     Assert.AreEqual("Frank",tbl.Schema);
             }
         }
-
     }
 }

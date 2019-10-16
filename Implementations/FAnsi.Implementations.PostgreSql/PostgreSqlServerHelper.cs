@@ -45,7 +45,14 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
         {
-            throw new NotImplementedException();
+            var b = (NpgsqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
+            b.Database = null;
+
+            using(var con = new NpgsqlConnection(b.ConnectionString))
+            {
+                con.Open();
+                GetCommand("CREATE DATABASE \"" + newDatabaseName.GetRuntimeName() + '"',con).ExecuteNonQuery();
+            }
         }
 
         public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder)
@@ -63,14 +70,34 @@ namespace FAnsi.Implementations.PostgreSql
             return ((NpgsqlConnectionStringBuilder) builder).Password;
         }
 
+
         public override string[] ListDatabases(DbConnectionStringBuilder builder)
         {
-            throw new NotImplementedException();
+            //create a copy so as not to corrupt the original
+            var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString);
+            b.Database = "postgres";
+            b.Timeout = 5;
+
+            using (var con = new NpgsqlConnection(b.ConnectionString))
+            {
+                con.Open();
+                return ListDatabases(con);
+            }
         }
 
         public override string[] ListDatabases(DbConnection con)
         {
-            throw new NotImplementedException();
+            var cmd = GetCommand("SELECT datname FROM pg_database;", con);
+            
+            DbDataReader r = cmd.ExecuteReader();
+
+            List<string> databases = new List<string>();
+
+            while (r.Read())
+                databases.Add((string) r["datname"]);
+
+            con.Close();
+            return databases.ToArray();
         }
 
         public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
