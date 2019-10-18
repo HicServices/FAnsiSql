@@ -35,6 +35,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestTableCreation(DatabaseType type)
         {
             var database = GetTestDatabase(type);

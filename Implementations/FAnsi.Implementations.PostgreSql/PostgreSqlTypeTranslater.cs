@@ -17,5 +17,10 @@ namespace FAnsi.Implementations.PostgreSql
         {
             return "text";
         }
+
+        protected override string GetDateDateTimeDataType()
+        {
+            return "timestamp";
+        }
     }
 }

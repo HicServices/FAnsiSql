@@ -19,10 +19,24 @@ namespace FAnsi.Implementations.PostgreSql
         public override int MaximumDatabaseLength => 63;
         public override int MaximumTableLength => 63;
         public override int MaximumColumnLength => 63;
+        
+        public const string DefaultPostgresSchema = "public";
+
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
             return '"' + GetRuntimeName(databaseOrTableName) + '"';
         }
+
+        public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
+        {
+            //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
+            if(string.IsNullOrWhiteSpace(schema))
+                return '"'+ GetRuntimeName(databaseName) +'"'+ DatabaseTableSeparator + DefaultPostgresSchema + DatabaseTableSeparator + '"'+GetRuntimeName(tableName)+'"';
+
+            //there is a schema so add it in
+            return '"' + GetRuntimeName(databaseName) + '"' + DatabaseTableSeparator + schema + DatabaseTableSeparator + '"' + GetRuntimeName(tableName) + '"';
+        }
+
 
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
