@@ -17,6 +17,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateSimpleTable_Exists(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -116,6 +117,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateSimpleTable_VarcharTypeCorrect(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -140,6 +142,9 @@ namespace FAnsiTests.Table
                 case DatabaseType.Oracle:
                     Assert.AreEqual("varchar2(5)",dbType);
                     break;
+                case DatabaseType.PostgreSql:
+                    Assert.AreEqual("character varying(5)",dbType);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException("type");
             }
@@ -152,6 +157,7 @@ namespace FAnsiTests.Table
 
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         public void CreateTable_PrimaryKey_FromDataTable(DatabaseType databaseType)
         {
@@ -169,6 +175,7 @@ namespace FAnsiTests.Table
         
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         public void CreateTable_PrimaryKey_FromColumnRequest(DatabaseType databaseType)
         {
@@ -191,6 +198,7 @@ namespace FAnsiTests.Table
 
         [TestCase(DatabaseType.MicrosoftSQLServer, "Latin1_General_CS_AS_KS_WS")]
         [TestCase(DatabaseType.MySql, "latin1_german1_ci")]
+        [TestCase(DatabaseType.PostgreSql,"de-DE-x-icu")]
         //[TestCase(DatabaseType.Oracle, "BINARY_CI")] //Requires 12.2+ oracle https://www.experts-exchange.com/questions/29102764/SQL-Statement-to-create-case-insensitive-columns-and-or-tables-in-Oracle.html
         public void CreateTable_CollationTest(DatabaseType type, string collation)
         {
@@ -211,6 +219,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateTable_BoolStrings(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -314,6 +323,7 @@ namespace FAnsiTests.Table
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         [TestCase(DatabaseType.MySql)]
         public void Test_CreateTable_UnicodeNames(DatabaseType dbType)
         {
@@ -354,7 +364,7 @@ namespace FAnsiTests.Table
         }
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
-        //[TestCase(DatabaseType.Oracle)] // Oracle doesn't really support bits https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns
+        //[TestCase(DatabaseType.Oracle)]\r\n[TestCase(DatabaseType.PostgreSql)] // Oracle doesn't really support bits https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns
         [TestCase(DatabaseType.MySql)]
         public void Test_CreateTable_TF(DatabaseType dbType)
         {
@@ -377,7 +387,8 @@ namespace FAnsiTests.Table
         }
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)] 
+        [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)] 
         [TestCase(DatabaseType.MySql)]
         public void Test_CreateTable_DoNotRetype(DatabaseType dbType)
         {
@@ -441,7 +452,8 @@ namespace FAnsiTests.Table
         /// Tests how CreateTable interacts with <see cref="DataColumn"/> of type Object
         /// </summary>
         [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)] 
+        [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)] 
         [TestCase(DatabaseType.MySql)]
         public void CreateTable_ObjectColumns_StringContent(DatabaseType dbType)
         {

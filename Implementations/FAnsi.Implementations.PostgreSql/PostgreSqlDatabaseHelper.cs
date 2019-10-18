@@ -92,6 +92,20 @@ namespace FAnsi.Implementations.PostgreSql
             throw new NotImplementedException();
         }
 
+        protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
+        {
+            //Collations generally have to be in quotes (unless maybe they are very weird user generated ones?)
+
+            return string.Format("{0} {1} {2} {3} {4} {5}",
+                syntaxHelper.EnsureWrapped(col.ColumnName),
+                datatype,
+                col.Default != MandatoryScalarFunctions.None ? "default " + syntaxHelper.GetScalarFunctionSql(col.Default) : "",
+                string.IsNullOrWhiteSpace(col.Collation) ? "" : "COLLATE " + '"' + col.Collation.Trim('"') + '"',
+                col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL",
+                col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : ""
+            );
+        }
+
         public override DirectoryInfo Detach(DiscoveredDatabase database)
         {
             throw new NotImplementedException();
