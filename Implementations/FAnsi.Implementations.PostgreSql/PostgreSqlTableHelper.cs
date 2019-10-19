@@ -148,6 +148,22 @@ namespace FAnsi.Implementations.PostgreSql
             return new PostgreSqlBulkCopy(discoveredTable, connection,culture);
         }
 
+        public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd,
+            IManagedTransaction transaction = null)
+        {
+            var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(c => c.IsAutoIncrement);
+
+            if(autoIncrement != null)
+                cmd.CommandText += $" RETURNING {autoIncrement.GetFullyQualifiedName()};";
+
+            var result = cmd.ExecuteScalar();
+
+            if (result == DBNull.Value || result == null)
+                return 0;
+
+            return Convert.ToInt32(result);
+        }
+
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
             IManagedTransaction transaction = null)
         {

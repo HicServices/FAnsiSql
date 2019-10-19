@@ -892,6 +892,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateTable_AutoIncrementColumnTest(DatabaseType type)
         {
             var database = GetTestDatabase(type, true);

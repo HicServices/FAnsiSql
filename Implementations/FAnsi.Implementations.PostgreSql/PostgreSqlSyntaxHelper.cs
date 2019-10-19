@@ -37,6 +37,15 @@ namespace FAnsi.Implementations.PostgreSql
             return '"' + GetRuntimeName(databaseName) + '"' + DatabaseTableSeparator + schema + DatabaseTableSeparator + '"' + GetRuntimeName(tableName) + '"';
         }
 
+        public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName,
+            bool isTableValuedFunction = false)
+        {
+            if (isTableValuedFunction)
+                return '"' + GetRuntimeName(tableName) + "\".\"" + GetRuntimeName(columnName) + "\"";//table valued functions do not support database name being in the column level selection list area of sql queries
+
+            return EnsureFullyQualified(databaseName, schema, tableName) + ".\"" + GetRuntimeName(columnName) + '"';
+        }
+
 
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
@@ -55,7 +64,7 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override string GetAutoIncrementKeywordIfAny()
         {
-            throw new NotImplementedException();
+            return "GENERATED ALWAYS AS IDENTITY";
         }
 
         public override Dictionary<string, string> GetSQLFunctionsDictionary()
