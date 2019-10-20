@@ -10,6 +10,7 @@ namespace FAnsi.Implementations.PostgreSql
         public PostgreSqlTypeTranslater() : base(8000, 4000)
         {
             DateRegex = new Regex("timestamp",RegexOptions.IgnoreCase);
+            TimeRegex = new Regex("^time ",RegexOptions.IgnoreCase); //space is important
         }
 
         public override string GetStringDataTypeWithUnlimitedWidth()

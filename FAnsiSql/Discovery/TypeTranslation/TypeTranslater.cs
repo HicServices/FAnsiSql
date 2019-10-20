@@ -5,9 +5,7 @@ using TypeGuesser;
 
 namespace FAnsi.Discovery.TypeTranslation
 {
-    /// <summary>
-    /// See ITypeTranslater
-    /// </summary>
+    /// <inheritdoc cref="ITypeTranslater"/>
     public abstract class TypeTranslater:ITypeTranslater
     {
         protected const string StringSizeRegexPattern = @"\(([0-9]+)\)";

@@ -84,7 +84,30 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override void DropDatabase(DiscoveredDatabase database)
         {
-            throw new NotImplementedException();
+            var master = database.Server.ExpectDatabase("postgres");
+
+            NpgsqlConnection.ClearAllPools();
+
+            using (var con = (NpgsqlConnection) master.Server.GetConnection())
+            {
+                con.Open();
+
+                https://dba.stackexchange.com/a/11895
+                NpgsqlCommand cmd = new NpgsqlCommand($"UPDATE pg_database SET datallowconn = 'false' WHERE datname = '{database.GetRuntimeName()}';",con);
+                cmd.ExecuteNonQuery();
+
+                cmd = new NpgsqlCommand($@"SELECT pg_terminate_backend(pid)
+                FROM pg_stat_activity
+                WHERE datname = '{database.GetRuntimeName()}';"
+                ,con);
+                cmd.ExecuteNonQuery();
+                
+                 cmd = new NpgsqlCommand("DROP DATABASE \"" + database.GetRuntimeName() +"\"",con);
+                cmd.ExecuteNonQuery();
+            }
+            
+            NpgsqlConnection.ClearAllPools();
+
         }
 
         public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
