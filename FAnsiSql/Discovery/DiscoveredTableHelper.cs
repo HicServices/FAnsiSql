@@ -145,13 +145,15 @@ namespace FAnsi.Discovery
 
         public virtual void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
         {
+            var syntax = table.GetQuerySyntaxHelper();
+
             using (var connection = args.GetManagedConnection(table))
             {
                 try{
 
                     string sql = string.Format("ALTER TABLE {0} ADD PRIMARY KEY ({1})",
                         table.GetFullyQualifiedName(),
-                        string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))
+                        string.Join(",", discoverColumns.Select(c => syntax.EnsureWrapped(c.GetRuntimeName())))
                     );
 
                     DbCommand cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
