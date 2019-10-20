@@ -7,6 +7,7 @@ using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
+using Npgsql;
 
 namespace FAnsi.Implementations.PostgreSql
 {
@@ -167,7 +168,81 @@ namespace FAnsi.Implementations.PostgreSql
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
             IManagedTransaction transaction = null)
         {
-            throw new NotImplementedException();
+            string sql = $@"select c.constraint_name
+    , x.table_schema as foreign_table_schema
+    , x.table_name as foreign_table_name
+    , x.column_name as foreign_column_name
+    , y.table_schema 
+    , y.table_name 
+    , y.column_name 
+    , delete_rule
+from information_schema.referential_constraints c
+join information_schema.key_column_usage x
+    on x.constraint_name = c.constraint_name
+join information_schema.key_column_usage y
+    on y.ordinal_position = x.position_in_unique_constraint
+    and y.constraint_name = c.unique_constraint_name
+where 
+    y.table_name='{table.GetRuntimeName()}' AND
+    y.table_schema='{table.Schema??PostgreSqlSyntaxHelper.DefaultPostgresSchema}'
+order by c.constraint_name, x.ordinal_position";
+
+            
+            Dictionary<string, DiscoveredRelationship> toReturn = new Dictionary<string, DiscoveredRelationship>();
+
+            var cmd = table.GetCommand(sql, connection, transaction?.Transaction);
+
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    var fkName = r["constraint_name"].ToString();
+
+                    DiscoveredRelationship current;
+
+                    //could be a 2+ columns foreign key?
+                    if (toReturn.ContainsKey(fkName))
+                    {
+                        current = toReturn[fkName];
+                    }
+                    else
+                    {
+
+                        var pkDb = table.Database.GetRuntimeName();
+                        var pkSchema = r["table_schema"].ToString();
+                        var pkTableName = r["table_name"].ToString();
+
+                        var fkDb = pkDb;
+                        var fkSchema = r["foreign_table_schema"].ToString();
+                        var fkTableName = r["foreign_table_name"].ToString();
+
+                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
+                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName,fkSchema);
+
+                        CascadeRule deleteRule = CascadeRule.Unknown;
+
+                        var deleteRuleString = r["delete_rule"].ToString();
+                        
+                        if (deleteRuleString == "CASCADE")
+                            deleteRule = CascadeRule.Delete;
+                        else if (deleteRuleString == "NO ACTION")
+                            deleteRule = CascadeRule.NoAction;
+                        else if (deleteRuleString == "RESTRICT")
+                            deleteRule = CascadeRule.NoAction;
+                        else if (deleteRuleString == "SET NULL")
+                            deleteRule = CascadeRule.SetNull;
+                        else if (deleteRuleString == "SET DEFAULT")
+                            deleteRule = CascadeRule.SetDefault;
+                        
+                        current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                        toReturn.Add(current.Name, current);
+                    }
+
+                    current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
+                }
+            }
+
+            return toReturn.Values.ToArray();
         }
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)

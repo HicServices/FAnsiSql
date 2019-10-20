@@ -22,6 +22,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestTableCreation_NullTableName(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -35,6 +36,8 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MicrosoftSQLServer, "2007-01-01 00:00:00")]
         [TestCase(DatabaseType.MySql, "2007-01-01 00:00:00")]
         [TestCase(DatabaseType.Oracle, "2007-01-01 00:00:00")]
+        [TestCase(DatabaseType.PostgreSql, "01/01/2007 00:00:00")]
+        [TestCase(DatabaseType.PostgreSql,"2007-01-01 00:00:00")]
         public void DateColumnTests_NoTime(DatabaseType type, object input)
         {
             var db = GetTestDatabase(type, true);
@@ -63,6 +66,8 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MicrosoftSQLServer, "28/2/1993 5:36:27 AM","en-GB")]
         [TestCase(DatabaseType.MySql, "28/2/1993 5:36:27 AM","en-GB")]
         [TestCase(DatabaseType.Oracle, "28/2/1993 5:36:27 AM","en-GB")]
+        [TestCase(DatabaseType.PostgreSql,"2/28/1993 5:36:27 AM","en-US")]
+        [TestCase(DatabaseType.PostgreSql,"28/2/1993 5:36:27 AM","en-GB")]
         public void DateColumnTests_UkUsFormat_Explicit(DatabaseType type, object input, string culture)
         {
             var db = GetTestDatabase(type, true);
@@ -100,6 +105,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MicrosoftSQLServer, "2/28/1993 5:36:27 AM","en-US")]
         [TestCase(DatabaseType.MySql, "2/28/1993 5:36:27 AM","en-US")]
         [TestCase(DatabaseType.Oracle, "2/28/1993 5:36:27 AM","en-US")]
+        [TestCase(DatabaseType.PostgreSql, "2/28/1993 5:36:27 AM","en-US")]
         public void DateColumnTests_PrimaryKeyColumn(DatabaseType type, object input, string culture)
         {
             var db = GetTestDatabase(type, true);
@@ -135,6 +141,8 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MicrosoftSQLServer, "00:00")]
         [TestCase(DatabaseType.MySql, "00:00")]
         [TestCase(DatabaseType.Oracle, "00:00")]
+        [TestCase(DatabaseType.PostgreSql, "00:00:00")]
+        [TestCase(DatabaseType.PostgreSql, "00:00")]
         public void DateColumnTests_TimeOnly_Midnight(DatabaseType type, object input)
         {
             var db = GetTestDatabase(type, true);
@@ -207,6 +215,8 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MicrosoftSQLServer, "13:11")]
         [TestCase(DatabaseType.MySql, "13:11")]
         [TestCase(DatabaseType.Oracle, "13:11")]
+        [TestCase(DatabaseType.PostgreSql, "13:11:10")]
+        [TestCase(DatabaseType.PostgreSql, "13:11")]
         public void DateColumnTests_TimeOnly_Afternoon(DatabaseType type, object input)
         {
             var db = GetTestDatabase(type, true);
@@ -266,6 +276,11 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MySql, "int", "-23.00")]
         [TestCase(DatabaseType.MySql, "int", "-25")]
         [TestCase(DatabaseType.MySql, "bit", "0")]
+        [TestCase(DatabaseType.PostgreSql, "int", "-23.00")]
+        [TestCase(DatabaseType.PostgreSql, "int", "23.0")]
+        [TestCase(DatabaseType.PostgreSql, "bit", "0")]
+        [TestCase(DatabaseType.PostgreSql, "int", "00.0")]
+        [TestCase(DatabaseType.PostgreSql, "int", "-24")]
         public void TypeConsensusBetweenGuesserAndDiscoveredTableTest(DatabaseType type, string datatType,string insertValue)
         {
             var database = GetTestDatabase(type);
@@ -297,6 +312,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void ForeignKeyCreationTest(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -371,6 +387,8 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MySql, false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,true)]
         [TestCase(DatabaseType.MicrosoftSQLServer, false)]
+        [TestCase(DatabaseType.PostgreSql,true)]
+        [TestCase(DatabaseType.PostgreSql, false)]
         public void ForeignKeyCreationTest_TwoColumns(DatabaseType type, bool cascadeDelete)
         {
             var database = GetTestDatabase(type);
@@ -449,6 +467,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateMaxVarcharColumns(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -474,6 +493,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateMaxVarcharColumnFromDataTable(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -500,6 +520,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateDateColumnFromDataTable(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -522,6 +543,8 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MySql,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
         [TestCase(DatabaseType.Oracle,false)]
+        [TestCase(DatabaseType.PostgreSql,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
         public void AddColumnTest(DatabaseType type,bool useTransaction)
         {
             var database = GetTestDatabase(type);
@@ -600,6 +623,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void ChangeDatabaseShouldNotAffectOriginalConnectionString_Test(DatabaseType type)
         {
             var database1 = GetTestDatabase(type);
@@ -613,6 +637,8 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MicrosoftSQLServer,true)]
         [TestCase(DatabaseType.MySql,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        [TestCase(DatabaseType.PostgreSql,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
         public void TestDistincting(DatabaseType type,bool useTransaction)
         {
             var database = GetTestDatabase(type);
@@ -663,6 +689,7 @@ namespace FAnsiTests
         [Test]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestIntDataTypes(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -704,6 +731,7 @@ namespace FAnsiTests
         [Test]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestFloatDataTypes(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -743,6 +771,7 @@ namespace FAnsiTests
 
         [TestCase(DatabaseType.MySql, "_-o-_",":>0<:")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "_-o-_", ":>0<:")]
+        [TestCase(DatabaseType.PostgreSql, "_-o-_", ":>0<:")]
         public void HorribleDatabaseAndTableNames(DatabaseType type,string horribleDatabaseName, string horribleTableName)
         {
             AssertCanCreateDatabases();
@@ -805,6 +834,8 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MySql, "my.database", "my.table", "my.col")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "my.database", "my.table", "my.col")]
         [TestCase(DatabaseType.Oracle, "my.database", "my.table", "my.col")]
+        [TestCase(DatabaseType.PostgreSql, "my (database)", "my (table)", "my (col)")]
+        [TestCase(DatabaseType.PostgreSql, "my.database", "my.table", "my.col")]
         public void UnsupportedEntityNames(DatabaseType type, string horribleDatabaseName, string horribleTableName,string columnName)
         {
             
@@ -854,6 +885,9 @@ namespace FAnsiTests
         [TestCase(DatabaseType.Oracle, "_-o-_", ":>0<:", "-_")]
         [TestCase(DatabaseType.Oracle, "Comment", "Comment", "Comment")] //reserved keyword in Oracle
         [TestCase(DatabaseType.Oracle, "Comment", "SSSS", "Space Out")]
+        [TestCase(DatabaseType.PostgreSql, "_-o-_", ":>0<:", "-_")]
+        [TestCase(DatabaseType.PostgreSql, "Comment", "Comment", "Comment")] //reserved keyword in Oracle
+        [TestCase(DatabaseType.PostgreSql, "Comment", "SSSS", "Space Out")]
         public void HorribleColumnNames(DatabaseType type, string horribleDatabaseName, string horribleTableName,string columnName)
         {
             AssertCanCreateDatabases();
@@ -932,6 +966,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateTable_DefaultTest(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -970,6 +1005,7 @@ namespace FAnsiTests
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_BulkInserting_LotsOfDates(DatabaseType type)
         {
             CultureInfo culture = new CultureInfo("en-gb");

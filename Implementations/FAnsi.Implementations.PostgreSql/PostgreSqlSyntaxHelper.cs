@@ -59,7 +59,15 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override string GetScalarFunctionSql(MandatoryScalarFunctions function)
         {
-            throw new NotImplementedException();
+            switch (function)
+            {
+                case MandatoryScalarFunctions.GetTodaysDate:
+                    return "current_timestamp";
+                case MandatoryScalarFunctions.GetGuid:
+                    return "newid()";
+                default:
+                    throw new ArgumentOutOfRangeException("function");
+            }
         }
 
         public override string GetAutoIncrementKeywordIfAny()
