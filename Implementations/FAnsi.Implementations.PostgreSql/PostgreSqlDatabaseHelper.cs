@@ -58,8 +58,8 @@ namespace FAnsi.Implementations.PostgreSql
                         //its a system table
                         string schema = r["schemaname"] as string;
                     
-                        if(querySyntaxHelper.IsValidTableName((string)r["tablename"], out _))
-                            tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema, TableType.View));
+                        if(querySyntaxHelper.IsValidTableName((string)r["viewname"], out _))
+                            tables.Add(new DiscoveredTable(parent, (string)r["viewname"], querySyntaxHelper, schema, TableType.View));
                     }
             }
             

@@ -281,9 +281,9 @@ namespace FAnsiTests
         [TestCase(DatabaseType.PostgreSql, "bit", "0")]
         [TestCase(DatabaseType.PostgreSql, "int", "00.0")]
         [TestCase(DatabaseType.PostgreSql, "int", "-24")]
-        public void TypeConsensusBetweenGuesserAndDiscoveredTableTest(DatabaseType type, string datatType,string insertValue)
+        public void TypeConsensusBetweenGuesserAndDiscoveredTableTest(DatabaseType dbType, string datatType,string insertValue)
         {
-            var database = GetTestDatabase(type);
+            var database = GetTestDatabase(dbType);
 
             var tbl = database.ExpectTable("TestTableCreationStrangeTypology");
 
@@ -303,7 +303,16 @@ namespace FAnsiTests
 
             Assert.AreEqual(datatType, c.GetSqlDBType(tt));
 
-            Assert.AreEqual(datatType,tbl.DiscoverColumn("mycol").DataType.SQLType);
+            string expectedDataType = datatType;
+
+            //you ask for an int PostgreSql gives you an integer!
+            if(dbType == DatabaseType.PostgreSql)
+                if (datatType == "int")
+                    expectedDataType = "integer";
+            else if (datatType == "bit")
+                    expectedDataType = "bit(1)";
+
+            Assert.AreEqual(expectedDataType,tbl.DiscoverColumn("mycol").DataType.SQLType);
             Assert.AreEqual(1,tbl.GetRowCount());
 
             tbl.Drop();

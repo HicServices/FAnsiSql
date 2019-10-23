@@ -47,9 +47,11 @@ namespace FAnsi.Implementations.PostgreSql
                 return NpgsqlDbType.Bigint;
 
             if (t == typeof(float) || t == typeof(float?) || t == typeof(double) ||
-                t == typeof(double?) || t == typeof(decimal) ||
-                t == typeof(decimal?))
+                t == typeof(double?))
                 return NpgsqlDbType.Double;
+
+            if (t == typeof(decimal) || t == typeof(decimal?))
+                return NpgsqlDbType.Numeric;
 
             if (t == typeof(string))
                 return NpgsqlDbType.Text;
