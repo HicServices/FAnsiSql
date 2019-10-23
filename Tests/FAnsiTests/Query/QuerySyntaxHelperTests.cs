@@ -13,6 +13,7 @@ namespace FAnsiTests.Query
         [TestCase(DatabaseType.Oracle,true)]
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
         [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.PostgreSql,false)]
         public void SyntaxHelperTest_GetRuntimeName(DatabaseType t,bool expectUpper)
         {
             ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
@@ -38,6 +39,7 @@ namespace FAnsiTests.Query
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void SyntaxHelperTest_GetRuntimeName_Impossible(DatabaseType t)
         {
             ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
@@ -98,6 +100,7 @@ namespace FAnsiTests.Query
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_GetAlias(DatabaseType t)
         {
             ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
@@ -120,6 +123,7 @@ namespace FAnsiTests.Query
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_NameValidation(DatabaseType dbType)
         {
             ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
