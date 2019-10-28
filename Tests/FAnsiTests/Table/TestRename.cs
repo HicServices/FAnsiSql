@@ -10,6 +10,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)] 
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestRenamingTable(DatabaseType type)
         {
             var db = GetTestDatabase(type);

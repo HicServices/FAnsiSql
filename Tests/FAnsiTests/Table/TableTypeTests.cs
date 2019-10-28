@@ -11,6 +11,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateView(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -23,19 +24,22 @@ namespace FAnsiTests.Table
             Assert.AreEqual(TableType.Table, tbl.TableType);
 
             var viewName = "MyView";
+            
+            var syntax = tbl.GetQuerySyntaxHelper();
 
             //oracle likes to create stuff under your user account not the database your actually using!
             if(dbType == DatabaseType.Oracle)
             {
-                var syntax = tbl.GetQuerySyntaxHelper();
                 viewName = syntax.EnsureFullyQualified(tbl.Database.GetRuntimeName(),null,"MyView");
             }
             
             var sql = string.Format(@"CREATE VIEW {0} AS
-SELECT FF
+SELECT {2}
 FROM {1}",
-viewName,
- tbl.GetFullyQualifiedName());
+syntax.EnsureWrapped(viewName),
+tbl.GetFullyQualifiedName(),
+syntax.EnsureWrapped("FF")
+);
 
             using(var con = tbl.Database.Server.GetConnection())
             {

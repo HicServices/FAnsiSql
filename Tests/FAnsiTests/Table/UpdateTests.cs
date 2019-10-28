@@ -14,6 +14,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_UpdateTableFromJoin(DatabaseType dbType)
         {
             var dt1 = new DataTable();

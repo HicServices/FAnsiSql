@@ -11,6 +11,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_LongTableName_CreateAndReadBack(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -41,6 +42,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_LongDatabaseNames_CreateAndReadBack(DatabaseType dbType)
         {
             AssertCanCreateDatabases();
