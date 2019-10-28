@@ -7,6 +7,7 @@ using FAnsi.Discovery.ConnectionStringDefaults;
 using FAnsi.Implementations.MicrosoftSQL;
 using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
+using FAnsi.Implementations.PostgreSql;
 using NUnit.Framework;
 
 namespace FAnsiTests.Server
@@ -19,6 +20,7 @@ namespace FAnsiTests.Server
             {DatabaseType.MicrosoftSQLServer, new MicrosoftSQLServerHelper()},
             {DatabaseType.MySql, new MySqlServerHelper()},
             {DatabaseType.Oracle, new OracleServerHelper()},
+            {DatabaseType.PostgreSql, new PostgreSqlServerHelper()},
         };
 
         [Test]
@@ -62,6 +64,7 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql, "sslmode", "None", "Ssl-Mode","Required")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "AttachDbFilename", @"c:\temp\db", "Initial File Name", @"x:\omg.mdf")]
         [TestCase(DatabaseType.Oracle, "CONNECTION TIMEOUT", "10", "Connection Timeout", "20")]
+        [TestCase(DatabaseType.PostgreSql, "Database", "mydb", "DATABASE", "myotherdb")]
         public void TestKeywords_OverrideWithNovelButEquivalentKeyword_Ignored(DatabaseType databaseType, string key1, string value1, string equivalentKey, string value2)
         {
             // SSL Mode , SslMode , Ssl-Mode 
@@ -108,6 +111,7 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestKeywords_Invalid(DatabaseType databaseType)
         {
             var acc = new ConnectionStringKeywordAccumulator(databaseType);

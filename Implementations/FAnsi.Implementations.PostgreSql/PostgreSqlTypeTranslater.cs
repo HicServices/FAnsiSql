@@ -18,6 +18,11 @@ namespace FAnsi.Implementations.PostgreSql
             return "text";
         }
 
+        protected override string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth)
+        {
+            return GetStringDataType(maxExpectedStringWidth);
+        }
+
         public override string GetUnicodeStringDataTypeWithUnlimitedWidth()
         {
             return "text";

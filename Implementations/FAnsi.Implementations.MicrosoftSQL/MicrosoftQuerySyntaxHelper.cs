@@ -90,6 +90,11 @@ namespace FAnsi.Implementations.MicrosoftSQL
             return "CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary," + selectSql + ")),2)";
         }
 
+        public override string GetDefaultSchemaIfAny()
+        {
+            return "dbo";
+        }
+
         protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
         {
             //Value must be a DateTime even if DBParameter is of Type DbType.Time

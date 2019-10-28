@@ -20,6 +20,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_Basic(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -59,6 +60,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_ColumnOrdinals(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -98,6 +100,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_Transaction(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -147,6 +150,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_AbandonTransaction(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -197,6 +201,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_AlterColumn_MidTransaction(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -253,6 +258,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void BulkInsert_MixedCase(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -280,6 +286,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void UnmatchedColumnsBulkInsertTest_UsesDefaultValues_Passes(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -328,6 +335,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void UnmatchedColumnsBulkInsertTest_UsesDefaultValues_TwoLargeBatches_Passes(DatabaseType type)
         {
             const int numberOfRowsPerBatch = 100010;
@@ -481,6 +489,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void NullPrimaryKey_ThrowsException(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -507,6 +516,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void AutoIncrementPrimaryKey_Passes(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -552,6 +562,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_ScientificNotation(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -602,6 +613,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_Unicode(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -636,6 +648,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_SchemaTooNarrow_StringError(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -692,6 +705,9 @@ namespace FAnsiTests.Table
                         StringAssert.Contains("actual: 11",ex.Message);
 
                         break;
+                    case DatabaseType.PostgreSql:
+                        StringAssert.Contains("value too long for type character varying(10)",ex.Message);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(type), type, null);
                 }
@@ -701,6 +717,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBulkInsert_SchemaTooNarrow_DecimalError(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -757,6 +774,10 @@ namespace FAnsiTests.Table
                         StringAssert.Contains("value larger than specified precision allowed for this column",ex.Message);
 
                         break;
+                    case DatabaseType.PostgreSql:
+                        StringAssert.Contains("numeric field overflow",ex.Message);
+                        break;
+
                     default:
                         throw new ArgumentOutOfRangeException(nameof(type), type, null);
                 }

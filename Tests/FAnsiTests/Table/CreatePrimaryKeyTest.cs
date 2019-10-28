@@ -12,6 +12,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBasicCase_KeysCreated(DatabaseType databaseType)
         {
             var dt = new DataTable("Fish");
@@ -43,6 +44,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void TestBasicCase_FailHalfWay_SchemaUnchanged(DatabaseType databaseType)
         {
             var dt = new DataTable("Fish");

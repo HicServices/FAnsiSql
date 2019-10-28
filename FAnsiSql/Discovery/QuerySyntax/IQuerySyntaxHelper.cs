@@ -173,6 +173,13 @@ namespace FAnsi.Discovery.QuerySyntax
         /// </summary>
         bool IsValidColumnName(string columnName, out string reason);
 
+
+        /// <summary>
+        /// The default schema into which tables are created if none is specified e.g. "dbo" in Sql Server.
+        /// If schemas are not supported (e.g. MySql) then null is returned
+        /// </summary>
+        /// <returns></returns>
+        string GetDefaultSchemaIfAny();
     }
 
     public enum MandatoryScalarFunctions

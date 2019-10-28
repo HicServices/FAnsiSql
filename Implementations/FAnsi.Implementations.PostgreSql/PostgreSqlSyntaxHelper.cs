@@ -84,5 +84,10 @@ namespace FAnsi.Implementations.PostgreSql
         {
             throw new NotImplementedException();
         }
+
+        public override string GetDefaultSchemaIfAny()
+        {
+            return "public";
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void CreateTable_WithAdjuster(DatabaseType type)
         {
             var tbl = GetTestDatabase(type).CreateTable("MyTable", new[]

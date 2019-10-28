@@ -426,6 +426,11 @@ namespace FAnsi.Discovery
             return string.IsNullOrWhiteSpace(reason);
         }
 
+        public virtual string GetDefaultSchemaIfAny()
+        {
+            return null;
+        }
+
         /// <summary>
         /// returns null if the name is valid.  Otherwise a string describing why it is invalid.
         /// </summary>
