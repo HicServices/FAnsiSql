@@ -264,6 +264,27 @@ namespace FAnsiTests.Table
             tbl.Drop();
         }
 
+        [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
+        public void Test_DropColumn(DatabaseType dbType)
+        {
+            var db = GetTestDatabase(dbType);
+
+            var tbl = db.CreateTable("RaceTable", new[]
+            {
+                new DatabaseColumnRequest("A", "int"){IsPrimaryKey = true},
+                new DatabaseColumnRequest("B", "int")
+
+            });
+            
+            Assert.AreEqual(2,tbl.GetDataTable().Columns.Count);
+
+            tbl.DropColumn(tbl.DiscoverColumn("B"));
+
+            Assert.AreEqual(1, tbl.GetDataTable().Columns.Count);
+
+            tbl.Drop();
+        }
+
         [Test]
         public void Test_OracleBit_IsActuallyString()
         {

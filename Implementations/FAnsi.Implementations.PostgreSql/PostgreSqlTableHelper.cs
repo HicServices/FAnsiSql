@@ -136,7 +136,14 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
-            throw new NotImplementedException();
+            var cmd = new NpgsqlCommand(
+                string.Format(
+                    @"ALTER TABLE {0} 
+DROP COLUMN ""{1}"";",columnToDrop.Table.GetFullyQualifiedName(),
+                    columnToDrop.GetRuntimeName()
+                    ),(NpgsqlConnection) connection);
+
+            cmd.ExecuteNonQuery();
         }
 
         public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,

@@ -10,14 +10,7 @@ namespace FAnsiTests.Table
 {
     class ForeignKeyTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer, false)]
-        [TestCase(DatabaseType.MySql, true)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.Oracle, true)]
-        [TestCase(DatabaseType.Oracle, false)]
-        [TestCase(DatabaseType.PostgreSql, true)]
-        [TestCase(DatabaseType.PostgreSql, false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void TestForeignKey_OneColumnKey(DatabaseType dbType, bool cascade)
         {
             var db = GetTestDatabase(dbType);
@@ -133,14 +126,7 @@ namespace FAnsiTests.Table
             parentTable.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.Oracle,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.Oracle,false)]
-        [TestCase(DatabaseType.PostgreSql,true)]
-        [TestCase(DatabaseType.PostgreSql,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void Test_ThreeTables_OnePrimary(DatabaseType dbType, bool useTransaction)
         {
             /*       t2
