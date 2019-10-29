@@ -74,7 +74,7 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
         {
-            throw new NotImplementedException();
+            return new DiscoveredStoredprocedure[0];
         }
 
         public override IDiscoveredTableHelper GetTableHelper()
