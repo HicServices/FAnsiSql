@@ -77,12 +77,12 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override Dictionary<string, string> GetSQLFunctionsDictionary()
         {
-            throw new NotImplementedException();
+            return new Dictionary<string, string>();
         }
 
         public override string HowDoWeAchieveMd5(string selectSql)
         {
-            throw new NotImplementedException();
+            return $"MD5({selectSql})";
         }
 
         public override string GetDefaultSchemaIfAny()
