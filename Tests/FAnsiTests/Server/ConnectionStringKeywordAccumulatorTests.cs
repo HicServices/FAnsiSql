@@ -108,10 +108,7 @@ namespace FAnsiTests.Server
         }
 
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestKeywords_Invalid(DatabaseType databaseType)
         {
             var acc = new ConnectionStringKeywordAccumulator(databaseType);

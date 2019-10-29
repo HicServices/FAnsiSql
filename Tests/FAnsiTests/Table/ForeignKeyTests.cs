@@ -77,10 +77,7 @@ namespace FAnsiTests.Table
             parentTable.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestForeignKey_TwoColumnKey(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -209,10 +206,7 @@ namespace FAnsiTests.Table
             Assert.Contains(t3, sort2.Order.ToList());
         }
         
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_ThreeTables_TwoPrimary(DatabaseType dbType)
         {
             /*  t1

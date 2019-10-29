@@ -10,9 +10,7 @@ namespace FAnsiTests.Aggregation
 {
     class CalendarAggregationTests:AggregationTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_Calendar_Year(DatabaseType type)
         {
             var tbl = GetTestTable(type);
@@ -68,9 +66,7 @@ namespace FAnsiTests.Aggregation
             }
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_Calendar_Quarter(DatabaseType type)
         {
             var tbl = GetTestTable(type);
@@ -112,9 +108,7 @@ namespace FAnsiTests.Aggregation
             }
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_Calendar_Month(DatabaseType type)
         {
             var tbl = GetTestTable(type);
@@ -156,9 +150,7 @@ namespace FAnsiTests.Aggregation
             }
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_Calendar_Day(DatabaseType type)
         {
             var tbl = GetTestTable(type);
@@ -203,9 +195,7 @@ namespace FAnsiTests.Aggregation
         }
 
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_Calendar_ToToday(DatabaseType type)
         {
             var tbl = GetTestTable(type);
@@ -270,9 +260,7 @@ namespace FAnsiTests.Aggregation
         /// Tests to ensure that the order of the count(*) and EventDate columns don't matter
         /// </summary>
         /// <param name="type"></param>
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_Calendar_SELECTColumnOrder_CountAfterAxisColumn(DatabaseType type)
         {
             var tbl = GetTestTable(type);

@@ -318,10 +318,7 @@ namespace FAnsiTests
             tbl.Drop();
         }
 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]        [TestCase(DatabaseType.PostgreSql)]
         public void ForeignKeyCreationTest(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -473,10 +470,7 @@ namespace FAnsiTests
             }
         }
 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]        [TestCase(DatabaseType.PostgreSql)]
         public void CreateMaxVarcharColumns(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -499,10 +493,7 @@ namespace FAnsiTests
         }
 
 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]        [TestCase(DatabaseType.PostgreSql)]
         public void CreateMaxVarcharColumnFromDataTable(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -526,10 +517,7 @@ namespace FAnsiTests
             Assert.AreEqual(sb.ToString(),dt.Rows[0][0]);
         }
 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]        [TestCase(DatabaseType.PostgreSql)]
         public void CreateDateColumnFromDataTable(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -932,10 +920,7 @@ namespace FAnsiTests
             }
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTable_AutoIncrementColumnTest(DatabaseType type)
         {
             var database = GetTestDatabase(type, true);
@@ -972,10 +957,7 @@ namespace FAnsiTests
             Assert.AreEqual(2,autoIncrement);
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTable_DefaultTest(DatabaseType type)
         {
             var database = GetTestDatabase(type);

@@ -9,10 +9,7 @@ namespace FAnsiTests.Database
 {
     class DatabaseLevelTests : DatabaseTests
     {
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Database_Exists(DatabaseType type)
         {
             var server = GetTestDatabase(type);
@@ -32,10 +29,7 @@ namespace FAnsiTests.Database
             Assert.AreEqual(upperCase?"OMG":"omg",db.GetRuntimeName());
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_CreateSchema(DatabaseType type)
         {
             var db = GetTestDatabase(type);

@@ -216,10 +216,7 @@ namespace FAnsiTests.Table
             Assert.AreEqual(collation, tbl.DiscoverColumn("Name").Collation);
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTable_BoolStrings(DatabaseType type)
         {
             var db = GetTestDatabase(type);

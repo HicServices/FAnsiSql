@@ -75,9 +75,7 @@ namespace FAnsiTests.Table
             tbl.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTableAndInsertAValue_ReturnsIdentity(DatabaseType type)
         {
             var db = GetTestDatabase(type,true);

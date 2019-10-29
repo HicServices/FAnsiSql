@@ -9,20 +9,14 @@ namespace FAnsiTests.Server
 {
     class ServerLevelTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Server_Exists(DatabaseType type)
         {
             var server = GetTestServer(type);
             Assert.IsTrue(server.Exists(), "Server " + server + " did not exist");
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Server_RespondsWithinTime(DatabaseType type)
         {
             var server = GetTestServer(type);
@@ -34,10 +28,7 @@ namespace FAnsiTests.Server
         /// Tests systems ability to deal with missing information in the connection string
         /// </summary>
         /// <param name="type"></param>
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void ServerHelper_GetCurrentDatabase_WhenNoneSpecified(DatabaseType type)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();            
@@ -48,10 +39,7 @@ namespace FAnsiTests.Server
             Assert.AreEqual(null,server.GetCurrentDatabase());
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void ServerHelper_GetConnectionStringBuilder(DatabaseType type)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
@@ -72,15 +60,7 @@ namespace FAnsiTests.Server
         }
 
         
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.Oracle,true)]
-        [TestCase(DatabaseType.Oracle,false)]
-        [TestCase(DatabaseType.PostgreSql,true)]
-        [TestCase(DatabaseType.PostgreSql,false)]
-
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void ServerHelper_GetConnectionStringBuilder_NoDatabase(DatabaseType type,bool useWhitespace)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();

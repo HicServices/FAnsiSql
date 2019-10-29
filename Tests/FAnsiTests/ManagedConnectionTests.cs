@@ -11,9 +11,7 @@ namespace FAnsiTests
 {
     class ManagedConnectionTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_GetConnection_NotOpenAtStart(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -29,9 +27,7 @@ namespace FAnsiTests
         /// is no <see cref="IManagedTransaction"/> ongoing
         /// </summary>
         /// <param name="dbType"></param>
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_GetManagedConnection_AutoOpenClose(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -53,9 +49,7 @@ namespace FAnsiTests
         /// a new transaction
         /// </summary>
         /// <param name="dbType"></param>
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_BeginNewTransactedConnection_AutoOpenClose(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -80,9 +74,7 @@ namespace FAnsiTests
         /// opening and closing their own connections or do have a <see cref="IManagedTransaction"/> and ignore open/dispose step</para>
         /// </summary>
         /// <param name="dbType"></param>
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_GetManagedConnection_OngoingTransaction(DatabaseType dbType)
         {
             DiscoveredDatabase db = GetTestDatabase(dbType);
@@ -166,9 +158,7 @@ namespace FAnsiTests
         }
 
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_ManagedTransaction_MultipleCancel(DatabaseType dbType)
         {
             DiscoveredDatabase db = GetTestDatabase(dbType);
@@ -189,9 +179,7 @@ namespace FAnsiTests
         /// a new transaction
         /// </summary>
         /// <param name="dbType"></param>
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_Clone_AutoOpenClose(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);

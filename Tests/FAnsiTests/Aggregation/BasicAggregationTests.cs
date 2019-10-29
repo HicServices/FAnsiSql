@@ -9,9 +9,7 @@ namespace FAnsiTests.Aggregation
 {
     class BasicAggregationTests : AggregationTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_BasicCount(DatabaseType type)
         {
             var tbl = GetTestTable(type);
@@ -35,9 +33,7 @@ namespace FAnsiTests.Aggregation
         }
 
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_GroupByCount(DatabaseType type)
         {
             var tbl = GetTestTable(type);

@@ -17,10 +17,7 @@ namespace FAnsiTests.Table
 {
     internal class BulkInsertTest : DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_Basic(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -57,10 +54,7 @@ namespace FAnsiTests.Table
             }
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_ColumnOrdinals(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -97,10 +91,7 @@ namespace FAnsiTests.Table
             Assert.AreEqual(typeof(int),dt.Columns[0].DataType); //but the data type was changed by HardTyping it
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_Transaction(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -147,10 +138,7 @@ namespace FAnsiTests.Table
             Assert.AreEqual(3, tbl.GetRowCount());
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_AbandonTransaction(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -198,10 +186,7 @@ namespace FAnsiTests.Table
         }
 
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_AlterColumn_MidTransaction(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -255,10 +240,7 @@ namespace FAnsiTests.Table
             Assert.AreEqual(3, tbl.GetRowCount());
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void BulkInsert_MixedCase(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -283,10 +265,7 @@ namespace FAnsiTests.Table
             Assert.AreEqual(2, result.Rows.Count); //2 rows inserted
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void UnmatchedColumnsBulkInsertTest_UsesDefaultValues_Passes(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -332,10 +311,7 @@ namespace FAnsiTests.Table
         /// then maybe this test will be inconsistent?
         /// </summary>
         /// <param name="type"></param>
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void UnmatchedColumnsBulkInsertTest_UsesDefaultValues_TwoLargeBatches_Passes(DatabaseType type)
         {
             const int numberOfRowsPerBatch = 100010;
@@ -486,10 +462,7 @@ namespace FAnsiTests.Table
             tbl.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void NullPrimaryKey_ThrowsException(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -513,10 +486,7 @@ namespace FAnsiTests.Table
             }
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void AutoIncrementPrimaryKey_Passes(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -559,10 +529,7 @@ namespace FAnsiTests.Table
         }
 
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_ScientificNotation(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -645,10 +612,7 @@ namespace FAnsiTests.Table
             table.Drop();
         }   
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_SchemaTooNarrow_StringError(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);
@@ -714,10 +678,7 @@ namespace FAnsiTests.Table
             }
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_SchemaTooNarrow_DecimalError(DatabaseType type)
         {
             DiscoveredDatabase db = GetTestDatabase(type);

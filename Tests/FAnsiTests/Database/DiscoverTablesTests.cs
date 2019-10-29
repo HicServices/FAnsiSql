@@ -10,10 +10,7 @@ namespace FAnsiTests.Database
 {
     class DiscoverTablesTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MySql)] 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_DiscoverTables_Normal(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -43,10 +40,7 @@ namespace FAnsiTests.Database
         ///
         /// Correct behaviour is for DiscoverTables to not return any tables that have invalid names
         /// </summary>
-        [TestCase(DatabaseType.MySql)] 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_DiscoverTables_WithInvalidNames_Skipped(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -82,10 +76,7 @@ namespace FAnsiTests.Database
         /// As above test <see cref="Test_DiscoverTables_WithInvalidNames_Skipped"/> but creates a view with a bad name instead of a table
         /// </summary>
         /// <param name="dbType"></param>
-        [TestCase(DatabaseType.MySql)] 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_DiscoverViews_WithInvalidNames_Skipped(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);

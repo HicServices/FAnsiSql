@@ -8,10 +8,7 @@ namespace FAnsiTests.Table
 {
     public class TableTypeTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateView(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
