@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace FAnsi.Connections
 {
@@ -33,8 +34,9 @@ namespace FAnsi.Connections
             {
                 Transaction.Rollback();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Trace.WriteLine("Transaction rollback failed during AbandonAndCloseConnection" + e.Message);
             }
             finally
             {

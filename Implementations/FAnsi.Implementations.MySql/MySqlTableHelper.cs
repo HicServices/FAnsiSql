@@ -23,46 +23,49 @@ namespace FAnsi.Implementations.MySql
         {
             List<DiscoveredColumn> columns = new List<DiscoveredColumn>();
             var tableName = discoveredTable.GetRuntimeName();
-            
-            DbCommand cmd = discoveredTable.Database.Server.Helper.GetCommand(
+
+            using (DbCommand cmd = discoveredTable.Database.Server.Helper.GetCommand(
                 @"SELECT * FROM information_schema.`COLUMNS` 
 WHERE table_schema = @db
-  AND table_name = @tbl", connection.Connection);
-            cmd.Transaction = connection.Transaction;
-
-            var p = new MySqlParameter("@db", MySqlDbType.String);
-            p.Value = discoveredTable.Database.GetRuntimeName();
-            cmd.Parameters.Add(p);
-
-            p = new MySqlParameter("@tbl", MySqlDbType.String);
-            p.Value = discoveredTable.GetRuntimeName();
-            cmd.Parameters.Add(p);
-
-            using(DbDataReader r = cmd.ExecuteReader())
+  AND table_name = @tbl", connection.Connection))
             {
-                if (!r.HasRows)
-                    throw new Exception("Could not find any columns for table " + tableName + " in database " + database);
+                cmd.Transaction = connection.Transaction;
 
-                while (r.Read())
+                var p = new MySqlParameter("@db", MySqlDbType.String);
+                p.Value = discoveredTable.Database.GetRuntimeName();
+                cmd.Parameters.Add(p);
+
+                p = new MySqlParameter("@tbl", MySqlDbType.String);
+                p.Value = discoveredTable.GetRuntimeName();
+                cmd.Parameters.Add(p);
+
+                using(DbDataReader r = cmd.ExecuteReader())
                 {
-                    var toAdd = new DiscoveredColumn(discoveredTable, (string) r["COLUMN_NAME"],YesNoToBool(r["IS_NULLABLE"]));
+                    if (!r.HasRows)
+                        throw new Exception("Could not find any columns for table " + tableName + " in database " + database);
 
-                    if (r["COLUMN_KEY"].Equals("PRI"))
-                        toAdd.IsPrimaryKey = true;
+                    while (r.Read())
+                    {
+                        var toAdd = new DiscoveredColumn(discoveredTable, (string) r["COLUMN_NAME"],YesNoToBool(r["IS_NULLABLE"]));
+
+                        if (r["COLUMN_KEY"].Equals("PRI"))
+                            toAdd.IsPrimaryKey = true;
                     
-                    toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
-                    toAdd.Collation = r["COLLATION_NAME"] as string;
+                        toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
+                        toAdd.Collation = r["COLLATION_NAME"] as string;
 
-                    //todo the only way to know if something in MySql is unicode is by r["character_set_name"] 
+                        //todo the only way to know if something in MySql is unicode is by r["character_set_name"] 
 
 
-                    toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
-                    columns.Add(toAdd);
+                        toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
+                        columns.Add(toAdd);
 
+                    }
+
+                    r.Close();
                 }
-
-                r.Close();
             }
+            
 
             return columns.ToArray();
             
@@ -128,6 +131,8 @@ WHERE table_schema = @db
 
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
         {
+            Dictionary<string,DiscoveredRelationship> toReturn = new Dictionary<string,DiscoveredRelationship>();
+
             string sql = @"SELECT DISTINCT
 u.CONSTRAINT_NAME,
 u.TABLE_SCHEMA,
@@ -145,67 +150,67 @@ WHERE
   u.REFERENCED_TABLE_SCHEMA = @db AND
   u.REFERENCED_TABLE_NAME = @tbl";
 
-            var cmd = new MySqlCommand(sql, (MySqlConnection) connection);
-            
-            var p = new MySqlParameter("@db", MySqlDbType.String);
-            p.Value = table.Database.GetRuntimeName();
-            cmd.Parameters.Add(p);
-
-            p = new MySqlParameter("@tbl", MySqlDbType.String);
-            p.Value = table.GetRuntimeName();
-            cmd.Parameters.Add(p);
-
-            Dictionary<string,DiscoveredRelationship> toReturn = new Dictionary<string,DiscoveredRelationship>();
-
-            var dt = new DataTable();
-            var da = table.Database.Server.GetDataAdapter(cmd);
-            da.Fill(dt);
-
-            foreach(DataRow r in dt.Rows)
+            using (var cmd = new MySqlCommand(sql, (MySqlConnection) connection))
             {
-                var fkName = r["CONSTRAINT_NAME"].ToString();
-                
-                DiscoveredRelationship current;
+                var p = new MySqlParameter("@db", MySqlDbType.String);
+                p.Value = table.Database.GetRuntimeName();
+                cmd.Parameters.Add(p);
 
-                //could be a 2+ columns foreign key?
-                if (toReturn.ContainsKey(fkName))
+                p = new MySqlParameter("@tbl", MySqlDbType.String);
+                p.Value = table.GetRuntimeName();
+                cmd.Parameters.Add(p);
+
+                using (var dt = new DataTable())
                 {
-                    current = toReturn[fkName];
+                    var da = table.Database.Server.GetDataAdapter(cmd);
+                    da.Fill(dt);
+
+                    foreach(DataRow r in dt.Rows)
+                    {
+                        var fkName = r["CONSTRAINT_NAME"].ToString();
+                        
+                        DiscoveredRelationship current;
+
+                        //could be a 2+ columns foreign key?
+                        if (toReturn.ContainsKey(fkName))
+                        {
+                            current = toReturn[fkName];
+                        }
+                        else
+                        {
+                            var pkDb = r["REFERENCED_TABLE_SCHEMA"].ToString();
+                            var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
+
+                            var fkDb = r["TABLE_SCHEMA"].ToString();
+                            var fkTableName =  r["TABLE_NAME"].ToString();
+
+                            var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
+                            var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
+
+                            //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
+                            var deleteRuleString = r["DELETE_RULE"].ToString();
+
+                            CascadeRule deleteRule = CascadeRule.Unknown;
+                            
+                            if(deleteRuleString == "CASCADE")
+                                deleteRule = CascadeRule.Delete;
+                            else if(deleteRuleString == "NO ACTION")
+                                deleteRule = CascadeRule.NoAction;
+                            else if(deleteRuleString == "RESTRICT")
+                                deleteRule = CascadeRule.NoAction;
+                            else if (deleteRuleString == "SET NULL")
+                                deleteRule = CascadeRule.SetNull;
+                            else if (deleteRuleString == "SET DEFAULT")
+                                deleteRule = CascadeRule.SetDefault;
+
+                            current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                            toReturn.Add(current.Name,current);
+                        }
+
+                        current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
+                    }
                 }
-                else
-                {
-                    var pkDb = r["REFERENCED_TABLE_SCHEMA"].ToString();
-                    var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
-
-                    var fkDb = r["TABLE_SCHEMA"].ToString();
-                    var fkTableName =  r["TABLE_NAME"].ToString();
-
-                    var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
-                    var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
-
-                    //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
-                    var deleteRuleString = r["DELETE_RULE"].ToString();
-
-                    CascadeRule deleteRule = CascadeRule.Unknown;
-                    
-                    if(deleteRuleString == "CASCADE")
-                        deleteRule = CascadeRule.Delete;
-                    else if(deleteRuleString == "NO ACTION")
-                        deleteRule = CascadeRule.NoAction;
-                    else if(deleteRuleString == "RESTRICT")
-                        deleteRule = CascadeRule.NoAction;
-                    else if (deleteRuleString == "SET NULL")
-                        deleteRule = CascadeRule.SetNull;
-                    else if (deleteRuleString == "SET DEFAULT")
-                        deleteRule = CascadeRule.SetDefault;
-
-                    current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                    toReturn.Add(current.Name,current);
-                }
-
-                current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
             }
-            
             
             return toReturn.Values.ToArray();
         }

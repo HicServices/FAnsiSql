@@ -108,47 +108,49 @@ namespace FAnsi.Implementations.MicrosoftSQL
             {
                 con.Open();
                 SqlTransaction investigationTransaction = con.BeginTransaction("Investigate BulkCopyFailure");
-                SqlBulkCopy investigationOneLineAtATime = new SqlBulkCopy(con, SqlBulkCopyOptions.KeepIdentity, investigationTransaction)
+                using (SqlBulkCopy investigationOneLineAtATime = new SqlBulkCopy(con,SqlBulkCopyOptions.KeepIdentity,investigationTransaction)
                 {
                     DestinationTableName = insert.DestinationTableName
-                };
+                })
+                {
+                   
+                    foreach (SqlBulkCopyColumnMapping m in insert.ColumnMappings)
+                        investigationOneLineAtATime.ColumnMappings.Add(m);
 
-                foreach (SqlBulkCopyColumnMapping m in insert.ColumnMappings)
-                    investigationOneLineAtATime.ColumnMappings.Add(m);
-
-                //try a line at a time
-                foreach (DataRow dr in dt.Rows)
-                    try
-                    {
-                        investigationOneLineAtATime.WriteToServer(new[] { dr }); //try one line
-                        line++;
-                    }
-                    catch (Exception exception)
-                    {
-                        if (BcpColIdToString(investigationOneLineAtATime,exception as SqlException,out string result, out SqlBulkCopyColumnMapping badMapping))
+                    //try a line at a time
+                    foreach (DataRow dr in dt.Rows)
+                        try
                         {
-                            if (dt.Columns.Contains(badMapping.SourceColumn))
-                            {
-                                var sourceValue = dr[badMapping.SourceColumn];
-                                var destColumn = base.TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
-
-                                if(destColumn != null)
-                                    return new FileLoadException(
-                                        string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0__the_complaint_was_about_source_column____1____which_had_value____2____destination_data_type_was____3____4__5_, line, badMapping.SourceColumn, sourceValue, destColumn.DataType, Environment.NewLine, result), exception);
-                            }
-
-                            return new Exception(string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_, line, result), e);
+                            investigationOneLineAtATime.WriteToServer(new[] { dr }); //try one line
+                            line++;
                         }
+                        catch (Exception exception)
+                        {
+                            if (BcpColIdToString(investigationOneLineAtATime,exception as SqlException,out string result, out SqlBulkCopyColumnMapping badMapping))
+                            {
+                                if (dt.Columns.Contains(badMapping.SourceColumn))
+                                {
+                                    var sourceValue = dr[badMapping.SourceColumn];
+                                    var destColumn = base.TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
+
+                                    if(destColumn != null)
+                                        return new FileLoadException(
+                                            string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0__the_complaint_was_about_source_column____1____which_had_value____2____destination_data_type_was____3____4__5_, line, badMapping.SourceColumn, sourceValue, destColumn.DataType, Environment.NewLine, result), exception);
+                                }
+
+                                return new Exception(string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_, line, result), e);
+                            }
                         
-                        return  new FileLoadException(
-                            string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_, line, Environment.NewLine, string.Join(Environment.NewLine,dr.ItemArray), firstPass),
-                            exception);
-                    }
+                            return  new FileLoadException(
+                                string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_, line, Environment.NewLine, string.Join(Environment.NewLine,dr.ItemArray), firstPass),
+                                exception);
+                        }
 
-                //it worked... how!?
-                investigationTransaction.Rollback();
-                con.Close();
-
+                    //it worked... how!?
+                    investigationTransaction.Rollback();
+                    con.Close();
+                }
+                
                 return new Exception(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Bulk_insert_failed_but_when_we_tried_to_repeat_it_a_line_at_a_time_it_worked + firstPass , e);
             }
         }
