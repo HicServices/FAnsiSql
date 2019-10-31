@@ -21,6 +21,17 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.Oracle)]
+        public void Server_Constructors(DatabaseType dbType)
+        {
+              var helper = ImplementationManager.GetImplementation(dbType).GetServerHelper();
+              var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,null,null).ConnectionString,dbType);
+
+              Assert.AreEqual("localhost",server.Name);
+        }
+
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.Oracle)]
         public void Server_RespondsWithinTime(DatabaseType type)
         {
             var server = GetTestServer(type);
