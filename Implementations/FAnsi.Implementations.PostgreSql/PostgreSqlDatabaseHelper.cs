@@ -95,7 +95,7 @@ namespace FAnsi.Implementations.PostgreSql
             {
                 con.Open();
 
-                https://dba.stackexchange.com/a/11895
+                // https://dba.stackexchange.com/a/11895
                 
                 using(var cmd = new NpgsqlCommand($"UPDATE pg_database SET datallowconn = 'false' WHERE datname = '{database.GetRuntimeName()}';",con))
                     cmd.ExecuteNonQuery();

@@ -200,57 +200,60 @@ order by c.constraint_name, x.ordinal_position";
             var cmd = table.GetCommand(sql, connection, transaction?.Transaction);
 
             //fill data table to avoid multiple active readers
-            DataTable dt = new DataTable();
-            using(var da = new NpgsqlDataAdapter((NpgsqlCommand) cmd))
-                da.Fill(dt);
-
-            foreach(DataRow r in dt.Rows)
+            using (DataTable dt = new DataTable())
             {
-                var fkName = r["constraint_name"].ToString();
+                using(var da = new NpgsqlDataAdapter((NpgsqlCommand) cmd))
+                    da.Fill(dt);
 
-                DiscoveredRelationship current;
-
-                //could be a 2+ columns foreign key?
-                if (toReturn.ContainsKey(fkName))
+                foreach(DataRow r in dt.Rows)
                 {
-                    current = toReturn[fkName];
+                    var fkName = r["constraint_name"].ToString();
+
+                    DiscoveredRelationship current;
+
+                    //could be a 2+ columns foreign key?
+                    if (toReturn.ContainsKey(fkName))
+                    {
+                        current = toReturn[fkName];
+                    }
+                    else
+                    {
+
+                        var pkDb = table.Database.GetRuntimeName();
+                        var pkSchema = r["table_schema"].ToString();
+                        var pkTableName = r["table_name"].ToString();
+
+                        var fkDb = pkDb;
+                        var fkSchema = r["foreign_table_schema"].ToString();
+                        var fkTableName = r["foreign_table_name"].ToString();
+
+                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
+                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName,fkSchema);
+
+                        CascadeRule deleteRule = CascadeRule.Unknown;
+
+                        var deleteRuleString = r["delete_rule"].ToString();
+                        
+                        if (deleteRuleString == "CASCADE")
+                            deleteRule = CascadeRule.Delete;
+                        else if (deleteRuleString == "NO ACTION")
+                            deleteRule = CascadeRule.NoAction;
+                        else if (deleteRuleString == "RESTRICT")
+                            deleteRule = CascadeRule.NoAction;
+                        else if (deleteRuleString == "SET NULL")
+                            deleteRule = CascadeRule.SetNull;
+                        else if (deleteRuleString == "SET DEFAULT")
+                            deleteRule = CascadeRule.SetDefault;
+                        
+                        current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                        toReturn.Add(current.Name, current);
+                    }
+
+                    current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
                 }
-                else
-                {
-
-                    var pkDb = table.Database.GetRuntimeName();
-                    var pkSchema = r["table_schema"].ToString();
-                    var pkTableName = r["table_name"].ToString();
-
-                    var fkDb = pkDb;
-                    var fkSchema = r["foreign_table_schema"].ToString();
-                    var fkTableName = r["foreign_table_name"].ToString();
-
-                    var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
-                    var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName,fkSchema);
-
-                    CascadeRule deleteRule = CascadeRule.Unknown;
-
-                    var deleteRuleString = r["delete_rule"].ToString();
-                    
-                    if (deleteRuleString == "CASCADE")
-                        deleteRule = CascadeRule.Delete;
-                    else if (deleteRuleString == "NO ACTION")
-                        deleteRule = CascadeRule.NoAction;
-                    else if (deleteRuleString == "RESTRICT")
-                        deleteRule = CascadeRule.NoAction;
-                    else if (deleteRuleString == "SET NULL")
-                        deleteRule = CascadeRule.SetNull;
-                    else if (deleteRuleString == "SET DEFAULT")
-                        deleteRule = CascadeRule.SetDefault;
-                    
-                    current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
-                    toReturn.Add(current.Name, current);
-                }
-
-                current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
-            }
         
+            }
+            
 
             return toReturn.Values.ToArray();
         }

@@ -14,8 +14,6 @@ namespace FAnsi.Implementations.PostgreSql.Aggregation
 
         protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
         {
-            var syntaxHelper = new PostgreSqlSyntaxHelper();
-
             string interval;
 
             switch (query.Axis.AxisIncrement)
