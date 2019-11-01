@@ -128,6 +128,9 @@ namespace FAnsiTests.Server
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void ServerHelper_ChangeDatabase_AdHoc(DatabaseType type, bool useApiFirst)
         {
+            if(type == DatabaseType.Oracle)
+                Assert.Inconclusive("FAnsiSql understanding of Database cannot be encoded in DbConnectionStringBuilder sadly so we can end up with DiscoveredServer with no GetCurrentDatabase");
+
             //create initial server reference
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
             var server = new DiscoveredServer(helper.GetConnectionStringBuilder("loco","bob","franko","wacky"));
