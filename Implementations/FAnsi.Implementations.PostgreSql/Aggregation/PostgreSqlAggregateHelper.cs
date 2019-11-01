@@ -92,7 +92,7 @@ ORDER BY
                 case AxisIncrement.Year:
                     return $"date_part('year', {columnSql})";
                 case AxisIncrement.Quarter:
-                    return $"to_char({columnSql},'YYYY-\"Q\"Q')";
+                    return $"to_char({columnSql},'YYYY\"Q\"Q')";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(increment), increment, null);
             }
