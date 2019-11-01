@@ -37,8 +37,8 @@ namespace FAnsi.Discovery
                     throw new ArgumentOutOfRangeException("Unknown TableType");
             }
             
-            var cmd = tableToDrop.GetCommand(string.Format(sql,tableToDrop.GetFullyQualifiedName()),connection);
-            cmd.ExecuteNonQuery();
+            using(var cmd = tableToDrop.GetCommand(string.Format(sql,tableToDrop.GetFullyQualifiedName()),connection))
+                cmd.ExecuteNonQuery();
         }
 
         public abstract void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
@@ -48,8 +48,8 @@ namespace FAnsi.Discovery
         {
             using (var con = args.GetManagedConnection(table))
             {
-                var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + name + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"),con);
-                args.ExecuteNonQuery(cmd);
+                using(var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + name + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"),con))
+                    args.ExecuteNonQuery(cmd);
             }
         }
 
@@ -57,8 +57,8 @@ namespace FAnsi.Discovery
         {
             using (IManagedConnection connection = args.GetManagedConnection(table))
             {
-                var cmd  = table.Database.Server.GetCommand("SELECT count(*) FROM " + table.GetFullyQualifiedName(), connection);
-                return Convert.ToInt32(args.ExecuteScalar(cmd));
+                using(var cmd  = table.Database.Server.GetCommand("SELECT count(*) FROM " + table.GetFullyQualifiedName(), connection))
+                    return Convert.ToInt32(args.ExecuteScalar(cmd));
             }
         }
 
@@ -72,7 +72,8 @@ namespace FAnsi.Discovery
             using (var con = server.GetConnection())
             {
                 con.Open();
-                server.GetCommand("TRUNCATE TABLE " + discoveredTable.GetFullyQualifiedName(), con).ExecuteNonQuery();
+                using(var cmd = server.GetCommand("TRUNCATE TABLE " + discoveredTable.GetFullyQualifiedName(), con))
+                    cmd.ExecuteNonQuery();
             }
         }
 
@@ -139,8 +140,8 @@ namespace FAnsi.Discovery
 
             discoveredTable.GetQuerySyntaxHelper().ValidateTableName(newName);
 
-            DbCommand cmd = discoveredTable.Database.Server.Helper.GetCommand(GetRenameTableSql(discoveredTable, newName), connection.Connection, connection.Transaction);
-            cmd.ExecuteNonQuery();
+            using(DbCommand cmd = discoveredTable.Database.Server.Helper.GetCommand(GetRenameTableSql(discoveredTable, newName), connection.Connection, connection.Transaction))
+                cmd.ExecuteNonQuery();
         }
 
         public virtual void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
@@ -156,9 +157,8 @@ namespace FAnsi.Discovery
                         string.Join(",", discoverColumns.Select(c => syntax.EnsureWrapped(c.GetRuntimeName())))
                     );
 
-                    DbCommand cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
-
-                    args.ExecuteNonQuery(cmd);
+                    using(DbCommand cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction))
+                        args.ExecuteNonQuery(cmd);
                 }
                 catch (Exception e)
                 {
@@ -188,9 +188,9 @@ namespace FAnsi.Discovery
 
             using (var con = args.GetManagedConnection(table))
             {
-                var cmd = table.Database.Server.GetCommand(sql, con);
-                var da = table.Database.Server.GetDataAdapter(cmd);
-                args.Fill(da,cmd, dt);
+                using(var cmd = table.Database.Server.GetCommand(sql, con))
+                    using(var da = table.Database.Server.GetDataAdapter(cmd))
+                        args.Fill(da,cmd, dt);
             }
         }
 
@@ -221,7 +221,8 @@ namespace FAnsi.Discovery
             {
                 try
                 {
-                    args.ExecuteNonQuery(primary.Database.Server.GetCommand(sql, con));
+                    using(var cmd = primary.Database.Server.GetCommand(sql, con))
+                        args.ExecuteNonQuery(cmd);
                 }
                 catch (Exception e)
                 {
@@ -248,25 +249,34 @@ namespace FAnsi.Discovery
             var tempTable = discoveredTable.Database.ExpectTable(discoveredTable.GetRuntimeName() + "_DistinctingTemp").GetFullyQualifiedName();
 
 
-            using (var con = args.TransactionIfAny  == null ? 
-                server.BeginNewTransactedConnection():  //start a new transaction
-                args.GetManagedConnection(server))      //or continue the ongoing transaction
+            using (var con = args.TransactionIfAny == null
+                ? server.BeginNewTransactedConnection()
+                : //start a new transaction
+                args.GetManagedConnection(server)) //or continue the ongoing transaction
             {
-                var cmdDistinct = server.GetCommand(string.Format("CREATE TABLE {1} AS SELECT distinct * FROM {0}", tableName, tempTable), con);
-                args.ExecuteNonQuery(cmdDistinct);
+                using (var cmdDistinct =
+                    server.GetCommand(
+                        string.Format("CREATE TABLE {1} AS SELECT distinct * FROM {0}", tableName, tempTable), con))
+                    args.ExecuteNonQuery(cmdDistinct);
 
                 //this is the point of no return so don't cancel after this point
-                var cmdTruncate = server.GetCommand(string.Format("DELETE FROM {0}", tableName), con);
-                cmdTruncate.CommandTimeout = args.TimeoutInSeconds;
-                cmdTruncate.ExecuteNonQuery();
+                using (var cmdTruncate = server.GetCommand(string.Format("DELETE FROM {0}", tableName), con))
+                {
+                    cmdTruncate.CommandTimeout = args.TimeoutInSeconds;
+                    cmdTruncate.ExecuteNonQuery();
+                }
+                
+                using(var cmdBack = server.GetCommand(string.Format("INSERT INTO {0} (SELECT * FROM {1})", tableName, tempTable), con))
+                {
+                    cmdBack.CommandTimeout = args.TimeoutInSeconds;
+                    cmdBack.ExecuteNonQuery();
+                }
 
-                var cmdBack = server.GetCommand(string.Format("INSERT INTO {0} (SELECT * FROM {1})", tableName, tempTable), con);
-                cmdBack.CommandTimeout = args.TimeoutInSeconds;
-                cmdBack.ExecuteNonQuery();
-
-                var cmdDropDistinctTable = server.GetCommand(string.Format("DROP TABLE {0}", tempTable), con);
-                cmdDropDistinctTable.CommandTimeout = args.TimeoutInSeconds;
-                cmdDropDistinctTable.ExecuteNonQuery();
+                using(var cmdDropDistinctTable = server.GetCommand(string.Format("DROP TABLE {0}", tempTable), con))
+                {
+                    cmdDropDistinctTable.CommandTimeout = args.TimeoutInSeconds;
+                    cmdDropDistinctTable.ExecuteNonQuery();
+                }
 
                 //if we opened a new transaction we should commit it
                 if(args.TransactionIfAny == null)

@@ -196,12 +196,11 @@ We can still execute raw ANSI Sql against the table
 ```csharp
 using (DbConnection con = server.GetConnection())
 {
-	con.Open();
-	DbCommand cmd = server.GetCommand("Select * from " + table.GetFullyQualifiedName(), con);
-	DbDataReader r = cmd.ExecuteReader();
-
-	while (r.Read())
-		Console.WriteLine(string.Join(",", r["Name"],r["DateOfBirth"]));
+    con.Open();
+    using(DbCommand cmd = server.GetCommand("Select * from " + table.GetFullyQualifiedName(), con))
+        using(DbDataReader r = cmd.ExecuteReader())
+            while (r.Read())
+                Console.WriteLine(string.Join(",", r["Name"],r["DateOfBirth"]));
 }
 ```
 

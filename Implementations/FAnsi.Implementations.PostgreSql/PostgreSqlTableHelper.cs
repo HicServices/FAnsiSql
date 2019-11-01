@@ -21,43 +21,47 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
         {
+            List<DiscoveredColumn> toReturn = new List<DiscoveredColumn>();
+
             string sqlColumns = @"SELECT *
                 FROM information_schema.columns
             WHERE table_schema = @schemaName
             AND table_name   = @tableName;";
 
-            DbCommand cmd = discoveredTable.GetCommand(sqlColumns, connection.Connection, connection.Transaction);
-
-            var p = cmd.CreateParameter();
-            p.ParameterName = "@tableName";
-            p.Value = discoveredTable.GetRuntimeName();
-            cmd.Parameters.Add(p);
+            using (DbCommand cmd =
+                discoveredTable.GetCommand(sqlColumns, connection.Connection, connection.Transaction))
+            {
+                var p = cmd.CreateParameter();
+                p.ParameterName = "@tableName";
+                p.Value = discoveredTable.GetRuntimeName();
+                cmd.Parameters.Add(p);
             
-            var p2 = cmd.CreateParameter();
-            p2.ParameterName = "@schemaName";
-            p2.Value = string.IsNullOrWhiteSpace(discoveredTable.Schema) ? PostgreSqlSyntaxHelper.DefaultPostgresSchema : discoveredTable.Schema;
-            cmd.Parameters.Add(p2);
+                var p2 = cmd.CreateParameter();
+                p2.ParameterName = "@schemaName";
+                p2.Value = string.IsNullOrWhiteSpace(discoveredTable.Schema) ? PostgreSqlSyntaxHelper.DefaultPostgresSchema : discoveredTable.Schema;
+                cmd.Parameters.Add(p2);
 
-            List<DiscoveredColumn> toReturn = new List<DiscoveredColumn>();
+            
+                using (var r = cmd.ExecuteReader())
+                    while (r.Read())
+                    {
+                        bool isNullable = string.Equals(r["is_nullable"] , "YES");
 
-
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                {
-                    bool isNullable = string.Equals(r["is_nullable"] , "YES");
-
-                    //if it is a table valued function prefix the column name with the table valued function name
-                    string columnName = discoveredTable is DiscoveredTableValuedFunction
-                        ? discoveredTable.GetRuntimeName() + "." + r["column_name"]
-                        : r["column_name"].ToString();
+                        //if it is a table valued function prefix the column name with the table valued function name
+                        string columnName = discoveredTable is DiscoveredTableValuedFunction
+                            ? discoveredTable.GetRuntimeName() + "." + r["column_name"]
+                            : r["column_name"].ToString();
                         
-                    var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable);
-                    toAdd.IsAutoIncrement = string.Equals(r["is_identity"],"YES");
+                        var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable);
+                        toAdd.IsAutoIncrement = string.Equals(r["is_identity"],"YES");
 
-                    toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
-                    toAdd.Collation = r["collation_name"] as string;
-                    toReturn.Add(toAdd);
-                }
+                        toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
+                        toAdd.Collation = r["collation_name"] as string;
+                        toReturn.Add(toAdd);
+                    }
+            }
+
+            
 
             if(!toReturn.Any())
                 throw new Exception("Could not find any columns in table " + discoveredTable);
@@ -90,17 +94,20 @@ namespace FAnsi.Implementations.PostgreSql
             AND indisprimary";
 
             List<string> toReturn = new List<string>();
-                
-            DbCommand cmd = table.GetCommand(query, con.Connection);
-            cmd.Transaction = con.Transaction;
 
-            using(DbDataReader r = cmd.ExecuteReader())
+            using (DbCommand cmd = table.GetCommand(query, con.Connection))
             {
-                while (r.Read())
-                    toReturn.Add((string) r["attname"]);
+                cmd.Transaction = con.Transaction;
 
-                r.Close();
+                using(DbDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                        toReturn.Add((string) r["attname"]);
+
+                    r.Close();
+                }
             }
+            
             return toReturn.ToArray();
         }
 
@@ -197,64 +204,63 @@ order by c.constraint_name, x.ordinal_position";
             
             Dictionary<string, DiscoveredRelationship> toReturn = new Dictionary<string, DiscoveredRelationship>();
 
-            var cmd = table.GetCommand(sql, connection, transaction?.Transaction);
-
-            //fill data table to avoid multiple active readers
-            using (DataTable dt = new DataTable())
+            using (var cmd = table.GetCommand(sql, connection, transaction?.Transaction))
             {
-                using(var da = new NpgsqlDataAdapter((NpgsqlCommand) cmd))
-                    da.Fill(dt);
-
-                foreach(DataRow r in dt.Rows)
+                //fill data table to avoid multiple active readers
+                using (DataTable dt = new DataTable())
                 {
-                    var fkName = r["constraint_name"].ToString();
+                    using(var da = new NpgsqlDataAdapter((NpgsqlCommand) cmd))
+                        da.Fill(dt);
 
-                    DiscoveredRelationship current;
-
-                    //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
+                    foreach(DataRow r in dt.Rows)
                     {
-                        current = toReturn[fkName];
+                        var fkName = r["constraint_name"].ToString();
+
+                        DiscoveredRelationship current;
+
+                        //could be a 2+ columns foreign key?
+                        if (toReturn.ContainsKey(fkName))
+                        {
+                            current = toReturn[fkName];
+                        }
+                        else
+                        {
+                            var pkDb = table.Database.GetRuntimeName();
+                            var pkSchema = r["table_schema"].ToString();
+                            var pkTableName = r["table_name"].ToString();
+
+                            var fkDb = pkDb;
+                            var fkSchema = r["foreign_table_schema"].ToString();
+                            var fkTableName = r["foreign_table_name"].ToString();
+
+                            var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
+                            var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName,fkSchema);
+
+                            CascadeRule deleteRule = CascadeRule.Unknown;
+
+                            var deleteRuleString = r["delete_rule"].ToString();
+                            
+                            if (deleteRuleString == "CASCADE")
+                                deleteRule = CascadeRule.Delete;
+                            else if (deleteRuleString == "NO ACTION")
+                                deleteRule = CascadeRule.NoAction;
+                            else if (deleteRuleString == "RESTRICT")
+                                deleteRule = CascadeRule.NoAction;
+                            else if (deleteRuleString == "SET NULL")
+                                deleteRule = CascadeRule.SetNull;
+                            else if (deleteRuleString == "SET DEFAULT")
+                                deleteRule = CascadeRule.SetDefault;
+                            
+                            current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                            toReturn.Add(current.Name, current);
+                        }
+
+                        current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
                     }
-                    else
-                    {
-
-                        var pkDb = table.Database.GetRuntimeName();
-                        var pkSchema = r["table_schema"].ToString();
-                        var pkTableName = r["table_name"].ToString();
-
-                        var fkDb = pkDb;
-                        var fkSchema = r["foreign_table_schema"].ToString();
-                        var fkTableName = r["foreign_table_name"].ToString();
-
-                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
-                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName,fkSchema);
-
-                        CascadeRule deleteRule = CascadeRule.Unknown;
-
-                        var deleteRuleString = r["delete_rule"].ToString();
-                        
-                        if (deleteRuleString == "CASCADE")
-                            deleteRule = CascadeRule.Delete;
-                        else if (deleteRuleString == "NO ACTION")
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleString == "RESTRICT")
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleString == "SET NULL")
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleString == "SET DEFAULT")
-                            deleteRule = CascadeRule.SetDefault;
-                        
-                        current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
-                        toReturn.Add(current.Name, current);
-                    }
-
-                    current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
+            
                 }
-        
             }
             
-
             return toReturn.Values.ToArray();
         }
 

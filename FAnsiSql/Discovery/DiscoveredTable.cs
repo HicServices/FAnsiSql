@@ -448,19 +448,21 @@ namespace FAnsi.Discovery
                     string.Join(",",toInsert.Keys.Select(c=>_parameterNames[c]))
                     );
 
-                var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
-
-                foreach (KeyValuePair<DiscoveredColumn, object> kvp in toInsert)
+                using(var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction))
                 {
-                    var parameter = server.Helper.GetParameter(_parameterNames[kvp.Key]);
 
-                    var p = GetQuerySyntaxHelper().GetParameter(parameter, kvp.Key, kvp.Value,culture);
-                    cmd.Parameters.Add(p);
+                    foreach (KeyValuePair<DiscoveredColumn, object> kvp in toInsert)
+                    {
+                        var parameter = server.Helper.GetParameter(_parameterNames[kvp.Key]);
+
+                        var p = GetQuerySyntaxHelper().GetParameter(parameter, kvp.Key, kvp.Value,culture);
+                        cmd.Parameters.Add(p);
+                    }
+
+                    int result = Helper.ExecuteInsertReturningIdentity(this, cmd, connection.ManagedTransaction);
+
+                    return result;
                 }
-
-                int result = Helper.ExecuteInsertReturningIdentity(this, cmd, connection.ManagedTransaction);
-
-                return result;
             }
         }
 

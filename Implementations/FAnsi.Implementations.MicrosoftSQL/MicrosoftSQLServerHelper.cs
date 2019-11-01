@@ -97,15 +97,13 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
         public override string[] ListDatabases(DbConnection con)
         {
-            var cmd = GetCommand("select name [Database] from master..sysdatabases", con);
-            
-            DbDataReader r = cmd.ExecuteReader();
-
             List<string> databases = new List<string>();
 
-            while (r.Read())
-                databases.Add((string) r["Database"]);
-
+            using(var cmd = GetCommand("select name [Database] from master..sysdatabases", con))
+                using (DbDataReader r = cmd.ExecuteReader())
+                    while (r.Read())
+                        databases.Add((string) r["Database"]);
+            
             con.Close();
             return databases.ToArray();
         }

@@ -320,9 +320,9 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
                 //apparently * doesn't fly with Oracle DataAdapter
                 string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY" ;
 
-                var cmd = table.Database.Server.GetCommand(sql, con);
-                var da = table.Database.Server.GetDataAdapter(cmd);
-                args.Fill(da,cmd, dt);
+                using(var cmd = table.Database.Server.GetCommand(sql, con))
+                    using(var da = table.Database.Server.GetDataAdapter(cmd))
+                        args.Fill(da,cmd, dt);
             }
         }
 

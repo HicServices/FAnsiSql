@@ -314,52 +314,54 @@ REFERENCES {2}({3}) {4}",
             string sqlBatch = string.Empty;
 
             var helper = ImplementationManager.GetImplementation(conn).GetServerHelper();
+
+            using (DbCommand cmd = helper.GetCommand(string.Empty, conn, transaction))
+            {
+                bool hadToOpen = false;
             
-            DbCommand cmd = helper.GetCommand(string.Empty, conn, transaction);
-            bool hadToOpen = false;
-
-            if (conn.State != ConnectionState.Open)
-            {
-
-                conn.Open();
-                hadToOpen = true;
-            }
-
-            int lineNumber = 1;
-
-            sql += "\nGO";   // make sure last batch is executed.
-            try
-            {
-                foreach (string line in sql.Split(new[] { "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
+                if (conn.State != ConnectionState.Open)
                 {
-                    lineNumber++;
 
-                    if (line.ToUpperInvariant().Trim() == "GO")
+                    conn.Open();
+                    hadToOpen = true;
+                }
+
+                int lineNumber = 1;
+
+                sql += "\nGO";   // make sure last batch is executed.
+                try
+                {
+                    foreach (string line in sql.Split(new[] { "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
                     {
-                        if (string.IsNullOrWhiteSpace(sqlBatch))
-                            continue;
+                        lineNumber++;
 
-                        if (!performanceFigures.ContainsKey(lineNumber))
-                            performanceFigures.Add(lineNumber, new Stopwatch());
-                        performanceFigures[lineNumber].Start();
+                        if (line.ToUpperInvariant().Trim() == "GO")
+                        {
+                            if (string.IsNullOrWhiteSpace(sqlBatch))
+                                continue;
 
-                        cmd.CommandText = sqlBatch;
-                        cmd.CommandTimeout = timeout;
-                        cmd.ExecuteNonQuery();
+                            if (!performanceFigures.ContainsKey(lineNumber))
+                                performanceFigures.Add(lineNumber, new Stopwatch());
+                            performanceFigures[lineNumber].Start();
 
-                        performanceFigures[lineNumber].Stop();
-                        sqlBatch = string.Empty;
-                    }
-                    else
-                    {
-                        sqlBatch += line + "\n";
+                            cmd.CommandText = sqlBatch;
+                            cmd.CommandTimeout = timeout;
+                            cmd.ExecuteNonQuery();
+
+                            performanceFigures[lineNumber].Stop();
+                            sqlBatch = string.Empty;
+                        }
+                        else
+                        {
+                            sqlBatch += line + "\n";
+                        }
                     }
                 }
-            }
-            finally
-            {
-                if (hadToOpen)
-                    conn.Close();
+                finally
+                {
+                    if (hadToOpen)
+                        conn.Close();
+                }
             }
         }
     }

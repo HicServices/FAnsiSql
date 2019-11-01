@@ -17,7 +17,9 @@ namespace FAnsi.Implementations.MicrosoftSQL
     {
         public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
         {
-            DbCommand cmd = discoveredTable.GetCommand("use [" + database + @"];
+            List<DiscoveredColumn> toReturn = new List<DiscoveredColumn>();
+
+            using (DbCommand cmd = discoveredTable.GetCommand("use [" + database + @"];
 SELECT  
 sys.columns.name AS COLUMN_NAME,
  sys.types.name AS TYPE_NAME,
@@ -31,33 +33,31 @@ sys.columns.collation_name
 from sys.columns 
 join 
 sys.types on sys.columns.user_type_id = sys.types.user_type_id
-where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Transaction);
+where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Transaction))
+            {
+                var p = cmd.CreateParameter();
+                p.ParameterName = "@tableName";
+                p.Value = GetObjectName(discoveredTable);
+                cmd.Parameters.Add(p);
 
-            var p = cmd.CreateParameter();
-            p.ParameterName = "@tableName";
-            p.Value = GetObjectName(discoveredTable);
-            cmd.Parameters.Add(p);
+                using (var r = cmd.ExecuteReader())
+                    while (r.Read())
+                    {
+                        bool isNullable = Convert.ToBoolean(r["is_nullable"]);
 
-            List<DiscoveredColumn> toReturn = new List<DiscoveredColumn>();
+                        //if it is a table valued function prefix the column name with the table valued function name
+                        string columnName = discoveredTable is DiscoveredTableValuedFunction
+                            ? discoveredTable.GetRuntimeName() + "." + r["COLUMN_NAME"]
+                            : r["COLUMN_NAME"].ToString();
 
+                        var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable);
+                        toAdd.IsAutoIncrement = Convert.ToBoolean(r["is_identity"]);
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                {
-                    bool isNullable = Convert.ToBoolean(r["is_nullable"]);
-
-                    //if it is a table valued function prefix the column name with the table valued function name
-                    string columnName = discoveredTable is DiscoveredTableValuedFunction
-                        ? discoveredTable.GetRuntimeName() + "." + r["COLUMN_NAME"]
-                        : r["COLUMN_NAME"].ToString();
-
-                    var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable);
-                    toAdd.IsAutoIncrement = Convert.ToBoolean(r["is_identity"]);
-
-                    toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
-                    toAdd.Collation = r["collation_name"] as string;
-                    toReturn.Add(toAdd);
-                }
+                        toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
+                        toAdd.Collation = r["collation_name"] as string;
+                        toReturn.Add(toAdd);
+                    }
+            }
 
             if(!toReturn.Any())
                 throw new Exception("Could not find any columns in table " + discoveredTable);
@@ -190,8 +190,8 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
                     foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))
                     {
                         var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
-                        var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
-                        args.ExecuteNonQuery(alterCmd);
+                        using(var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction))
+                            args.ExecuteNonQuery(alterCmd);
                     }
                 }
             }
@@ -209,90 +209,90 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
 
             string sql = "exec sp_fkeys @pktable_name = @table, @pktable_qualifier=@database, @pktable_owner=@schema";
 
-            DbCommand cmd = table.GetCommand(sql, connection);
-            if(transaction != null)
-                cmd.Transaction = transaction.Transaction;
-            
-            var p = cmd.CreateParameter();
-            p.ParameterName = "@table";
-            p.Value = table.GetRuntimeName();
-            p.DbType = DbType.String;
-            cmd.Parameters.Add(p);
-
-            p = cmd.CreateParameter();
-            p.ParameterName = "@schema";
-            p.Value = table.Schema ?? "dbo";
-            p.DbType = DbType.String;
-            cmd.Parameters.Add(p);
-            
-            p = cmd.CreateParameter();
-            p.ParameterName = "@database";
-            p.Value = table.Database.GetRuntimeName();
-            p.DbType = DbType.String;
-            cmd.Parameters.Add(p);
-
-            using (DataTable dt = new DataTable())
+            using (DbCommand cmd = table.GetCommand(sql, connection))
             {
-                var da = table.Database.Server.GetDataAdapter(cmd);
-                da.Fill(dt);
+                if(transaction != null)
+                    cmd.Transaction = transaction.Transaction;
+            
+                var p = cmd.CreateParameter();
+                p.ParameterName = "@table";
+                p.Value = table.GetRuntimeName();
+                p.DbType = DbType.String;
+                cmd.Parameters.Add(p);
+
+                p = cmd.CreateParameter();
+                p.ParameterName = "@schema";
+                p.Value = table.Schema ?? "dbo";
+                p.DbType = DbType.String;
+                cmd.Parameters.Add(p);
                 
-                foreach(DataRow r in dt.Rows)
+                p = cmd.CreateParameter();
+                p.ParameterName = "@database";
+                p.Value = table.Database.GetRuntimeName();
+                p.DbType = DbType.String;
+                cmd.Parameters.Add(p);
+
+                using (DataTable dt = new DataTable())
                 {
-                    var fkName = r["FK_NAME"].ToString();
+                    var da = table.Database.Server.GetDataAdapter(cmd);
+                    da.Fill(dt);
                     
-                    DiscoveredRelationship current;
-
-                    //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
+                    foreach(DataRow r in dt.Rows)
                     {
-                        current = toReturn[fkName];
-                    }
-                    else
-                    {
-                        var pkdb = r["PKTABLE_QUALIFIER"].ToString();
-                        var pkschema = r["PKTABLE_OWNER"].ToString();
-                        var pktableName = r["PKTABLE_NAME"].ToString();
-
-                        var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
-
-                        var fkdb = r["FKTABLE_QUALIFIER"].ToString();
-                        var fkschema = r["FKTABLE_OWNER"].ToString();
-                        var fktableName = r["FKTABLE_NAME"].ToString();
-
-                        var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
-
-                        var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
-                        CascadeRule deleteRule = CascadeRule.Unknown;
+                        var fkName = r["FK_NAME"].ToString();
                         
+                        DiscoveredRelationship current;
 
-                        if(deleteRuleInt == 0)
-                            deleteRule = CascadeRule.Delete;
-                        else if(deleteRuleInt == 1)
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleInt == 2)
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleInt == 3)
-                            deleteRule = CascadeRule.SetDefault;
+                        //could be a 2+ columns foreign key?
+                        if (toReturn.ContainsKey(fkName))
+                        {
+                            current = toReturn[fkName];
+                        }
+                        else
+                        {
+                            var pkdb = r["PKTABLE_QUALIFIER"].ToString();
+                            var pkschema = r["PKTABLE_OWNER"].ToString();
+                            var pktableName = r["PKTABLE_NAME"].ToString();
 
-                        
-                        /*
-    https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-fkeys-transact-sql?view=sql-server-2017
-                         
-    0=CASCADE changes to foreign key.
-    1=NO ACTION changes if foreign key is present.
-    2 = set null
-    3 = set default*/
+                            var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
 
-                        current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                        toReturn.Add(current.Name,current);
+                            var fkdb = r["FKTABLE_QUALIFIER"].ToString();
+                            var fkschema = r["FKTABLE_OWNER"].ToString();
+                            var fktableName = r["FKTABLE_NAME"].ToString();
+
+                            var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
+
+                            var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
+                            CascadeRule deleteRule = CascadeRule.Unknown;
+                            
+
+                            if(deleteRuleInt == 0)
+                                deleteRule = CascadeRule.Delete;
+                            else if(deleteRuleInt == 1)
+                                deleteRule = CascadeRule.NoAction;
+                            else if (deleteRuleInt == 2)
+                                deleteRule = CascadeRule.SetNull;
+                            else if (deleteRuleInt == 3)
+                                deleteRule = CascadeRule.SetDefault;
+
+                            
+                            /*
+        https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-fkeys-transact-sql?view=sql-server-2017
+                             
+        0=CASCADE changes to foreign key.
+        1=NO ACTION changes if foreign key is present.
+        2 = set null
+        3 = set default*/
+
+                            current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                            toReturn.Add(current.Name,current);
+                        }
+
+                        current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
                     }
-
-                    current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
                 }
             }
-
             
-
             return toReturn.Values.ToArray();
 
         }
@@ -326,8 +326,8 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
 
             using (var con = args.GetManagedConnection(server))
             {
-                var cmd = server.GetCommand(sqlToExecute, con);
-                args.ExecuteNonQuery(cmd);
+                using(var cmd = server.GetCommand(sqlToExecute, con))
+                    args.ExecuteNonQuery(cmd);
             }
         }
 
@@ -384,17 +384,19 @@ AND i.index_id = ic.index_id
 WHERE (i.is_primary_key = 1) AND ic.OBJECT_ID = OBJECT_ID('{0}')
 ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal", GetObjectName(table));
 
-            DbCommand cmd = table.GetCommand(query, con.Connection);
-            cmd.Transaction = con.Transaction;
-
-            using(DbDataReader r = cmd.ExecuteReader())
+            using (DbCommand cmd = table.GetCommand(query, con.Connection))
             {
+                cmd.Transaction = con.Transaction;
+                using(DbDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                        toReturn.Add((string) r["ColumnName"]);
 
-                while (r.Read())
-                    toReturn.Add((string) r["ColumnName"]);
-
-                r.Close();
+                    r.Close();
+                }
             }
+
+            
             return toReturn.ToArray();
         }
     }

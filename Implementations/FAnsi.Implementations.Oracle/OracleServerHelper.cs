@@ -144,13 +144,12 @@ namespace FAnsi.Implementations.Oracle
 
         public override string[] ListDatabases(DbConnection con)
         {
-            var cmd = GetCommand("select * from all_users", con); //already comes as single column called Database
-            
             List<string> databases = new List<string>();
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                    databases.Add((string) r["username"]);
+            using(var cmd = GetCommand("select * from all_users", con)) //already comes as single column called Database
+                using (var r = cmd.ExecuteReader())
+                    while (r.Read())
+                        databases.Add((string) r["username"]);
             
             return databases.ToArray();
         }

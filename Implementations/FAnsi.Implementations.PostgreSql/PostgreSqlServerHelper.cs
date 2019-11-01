@@ -51,7 +51,8 @@ namespace FAnsi.Implementations.PostgreSql
             using(var con = new NpgsqlConnection(b.ConnectionString))
             {
                 con.Open();
-                GetCommand("CREATE DATABASE \"" + newDatabaseName.GetRuntimeName() + '"',con).ExecuteNonQuery();
+                using(var cmd = GetCommand("CREATE DATABASE \"" + newDatabaseName.GetRuntimeName() + '"',con))
+                    cmd.ExecuteNonQuery();
             }
         }
 
@@ -87,14 +88,12 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override string[] ListDatabases(DbConnection con)
         {
-            var cmd = GetCommand("SELECT datname FROM pg_database;", con);
-            
-            DbDataReader r = cmd.ExecuteReader();
-
             List<string> databases = new List<string>();
 
-            while (r.Read())
-                databases.Add((string) r["datname"]);
+            using(var cmd = GetCommand("SELECT datname FROM pg_database;", con))
+                using(DbDataReader r = cmd.ExecuteReader())
+                    while (r.Read())
+                        databases.Add((string) r["datname"]);
 
             con.Close();
             return databases.ToArray();
