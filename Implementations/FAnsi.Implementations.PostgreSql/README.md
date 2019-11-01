@@ -1,50 +1,50 @@
-# Oracle FAnsi Implementation
+# Postgres FAnsi Implementation
 
 # Feature Completeness
 
 - Server
-  - [ ] Check Exists
+  - [X] Check Exists
   - [ ] Describe 
-  - [ ] List Databases
+  - [X] List Databases
 
 - Database
-  - [ ] Create
-  - [ ] Drop
+  - [X] Create
+  - [X] Drop
   - [ ] Backup
   - [ ] Detach
-  - [ ] List Tables
+  - [X] List Tables
   - [ ] List Table Valued Functions
   - [ ] List Stored Proceedures
   
 - Table 
-  - [ ] Create
-  - [ ] Drop
-  - [ ] Script Table Structure
-  - [ ] MakeDistinct
-  - [ ] Bulk Insert
-  - [ ] Rename
-  - [ ] List Foreign Keys
+  - [X] Create
+  - [X] Drop
+  - [X] Script Table Structure
+  - [X] MakeDistinct
+  - [X] Bulk Insert
+  - [X] Rename
+  - [X] List Foreign Keys
   
 - Column
-  - [ ] Alter
+  - [X] Alter
   
 - Data Types
-  - [ ] [Translation](./../../Documentation/TypeTranslation.md)
-  - [ ] Bit
-  - [ ] String
-  - [ ] TimeSpan
-  - [ ] Decimal
-  - [ ] Date
-  - [ ] Auto Increment (Requires Oracle 12c)
-  - [ ] Unicode
+  - [X] [Translation](./../../Documentation/TypeTranslation.md)
+  - [X] Bit
+  - [X] String
+  - [X] TimeSpan
+  - [X] Decimal
+  - [X] Date
+  - [X] Auto Increment
+  - [X] Unicode
   
 - Query
-  - [ ] Top X (Requires Oracle 12c)
-  - [ ] JOIN UPDATE
+  - [X] Top X
+  - [X] JOIN UPDATE
   
 - Aggregation 
-  - [ ] Basic GROUP BY
-  - [ ] Calendar/Axis Table GROUP BY
+  - [X] Basic GROUP BY
+  - [X] Calendar/Axis Table GROUP BY
   - [ ] Dynamic Pivot GROUP BY
   
 
