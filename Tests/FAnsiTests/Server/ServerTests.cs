@@ -125,12 +125,7 @@ namespace FAnsiTests.Server
         /// </summary>
         /// <param name="type"></param>
         /// <param name="useApiFirst"></param>
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.PostgreSql,true)]
-        [TestCase(DatabaseType.PostgreSql,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void ServerHelper_ChangeDatabase_AdHoc(DatabaseType type, bool useApiFirst)
         {
             //create initial server reference

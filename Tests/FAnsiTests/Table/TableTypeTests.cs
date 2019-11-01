@@ -33,7 +33,7 @@ namespace FAnsiTests.Table
             var sql = string.Format(@"CREATE VIEW {0} AS
 SELECT {2}
 FROM {1}",
-syntax.EnsureWrapped(viewName),
+dbType == DatabaseType.Oracle ? viewName : syntax.EnsureWrapped(viewName),
 tbl.GetFullyQualifiedName(),
 syntax.EnsureWrapped("FF")
 );

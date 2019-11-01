@@ -8,14 +8,7 @@ namespace FAnsiTests.Table
 {
     class TopXTests :DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.Oracle,true)]
-        [TestCase(DatabaseType.Oracle,false)]
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.PostgreSql,true)]
-        [TestCase(DatabaseType.PostgreSql,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void Test_TopX_OrderBy(DatabaseType type,bool asc)
         {
             var db = GetTestDatabase(type);

@@ -112,12 +112,7 @@ namespace FAnsiTests
         /// <see cref="IManagedTransaction.AbandonAndCloseConnection"/> instead of relying on the outermost using finally 
         /// </summary>
         /// <param name="dbType"></param>
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.Oracle,true)]
-        [TestCase(DatabaseType.Oracle,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void Test_GetManagedConnection_OngoingTransaction_WithCommitRollback(DatabaseType dbType,bool commit)
         {
             DiscoveredDatabase db = GetTestDatabase(dbType);

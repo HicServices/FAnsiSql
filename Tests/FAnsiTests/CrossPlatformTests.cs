@@ -19,10 +19,7 @@ namespace FAnsiTests
     public class CrossPlatformTests:DatabaseTests
     {
         
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestTableCreation_NullTableName(DatabaseType type)
         {
             var db = GetTestDatabase(type, true);
@@ -318,7 +315,7 @@ namespace FAnsiTests
             tbl.Drop();
         }
 
-        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void ForeignKeyCreationTest(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -389,12 +386,7 @@ namespace FAnsiTests
             }
         }
 
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MySql, false)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer, false)]
-        [TestCase(DatabaseType.PostgreSql,true)]
-        [TestCase(DatabaseType.PostgreSql, false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void ForeignKeyCreationTest_TwoColumns(DatabaseType type, bool cascadeDelete)
         {
             var database = GetTestDatabase(type);
@@ -470,7 +462,7 @@ namespace FAnsiTests
             }
         }
 
-        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateMaxVarcharColumns(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -493,7 +485,7 @@ namespace FAnsiTests
         }
 
 
-        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateMaxVarcharColumnFromDataTable(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -517,7 +509,7 @@ namespace FAnsiTests
             Assert.AreEqual(sb.ToString(),dt.Rows[0][0]);
         }
 
-        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateDateColumnFromDataTable(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -534,14 +526,7 @@ namespace FAnsiTests
             Assert.AreEqual(new DateTime(2001,01,22), dt.Rows[0][0]);
         }
 
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.Oracle,true)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.Oracle,false)]
-        [TestCase(DatabaseType.PostgreSql,true)]
-        [TestCase(DatabaseType.PostgreSql,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void AddColumnTest(DatabaseType type,bool useTransaction)
         {
             var database = GetTestDatabase(type);
@@ -617,10 +602,7 @@ namespace FAnsiTests
             Assert.IsFalse(tbl.DiscoverColumn("Field2").IsPrimaryKey);
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void ChangeDatabaseShouldNotAffectOriginalConnectionString_Test(DatabaseType type)
         {
             var database1 = GetTestDatabase(type);
@@ -630,12 +612,7 @@ namespace FAnsiTests
             Assert.AreEqual(stringBefore, database1.Server.Builder.ConnectionString);
         }
 
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.PostgreSql,true)]
-        [TestCase(DatabaseType.PostgreSql,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void TestDistincting(DatabaseType type,bool useTransaction)
         {
             var database = GetTestDatabase(type);
@@ -683,10 +660,7 @@ namespace FAnsiTests
             Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Count());
         }
 
-        [Test]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestIntDataTypes(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -725,10 +699,7 @@ namespace FAnsiTests
             Assert.AreEqual(1, dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(1.0f)));
         }
 
-        [Test]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestFloatDataTypes(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -993,10 +964,7 @@ namespace FAnsiTests
             Assert.AreEqual(currentValue.Hour, databaseValue.Hour);
         }
 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_BulkInserting_LotsOfDates(DatabaseType type)
         {
             CultureInfo culture = new CultureInfo("en-gb");

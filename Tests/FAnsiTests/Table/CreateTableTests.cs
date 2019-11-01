@@ -14,10 +14,7 @@ namespace FAnsiTests.Table
 {
     class CreateTableTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateSimpleTable_Exists(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -33,10 +30,7 @@ namespace FAnsiTests.Table
             Assert.IsFalse(table.Exists());
         }
 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestTableCreation(DatabaseType type)
         {
             var database = GetTestDatabase(type);
@@ -114,10 +108,7 @@ namespace FAnsiTests.Table
             table.Drop();
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateSimpleTable_VarcharTypeCorrect(DatabaseType type)
         {
             var db = GetTestDatabase(type);
@@ -155,10 +146,7 @@ namespace FAnsiTests.Table
             Assert.IsFalse(table.Exists());
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTable_PrimaryKey_FromDataTable(DatabaseType databaseType)
         {
             DiscoveredDatabase database = GetTestDatabase(databaseType);
@@ -173,10 +161,7 @@ namespace FAnsiTests.Table
             Assert.IsTrue(table.DiscoverColumn("Name").IsPrimaryKey);
         }
         
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTable_PrimaryKey_FromColumnRequest(DatabaseType databaseType)
         {
             var database = GetTestDatabase(databaseType);
@@ -339,10 +324,7 @@ namespace FAnsiTests.Table
             Assert.IsTrue(comp.Guess.Unicode);
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)]
-        [TestCase(DatabaseType.MySql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_CreateTable_UnicodeNames(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -382,8 +364,9 @@ namespace FAnsiTests.Table
         }
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
-        //[TestCase(DatabaseType.Oracle)]\r\n[TestCase(DatabaseType.PostgreSql)] // Oracle doesn't really support bits https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns
+        //[TestCase(DatabaseType.Oracle)]\r\n // Oracle doesn't really support bits https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_CreateTable_TF(DatabaseType dbType)
         {
             //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
@@ -404,10 +387,7 @@ namespace FAnsiTests.Table
             tbl.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)] 
-        [TestCase(DatabaseType.MySql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_CreateTable_DoNotRetype(DatabaseType dbType)
         {
             //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
@@ -469,10 +449,7 @@ namespace FAnsiTests.Table
         /// <summary>
         /// Tests how CreateTable interacts with <see cref="DataColumn"/> of type Object
         /// </summary>
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.PostgreSql)] 
-        [TestCase(DatabaseType.MySql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTable_ObjectColumns_StringContent(DatabaseType dbType)
         {
             //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
@@ -522,9 +499,7 @@ namespace FAnsiTests.Table
             }
         }
 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestSomething(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);

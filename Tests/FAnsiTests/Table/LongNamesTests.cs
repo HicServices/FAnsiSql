@@ -8,10 +8,7 @@ namespace FAnsiTests.Table
 {
     class LongNamesTests : DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_LongTableName_CreateAndReadBack(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -39,10 +36,7 @@ namespace FAnsiTests.Table
             StringAssert.AreEqualIgnoringCase(columnName,col.GetRuntimeName());
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.PostgreSql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_LongDatabaseNames_CreateAndReadBack(DatabaseType dbType)
         {
             AssertCanCreateDatabases();
