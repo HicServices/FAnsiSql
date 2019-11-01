@@ -559,7 +559,7 @@ namespace FAnsi.Discovery
         {
             unchecked
             {
-                var hashCode =  StringComparer.OrdinalIgnoreCase.GetHashCode(GetSchemaWithDefaultForNull());
+                var hashCode =  StringComparer.OrdinalIgnoreCase.GetHashCode(GetSchemaWithDefaultForNull()??string.Empty);
                 hashCode = (hashCode * 397) ^ (Database != null ? Database.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (int)TableType;
                 return hashCode;
