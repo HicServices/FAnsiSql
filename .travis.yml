@@ -1,6 +1,11 @@
 language: csharp
 mono: none
 dotnet: 2.2.100
+
+services:
+  - postgresql
+  - mysql
+
 script:
  - dotnet restore
  - dotnet build
