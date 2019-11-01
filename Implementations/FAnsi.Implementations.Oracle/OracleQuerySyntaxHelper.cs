@@ -96,7 +96,7 @@ namespace FAnsi.Implementations.Oracle
 
         public override string HowDoWeAchieveMd5(string selectSql)
         {
-            throw new NotImplementedException();
+            return "RAWTOHEX(standard_hash("+selectSql+", 'MD5'))";
         }
 
         protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
