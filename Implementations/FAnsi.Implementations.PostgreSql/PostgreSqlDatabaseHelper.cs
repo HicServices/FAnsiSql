@@ -33,23 +33,26 @@ namespace FAnsi.Implementations.PostgreSql
             AND schemaname != 'information_schema';";
 
             List<DiscoveredTable> tables = new List<DiscoveredTable>();
-            
-            var cmd = new NpgsqlCommand(sqlTables, (NpgsqlConnection)connection);
-            cmd.Transaction = transaction as NpgsqlTransaction;
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                {
-                    //its a system table
-                    string schema = r["schemaname"] as string;
-                    
-                    if(querySyntaxHelper.IsValidTableName((string)r["tablename"], out _))
-                        tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema, TableType.Table));
-                }
-
-            if (includeViews)
+            using (var cmd = new NpgsqlCommand(sqlTables, (NpgsqlConnection) connection))
             {
-                cmd = new NpgsqlCommand(sqlViews, (NpgsqlConnection)connection);
+                cmd.Transaction = transaction as NpgsqlTransaction;
+
+                using (var r = cmd.ExecuteReader())
+                    while (r.Read())
+                    {
+                        //its a system table
+                        string schema = r["schemaname"] as string;
+                    
+                        if(querySyntaxHelper.IsValidTableName((string)r["tablename"], out _))
+                            tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema, TableType.Table));
+                    }
+            }
+            
+            if (includeViews)
+            using(var cmd = new NpgsqlCommand(sqlViews, (NpgsqlConnection)connection))
+            {
+                    
                 cmd.Transaction = transaction as NpgsqlTransaction;
 
                 using (var r = cmd.ExecuteReader())
@@ -93,17 +96,18 @@ namespace FAnsi.Implementations.PostgreSql
                 con.Open();
 
                 https://dba.stackexchange.com/a/11895
-                NpgsqlCommand cmd = new NpgsqlCommand($"UPDATE pg_database SET datallowconn = 'false' WHERE datname = '{database.GetRuntimeName()}';",con);
-                cmd.ExecuteNonQuery();
+                
+                using(var cmd = new NpgsqlCommand($"UPDATE pg_database SET datallowconn = 'false' WHERE datname = '{database.GetRuntimeName()}';",con))
+                    cmd.ExecuteNonQuery();
 
-                cmd = new NpgsqlCommand($@"SELECT pg_terminate_backend(pid)
+                using(var cmd = new NpgsqlCommand($@"SELECT pg_terminate_backend(pid)
                 FROM pg_stat_activity
                 WHERE datname = '{database.GetRuntimeName()}';"
-                ,con);
+                ,con))
                 cmd.ExecuteNonQuery();
                 
-                 cmd = new NpgsqlCommand("DROP DATABASE \"" + database.GetRuntimeName() +"\"",con);
-                cmd.ExecuteNonQuery();
+                 using(var cmd = new NpgsqlCommand("DROP DATABASE \"" + database.GetRuntimeName() +"\"",con))
+                    cmd.ExecuteNonQuery();
             }
             
             NpgsqlConnection.ClearAllPools();

@@ -77,15 +77,16 @@ namespace FAnsiTests.Aggregation
         {
             var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
+            var col = tbl.DiscoverColumn("EventDate");
 
             var lines = new List<CustomLine>();
             lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
             lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("EventDate", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
+            lines.Add(new CustomLine(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
             lines.Add(new CustomLine("FROM ", QueryComponent.FROM));
             lines.Add(new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM));
             lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
+            lines.Add(new CustomLine(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
 
             var axis = new QueryAxis()
             {
@@ -163,15 +164,16 @@ namespace FAnsiTests.Aggregation
         {
             var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
+            var col = tbl.DiscoverColumn("EventDate");
 
             var lines = new List<CustomLine>();
             lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
             lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("EventDate", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
+            lines.Add(new CustomLine(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
             lines.Add(new CustomLine("FROM ", QueryComponent.FROM));
             lines.Add(new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM));
             lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
+            lines.Add(new CustomLine(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
 
             var axis = new QueryAxis()
             {
@@ -208,15 +210,16 @@ namespace FAnsiTests.Aggregation
         {
             var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
+            var eventDate = tbl.DiscoverColumn("EventDate");
 
             var lines = new List<CustomLine>();
             lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
             lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("EventDate", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
+            lines.Add(new CustomLine(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
             lines.Add(new CustomLine("FROM ", QueryComponent.FROM));
             lines.Add(new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM));
             lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
+            lines.Add(new CustomLine(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
 
             var axis = new QueryAxis()
             {
@@ -227,6 +230,8 @@ namespace FAnsiTests.Aggregation
 
 
             var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
+
+            Console.WriteLine(sql);
 
             using (var con = svr.GetConnection())
             {
@@ -273,15 +278,16 @@ namespace FAnsiTests.Aggregation
         {
             var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
+            var eventDate = tbl.DiscoverColumn("EventDate");
 
             var lines = new List<CustomLine>();
             lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
-            lines.Add(new CustomLine("EventDate,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
+            lines.Add(new CustomLine(eventDate.GetFullyQualifiedName() +",", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis });                      //tell it which the axis are 
             lines.Add(new CustomLine("count(*) as MyCount", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
             lines.Add(new CustomLine("FROM ", QueryComponent.FROM));
             lines.Add(new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM));
             lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
+            lines.Add(new CustomLine(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis });                                           //tell it which the axis are 
 
             var axis = new QueryAxis()
             {
@@ -292,6 +298,8 @@ namespace FAnsiTests.Aggregation
 
 
             var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
+
+            Console.WriteLine(sql);
 
             using (var con = svr.GetConnection())
             {

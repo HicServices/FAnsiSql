@@ -62,9 +62,9 @@ namespace FAnsi.Implementations.PostgreSql
             switch (function)
             {
                 case MandatoryScalarFunctions.GetTodaysDate:
-                    return "current_timestamp";
+                    return "now()";
                 case MandatoryScalarFunctions.GetGuid:
-                    return "newid()";
+                    return "gen_random_uuid()"; //requires pgcrypto e.g. CREATE EXTENSION pgcrypto;
                 default:
                     throw new ArgumentOutOfRangeException("function");
             }

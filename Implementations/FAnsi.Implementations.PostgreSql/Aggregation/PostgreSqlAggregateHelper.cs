@@ -47,8 +47,8 @@ namespace FAnsi.Implementations.PostgreSql.Aggregation
 SELECT
    {1} AS ""joinDt"",dataset.{6}
 FROM
-generate_series(date {3},
-            date {4},
+generate_series({3},
+             {4},
             interval '{5}')
 LEFT JOIN
 (
