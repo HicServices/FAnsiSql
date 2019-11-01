@@ -21,7 +21,7 @@ namespace FAnsiTests.Server
         public void Server_Constructors(DatabaseType dbType)
         {
               var helper = ImplementationManager.GetImplementation(dbType).GetServerHelper();
-              var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,null,null).ConnectionString,dbType);
+              var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,"franko","wacky").ConnectionString,dbType);
 
               Assert.AreEqual("localhost",server.Name);
         }
