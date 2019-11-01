@@ -200,22 +200,23 @@ namespace FAnsi.Discovery
         {
             using (var con = Helper.GetConnection(Builder))
             {
-                using (var openTask = con.OpenAsync(new CancellationTokenSource(timeoutInMillis).Token))
-                {
-                    try
+                using(var tokenSource = new CancellationTokenSource(timeoutInMillis))
+                    using (var openTask = con.OpenAsync(tokenSource.Token))
                     {
-                        openTask.Wait();
-                    }
-                    catch (AggregateException e)
-                    {
-                        if (openTask.IsCanceled)
-                            throw new TimeoutException(string.Format(FAnsiStrings.DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,Name, timeoutInMillis), e);
+                        try
+                        {
+                            openTask.Wait();
+                        }
+                        catch (AggregateException e)
+                        {
+                            if (openTask.IsCanceled)
+                                throw new TimeoutException(string.Format(FAnsiStrings.DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,Name, timeoutInMillis), e);
 
-                        throw;
+                            throw;
+                        }
                     }
-                }
 
-                con.Close();
+                    con.Close();
             }
         }
 

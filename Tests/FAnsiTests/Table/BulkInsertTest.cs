@@ -445,7 +445,7 @@ namespace FAnsiTests.Table
 
                 //GetDataTable should have been cancelled at the database level
                 var ex = Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,cts.Token,50000)));
-                tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default,50000));
+                tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default(CancellationToken),50000));
             }
 
             

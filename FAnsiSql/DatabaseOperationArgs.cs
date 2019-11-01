@@ -34,7 +34,7 @@ namespace FAnsi
         {
             
         }
-        public DatabaseOperationArgs(IManagedTransaction transactionIfAny, in CancellationToken cancellationToken, int timeoutInSeconds)
+        public DatabaseOperationArgs(IManagedTransaction transactionIfAny, CancellationToken cancellationToken, int timeoutInSeconds)
         {
             TransactionIfAny = transactionIfAny;
             CancellationToken = cancellationToken;

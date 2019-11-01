@@ -16,6 +16,16 @@ namespace FAnsiTests.Server
             Assert.IsTrue(server.Exists(), "Server " + server + " did not exist");
         }
 
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void Server_Constructors(DatabaseType dbType)
+        {
+              var helper = ImplementationManager.GetImplementation(dbType).GetServerHelper();
+              var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,null,null).ConnectionString,dbType);
+
+              Assert.AreEqual("localhost",server.Name);
+        }
+
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Server_RespondsWithinTime(DatabaseType type)
         {

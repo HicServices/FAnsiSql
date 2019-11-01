@@ -522,6 +522,38 @@ namespace FAnsiTests.Table
             }
         }
 
+        [TestCase(DatabaseType.Oracle)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        public void TestSomething(DatabaseType dbType)
+        {
+            var db = GetTestDatabase(dbType);
+
+
+            var tbl = db.CreateTable("ScriptsRun", new[]
+            {
+                new DatabaseColumnRequest("cint", new DatabaseTypeRequest(typeof(int)))
+                    {IsAutoIncrement = true, IsPrimaryKey = true},
+                new DatabaseColumnRequest("clong", new DatabaseTypeRequest(typeof(long))),
+                new DatabaseColumnRequest("cshort", new DatabaseTypeRequest(typeof(short))),
+                new DatabaseColumnRequest("script_name", new DatabaseTypeRequest(typeof(string), 255)),
+                new DatabaseColumnRequest("text_of_script", new DatabaseTypeRequest(typeof(string), int.MaxValue)),
+                new DatabaseColumnRequest("text_hash", new DatabaseTypeRequest(typeof(string), 512) {Unicode = true}),
+                new DatabaseColumnRequest("one_time_script", new DatabaseTypeRequest(typeof(bool))),
+                new DatabaseColumnRequest("entry_date", new DatabaseTypeRequest(typeof(DateTime))),
+                new DatabaseColumnRequest("modified_date", new DatabaseTypeRequest(typeof(DateTime))),
+                new DatabaseColumnRequest("entered_by", new DatabaseTypeRequest(typeof(string), 50))
+
+            });
+
+            Assert.IsTrue(tbl.Exists());
+
+            Assert.AreEqual(typeof(int),tbl.DiscoverColumn("cint").DataType.GetCSharpDataType());
+            Assert.AreEqual(typeof(long),tbl.DiscoverColumn("clong").DataType.GetCSharpDataType());
+            Assert.AreEqual(typeof(short),tbl.DiscoverColumn("cshort").DataType.GetCSharpDataType());
+            Assert.AreEqual(typeof(string),tbl.DiscoverColumn("script_name").DataType.GetCSharpDataType());
+        }
+
         /// <summary>
         /// Tests how we can customize how "T" and "F" etc are interpreted (either as boolean true/false or as string). This test
         /// uses the <see cref="CreateTableArgs.GuessSettings"/> injection.

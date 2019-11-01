@@ -137,8 +137,8 @@ namespace FAnsi.Implementations.MicrosoftSQL
             using (var con = new SqlConnection(b.ConnectionString))
             {
                 con.Open();
-                SqlCommand cmd = new SqlCommand("CREATE DATABASE [" + newDatabaseName.GetRuntimeName() + "]", (SqlConnection)con);
-                cmd.ExecuteNonQuery();                
+                using(SqlCommand cmd = new SqlCommand("CREATE DATABASE [" + newDatabaseName.GetRuntimeName() + "]", con))
+                    cmd.ExecuteNonQuery();                
             }
         }
 
@@ -155,10 +155,15 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
                 try
                 {
-                    DataTable dt = new DataTable();
-                    new SqlDataAdapter(new SqlCommand("EXEC master..xp_fixeddrives",con)).Fill(dt);
-                    foreach (DataRow row in dt.Rows)
-                        toReturn.Add("Free Space Drive" + row[0], "" + row[1]);
+                    using (DataTable dt = new DataTable())
+                    {
+                        using(var cmd = new SqlCommand("EXEC master..xp_fixeddrives",con))
+                            using(var da = new SqlDataAdapter(cmd))
+                                da.Fill(dt);
+
+                        foreach (DataRow row in dt.Rows)
+                            toReturn.Add("Free Space Drive" + row[0], "" + row[1]);
+                    }
                 }
                 catch (Exception)
                 {
