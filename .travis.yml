@@ -2,6 +2,13 @@ language: csharp
 mono: none
 dotnet: 2.2.100
 
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+
 services:
   - postgresql
   - mysql
