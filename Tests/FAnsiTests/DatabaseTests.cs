@@ -30,51 +30,61 @@ namespace FAnsiTests
         [OneTimeSetUp]
         public void CheckFiles()
         {
-            ImplementationManager.Load(
-                typeof(MicrosoftSQLServerHelper).Assembly,
-                typeof(OracleServerHelper).Assembly,
-                typeof(MySqlServerHelper).Assembly,
-                typeof(PostgreSqlServerHelper).Assembly);
-
-            var file = Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilename);
-            
-            Assert.IsTrue(File.Exists(file),"Could not find " + TestFilename);
-
-            var doc = XDocument.Load(file);
-
-            var root = doc.Element("TestDatabases");
-            if(root == null)
-                throw new Exception("Missing element 'TestDatabases' in " + TestFilename);
-
-            var settings = root.Element("Settings");
-
-            if (settings == null)
-                throw new Exception("Missing element 'Settings' in " + TestFilename);
-
-            var e = settings.Element("AllowDatabaseCreation");
-            if (e == null)
-                throw new Exception("Missing element 'AllowDatabaseCreation' in " + TestFilename);
-
-            AllowDatabaseCreation = Convert.ToBoolean(e.Value);
-
-            e = settings.Element("TestScratchDatabase");
-            if (e == null)
-                throw new Exception("Missing element 'TestScratchDatabase' in " + TestFilename);
-
-            _testScratchDatabase = e.Value;
-            
-            foreach (XElement element in root.Elements("TestDatabase"))
+            try
             {
-                var type = element.Element("DatabaseType").Value;
-                DatabaseType databaseType;
+                ImplementationManager.Load(
+                    typeof(MicrosoftSQLServerHelper).Assembly,
+                    typeof(OracleServerHelper).Assembly,
+                    typeof(MySqlServerHelper).Assembly,
+                    typeof(PostgreSqlServerHelper).Assembly);
 
-                if(!DatabaseType.TryParse(type, out databaseType))
-                    throw new Exception("Could not parse DatabaseType " + type);
+                var file = Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilename);
+            
+                Assert.IsTrue(File.Exists(file),"Could not find " + TestFilename);
 
-                var constr = element.Element("ConnectionString").Value;
+                var doc = XDocument.Load(file);
+
+                var root = doc.Element("TestDatabases");
+                if(root == null)
+                    throw new Exception("Missing element 'TestDatabases' in " + TestFilename);
+
+                var settings = root.Element("Settings");
+
+                if (settings == null)
+                    throw new Exception("Missing element 'Settings' in " + TestFilename);
+
+                var e = settings.Element("AllowDatabaseCreation");
+                if (e == null)
+                    throw new Exception("Missing element 'AllowDatabaseCreation' in " + TestFilename);
+
+                AllowDatabaseCreation = Convert.ToBoolean(e.Value);
+
+                e = settings.Element("TestScratchDatabase");
+                if (e == null)
+                    throw new Exception("Missing element 'TestScratchDatabase' in " + TestFilename);
+
+                _testScratchDatabase = e.Value;
+            
+                foreach (XElement element in root.Elements("TestDatabase"))
+                {
+                    var type = element.Element("DatabaseType").Value;
+                    DatabaseType databaseType;
+
+                    if(!DatabaseType.TryParse(type, out databaseType))
+                        throw new Exception("Could not parse DatabaseType " + type);
+
+         
+                    var constr = element.Element("ConnectionString").Value;
                 
-                TestConnectionStrings.Add(databaseType,constr);
+                    TestConnectionStrings.Add(databaseType,constr);
+                }
             }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
+            
         }
 
         protected IEnumerable<DiscoveredServer> TestServer()
