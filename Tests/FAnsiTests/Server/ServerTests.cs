@@ -85,7 +85,7 @@ namespace FAnsiTests.Server
             Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
             Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
 
-            server = new DiscoveredServer("loco",useWhitespace?"  ":null,type,null,null);
+            server = new DiscoveredServer("loco",useWhitespace?"  ":null,type,"frank","kangaro");
             Assert.AreEqual("loco",server.Name);
 
             Assert.IsNull(server.GetCurrentDatabase());

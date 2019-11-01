@@ -29,7 +29,7 @@ namespace FAnsiTests.Server
             var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MySql);
             acc.AddOrUpdateKeyword("AutoEnlist", "false", ConnectionStringKeywordPriority.SystemDefaultLow);
             
-            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb",null,null);
+            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb","frank","kangaro");
 
             StringAssert.DoesNotContain("autoenlist",connectionStringBuilder.ConnectionString);
 
@@ -45,7 +45,7 @@ namespace FAnsiTests.Server
             var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MicrosoftSQLServer);
             acc.AddOrUpdateKeyword("Pooling", "false", ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", null, null);
+            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
             StringAssert.DoesNotContain("pooling", connectionStringBuilder.ConnectionString);
 
@@ -71,7 +71,7 @@ namespace FAnsiTests.Server
             var acc = new ConnectionStringKeywordAccumulator(databaseType);
             acc.AddOrUpdateKeyword(key1,value1, ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-            DbConnectionStringBuilder connectionStringBuilder = helpers[databaseType].GetConnectionStringBuilder("localhost", "mydb", null, null);
+            DbConnectionStringBuilder connectionStringBuilder = helpers[databaseType].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
             acc.EnforceOptions(connectionStringBuilder);
 
@@ -91,7 +91,7 @@ namespace FAnsiTests.Server
             var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MicrosoftSQLServer);
             acc.AddOrUpdateKeyword("Pooling", "false", ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", null, null);
+            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
             StringAssert.DoesNotContain("pooling", connectionStringBuilder.ConnectionString);
 

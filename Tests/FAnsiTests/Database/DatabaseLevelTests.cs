@@ -24,7 +24,7 @@ namespace FAnsiTests.Database
         public void Test_ExpectDatabase(DatabaseType type, bool upperCase)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
-            var server = new DiscoveredServer(helper.GetConnectionStringBuilder("loco","db",null,null));
+            var server = new DiscoveredServer(helper.GetConnectionStringBuilder("loco","db","frank","kangaro"));
             var db = server.ExpectDatabase("omg");
             Assert.AreEqual(upperCase?"OMG":"omg",db.GetRuntimeName());
         }
