@@ -746,8 +746,13 @@ namespace FAnsiTests
 
             var database = GetTestDatabase(type);
 
+            SqlConnection.ClearAllPools();
+
             database = database.Server.ExpectDatabase(horribleDatabaseName);
             database.Create(true);
+            
+            SqlConnection.ClearAllPools();
+
             try
             {
                 var tbl = database.CreateTable(horribleTableName, new[]
