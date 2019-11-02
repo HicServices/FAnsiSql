@@ -5,7 +5,7 @@
           </Settings>
           <TestDatabase>
             <DatabaseType>MicrosoftSQLServer</DatabaseType>
-            <ConnectionString>server=localhost\sqlexpress;User Id=sa;Password=YourStrong!Passw0rd;</ConnectionString>
+            <ConnectionString>server=localhost;User Id=sa;Password=YourStrong!Passw0rd;</ConnectionString>
           </TestDatabase>
           <TestDatabase>
             <DatabaseType>MySql</DatabaseType>
