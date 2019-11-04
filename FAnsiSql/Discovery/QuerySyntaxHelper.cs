@@ -34,7 +34,7 @@ namespace FAnsi.Discovery
         /// <summary>
         /// Symbols (for all database types) which denote wrapped entity names e.g. [dbo].[mytable] contains qualifiers '[' and ']'
         /// </summary>
-        public static char[] TableNameQualifiers = { '[', ']', '`' };
+        public static char[] TableNameQualifiers = { '[', ']', '`' ,'"'};
 
         public ITypeTranslater TypeTranslater { get; private set; }
         
@@ -138,7 +138,7 @@ namespace FAnsi.Discovery
             if (s.IndexOfAny(new char[]{'(',')' }) != -1)
                 throw new RuntimeNameException("Could not determine runtime name for Sql:'" + s + "'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
 
-            return s.Substring(s.LastIndexOf(".") + 1).Trim('[', ']', '`');
+            return s.Substring(s.LastIndexOf(".") + 1).Trim('[', ']', '`','"');
         }
         
         public virtual bool TryGetRuntimeName(string s,out string name)

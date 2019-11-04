@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Fixed
+
+- Fixed Postgres escaped names (e.g `"MyCol"`) now properly strip `"` when calling `GetRuntimeName`
+
+
 ## [0.10.8] - 2019-09-20
 
 

@@ -19,10 +19,14 @@ namespace FAnsiTests.Query
             ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
 
             var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
+
+            Assert.AreEqual(expectUpper?"CHI":"chi",syntaxHelper.GetRuntimeName("\"TEST_ScratchArea\".public.\"Biochemistry\".\"chi\""));
+
             Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("count(*) as Frank"));
             Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("count(cast(1 as int)) as Frank"));
             Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as Frank"));
             Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as [Frank]"));
+            Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("\"Mydb\".\"mytbl\".\"mycol\" as \"Frank\""));
             Assert.AreEqual(expectUpper?"FRANK":"Frank",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol] as `Frank`"));
             Assert.AreEqual(expectUpper?"MYCOL":"mycol",syntaxHelper.GetRuntimeName("[mydb].[mytbl].[mycol]"));
             Assert.AreEqual(expectUpper?"ZOMBIE":"zombie",syntaxHelper.GetRuntimeName("dbo.GetMyCoolThing(\"Magic Fun Times\") as zombie"));
