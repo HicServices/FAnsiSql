@@ -124,6 +124,8 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
                 using(var cmd = new SqlCommand(sql, con))
                     cmd.ExecuteNonQuery();
             }
+
+            SqlConnection.ClearAllPools();
         }
 
         public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)

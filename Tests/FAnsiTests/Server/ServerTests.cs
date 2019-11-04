@@ -21,7 +21,7 @@ namespace FAnsiTests.Server
         public void Server_Constructors(DatabaseType dbType)
         {
               var helper = ImplementationManager.GetImplementation(dbType).GetServerHelper();
-              var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,null,null).ConnectionString,dbType);
+              var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,"franko","wacky").ConnectionString,dbType);
 
               Assert.AreEqual("localhost",server.Name);
         }
@@ -85,7 +85,7 @@ namespace FAnsiTests.Server
             Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
             Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
 
-            server = new DiscoveredServer("loco",useWhitespace?"  ":null,type,null,null);
+            server = new DiscoveredServer("loco",useWhitespace?"  ":null,type,"frank","kangaro");
             Assert.AreEqual("loco",server.Name);
 
             Assert.IsNull(server.GetCurrentDatabase());
@@ -128,6 +128,9 @@ namespace FAnsiTests.Server
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void ServerHelper_ChangeDatabase_AdHoc(DatabaseType type, bool useApiFirst)
         {
+            if(type == DatabaseType.Oracle)
+                Assert.Inconclusive("FAnsiSql understanding of Database cannot be encoded in DbConnectionStringBuilder sadly so we can end up with DiscoveredServer with no GetCurrentDatabase");
+
             //create initial server reference
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
             var server = new DiscoveredServer(helper.GetConnectionStringBuilder("loco","bob","franko","wacky"));
