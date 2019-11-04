@@ -30,5 +30,6 @@
     <ProjectReference Include="..\Implementations\FAnsi.Implementations.Oracle\FAnsi.Implementations.Oracle.csproj">
       <Private>true</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Implementations\FAnsi.Implementations.PostgreSql\FAnsi.Implementations.PostgreSql.csproj" />
   </ItemGroup>
 </Project>
