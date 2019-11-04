@@ -97,15 +97,13 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
         public override string[] ListDatabases(DbConnection con)
         {
-            var cmd = GetCommand("select name [Database] from master..sysdatabases", con);
-            
-            DbDataReader r = cmd.ExecuteReader();
-
             List<string> databases = new List<string>();
 
-            while (r.Read())
-                databases.Add((string) r["Database"]);
-
+            using(var cmd = GetCommand("select name [Database] from master..sysdatabases", con))
+                using (DbDataReader r = cmd.ExecuteReader())
+                    while (r.Read())
+                        databases.Add((string) r["Database"]);
+            
             con.Close();
             return databases.ToArray();
         }
@@ -137,8 +135,8 @@ namespace FAnsi.Implementations.MicrosoftSQL
             using (var con = new SqlConnection(b.ConnectionString))
             {
                 con.Open();
-                SqlCommand cmd = new SqlCommand("CREATE DATABASE [" + newDatabaseName.GetRuntimeName() + "]", (SqlConnection)con);
-                cmd.ExecuteNonQuery();                
+                using(SqlCommand cmd = new SqlCommand("CREATE DATABASE [" + newDatabaseName.GetRuntimeName() + "]", con))
+                    cmd.ExecuteNonQuery();                
             }
         }
 
@@ -155,10 +153,15 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
                 try
                 {
-                    DataTable dt = new DataTable();
-                    new SqlDataAdapter(new SqlCommand("EXEC master..xp_fixeddrives",con)).Fill(dt);
-                    foreach (DataRow row in dt.Rows)
-                        toReturn.Add("Free Space Drive" + row[0], "" + row[1]);
+                    using (DataTable dt = new DataTable())
+                    {
+                        using(var cmd = new SqlCommand("EXEC master..xp_fixeddrives",con))
+                            using(var da = new SqlDataAdapter(cmd))
+                                da.Fill(dt);
+
+                        foreach (DataRow row in dt.Rows)
+                            toReturn.Add("Free Space Drive" + row[0], "" + row[1]);
+                    }
                 }
                 catch (Exception)
                 {
@@ -182,5 +185,20 @@ namespace FAnsi.Implementations.MicrosoftSQL
             return string.IsNullOrWhiteSpace(pwd) ? null : pwd;
         }
 
+        public override Version GetVersion(DiscoveredServer server)
+        {
+            using (var con = server.GetConnection())
+            {
+                con.Open();
+                using (var cmd = server.GetCommand("SELECT @@VERSION",con))
+                {
+                    using(var r = cmd.ExecuteReader())
+                        if(r.Read())
+                            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+                        else
+                            return null;
+                }
+            }
+        }
     }
 }

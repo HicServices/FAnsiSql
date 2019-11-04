@@ -17,33 +17,35 @@ namespace FAnsi.Implementations.MicrosoftSQL
                 throw new InvalidOperationException("Expected connection to be open");
 
             List<DiscoveredTable> tables = new List<DiscoveredTable>();
-            
-            var cmd = new SqlCommand("use [" + database + "]; EXEC sp_tables", (SqlConnection)connection);
-            cmd.Transaction = transaction as SqlTransaction;
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                {
-                    //its a system table
-                    string schema = r["TABLE_OWNER"] as string;
+            using (var cmd = new SqlCommand("use [" + database + "]; EXEC sp_tables", (SqlConnection) connection))
+            {
+                cmd.Transaction = transaction as SqlTransaction;
+
+                using (var r = cmd.ExecuteReader())
+                    while (r.Read())
+                    {
+                        //its a system table
+                        string schema = r["TABLE_OWNER"] as string;
                         
-                    //its a system table
-                    if (schema == "sys")
-                        continue;
+                        //its a system table
+                        if (schema == "sys")
+                            continue;
 
-                    if (schema == "INFORMATION_SCHEMA")
-                        continue;
+                        if (schema == "INFORMATION_SCHEMA")
+                            continue;
 
-                    //add views if we are including them
-                    if (includeViews && r["TABLE_TYPE"].Equals("VIEW"))
-                        if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
-                            tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.View));
+                        //add views if we are including them
+                        if (includeViews && r["TABLE_TYPE"].Equals("VIEW"))
+                            if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
+                                tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.View));
 
-                    //add tables
-                    if (r["TABLE_TYPE"].Equals("TABLE"))
-                        if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
-                            tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.Table));
-                }
+                        //add tables
+                        if (r["TABLE_TYPE"].Equals("TABLE"))
+                            if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
+                                tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.Table));
+                    }
+            }
             
             return tables.ToArray();
         }
@@ -52,24 +54,26 @@ namespace FAnsi.Implementations.MicrosoftSQL
         {
             List<DiscoveredTableValuedFunction> functionsToReturn = new List<DiscoveredTableValuedFunction>();
 
-            DbCommand cmd = new SqlCommand("use [" + database + @"];select name,
+            using( DbCommand cmd = new SqlCommand("use [" + database + @"];select name,
  (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name
   from sys.objects o
-WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection);
+WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection))
 
-            cmd.Transaction = transaction;
+            {
+                cmd.Transaction = transaction;
 
-            using (DbDataReader r = cmd.ExecuteReader())
-                while (r.Read())
-                {
-                    string schema = r["schema_name"] as string;
+                using (DbDataReader r = cmd.ExecuteReader())
+                    while (r.Read())
+                    {
+                        string schema = r["schema_name"] as string;
 
-                    if (string.Equals("dbo", schema))
-                        schema = null;
-                    functionsToReturn.Add(new DiscoveredTableValuedFunction(parent, r["name"].ToString(), querySyntaxHelper,schema));
+                        if (string.Equals("dbo", schema))
+                            schema = null;
+                        functionsToReturn.Add(new DiscoveredTableValuedFunction(parent, r["name"].ToString(), querySyntaxHelper,schema));
 
-                }
-
+                    }
+            }
+            
 
             return functionsToReturn.ToArray();
         }
@@ -81,12 +85,14 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
             using (var con = new SqlConnection(builder.ConnectionString))
             {
                 con.Open();
-                SqlCommand cmdFindStoredprocedure = new SqlCommand("use [" + database + @"];  SELECT * FROM sys.procedures", con);
+                using (SqlCommand cmdFindStoredprocedure =
+                    new SqlCommand("use [" + database + @"];  SELECT * FROM sys.procedures", con))
+                {
+                    var result = cmdFindStoredprocedure.ExecuteReader();
 
-                var result = cmdFindStoredprocedure.ExecuteReader();
-
-                while (result.Read())
-                    toReturn.Add(new DiscoveredStoredprocedure((string)result["name"]));
+                    while (result.Read())
+                        toReturn.Add(new DiscoveredStoredprocedure((string)result["name"]));
+                }
             }
 
             return toReturn.ToArray();
@@ -115,32 +121,35 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
             using (var con = (SqlConnection) server.GetConnection())
             {
                 con.Open();
-                var cmd = new SqlCommand(sql, con);
-                cmd.ExecuteNonQuery();
+                using(var cmd = new SqlCommand(sql, con))
+                    cmd.ExecuteNonQuery();
             }
+
+            SqlConnection.ClearAllPools();
         }
 
         public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
         {
+            var toReturn = new Dictionary<string, string>();
+
             using (var con = new SqlConnection(builder.ConnectionString))
             {
                 con.Open();
                 con.ChangeDatabase(database);
-                SqlCommand cmd = new SqlCommand("exec sp_spaceused", con);
+                using (DataSet ds = new DataSet())
+                {
+                    using (SqlCommand cmd = new SqlCommand("exec sp_spaceused", con))
+                        using (var da = new SqlDataAdapter(cmd))
+                            da.Fill(ds);
 
-                DataSet ds = new DataSet();
+                    toReturn.Add(ds.Tables[0].Columns[0].ColumnName, ds.Tables[0].Rows[0][0].ToString());
+                    toReturn.Add(ds.Tables[0].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
 
-                new SqlDataAdapter(cmd).Fill(ds);
-
-                var toReturn = new Dictionary<string, string>();
-
-                toReturn.Add(ds.Tables[0].Columns[0].ColumnName, ds.Tables[0].Rows[0][0].ToString());
-                toReturn.Add(ds.Tables[0].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
-
-                toReturn.Add(ds.Tables[1].Columns[0].ColumnName, ds.Tables[1].Rows[0][0].ToString());
-                toReturn.Add(ds.Tables[1].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
-                toReturn.Add(ds.Tables[1].Columns[2].ColumnName, ds.Tables[1].Rows[0][2].ToString());
-
+                    toReturn.Add(ds.Tables[1].Columns[0].ColumnName, ds.Tables[1].Rows[0][0].ToString());
+                    toReturn.Add(ds.Tables[1].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
+                    toReturn.Add(ds.Tables[1].Columns[2].ColumnName, ds.Tables[1].Rows[0][2].ToString());
+                }
+                
                 return toReturn;
             }
         }
@@ -165,8 +174,8 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
             using (var con = (SqlConnection)server.GetConnection())
             {
                 con.Open();
-                var cmd = new SqlCommand(sql, con);
-                cmd.ExecuteNonQuery();
+                using(var cmd = new SqlCommand(sql, con))
+                    cmd.ExecuteNonQuery();
             }
 
             // other operations must be done on master
@@ -177,8 +186,8 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
             using (var con = (SqlConnection)server.GetConnection())
             {
                 con.Open();
-                var cmd = new SqlCommand(sql, con);
-                cmd.ExecuteNonQuery();
+                using(var cmd = new SqlCommand(sql, con))
+                    cmd.ExecuteNonQuery();
             }
 
             // detach!
@@ -186,18 +195,19 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
             using (var con = (SqlConnection)server.GetConnection())
             {
                 con.Open();
-                var cmd = new SqlCommand(sql, con);
-                cmd.ExecuteNonQuery();
+                using(var cmd = new SqlCommand(sql, con))
+                    cmd.ExecuteNonQuery();
             }
 
             // get data-files path from SQL Server
             using (var connection = (SqlConnection)server.GetConnection())
             {
                 connection.Open();
-                dataFolder = new SqlCommand(GetDefaultSQLServerDatabaseDirectory, connection).ExecuteScalar() as string;
+                using(var cmd = new SqlCommand(GetDefaultSQLServerDatabaseDirectory, connection))
+                    dataFolder = (string)cmd.ExecuteScalar();
             }
 
-            return new DirectoryInfo(dataFolder);
+            return dataFolder == null ? null : new DirectoryInfo(dataFolder);
         }
 
         public override void CreateBackup(DiscoveredDatabase discoveredDatabase,string backupName)
@@ -211,8 +221,8 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
                     "BACKUP DATABASE {0} TO  DISK = '{0}.bak' WITH  INIT ,  NOUNLOAD ,  NAME = N'{1}',  NOSKIP ,  STATS = 10,  NOFORMAT",
                     discoveredDatabase.GetRuntimeName(),backupName);
 
-                var cmd = server.GetCommand(sql,con);
-                cmd.ExecuteNonQuery();
+                using(var cmd = server.GetCommand(sql,con))
+                    cmd.ExecuteNonQuery();
             }
         }
 
@@ -225,8 +235,8 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
                 string sql = $@"if not exists (select 1 from sys.schemas where name = '{name}')
 	    EXEC('CREATE SCHEMA {name}')";
 
-                var cmd = discoveredDatabase.Server.GetCommand(sql, con);
-                cmd.ExecuteNonQuery();
+                using(var cmd = discoveredDatabase.Server.GetCommand(sql, con))
+                    cmd.ExecuteNonQuery();
             }
         }
     }

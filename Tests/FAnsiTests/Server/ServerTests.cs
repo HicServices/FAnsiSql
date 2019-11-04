@@ -9,18 +9,24 @@ namespace FAnsiTests.Server
 {
     class ServerLevelTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Server_Exists(DatabaseType type)
         {
             var server = GetTestServer(type);
             Assert.IsTrue(server.Exists(), "Server " + server + " did not exist");
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void Server_Constructors(DatabaseType dbType)
+        {
+              var helper = ImplementationManager.GetImplementation(dbType).GetServerHelper();
+              var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,"franko","wacky").ConnectionString,dbType);
+
+              Assert.AreEqual("localhost",server.Name);
+        }
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Server_RespondsWithinTime(DatabaseType type)
         {
             var server = GetTestServer(type);
@@ -32,9 +38,7 @@ namespace FAnsiTests.Server
         /// Tests systems ability to deal with missing information in the connection string
         /// </summary>
         /// <param name="type"></param>
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void ServerHelper_GetCurrentDatabase_WhenNoneSpecified(DatabaseType type)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();            
@@ -45,9 +49,7 @@ namespace FAnsiTests.Server
             Assert.AreEqual(null,server.GetCurrentDatabase());
         }
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void ServerHelper_GetConnectionStringBuilder(DatabaseType type)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
@@ -68,12 +70,7 @@ namespace FAnsiTests.Server
         }
 
         
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.Oracle,true)]
-        [TestCase(DatabaseType.Oracle,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void ServerHelper_GetConnectionStringBuilder_NoDatabase(DatabaseType type,bool useWhitespace)
         {
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
@@ -88,7 +85,7 @@ namespace FAnsiTests.Server
             Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
             Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
 
-            server = new DiscoveredServer("loco",useWhitespace?"  ":null,type,null,null);
+            server = new DiscoveredServer("loco",useWhitespace?"  ":null,type,"frank","kangaro");
             Assert.AreEqual("loco",server.Name);
 
             Assert.IsNull(server.GetCurrentDatabase());
@@ -99,6 +96,7 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,false)]
         [TestCase(DatabaseType.Oracle,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
         public void ServerHelper_ChangeDatabase(DatabaseType type,bool expectCaps)
         {
             var server = new DiscoveredServer("loco","bob",type,"franko","wacky");
@@ -127,12 +125,12 @@ namespace FAnsiTests.Server
         /// </summary>
         /// <param name="type"></param>
         /// <param name="useApiFirst"></param>
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void ServerHelper_ChangeDatabase_AdHoc(DatabaseType type, bool useApiFirst)
         {
+            if(type == DatabaseType.Oracle)
+                Assert.Inconclusive("FAnsiSql understanding of Database cannot be encoded in DbConnectionStringBuilder sadly so we can end up with DiscoveredServer with no GetCurrentDatabase");
+
             //create initial server reference
             var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
             var server = new DiscoveredServer(helper.GetConnectionStringBuilder("loco","bob","franko","wacky"));
@@ -159,6 +157,9 @@ namespace FAnsiTests.Server
 
         [TestCase(DatabaseType.MicrosoftSQLServer,DatabaseType.MySql)]
         [TestCase(DatabaseType.MySql, DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,DatabaseType.PostgreSql)]
+        [TestCase(DatabaseType.PostgreSql, DatabaseType.MicrosoftSQLServer)]
+
         public void MoveData_BetweenServerTypes(DatabaseType from, DatabaseType to)
         {
             //Create some test data
@@ -212,6 +213,17 @@ namespace FAnsiTests.Server
             AssertAreEqual(toTable.GetDataTable(), tblFrom.GetDataTable());
         }
 
+        [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
+        public void TestServer_GetVersion(DatabaseType dbType)
+        {
+            var db = GetTestDatabase(dbType, false);
+            var ver = db.Server.GetVersion();
+
+            Console.WriteLine("Version:" + ver);
+            Assert.IsNotNull(ver);
+
+            Assert.Greater(ver.Major,0);
+        }
         
     }
 }

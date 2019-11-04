@@ -1,18 +1,24 @@
 <TestDatabases>
           <Settings>
-            <AllowDatabaseCreation>False</AllowDatabaseCreation>
+            <AllowDatabaseCreation>True</AllowDatabaseCreation>
             <TestScratchDatabase>FAnsiTests</TestScratchDatabase>
           </Settings>
           <TestDatabase>
             <DatabaseType>MicrosoftSQLServer</DatabaseType>
-            <ConnectionString>server=localhost\sqlexpress;Trusted_Connection=True;</ConnectionString>
+            <ConnectionString>server=localhost;User Id=sa;Password=YourStrong!Passw0rd;</ConnectionString>
           </TestDatabase>
           <TestDatabase>
             <DatabaseType>MySql</DatabaseType>
-            <ConnectionString>server=localhost;Uid=root;Pwd=zombie;Ssl-Mode=None</ConnectionString>
+            <ConnectionString>server=127.0.0.1;Uid=root;Pwd=;Ssl-Mode=None</ConnectionString>
           </TestDatabase>
-         <TestDatabase>
+<!--         <TestDatabase>
             <DatabaseType>Oracle</DatabaseType>
             <ConnectionString>Data Source=localhost:1521/orclpdb.dundee.uni;User Id=ora;Password=zombie;</ConnectionString>
           </TestDatabase>
-        </TestDatabases>
+-->
+         <TestDatabase>
+            <DatabaseType>PostgreSql</DatabaseType>
+            <ConnectionString>
+              User ID=postgres;Password=;Host=127.0.0.1;Port=5432</ConnectionString>
+          </TestDatabase>
+</TestDatabases>

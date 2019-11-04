@@ -9,9 +9,7 @@ namespace FAnsiTests.Aggregation
 {
     class BasicAggregationTests : AggregationTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_BasicCount(DatabaseType type)
         {
             var tbl = GetTestTable(type);
@@ -35,28 +33,27 @@ namespace FAnsiTests.Aggregation
         }
 
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_GroupByCount(DatabaseType type)
         {
             var tbl = GetTestTable(type);
             var svr = tbl.Database.Server;
+            var category = tbl.DiscoverColumn("Category");
 
             var lines = new List<CustomLine>();
 
             lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
 
             lines.Add(new CustomLine("count(*),", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("Category", QueryComponent.QueryTimeColumn));
+            lines.Add(new CustomLine(category.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn));
 
             lines.Add(new CustomLine("FROM " + tbl.GetFullyQualifiedName(), QueryComponent.FROM));
 
             lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("Category", QueryComponent.GroupBy));
+            lines.Add(new CustomLine(category.GetFullyQualifiedName(), QueryComponent.GroupBy));
 
             lines.Add(new CustomLine("ORDER BY", QueryComponent.OrderBy));
-            lines.Add(new CustomLine("Category", QueryComponent.OrderBy));
+            lines.Add(new CustomLine(category.GetFullyQualifiedName(), QueryComponent.OrderBy));
 
 
             var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null);

@@ -9,9 +9,7 @@ namespace FAnsiTests.Table
 {
     class CreatePrimaryKeyTest: DatabaseTests
     {
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBasicCase_KeysCreated(DatabaseType databaseType)
         {
             var dt = new DataTable("Fish");
@@ -40,9 +38,7 @@ namespace FAnsiTests.Table
             Assert.IsTrue(col.IsPrimaryKey);
         }
 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBasicCase_FailHalfWay_SchemaUnchanged(DatabaseType databaseType)
         {
             var dt = new DataTable("Fish");

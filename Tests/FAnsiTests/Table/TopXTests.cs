@@ -8,12 +8,7 @@ namespace FAnsiTests.Table
 {
     class TopXTests :DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.Oracle,true)]
-        [TestCase(DatabaseType.Oracle,false)]
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.MySql,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void Test_TopX_OrderBy(DatabaseType type,bool asc)
         {
             var db = GetTestDatabase(type);
@@ -34,14 +29,17 @@ namespace FAnsiTests.Table
             
             string sql;
 
+            var f = tbl.GetQuerySyntaxHelper().EnsureWrapped("F");
+
             switch(topx.Location)
             {
                 case QueryComponent.SELECT:
-                    sql= "SELECT " + topx.SQL + " F FROM " + tbl.GetFullyQualifiedName() + " ORDER BY F " + (asc?"ASC":"DESC") ;
+                    sql= $"SELECT {topx.SQL} {f} FROM {tbl.GetFullyQualifiedName()} ORDER BY {f} {(asc ? "ASC" : "DESC")}";
                     break;
 
                 case QueryComponent.Postfix:
-                    sql = "SELECT F FROM " + tbl.GetFullyQualifiedName() + " ORDER BY F "+ (asc?"ASC ":"DESC ") + topx.SQL;
+                    sql =
+                        $"SELECT {f} FROM {tbl.GetFullyQualifiedName()} ORDER BY {f} {(asc ? "ASC " : "DESC ")}{topx.SQL}";
                     break;
                 default: throw new ArgumentOutOfRangeException("Did not expect this location");
 

@@ -96,7 +96,7 @@ namespace FAnsi.Implementations.Oracle
 
         public override string HowDoWeAchieveMd5(string selectSql)
         {
-            throw new NotImplementedException();
+            return "RAWTOHEX(standard_hash("+selectSql+", 'MD5'))";
         }
 
         protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
@@ -105,11 +105,6 @@ namespace FAnsi.Implementations.Oracle
             return Convert.ToDateTime(timeSpan.ToString());
         }
 
-        public override string DatabaseTableSeparator
-        {
-            get { return "."; }
-        }
-        
         static readonly HashSet<string> ReservedWords = new HashSet<string>( new []
         {
             

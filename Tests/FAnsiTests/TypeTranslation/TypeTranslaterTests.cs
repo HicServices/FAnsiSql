@@ -44,6 +44,7 @@ namespace FAnsiTests.TypeTranslation
         [TestCase(DatabaseType.MicrosoftSQLServer,"varchar(10)")]
         [TestCase(DatabaseType.MySql, "varchar(10)")]
         [TestCase(DatabaseType.Oracle, "varchar2(10)")]
+        [TestCase(DatabaseType.PostgreSql, "varchar(10)")]
         public void Test_CSharpToDbType_String10(DatabaseType type,string expectedType)
         {
             var cSharpType = new DatabaseTypeRequest(typeof (string), 10, null);
@@ -53,6 +54,7 @@ namespace FAnsiTests.TypeTranslation
         [TestCase(DatabaseType.MicrosoftSQLServer, "varchar(max)")]
         [TestCase(DatabaseType.MySql, "text")]
         [TestCase(DatabaseType.Oracle, "CLOB")]
+        [TestCase(DatabaseType.PostgreSql, "text")]
         public void Test_CSharpToDbType_StringMax(DatabaseType type,string expectedType)
         {
             var cSharpType = new DatabaseTypeRequest(typeof(string), 10000000, null);

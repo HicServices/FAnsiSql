@@ -15,39 +15,60 @@ namespace FAnsiTests.Aggregation
         [OneTimeSetUp]
         public void Setup()
         {
-            DataTable dt = new DataTable();
-            dt.TableName = "AggregateDataBasedTests";
+            try
+            {
+                using (DataTable dt = new DataTable())
+                {
+                    dt.TableName = "AggregateDataBasedTests";
 
-            dt.Columns.Add("EventDate");
-            dt.Columns.Add("Category");
-            dt.Columns.Add("NumberInTrouble");
+                    dt.Columns.Add("EventDate");
+                    dt.Columns.Add("Category");
+                    dt.Columns.Add("NumberInTrouble");
 
-            dt.Rows.Add("2001-01-01", "T", "7");
-            dt.Rows.Add("2001-01-02", "T", "11");
-            dt.Rows.Add("2001-01-01", "T", "49");
+                    dt.Rows.Add("2001-01-01", "T", "7");
+                    dt.Rows.Add("2001-01-02", "T", "11");
+                    dt.Rows.Add("2001-01-01", "T", "49");
 
-            dt.Rows.Add("2002-02-01", "T", "13");
-            dt.Rows.Add("2002-03-02", "T", "17");
-            dt.Rows.Add("2003-01-01", "T", "19");
-            dt.Rows.Add("2003-04-02", "T", "23");
+                    dt.Rows.Add("2002-02-01", "T", "13");
+                    dt.Rows.Add("2002-03-02", "T", "17");
+                    dt.Rows.Add("2003-01-01", "T", "19");
+                    dt.Rows.Add("2003-04-02", "T", "23");
 
 
-            dt.Rows.Add("2002-01-01", "F", "29");
-            dt.Rows.Add("2002-01-01", "F", "31");
+                    dt.Rows.Add("2002-01-01", "F", "29");
+                    dt.Rows.Add("2002-01-01", "F", "31");
 
-            dt.Rows.Add("2001-01-01", "E&, %a' mp;E", "37");
-            dt.Rows.Add("2002-01-01", "E&, %a' mp;E", "41");
-            dt.Rows.Add("2005-01-01", "E&, %a' mp;E", "59");  //note there are no records in 2004 it is important for axis tests (axis involves you having to build a calendar table)
+                    dt.Rows.Add("2001-01-01", "E&, %a' mp;E", "37");
+                    dt.Rows.Add("2002-01-01", "E&, %a' mp;E", "41");
+                    dt.Rows.Add("2005-01-01", "E&, %a' mp;E", "59");  //note there are no records in 2004 it is important for axis tests (axis involves you having to build a calendar table)
 
-            dt.Rows.Add(null, "G", "47");
-            dt.Rows.Add("2001-01-01", "G", "53");
+                    dt.Rows.Add(null, "G", "47");
+                    dt.Rows.Add("2001-01-01", "G", "53");
 
             
-            foreach (KeyValuePair<DatabaseType, string> kvp in TestConnectionStrings)
+                    foreach (KeyValuePair<DatabaseType, string> kvp in TestConnectionStrings)
+                    {
+                        try
+                        {
+                            var db = GetTestDatabase(kvp.Key);
+                            var tbl = db.CreateTable("AggregateDataBasedTests", dt);
+                            _testTables.Add(kvp.Key,tbl);
+
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Could not setup test database for DatabaseType " + kvp.Key);
+                            Console.WriteLine(e);
+
+                        }
+                        
+                    }
+                }
+            }
+            catch (Exception e)
             {
-                var db = GetTestDatabase(kvp.Key);
-                var tbl = db.CreateTable("AggregateDataBasedTests", dt);
-                _testTables.Add(kvp.Key,tbl);
+                Console.WriteLine(e);
+                throw;
             }
         }
 

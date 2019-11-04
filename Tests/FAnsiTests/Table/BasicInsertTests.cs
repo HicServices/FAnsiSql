@@ -11,6 +11,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer,"Dave")]
         [TestCase(DatabaseType.MySql,"Dave")]
         [TestCase(DatabaseType.Oracle, "Dave")]
+        [TestCase(DatabaseType.PostgreSql, "Dave")]
         
         [TestCase(DatabaseType.MicrosoftSQLServer, @"].;\""ffff 
 [")]
@@ -20,12 +21,12 @@ namespace FAnsiTests.Table
 
         [TestCase(DatabaseType.Oracle, @"].;\""ffff 
 [")]
-
-        [TestCase(DatabaseType.MySql, "Dave")]
-        [TestCase(DatabaseType.Oracle, "Dave")]
+        [TestCase(DatabaseType.PostgreSql, @"].;\""ffff 
+[")]
         [TestCase(DatabaseType.MicrosoftSQLServer, 1.5)]
         [TestCase(DatabaseType.MySql, 1.5)]
         [TestCase(DatabaseType.Oracle, 1.5)]
+        [TestCase(DatabaseType.PostgreSql, 1.5)]
         public void CreateTableAndInsertAValue_ColumnOverload(DatabaseType type, object value)
         {
             var db = GetTestDatabase(type);
@@ -52,6 +53,7 @@ namespace FAnsiTests.Table
         [TestCase(DatabaseType.MicrosoftSQLServer, 1.5)]
         [TestCase(DatabaseType.MySql, 1.5)]
         [TestCase(DatabaseType.Oracle, 1.5)]
+        [TestCase(DatabaseType.PostgreSql, 1.5)]
         public void CreateTableAndInsertAValue_StringOverload(DatabaseType type, object value)
         {
             var db = GetTestDatabase(type,true);
@@ -73,9 +75,7 @@ namespace FAnsiTests.Table
             tbl.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTableAndInsertAValue_ReturnsIdentity(DatabaseType type)
         {
             var db = GetTestDatabase(type,true);

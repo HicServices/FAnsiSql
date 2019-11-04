@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Data.Common;
 using FAnsi.Discovery;
 using FAnsi.Discovery.ConnectionStringDefaults;
@@ -108,7 +109,8 @@ namespace FAnsi.Implementations.MySql
             using(var con = new MySqlConnection(b.ConnectionString))
             {
                 con.Open();
-                GetCommand("CREATE DATABASE `" + newDatabaseName.GetRuntimeName() + "`",con).ExecuteNonQuery();
+                using(var cmd = GetCommand("CREATE DATABASE `" + newDatabaseName.GetRuntimeName() + "`",con))
+                    cmd.ExecuteNonQuery();
             }
         }
 
@@ -127,6 +129,22 @@ namespace FAnsi.Implementations.MySql
             return ((MySqlConnectionStringBuilder)builder).Password;
         }
 
+        public override Version GetVersion(DiscoveredServer server)
+        {
+            using (var con = server.GetConnection())
+            {
+                con.Open();
+                using (var cmd = server.GetCommand("show variables like \"version\"",con))
+                {
+                    using(var r = cmd.ExecuteReader())
+                        if (r.Read())
+                            return r["Value"] == DBNull.Value ? null: CreateVersionFromString((string)r["Value"]);
+                        else
+                            return null;
+                }
+            }
+        }
+        
         public override string[] ListDatabases(DbConnectionStringBuilder builder)
         {
             var b = (MySqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
@@ -140,15 +158,16 @@ namespace FAnsi.Implementations.MySql
         }
         public override string[] ListDatabases(DbConnection con)
         {
-            var cmd = GetCommand("show databases;", con); //already comes as single column called Database
-
-            var r = cmd.ExecuteReader();
-
             List<string> databases = new List<string>();
 
-            while (r.Read())
-                databases.Add((string)r["Database"]);
+            using(var cmd = GetCommand("show databases;", con)) //already comes as single column called Database
+                using (var r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                        databases.Add((string)r["Database"]);
 
+                }
+            
             con.Close();
             return databases.ToArray();
         }

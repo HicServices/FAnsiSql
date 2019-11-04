@@ -27,10 +27,11 @@ namespace FAnsi.Implementations.Oracle
             List<DiscoveredColumn> columns = new List<DiscoveredColumn>();
             var tableName = discoveredTable.GetRuntimeName();
 
-            DbCommand cmd = server.Helper.GetCommand(@"SELECT *
+            using (DbCommand cmd = server.Helper.GetCommand(@"SELECT *
 FROM   all_tab_cols
 WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
-", connection.Connection);
+", connection.Connection))
+            {
                 cmd.Transaction = connection.Transaction;
 
                 DbParameter p = new OracleParameter("table_name", OracleDbType.Varchar2);
@@ -49,23 +50,28 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
 
                     while (r.Read())
                     {
-
                         var toAdd = new DiscoveredColumn(discoveredTable, (string)r["COLUMN_NAME"], r["NULLABLE"].ToString() != "N") { Format = r["CHARACTER_SET_NAME"] as string };
                         toAdd.DataType = new DiscoveredDataType(r, GetSQLType_From_all_tab_cols_Result(r), toAdd);
                         columns.Add(toAdd);
                     }
 
                 }
+            }
+                
 
-                //get auto increment information
-                cmd = new OracleCommand("select table_name,column_name from ALL_TAB_IDENTITY_COLS WHERE table_name = :table_name AND owner =:owner", (OracleConnection)connection.Connection);
-                cmd.Transaction = connection.Transaction;
+            //get auto increment information
+            using (var cmd =
+                new OracleCommand(
+                    "select table_name,column_name from ALL_TAB_IDENTITY_COLS WHERE table_name = :table_name AND owner =:owner",
+                    (OracleConnection) connection.Connection))
+            {
+                cmd.Transaction = (OracleTransaction) connection.Transaction;
 
-                p = new OracleParameter("table_name", OracleDbType.Varchar2);
+                var p = new OracleParameter("table_name", OracleDbType.Varchar2);
                 p.Value = tableName;
                 cmd.Parameters.Add(p);
 
-                p2 = new OracleParameter("owner", OracleDbType.Varchar2);
+                var p2 = new OracleParameter("owner", OracleDbType.Varchar2);
                 p2.Value = database;
                 cmd.Parameters.Add(p2);
 
@@ -78,25 +84,25 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
                         match.IsAutoIncrement = true;
                     }
                 }
+            }
 
-
-                //get primary key information 
-                cmd = new OracleCommand(@"SELECT cols.table_name, cols.column_name, cols.position, cons.status, cons.owner
+                
+            //get primary key information 
+            using(var cmd = new OracleCommand(@"SELECT cols.table_name, cols.column_name, cols.position, cons.status, cons.owner
 FROM all_constraints cons, all_cons_columns cols
 WHERE cols.table_name = :table_name AND cols.owner = :owner
 AND cons.constraint_type = 'P'
 AND cons.constraint_name = cols.constraint_name
 AND cons.owner = cols.owner
-ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connection);
-                cmd.Transaction = connection.Transaction;
+ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connection))
+            {
+                cmd.Transaction = (OracleTransaction) connection.Transaction;
 
-
-                p = new OracleParameter("table_name",OracleDbType.Varchar2);
+                var p = new OracleParameter("table_name",OracleDbType.Varchar2);
                 p.Value = tableName;
                 cmd.Parameters.Add(p);
-
-
-                p2 = new OracleParameter("owner", OracleDbType.Varchar2);
+                
+                var p2 = new OracleParameter("owner", OracleDbType.Varchar2);
                 p2.Value = database;
                 cmd.Parameters.Add(p2);
 
@@ -105,8 +111,10 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
                     while (r.Read())
                         columns.Single(c => c.GetRuntimeName().Equals(r["COLUMN_NAME"])).IsPrimaryKey = true;//mark all primary keys as primary
                 }
+            }
+            
 
-                return columns.ToArray();
+            return columns.ToArray();
         }
 
 
@@ -116,9 +124,9 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         }
         
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
-        {
-            var cmd = new OracleCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + "  DROP COLUMN " + columnToDrop.GetRuntimeName(), (OracleConnection)connection);
-            cmd.ExecuteNonQuery();
+        { 
+            using(var cmd = new OracleCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + "  DROP COLUMN " + columnToDrop.GetRuntimeName(), (OracleConnection)connection))
+                cmd.ExecuteNonQuery();
         }
         
         private string GetBasicTypeFromOracleType(DbDataReader r)
@@ -217,6 +225,8 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
             IManagedTransaction transaction = null)
         {
+            Dictionary<string, DiscoveredRelationship> toReturn = new Dictionary<string, DiscoveredRelationship>();
+
             string sql = @"
 SELECT DISTINCT a.table_name
      , a.column_name
@@ -236,67 +246,66 @@ AND  UPPER(c.r_owner) =  UPPER(:DatabaseName)
 AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
 
 
-            var cmd = new OracleCommand(sql, (OracleConnection)connection);
-
-            var p = new OracleParameter(":DatabaseName", OracleDbType.Varchar2);
-            p.Value = table.Database.GetRuntimeName();
-            cmd.Parameters.Add(p);
-
-            p = new OracleParameter(":TableName", OracleDbType.Varchar2);
-            p.Value = table.GetRuntimeName();
-            cmd.Parameters.Add(p);
-
-            Dictionary<string, DiscoveredRelationship> toReturn = new Dictionary<string, DiscoveredRelationship>();
-
-            using (var r = cmd.ExecuteReader())
+            using (var cmd = new OracleCommand(sql, (OracleConnection) connection))
             {
-                while (r.Read())
+                var p = new OracleParameter(":DatabaseName", OracleDbType.Varchar2);
+                p.Value = table.Database.GetRuntimeName();
+                cmd.Parameters.Add(p);
+
+                p = new OracleParameter(":TableName", OracleDbType.Varchar2);
+                p.Value = table.GetRuntimeName();
+                cmd.Parameters.Add(p);
+                
+                using (var r = cmd.ExecuteReader())
                 {
-                    var fkName = r["constraint_name"].ToString();
-
-                    DiscoveredRelationship current;
-
-                    //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
+                    while (r.Read())
                     {
-                        current = toReturn[fkName];
+                        var fkName = r["constraint_name"].ToString();
+
+                        DiscoveredRelationship current;
+
+                        //could be a 2+ columns foreign key?
+                        if (toReturn.ContainsKey(fkName))
+                        {
+                            current = toReturn[fkName];
+                        }
+                        else
+                        {
+
+                            var pkDb = r["r_owner"].ToString();
+                            var pkTableName = r["r_table_name"].ToString();
+
+                            var fkDb = r["owner"].ToString();
+                            var fkTableName = r["table_name"].ToString();
+
+                            var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
+                            var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
+
+                            //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
+                            var deleteRuleString = r["delete_rule"].ToString();
+
+                            CascadeRule deleteRule = CascadeRule.Unknown;
+
+                            if (deleteRuleString == "CASCADE")
+                                deleteRule = CascadeRule.Delete;
+                            else if (deleteRuleString == "NO ACTION")
+                                deleteRule = CascadeRule.NoAction;
+                            else if (deleteRuleString == "RESTRICT")
+                                deleteRule = CascadeRule.NoAction;
+                            else if (deleteRuleString == "SET NULL")
+                                deleteRule = CascadeRule.SetNull;
+                            else if (deleteRuleString == "SET DEFAULT")
+                                deleteRule = CascadeRule.SetDefault;
+
+                            current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                            toReturn.Add(current.Name, current);
+                        }
+
+                        current.AddKeys(r["r_column_name"].ToString(), r["column_name"].ToString(), transaction);
                     }
-                    else
-                    {
-
-                        var pkDb = r["r_owner"].ToString();
-                        var pkTableName = r["r_table_name"].ToString();
-
-                        var fkDb = r["owner"].ToString();
-                        var fkTableName = r["table_name"].ToString();
-
-                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
-                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
-
-                        //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
-                        var deleteRuleString = r["delete_rule"].ToString();
-
-                        CascadeRule deleteRule = CascadeRule.Unknown;
-
-                        if (deleteRuleString == "CASCADE")
-                            deleteRule = CascadeRule.Delete;
-                        else if (deleteRuleString == "NO ACTION")
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleString == "RESTRICT")
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleString == "SET NULL")
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleString == "SET DEFAULT")
-                            deleteRule = CascadeRule.SetDefault;
-
-                        current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
-                        toReturn.Add(current.Name, current);
-                    }
-
-                    current.AddKeys(r["r_column_name"].ToString(), r["column_name"].ToString(), transaction);
                 }
             }
-
+            
             return toReturn.Values.ToArray();
         }
 
@@ -311,9 +320,9 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
                 //apparently * doesn't fly with Oracle DataAdapter
                 string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY" ;
 
-                var cmd = table.Database.Server.GetCommand(sql, con);
-                var da = table.Database.Server.GetDataAdapter(cmd);
-                args.Fill(da,cmd, dt);
+                using(var cmd = table.Database.Server.GetCommand(sql, con))
+                    using(var da = table.Database.Server.GetDataAdapter(cmd))
+                        args.Fill(da,cmd, dt);
             }
         }
 

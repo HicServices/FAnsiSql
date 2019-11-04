@@ -9,9 +9,7 @@ namespace FAnsiTests.Table
 {
     class DataTypeAdjusterTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void CreateTable_WithAdjuster(DatabaseType type)
         {
             var tbl = GetTestDatabase(type).CreateTable("MyTable", new[]

@@ -10,9 +10,7 @@ namespace FAnsiTests.Database
 {
     class DiscoverTablesTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MySql)] 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_DiscoverTables_Normal(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -42,9 +40,7 @@ namespace FAnsiTests.Database
         ///
         /// Correct behaviour is for DiscoverTables to not return any tables that have invalid names
         /// </summary>
-        [TestCase(DatabaseType.MySql)] 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_DiscoverTables_WithInvalidNames_Skipped(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -73,16 +69,14 @@ namespace FAnsiTests.Database
             Assert.AreEqual(1,tbls.Length);
             Assert.AreEqual(1, tbls.Count(t => t.GetRuntimeName().Equals("FF",StringComparison.CurrentCultureIgnoreCase)));
             
-            DropBadTable(db);
+            DropBadTable(db,false);
         }
 
         /// <summary>
         /// As above test <see cref="Test_DiscoverTables_WithInvalidNames_Skipped"/> but creates a view with a bad name instead of a table
         /// </summary>
         /// <param name="dbType"></param>
-        [TestCase(DatabaseType.MySql)] 
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_DiscoverViews_WithInvalidNames_Skipped(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -115,10 +109,10 @@ namespace FAnsiTests.Database
             Assert.AreEqual(0,tbls.Count(t=>t.TableType == TableType.View));
             Assert.AreEqual(1, tbls.Count(t => t.GetRuntimeName().Equals("FF",StringComparison.CurrentCultureIgnoreCase)));
             
-            DropBadView(db);
+            DropBadView(db,false);
         }
 
-        private void DropBadTable(DiscoveredDatabase db)
+        private void DropBadTable(DiscoveredDatabase db,bool ignoreFailure)
         {
             using(var con = db.Server.GetConnection())
             {
@@ -130,6 +124,9 @@ namespace FAnsiTests.Database
                 }
                 catch (Exception)
                 {
+                    if (!ignoreFailure)
+                        throw;
+
                     Console.WriteLine("Drop table failed, this is expected, since FAnsi won't see this dodgy table name we can't drop it as normal before tests");
                 }
             }
@@ -145,6 +142,8 @@ namespace FAnsiTests.Database
                     return "`BB (ff)`";
                 case DatabaseType.Oracle:
                     return  db.GetRuntimeName() + ".\"BB (ff)\"";
+                case DatabaseType.PostgreSql:
+                    return  '"' + db.GetRuntimeName() + "\".public.\"BB (ff)\"";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(db.Server.DatabaseType), db.Server.DatabaseType, null);
             }
@@ -153,7 +152,7 @@ namespace FAnsiTests.Database
         private void CreateBadTable(DiscoveredDatabase db)
         {
             //drop it if it exists
-            DropBadTable(db);
+            DropBadTable(db,true);
 
             using(var con = db.Server.GetConnection())
             {
@@ -164,12 +163,8 @@ namespace FAnsiTests.Database
         }
 
 
-        private void DropBadView(DiscoveredDatabase db)
+        private void DropBadView(DiscoveredDatabase db, bool ignoreFailure)
         {
-            //the table that the view reads from
-            var abc = db.ExpectTable("ABC");
-            if(abc.Exists())
-                abc.Drop();
             
             using(var con = db.Server.GetConnection())
             {
@@ -181,23 +176,35 @@ namespace FAnsiTests.Database
                 }
                 catch (Exception)
                 {
+                    if (!ignoreFailure)
+                        throw;
+
                     Console.WriteLine("Drop view failed, this is expected, since FAnsi won't see this dodgy table name we can't drop it as normal before tests");
                 }
             }
+
+            //the table that the view reads from
+            var abc = db.ExpectTable("ABC");
+            if(abc.Exists())
+                abc.Drop();
+
         }
 
 
         private void CreateBadView(DiscoveredDatabase db)
         {
             //drop it if it exists
-            DropBadView(db);
+            DropBadView(db,true);
 
             db.CreateTable("ABC",new DatabaseColumnRequest[]{new DatabaseColumnRequest("A",new DatabaseTypeRequest(typeof(int)))});
 
             using(var con = db.Server.GetConnection())
             {
                 con.Open();
-                var cmd = db.Server.GetCommand($"CREATE VIEW {GetBadTableName(db)} as select * from ABC",con);
+ 
+                var viewname = db.Server.GetQuerySyntaxHelper().EnsureWrapped("ABC");
+
+                var cmd = db.Server.GetCommand($"CREATE VIEW {GetBadTableName(db)} as select * from " + viewname,con);
                 cmd.ExecuteNonQuery();
             }
         }

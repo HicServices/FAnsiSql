@@ -7,6 +7,7 @@ using FAnsi.Discovery.ConnectionStringDefaults;
 using FAnsi.Implementations.MicrosoftSQL;
 using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
+using FAnsi.Implementations.PostgreSql;
 using NUnit.Framework;
 
 namespace FAnsiTests.Server
@@ -19,6 +20,7 @@ namespace FAnsiTests.Server
             {DatabaseType.MicrosoftSQLServer, new MicrosoftSQLServerHelper()},
             {DatabaseType.MySql, new MySqlServerHelper()},
             {DatabaseType.Oracle, new OracleServerHelper()},
+            {DatabaseType.PostgreSql, new PostgreSqlServerHelper()},
         };
 
         [Test]
@@ -27,7 +29,7 @@ namespace FAnsiTests.Server
             var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MySql);
             acc.AddOrUpdateKeyword("AutoEnlist", "false", ConnectionStringKeywordPriority.SystemDefaultLow);
             
-            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb",null,null);
+            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb","frank","kangaro");
 
             StringAssert.DoesNotContain("autoenlist",connectionStringBuilder.ConnectionString);
 
@@ -43,7 +45,7 @@ namespace FAnsiTests.Server
             var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MicrosoftSQLServer);
             acc.AddOrUpdateKeyword("Pooling", "false", ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", null, null);
+            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
             StringAssert.DoesNotContain("pooling", connectionStringBuilder.ConnectionString);
 
@@ -62,13 +64,14 @@ namespace FAnsiTests.Server
         [TestCase(DatabaseType.MySql, "sslmode", "None", "Ssl-Mode","Required")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "AttachDbFilename", @"c:\temp\db", "Initial File Name", @"x:\omg.mdf")]
         [TestCase(DatabaseType.Oracle, "CONNECTION TIMEOUT", "10", "Connection Timeout", "20")]
+        [TestCase(DatabaseType.PostgreSql, "Database", "mydb", "DATABASE", "myotherdb")]
         public void TestKeywords_OverrideWithNovelButEquivalentKeyword_Ignored(DatabaseType databaseType, string key1, string value1, string equivalentKey, string value2)
         {
             // SSL Mode , SslMode , Ssl-Mode 
             var acc = new ConnectionStringKeywordAccumulator(databaseType);
             acc.AddOrUpdateKeyword(key1,value1, ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-            DbConnectionStringBuilder connectionStringBuilder = helpers[databaseType].GetConnectionStringBuilder("localhost", "mydb", null, null);
+            DbConnectionStringBuilder connectionStringBuilder = helpers[databaseType].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
             acc.EnforceOptions(connectionStringBuilder);
 
@@ -88,7 +91,7 @@ namespace FAnsiTests.Server
             var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MicrosoftSQLServer);
             acc.AddOrUpdateKeyword("Pooling", "false", ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", null, null);
+            DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
             StringAssert.DoesNotContain("pooling", connectionStringBuilder.ConnectionString);
 
@@ -105,9 +108,7 @@ namespace FAnsiTests.Server
         }
 
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestKeywords_Invalid(DatabaseType databaseType)
         {
             var acc = new ConnectionStringKeywordAccumulator(databaseType);

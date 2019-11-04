@@ -154,9 +154,11 @@ namespace FAnsi.Discovery
                 string sql = Column.Helper.GetAlterColumnToSql(Column, newType, Column.AllowNulls);
                 try
                 {
-                    var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
-                    cmd.CommandTimeout = altertimeoutInSeconds;
-                    cmd.ExecuteNonQuery();
+                    using(var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction))
+                    {
+                        cmd.CommandTimeout = altertimeoutInSeconds;
+                        cmd.ExecuteNonQuery();
+                    }
                 }
                 catch (Exception e)
                 {

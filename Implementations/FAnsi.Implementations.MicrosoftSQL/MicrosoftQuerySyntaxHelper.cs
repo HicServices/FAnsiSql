@@ -15,11 +15,6 @@ namespace FAnsi.Implementations.MicrosoftSQL
         {
         }
 
-        public override string DatabaseTableSeparator
-        {
-           get { return "."; }
-        }
-        
         /// <summary>
         /// Maximum database name length.  This is less than 128 in order to allow for "_logs" etc getting appended to end.
         /// See: https://stackoverflow.com/a/5096245/4824531 
@@ -93,6 +88,11 @@ namespace FAnsi.Implementations.MicrosoftSQL
         public override string HowDoWeAchieveMd5(string selectSql)
         {
             return "CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary," + selectSql + ")),2)";
+        }
+
+        public override string GetDefaultSchemaIfAny()
+        {
+            return "dbo";
         }
 
         protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)

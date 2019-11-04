@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Fixed
+
+- Fixed Oracle `long` mapping (previously mapped to "bigint" now maps to "long")
+
+
 ## [0.10.7] - 2019-09-20
 
 ### Added

@@ -89,11 +89,10 @@ namespace FAnsiTests
             using (DbConnection con = server.GetConnection())
             {
                 con.Open();
-                DbCommand cmd = server.GetCommand("Select * from " + table.GetFullyQualifiedName(), con);
-                DbDataReader r = cmd.ExecuteReader();
-
-                while (r.Read())
-                    Console.WriteLine(string.Join(",", r["Name"],r["DateOfBirth"]));
+                using(DbCommand cmd = server.GetCommand("Select * from " + table.GetFullyQualifiedName(), con))
+                    using(DbDataReader r = cmd.ExecuteReader())
+                        while (r.Read())
+                            Console.WriteLine(string.Join(",", r["Name"],r["DateOfBirth"]));
             }
 
             //Drop the table afterwards

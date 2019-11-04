@@ -11,9 +11,7 @@ namespace FAnsiTests.Table
 {
     class UpdateTests :DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.Oracle)]
-        [TestCase(DatabaseType.MySql)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_UpdateTableFromJoin(DatabaseType dbType)
         {
             var dt1 = new DataTable();
@@ -35,13 +33,19 @@ namespace FAnsiTests.Table
             var tbl1 = db.CreateTable("HighScoresTable", dt1);
             var tbl2 = db.CreateTable("NewScoresTable", dt2);
 
-            var updateHelper = db.Server.GetQuerySyntaxHelper().UpdateHelper;
+            var syntaxHelper = db.Server.GetQuerySyntaxHelper();
+
+            var updateHelper = syntaxHelper.UpdateHelper;
             
             List<CustomLine> queryLines = new List<CustomLine>();
-            
-            queryLines.Add(new CustomLine("t1.HighScore = t2.Score",QueryComponent.SET));
-            queryLines.Add(new CustomLine("t1.HighScore < t2.Score OR t1.HighScore is null",QueryComponent.WHERE));
-            queryLines.Add(new CustomLine("t1.Name = t2.Name",QueryComponent.JoinInfoJoin));
+
+            var highScore = syntaxHelper.EnsureWrapped("HighScore");
+            var score = syntaxHelper.EnsureWrapped("Score");
+            var name = syntaxHelper.EnsureWrapped("Name");
+
+            queryLines.Add(new CustomLine($"t1.{highScore} = t2.{score}",QueryComponent.SET));
+            queryLines.Add(new CustomLine($"t1.{highScore} < t2.{score} OR t1.{highScore} is null",QueryComponent.WHERE));
+            queryLines.Add(new CustomLine($"t1.{name} = t2.{name}",QueryComponent.JoinInfoJoin));
 
             string sql = updateHelper.BuildUpdate(tbl1, tbl2, queryLines);
 
@@ -57,11 +61,11 @@ namespace FAnsiTests.Table
                 Assert.AreEqual(1,affectedRows);
 
                 //Frank should have got a new high score of 900
-                cmd = db.Server.GetCommand(string.Format("SELECT HighScore from {0} WHERE Name = 'Frank'",tbl1.GetFullyQualifiedName()), con);
+                cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Frank'", con);
                 Assert.AreEqual(900,cmd.ExecuteScalar());
 
                 //Dave should have his old score of 100
-                cmd = db.Server.GetCommand(string.Format("SELECT HighScore from {0} WHERE Name = 'Dave'", tbl1.GetFullyQualifiedName()), con);
+                cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Dave'", con);
                 Assert.AreEqual(100, cmd.ExecuteScalar());
             }
         }

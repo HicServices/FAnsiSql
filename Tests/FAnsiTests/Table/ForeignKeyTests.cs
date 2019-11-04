@@ -10,12 +10,7 @@ namespace FAnsiTests.Table
 {
     class ForeignKeyTests:DatabaseTests
     {
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer, false)]
-        [TestCase(DatabaseType.MySql, true)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.Oracle, true)]
-        [TestCase(DatabaseType.Oracle, false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void TestForeignKey_OneColumnKey(DatabaseType dbType, bool cascade)
         {
             var db = GetTestDatabase(dbType);
@@ -75,9 +70,7 @@ namespace FAnsiTests.Table
             parentTable.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestForeignKey_TwoColumnKey(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -133,12 +126,7 @@ namespace FAnsiTests.Table
             parentTable.Drop();
         }
 
-        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-        [TestCase(DatabaseType.MySql,true)]
-        [TestCase(DatabaseType.Oracle,true)]
-        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
-        [TestCase(DatabaseType.MySql,false)]
-        [TestCase(DatabaseType.Oracle,false)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void Test_ThreeTables_OnePrimary(DatabaseType dbType, bool useTransaction)
         {
             /*       t2
@@ -204,9 +192,7 @@ namespace FAnsiTests.Table
             Assert.Contains(t3, sort2.Order.ToList());
         }
         
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.Oracle)]
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_ThreeTables_TwoPrimary(DatabaseType dbType)
         {
             /*  t1

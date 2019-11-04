@@ -33,8 +33,8 @@ namespace FAnsi.Implementations.MySql
             using (var con = (MySqlConnection) database.Server.GetConnection())
             {
                 con.Open();
-                MySqlCommand cmd = new MySqlCommand("DROP DATABASE `" + database.GetRuntimeName() +"`",con);
-                cmd.ExecuteNonQuery();
+                using(MySqlCommand cmd = new MySqlCommand("DROP DATABASE `" + database.GetRuntimeName() +"`",con))
+                    cmd.ExecuteNonQuery();
             }
         }
 
@@ -91,25 +91,26 @@ namespace FAnsi.Implementations.MySql
 
             List<DiscoveredTable> tables = new List<DiscoveredTable>();
 
-            var cmd = new MySqlCommand("SHOW FULL TABLES in `" + database +"`", (MySqlConnection) connection);
-            cmd.Transaction = transaction as MySqlTransaction;
-
-            var r = cmd.ExecuteReader();
-            while (r.Read())
+            using (var cmd = new MySqlCommand("SHOW FULL TABLES in `" + database + "`", (MySqlConnection) connection))
             {
-                bool isView = (string)r[1] == "VIEW";
+                cmd.Transaction = transaction as MySqlTransaction;
 
-                //if we are skipping views
-                if(isView && !includeViews)
-                    continue;
+                var r = cmd.ExecuteReader();
+                while (r.Read())
+                {
+                    bool isView = (string)r[1] == "VIEW";
+
+                    //if we are skipping views
+                    if(isView && !includeViews)
+                        continue;
                 
-                //skip invalid table names
-                if(!querySyntaxHelper.IsValidTableName((string)r[0],out _))
-                    continue;
+                    //skip invalid table names
+                    if(!querySyntaxHelper.IsValidTableName((string)r[0],out _))
+                        continue;
 
-                tables.Add(new DiscoveredTable(parent,(string)r[0],querySyntaxHelper,null,isView ? TableType.View : TableType.Table));//this table fieldname will be something like Tables_in_mydbwhatevernameitis
+                    tables.Add(new DiscoveredTable(parent,(string)r[0],querySyntaxHelper,null,isView ? TableType.View : TableType.Table));//this table fieldname will be something like Tables_in_mydbwhatevernameitis
+                }
             }
-                
             
             return tables.ToArray();
         }

@@ -36,45 +36,48 @@ namespace FAnsi.Implementations.MySql
         public override int UploadImpl(DataTable dt)
         {
             var matchedColumns = GetMapping(dt.Columns.Cast<DataColumn>());
-
-            MySqlCommand cmd = new MySqlCommand("", (MySqlConnection)Connection.Connection,(MySqlTransaction) Connection.Transaction);
-
-            if (BulkInsertBatchTimeoutInSeconds != 0)
-                cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
-
-            string commandPrefix = string.Format("INSERT INTO {0}({1}) VALUES ", TargetTable.GetFullyQualifiedName(),string.Join(",", matchedColumns.Values.Select(c => "`" + c.GetRuntimeName() + "`")));
-
-            StringBuilder sb = new StringBuilder();
-                
             int affected = 0;
-            int row = 0;
 
-            foreach(DataRow dr in dt.Rows)
+            using (var cmd = new MySqlCommand("", (MySqlConnection) Connection.Connection,
+                (MySqlTransaction) Connection.Transaction))
             {
-                sb.Append('(');
+                if (BulkInsertBatchTimeoutInSeconds != 0)
+                    cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
 
-                DataRow dr1 = dr;
+                string commandPrefix = string.Format("INSERT INTO {0}({1}) VALUES ", TargetTable.GetFullyQualifiedName(),string.Join(",", matchedColumns.Values.Select(c => "`" + c.GetRuntimeName() + "`")));
+
+                StringBuilder sb = new StringBuilder();
                 
-                sb.Append(string.Join(",",matchedColumns.Keys.Select(k => ConstructIndividualValue(matchedColumns[k].DataType.SQLType,dr1[k]))));
+                
+                int row = 0;
 
-                sb.AppendLine("),");
-                row++;
+                foreach(DataRow dr in dt.Rows)
+                {
+                    sb.Append('(');
 
-                //don't let command get too long
-                if (row % BulkInsertRowsPerNetworkPacket == 0)
+                    DataRow dr1 = dr;
+                
+                    sb.Append(string.Join(",",matchedColumns.Keys.Select(k => ConstructIndividualValue(matchedColumns[k].DataType.SQLType,dr1[k]))));
+
+                    sb.AppendLine("),");
+                    row++;
+
+                    //don't let command get too long
+                    if (row % BulkInsertRowsPerNetworkPacket == 0)
+                    {
+                        cmd.CommandText = commandPrefix + sb.ToString().TrimEnd(',', '\r', '\n');
+                        affected += cmd.ExecuteNonQuery();
+                        sb.Clear();
+                    }
+                }
+
+                //send final batch
+                if(sb.Length > 0)
                 {
                     cmd.CommandText = commandPrefix + sb.ToString().TrimEnd(',', '\r', '\n');
                     affected += cmd.ExecuteNonQuery();
                     sb.Clear();
                 }
-            }
-
-            //send final batch
-            if(sb.Length > 0)
-            {
-                cmd.CommandText = commandPrefix + sb.ToString().TrimEnd(',', '\r', '\n');
-                affected += cmd.ExecuteNonQuery();
-                sb.Clear();
             }
 
             return affected;

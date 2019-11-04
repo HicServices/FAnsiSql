@@ -61,6 +61,11 @@ namespace FAnsi.Implementations.Oracle
             return "varchar2(5)";
         }
 
+        protected override string GetBigIntDataType()
+        {
+            return "long";
+        }
+
         /// <summary>
         /// <para>Returns False.  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint
         /// For our purposes we will have to just use varchar2(5) to store "True" or "False" and "1" and "0" etc</para>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Text.RegularExpressions;
 using System.Threading;
 using FAnsi.Connections;
 using FAnsi.Discovery.ConnectionStringDefaults;
@@ -159,6 +160,29 @@ namespace FAnsi.Discovery
         }
         public abstract string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
         public abstract string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
+        public abstract Version GetVersion(DiscoveredServer server);
+        
+        Regex rVagueVersion = new Regex(@"\d+\.\d+(\.\d+)?(\.\d+)?");
+
+        /// <summary>
+        /// Returns a new <see cref="Version"/> by parsing the <paramref name="versionString"/>.  If the string
+        /// is a valid version the full version string is represented otherwise a regex match is used to find
+        /// numbers with dots separating them (e.g. 1.2.3  / 5.1 etc).
+        /// </summary>
+        /// <param name="versionString"></param>
+        /// <returns></returns>
+        protected Version CreateVersionFromString(string versionString)
+        {
+            if (Version.TryParse(versionString, out Version result))
+                return result;
+
+            var m = rVagueVersion.Match(versionString);
+            if (m.Success)
+                return Version.Parse(m.Value);
+
+            //whatever the string was it didn't even remotely resemble a Version
+            return null;
+        }
 
         protected DiscoveredServerHelper(DatabaseType databaseType)
         {

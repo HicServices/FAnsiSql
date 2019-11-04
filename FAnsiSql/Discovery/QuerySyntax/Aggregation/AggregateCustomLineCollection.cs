@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FAnsi.Discovery.QuerySyntax.Aggregation
@@ -60,5 +61,16 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation
         /// top 5 drugs ordered by SUM of prescriptions
         /// </summary>
         public CustomLine TopXOrderBy => Lines.SingleOrDefault(l => l.LocationToInsert == QueryComponent.OrderBy && l.Role == CustomLineRole.TopX);
+
+        /// <summary>
+        /// Returns all concatenated SQL for all <see cref="Lines"/> between the inclusive boundaries from/to
+        /// </summary>
+        /// <param name="from">inclusive start section from which to return rows</param>
+        /// <param name="to">inclusive end section from which to return rows</param>
+        public string GetLines(QueryComponent from, QueryComponent to)
+        {
+            return string.Join(Environment.NewLine,
+                Lines.Where(c => c.LocationToInsert >= from && c.LocationToInsert <= to));
+        }
     }
 }

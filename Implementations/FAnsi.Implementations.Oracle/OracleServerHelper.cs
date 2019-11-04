@@ -104,16 +104,16 @@ namespace FAnsi.Implementations.Oracle
             {
                 con.Open();
                 //create a new user with a random password!!! - go oracle this makes perfect sense database=user!
-                var cmd = new OracleCommand(
-                    "CREATE USER \"" + newDatabaseName.GetRuntimeName() + "\" IDENTIFIED BY pwd" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 27) //oracle only allows 30 character passwords
-                    ,(OracleConnection) con); 
-                cmd.ExecuteNonQuery();
+                using(var cmd = new OracleCommand("CREATE USER \"" + newDatabaseName.GetRuntimeName() + "\" IDENTIFIED BY pwd" +
+                                                  Guid.NewGuid().ToString().Replace("-", "").Substring(0, 27) //oracle only allows 30 character passwords
+                    ,con))
+                    cmd.ExecuteNonQuery();
 
-                cmd = new OracleCommand("ALTER USER \"" + newDatabaseName.GetRuntimeName() + "\" quota unlimited on system", (OracleConnection)con);
-                cmd.ExecuteNonQuery();
+                using(var cmd = new OracleCommand("ALTER USER \"" + newDatabaseName.GetRuntimeName() + "\" quota unlimited on system", con))
+                    cmd.ExecuteNonQuery();
 
-                cmd = new OracleCommand("ALTER USER \"" + newDatabaseName.GetRuntimeName() + "\" quota unlimited on users", (OracleConnection)con);
-                cmd.ExecuteNonQuery();
+                using(var cmd = new OracleCommand("ALTER USER \"" + newDatabaseName.GetRuntimeName() + "\" quota unlimited on users", con))
+                    cmd.ExecuteNonQuery();
             }
         }
 
@@ -132,6 +132,22 @@ namespace FAnsi.Implementations.Oracle
             return ((OracleConnectionStringBuilder)builder).Password;
         }
 
+        public override Version GetVersion(DiscoveredServer server)
+        {
+            using (var con = server.GetConnection())
+            {
+                con.Open();
+                using (var cmd = server.GetCommand("SELECT * FROM v$version WHERE BANNER like 'Oracle Database%'",con))
+                {
+                    using(var r = cmd.ExecuteReader())
+                        if(r.Read())
+                            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+                        else
+                            return null;
+                }
+            }
+        }
+
         public override string[] ListDatabases(DbConnectionStringBuilder builder)
         {
             //todo do we have to edit the builder in here incase it is pointed at nothing?
@@ -144,13 +160,12 @@ namespace FAnsi.Implementations.Oracle
 
         public override string[] ListDatabases(DbConnection con)
         {
-            var cmd = GetCommand("select * from all_users", con); //already comes as single column called Database
-            
             List<string> databases = new List<string>();
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                    databases.Add((string) r["username"]);
+            using(var cmd = GetCommand("select * from all_users", con)) //already comes as single column called Database
+                using (var r = cmd.ExecuteReader())
+                    while (r.Read())
+                        databases.Add((string) r["username"]);
             
             return databases.ToArray();
         }

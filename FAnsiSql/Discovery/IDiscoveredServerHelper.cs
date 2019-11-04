@@ -57,5 +57,6 @@ namespace FAnsi.Discovery
         
         string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
         string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
+        Version GetVersion(DiscoveredServer server);
     }
 }

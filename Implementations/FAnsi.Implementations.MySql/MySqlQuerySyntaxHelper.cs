@@ -31,11 +31,6 @@ namespace FAnsi.Implementations.MySql
             return "`" + GetRuntimeName(databaseName) + "`" + DatabaseTableSeparator + "`" + GetRuntimeName(tableName) + "`";
         }
 
-        public override string DatabaseTableSeparator
-        {
-            get { return "."; }
-        }
-        
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
             return new TopXResponse("LIMIT " + x,QueryComponent.Postfix);
@@ -69,12 +64,13 @@ namespace FAnsi.Implementations.MySql
 
         public override string GetScalarFunctionSql(MandatoryScalarFunctions function)
         {
+            
             switch (function)
             {
-                case MandatoryScalarFunctions.GetTodaysDate:
+                case MandatoryScalarFunctions.GetTodaysDate:  //this works at least as of 5.7.19
                     return "now()";
-                case MandatoryScalarFunctions.GetGuid:
-                    return "uuid()";
+                case MandatoryScalarFunctions.GetGuid:  //using this as defaults in columns requires MySql 8 (2018)
+                    return "(uuid())"; 
                 default:
                     throw new ArgumentOutOfRangeException("function");
             }
