@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.10.8] - 2019-09-20
+
+
+### Added
+
+- Support for Postgres DBMS
+
 ### Fixed
 
 - Fixed Oracle `long` mapping (previously mapped to "bigint" now maps to "long")
@@ -163,7 +170,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.7...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.8...develop
+[0.10.8]: https://github.com/HicServices/FAnsiSql/compare/0.10.7...0.10.8
 [0.10.7]: https://github.com/HicServices/FAnsiSql/compare/0.10.6...0.10.7
 [0.10.6]: https://github.com/HicServices/FAnsiSql/compare/0.10.5...0.10.6
 [0.10.5]: https://github.com/HicServices/FAnsiSql/compare/0.10.4...0.10.5

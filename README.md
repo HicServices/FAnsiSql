@@ -1,5 +1,7 @@
 # FAnsiSql
 
+[![Build Status](https://travis-ci.org/HicServices/FAnsiSql.svg?branch=master)](https://travis-ci.org/HicServices/FAnsiSql) [![Total alerts](https://img.shields.io/lgtm/alerts/g/HicServices/FAnsiSql.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/HicServices/FAnsiSql/alerts/)
+
 - [Nuget](https://www.nuget.org/packages/HIC.FansiSql/)
 - [Dependencies](./Packages.md)
 - [Changelog](./CHANGELOG.md)
@@ -81,11 +83,12 @@ Or .NET CLI Console:
 
 ## Feature Completeness
 
-Most features are implemented across all 3 DBMS, you can find a breakdown of progress here:
+Most features are implemented across all 4 DBMS, you can find a breakdown of progress here:
 
 - [Microsoft Sql](./Implementations/FAnsi.Implementations.MicrosoftSQL/README.md) 
 - [MySql](./Implementations/FAnsi.Implementations.MySql/README.md)
 - [Oracle](./Implementations/FAnsi.Implementations.Oracle/README.md)
+- [Postgres](./Implementations/FAnsi.Implementations.PostgreSql/README.md)
 
 Implementations are defined in separate assemblies (e.g. FAnsi.Implementations.MicrosoftSQL.dll) to allow for future expansion.  Each implementation uses it's own backing library (e.g. [ODP.net](https://www.oracle.com/technetwork/topics/dotnet/index-085163.html) for Oracle).  Implementations are loaded using [Managed Extensibility Framework](https://docs.microsoft.com/en-us/dotnet/framework/mef/).
 

@@ -977,6 +977,17 @@ namespace FAnsiTests
             if(type == DatabaseType.MySql && database.Server.GetVersion().Major < 8)
                 Assert.Inconclusive("UID defaults are only supported in MySql 8+");
 
+            if (type == DatabaseType.PostgreSql)
+            {
+                //we need this extension on the server to work
+                using (var con = database.Server.GetConnection())
+                {
+                    con.Open();
+                    using (var cmd = database.Server.GetCommand("CREATE EXTENSION IF NOT EXISTS pgcrypto;", con))
+                        cmd.ExecuteNonQuery();
+                }
+            }
+
             var tbl = database.CreateTable("MyTable", new[]
             {
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100)), 
