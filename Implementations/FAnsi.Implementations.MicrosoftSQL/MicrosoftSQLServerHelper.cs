@@ -185,5 +185,20 @@ namespace FAnsi.Implementations.MicrosoftSQL
             return string.IsNullOrWhiteSpace(pwd) ? null : pwd;
         }
 
+        public override Version GetVersion(DiscoveredServer server)
+        {
+            using (var con = server.GetConnection())
+            {
+                con.Open();
+                using (var cmd = server.GetCommand("SELECT @@VERSION",con))
+                {
+                    using(var r = cmd.ExecuteReader())
+                        if(r.Read())
+                            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+                        else
+                            return null;
+                }
+            }
+        }
     }
 }

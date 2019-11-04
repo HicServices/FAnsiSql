@@ -934,7 +934,7 @@ namespace FAnsiTests
         }
 
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
-        public void CreateTable_DefaultTest(DatabaseType type)
+        public void CreateTable_DefaultTest_Date(DatabaseType type)
         {
             var database = GetTestDatabase(type);
 
@@ -967,6 +967,43 @@ namespace FAnsiTests
             Assert.AreEqual(currentValue.Month, databaseValue.Month);
             Assert.AreEqual(currentValue.Day, databaseValue.Day);
             Assert.AreEqual(currentValue.Hour, databaseValue.Hour);
+        }
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void CreateTable_DefaultTest_Guid(DatabaseType type)
+        {
+            var database = GetTestDatabase(type);
+
+            if(type == DatabaseType.MySql && database.Server.GetVersion().Major < 8)
+                Assert.Inconclusive("UID defaults are only supported in MySql 8+");
+
+            var tbl = database.CreateTable("MyTable", new[]
+            {
+                new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100)), 
+                new DatabaseColumnRequest("MyGuid", new DatabaseTypeRequest(typeof (string)))
+                {
+                    AllowNulls = false,
+                    Default = MandatoryScalarFunctions.GetGuid
+                }
+            });
+            DateTime currentValue;
+            
+            using (var insert = tbl.BeginBulkInsert())
+            {
+                var dt = new DataTable();
+                dt.Columns.Add("Name");
+                dt.Rows.Add("Hi");
+
+                currentValue = DateTime.Now;
+                insert.Upload(dt);
+            }
+
+            var dt2 = tbl.GetDataTable();
+
+            var databaseValue = (string)dt2.Rows.Cast<DataRow>().Single()["MyGuid"];
+            
+            Assert.IsNotNull(databaseValue);
+            Console.WriteLine(databaseValue);
         }
 
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]

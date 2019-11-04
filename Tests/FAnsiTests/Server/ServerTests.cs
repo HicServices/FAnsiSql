@@ -213,6 +213,17 @@ namespace FAnsiTests.Server
             AssertAreEqual(toTable.GetDataTable(), tblFrom.GetDataTable());
         }
 
+        [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
+        public void TestServer_GetVersion(DatabaseType dbType)
+        {
+            var db = GetTestDatabase(dbType, false);
+            var ver = db.Server.GetVersion();
+
+            Console.WriteLine("Version:" + ver);
+            Assert.IsNotNull(ver);
+
+            Assert.Greater(ver.Major,0);
+        }
         
     }
 }

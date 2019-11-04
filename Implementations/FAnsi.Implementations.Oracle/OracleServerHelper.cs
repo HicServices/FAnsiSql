@@ -132,6 +132,22 @@ namespace FAnsi.Implementations.Oracle
             return ((OracleConnectionStringBuilder)builder).Password;
         }
 
+        public override Version GetVersion(DiscoveredServer server)
+        {
+            using (var con = server.GetConnection())
+            {
+                con.Open();
+                using (var cmd = server.GetCommand("SELECT * FROM v$version WHERE BANNER like 'Oracle Database%'",con))
+                {
+                    using(var r = cmd.ExecuteReader())
+                        if(r.Read())
+                            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+                        else
+                            return null;
+                }
+            }
+        }
+
         public override string[] ListDatabases(DbConnectionStringBuilder builder)
         {
             //todo do we have to edit the builder in here incase it is pointed at nothing?

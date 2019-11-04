@@ -442,5 +442,14 @@ namespace FAnsi.Discovery
         {
             return DatabaseType.GetHashCode();
         }
+
+        /// <summary>
+        /// Returns the version number of the DBMS e.g. MySql 5.7
+        /// </summary>
+        /// <returns></returns>
+        public Version GetVersion()
+        {
+            return Helper.GetVersion(this);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Data.Common;
 using FAnsi.Discovery;
 using FAnsi.Discovery.ConnectionStringDefaults;
@@ -128,6 +129,22 @@ namespace FAnsi.Implementations.MySql
             return ((MySqlConnectionStringBuilder)builder).Password;
         }
 
+        public override Version GetVersion(DiscoveredServer server)
+        {
+            using (var con = server.GetConnection())
+            {
+                con.Open();
+                using (var cmd = server.GetCommand("show variables like \"version\"",con))
+                {
+                    using(var r = cmd.ExecuteReader())
+                        if (r.Read())
+                            return r["Value"] == DBNull.Value ? null: CreateVersionFromString((string)r["Value"]);
+                        else
+                            return null;
+                }
+            }
+        }
+        
         public override string[] ListDatabases(DbConnectionStringBuilder builder)
         {
             var b = (MySqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
