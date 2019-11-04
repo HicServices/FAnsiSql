@@ -15,13 +15,13 @@ namespace FAnsiTests.Database
         {
             var db = GetTestDatabase(dbType);
 
-            var tbl1 = db.CreateTable("AA",
+            db.CreateTable("AA",
                 new DatabaseColumnRequest[]
                 {
                     new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
                 });
 
-            var tbl2 = db.CreateTable("BB",
+            db.CreateTable("BB",
                 new DatabaseColumnRequest[]
                 {
                     new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
@@ -57,7 +57,7 @@ namespace FAnsiTests.Database
                     }));
 
             //but we can create a table "FF"
-            var tbl = db.CreateTable("FF",
+            db.CreateTable("FF",
                 new DatabaseColumnRequest[]
                 {
                     new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
@@ -93,7 +93,7 @@ namespace FAnsiTests.Database
                     }));
 
             //but we can create a table "FF"
-            var tbl = db.CreateTable("FF",
+            db.CreateTable("FF",
                 new DatabaseColumnRequest[]
                 {
                     new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))

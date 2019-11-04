@@ -32,25 +32,27 @@ namespace FAnsiTests.Table
             //There are no rows in the table yet
             Assert.AreEqual(0, tbl.GetRowCount());
 
-            var dt = new DataTable();
-            dt.Columns.Add("Name");
-            dt.Columns.Add("Age");
-            dt.Rows.Add("Dave", 50);
-            dt.Rows.Add("Jamie", 60);
-
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
+            using (var dt = new DataTable())
             {
-                bulk.Timeout = 30;
-                bulk.Upload(dt);
+                dt.Columns.Add("Name");
+                dt.Columns.Add("Age");
+                dt.Rows.Add("Dave", 50);
+                dt.Rows.Add("Jamie", 60);
 
-                Assert.AreEqual(2, tbl.GetRowCount());
+                using (IBulkCopy bulk = tbl.BeginBulkInsert())
+                {
+                    bulk.Timeout = 30;
+                    bulk.Upload(dt);
 
-                dt.Rows.Clear();
-                dt.Rows.Add("Frank", 100);
+                    Assert.AreEqual(2, tbl.GetRowCount());
 
-                bulk.Upload(dt);
+                    dt.Rows.Clear();
+                    dt.Rows.Add("Frank", 100);
 
-                Assert.AreEqual(3, tbl.GetRowCount());
+                    bulk.Upload(dt);
+
+                    Assert.AreEqual(3, tbl.GetRowCount());
+                }
             }
         }
 
@@ -69,26 +71,28 @@ namespace FAnsiTests.Table
             //There are no rows in the table yet
             Assert.AreEqual(0, tbl.GetRowCount());
 
-            var dt = new DataTable();
-            dt.Columns.Add("Age");
-            dt.Columns.Add("Name");
-            dt.Rows.Add( "50","David");
-            dt.Rows.Add("60","Jamie");
-
-            Assert.AreEqual("Age",dt.Columns[0].ColumnName);
-            Assert.AreEqual(typeof(string),dt.Columns[0].DataType);
-
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
+            using (var dt = new DataTable())
             {
-                bulk.Timeout = 30;
-                bulk.Upload(dt);
+                dt.Columns.Add("Age");
+                dt.Columns.Add("Name");
+                dt.Rows.Add( "50","David");
+                dt.Rows.Add("60","Jamie");
 
-                Assert.AreEqual(2, tbl.GetRowCount());
+                Assert.AreEqual("Age",dt.Columns[0].ColumnName);
+                Assert.AreEqual(typeof(string),dt.Columns[0].DataType);
+
+                using (IBulkCopy bulk = tbl.BeginBulkInsert())
+                {
+                    bulk.Timeout = 30;
+                    bulk.Upload(dt);
+
+                    Assert.AreEqual(2, tbl.GetRowCount());
+                }
+
+                //columns should not be reordered
+                Assert.AreEqual("Age",dt.Columns[0].ColumnName);
+                Assert.AreEqual(typeof(int),dt.Columns[0].DataType); //but the data type was changed by HardTyping it
             }
-
-            //columns should not be reordered
-            Assert.AreEqual("Age",dt.Columns[0].ColumnName);
-            Assert.AreEqual(typeof(int),dt.Columns[0].DataType); //but the data type was changed by HardTyping it
         }
 
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -106,32 +110,34 @@ namespace FAnsiTests.Table
 
             Assert.AreEqual(0, tbl.GetRowCount());
 
-            var dt = new DataTable();
-            dt.Columns.Add("Name");
-            dt.Columns.Add("Age");
-            dt.Rows.Add("Dave", 50);
-            dt.Rows.Add("Jamie", 60);
-
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using (var dt = new DataTable())
             {
-                using (IBulkCopy bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
+                dt.Columns.Add("Name");
+                dt.Columns.Add("Age");
+                dt.Rows.Add("Dave", 50);
+                dt.Rows.Add("Jamie", 60);
+
+                using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
                 {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                    using (IBulkCopy bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
+                    {
+                        bulk.Timeout = 30;
+                        bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                        //inside transaction the count is 2
+                        Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frank", 100);
+                        dt.Rows.Clear();
+                        dt.Rows.Add("Frank", 100);
 
-                    bulk.Upload(dt);
+                        bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                        //inside transaction the count is 3
+                        Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                    }
+
+                    transaction.ManagedTransaction.CommitAndCloseConnection();
                 }
-
-                transaction.ManagedTransaction.CommitAndCloseConnection();
             }
 
             //Transaction was committed final row count should be 3
@@ -153,32 +159,34 @@ namespace FAnsiTests.Table
 
             Assert.AreEqual(0, tbl.GetRowCount());
 
-            var dt = new DataTable();
-            dt.Columns.Add("Name");
-            dt.Columns.Add("Age");
-            dt.Rows.Add("Dave", 50);
-            dt.Rows.Add("Jamie", 60);
-
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using (var dt = new DataTable())
             {
-                using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
+                dt.Columns.Add("Name");
+                dt.Columns.Add("Age");
+                dt.Rows.Add("Dave", 50);
+                dt.Rows.Add("Jamie", 60);
+
+                using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
                 {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                    using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
+                    {
+                        bulk.Timeout = 30;
+                        bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                        //inside transaction the count is 2
+                        Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frank", 100);
+                        dt.Rows.Clear();
+                        dt.Rows.Add("Frank", 100);
 
-                    bulk.Upload(dt);
+                        bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                        //inside transaction the count is 3
+                        Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                    }
+
+                    transaction.ManagedTransaction.AbandonAndCloseConnection();
                 }
-
-                transaction.ManagedTransaction.AbandonAndCloseConnection();
             }
 
             //We abandoned transaction so final rowcount should be 0
@@ -200,42 +208,44 @@ namespace FAnsiTests.Table
 
             Assert.AreEqual(0, tbl.GetRowCount());
 
-            var dt = new DataTable();
-            dt.Columns.Add("Name");
-            dt.Columns.Add("Age");
-            dt.Rows.Add("Dave", 50);
-            dt.Rows.Add("Jamie", 60);
-
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using (var dt = new DataTable())
             {
-                using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
+                dt.Columns.Add("Name");
+                dt.Columns.Add("Age");
+                dt.Rows.Add("Dave", 50);
+                dt.Rows.Add("Jamie", 60);
+
+                using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
                 {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                    using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
+                    {
+                        bulk.Timeout = 30;
+                        bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                        //inside transaction the count is 2
+                        Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    //New row is too long for the data type
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frankyyyyyyyyyyyyyyyyyyyyyy", 100);
+                        //New row is too long for the data type
+                        dt.Rows.Clear();
+                        dt.Rows.Add("Frankyyyyyyyyyyyyyyyyyyyyyy", 100);
 
-                    //So alter the data type to handle up to string lengths of 100
-                    //Find the column
-                    DiscoveredColumn col = tbl.DiscoverColumn("Name", transaction.ManagedTransaction);
+                        //So alter the data type to handle up to string lengths of 100
+                        //Find the column
+                        DiscoveredColumn col = tbl.DiscoverColumn("Name", transaction.ManagedTransaction);
 
-                    //Make it bigger
-                    col.DataType.Resize(100, transaction.ManagedTransaction);
+                        //Make it bigger
+                        col.DataType.Resize(100, transaction.ManagedTransaction);
 
-                    bulk.Upload(dt);
+                        bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                        //inside transaction the count is 3
+                        Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                    }
+
+                    transaction.ManagedTransaction.CommitAndCloseConnection();
                 }
-
-                transaction.ManagedTransaction.CommitAndCloseConnection();
             }
-
+            
             //We abandoned transaction so final rowcount should be 0
             Assert.AreEqual(3, tbl.GetRowCount());
         }
@@ -251,18 +261,21 @@ namespace FAnsiTests.Table
                 new DatabaseColumnRequest("Frank", new DatabaseTypeRequest(typeof (string), 100))
             });
 
-            DataTable dt = new DataTable();
+            using (DataTable dt = new DataTable())
+            {
                 //note that the column order here is reversed i.e. the DataTable column order doesn't match the database (intended)
-            dt.Columns.Add("BoB");
-            dt.Columns.Add("fRAnk");
-            dt.Rows.Add("no", "yes");
-            dt.Rows.Add("no", "no");
+                dt.Columns.Add("BoB");
+                dt.Columns.Add("fRAnk");
+                dt.Rows.Add("no", "yes");
+                dt.Rows.Add("no", "no");
 
-            using (var blk = tbl.BeginBulkInsert())
-                blk.Upload(dt);
+                using (var blk = tbl.BeginBulkInsert())
+                    blk.Upload(dt);
 
-            var result = tbl.GetDataTable();
-            Assert.AreEqual(2, result.Rows.Count); //2 rows inserted
+            }
+                
+            using(var result = tbl.GetDataTable())
+                Assert.AreEqual(2, result.Rows.Count); //2 rows inserted
         }
 
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -284,16 +297,19 @@ namespace FAnsiTests.Table
                 new DatabaseColumnRequest("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false},
             });
 
-            DataTable dt = new DataTable();
-                //note that the column order here is reversed i.e. the DataTable column order doesn't match the database (intended)
-            dt.Columns.Add("peter");
-            dt.Columns.Add("bob");
-            dt.Rows.Add("no", "yes");
-
-            using (var blk = tbl.BeginBulkInsert())
+            using (DataTable dt = new DataTable())
             {
-                blk.Upload(dt);
+                //note that the column order here is reversed i.e. the DataTable column order doesn't match the database (intended)
+                dt.Columns.Add("peter");
+                dt.Columns.Add("bob");
+                dt.Rows.Add("no", "yes");
+
+                using (var blk = tbl.BeginBulkInsert())
+                {
+                    blk.Upload(dt);
+                }
             }
+                
 
             var result = tbl.GetDataTable();
             Assert.AreEqual(3, result.Columns.Count);
@@ -365,46 +381,50 @@ namespace FAnsiTests.Table
 
             });
 
-            DataTable dt = new DataTable();
+            using (DataTable dt = new DataTable())
+            {
                 //note that the column order here is reversed i.e. the DataTable column order doesn't match the database (intended)
-            dt.Columns.Add("peter");
-            dt.Columns.Add("bob");
+                dt.Columns.Add("peter");
+                dt.Columns.Add("bob");
 
-            for (int i = 0; i < 30; i++)
-            {
-                dt.Columns.Add("Column" + i);
+                for (int i = 0; i < 30; i++)
+                {
+                    dt.Columns.Add("Column" + i);
+                }
+
+
+
+                for (int i = 0; i < numberOfRowsPerBatch; i++)
+                    dt.Rows.Add("no", Guid.NewGuid().ToString(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29);
+
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+
+                using (var blk = tbl.BeginBulkInsert())
+                {
+                    Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt)); //affected rows should match batch size
+                }
+                sw.Stop();
+                Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
+
+                dt.Rows.Clear();
+
+                for (int i = 0; i < numberOfRowsPerBatch; i++)
+                    dt.Rows.Add("no", Guid.NewGuid().ToString(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29);
+
+                sw.Restart();
+
+                using (var blk = tbl.BeginBulkInsert())
+                {
+                    Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt));
+                }
+
+                sw.Stop();
+                Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
             }
-
-
-
-            for (int i = 0; i < numberOfRowsPerBatch; i++)
-                dt.Rows.Add("no", Guid.NewGuid().ToString(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-                    17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29);
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt)); //affected rows should match batch size
-            }
-            sw.Stop();
-            Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
-
-            dt.Rows.Clear();
-
-            for (int i = 0; i < numberOfRowsPerBatch; i++)
-                dt.Rows.Add("no", Guid.NewGuid().ToString(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-                    17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29);
-
-            sw.Restart();
-
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt));
-            }
-            sw.Stop();
-            Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
+                
             
             var result = tbl.GetDataTable();
             Assert.AreEqual(33, result.Columns.Count);
@@ -425,27 +445,30 @@ namespace FAnsiTests.Table
             using (var con = tbl.Database.Server.BeginNewTransactedConnection())
             {
                 //give it 100 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
-                cts = new CancellationTokenSource(100);
-
-                //creation should have been cancelled at the database level
-                var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
+                using (cts = new CancellationTokenSource(100))
+                {
+                    //creation should have been cancelled at the database level
+                    var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
                 
-                //MySql seems to be throwing null reference inside ExecuteNonQueryAsync.  No idea why but it is still cancelled
-                if(type != DatabaseType.MySql)
-                    StringAssert.Contains("cancel",ex.InnerException.Message);
-                else
-                    Console.WriteLine("MySql error was:" + ex.InnerException);
+                    //MySql seems to be throwing null reference inside ExecuteNonQueryAsync.  No idea why but it is still cancelled
+                    if(type != DatabaseType.MySql)
+                        StringAssert.Contains("cancel",ex.InnerException.Message);
+                    else
+                        Console.WriteLine("MySql error was:" + ex.InnerException);
+                }
+                
             }
 
             //Now lets test cancelling GetDataTable
             using (var con = tbl.Database.Server.BeginNewTransactedConnection())
             {
                 //give it 100 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
-                cts = new CancellationTokenSource(300);
-
-                //GetDataTable should have been cancelled at the database level
-                var ex = Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,cts.Token,50000)));
-                tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default(CancellationToken),50000));
+                using (cts = new CancellationTokenSource(300))
+                {
+                    //GetDataTable should have been cancelled at the database level
+                    Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,cts.Token,50000)));
+                    tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default(CancellationToken),50000));
+                }
             }
 
             
@@ -453,8 +476,8 @@ namespace FAnsiTests.Table
             Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
 
             //now give it a bit longer to create it
-            cts = new CancellationTokenSource(50000000);
-            tbl.CreatePrimaryKey(null, cts.Token, 50000, bobCol);
+            using(cts = new CancellationTokenSource(50000000))
+                tbl.CreatePrimaryKey(null, cts.Token, 50000, bobCol);
 
             bobCol = tbl.DiscoverColumn("bob");
             Assert.IsTrue(bobCol.IsPrimaryKey);
@@ -476,13 +499,15 @@ namespace FAnsiTests.Table
                 }
             });
 
-            DataTable dt = new DataTable();
-            dt.Columns.Add("bob");
-            dt.Rows.Add(DBNull.Value);
-
-            using (var blk = tbl.BeginBulkInsert())
+            using (DataTable dt = new DataTable())
             {
-                Assert.Throws(Is.InstanceOf<Exception>(), () => blk.Upload(dt));
+                dt.Columns.Add("bob");
+                dt.Rows.Add(DBNull.Value);
+
+                using (var blk = tbl.BeginBulkInsert())
+                {
+                    Assert.Throws(Is.InstanceOf<Exception>(), () => blk.Upload(dt));
+                }
             }
         }
 
@@ -506,17 +531,19 @@ namespace FAnsiTests.Table
                 }
             });
 
-            DataTable dt = new DataTable();
-            dt.Columns.Add("frank");
-            dt.Rows.Add("fish");
-            dt.Rows.Add("fish");
-            dt.Rows.Add("tank");
-
-            using (var blk = tbl.BeginBulkInsert())
+            using (DataTable dt = new DataTable())
             {
-                Assert.AreEqual(3, blk.Upload(dt));
-            }
+                dt.Columns.Add("frank");
+                dt.Rows.Add("fish");
+                dt.Rows.Add("fish");
+                dt.Rows.Add("tank");
 
+                using (var blk = tbl.BeginBulkInsert())
+                {
+                    Assert.AreEqual(3, blk.Upload(dt));
+                }
+            }
+            
 
             var result = tbl.GetDataTable();
 
@@ -542,14 +569,17 @@ namespace FAnsiTests.Table
                 }
             });
 
-            DataTable dt = new DataTable();
-            dt.Columns.Add("num");
-            dt.Rows.Add("-4.10235746055587E-05"); //-0.0000410235746055587  <- this is what the number is
-                                                              //-0.0000410235           <- this is what goes into db since we only asked for 10 digits after decimal place
-            using (var blk = tbl.BeginBulkInsert())
+            using (DataTable dt = new DataTable())
             {
-                Assert.AreEqual(1, blk.Upload(dt));
+                dt.Columns.Add("num");
+                dt.Rows.Add("-4.10235746055587E-05"); //-0.0000410235746055587  <- this is what the number is
+                //-0.0000410235           <- this is what goes into db since we only asked for 10 digits after decimal place
+                using (var blk = tbl.BeginBulkInsert())
+                {
+                    Assert.AreEqual(1, blk.Upload(dt));
+                }
             }
+            
 
             tbl.Insert(new Dictionary<string, object>() {{"num", "-4.10235746055587E-05"}});
 
@@ -582,18 +612,25 @@ namespace FAnsiTests.Table
         {
             var db = GetTestDatabase(dbType);
 
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Yay");
-            dt.Rows.Add("乗 12345");
+            DiscoveredTable table;
 
-            var table = db.CreateTable("GoGo", dt);
+            using (DataTable dt = new DataTable())
+            {
+                dt.Columns.Add("Yay");
+                dt.Rows.Add("乗 12345");
 
-            DataTable dt2 = new DataTable();
-            dt2.Columns.Add("yay");
-            dt2.Rows.Add("你好");
+                table = db.CreateTable("GoGo", dt);
+            }
+            
+            using (DataTable dt2 = new DataTable())
+            {
+                dt2.Columns.Add("yay");
+                dt2.Rows.Add("你好");
 
-            using (var insert = table.BeginBulkInsert())
-                insert.Upload(dt2);
+                using (var insert = table.BeginBulkInsert())
+                    insert.Upload(dt2);
+
+            }
             
             table.Insert(new Dictionary<string, object>() {{"Yay", "مرحبا"}});
             
@@ -625,54 +662,58 @@ namespace FAnsiTests.Table
             //There are no rows in the table yet
             Assert.AreEqual(0, tbl.GetRowCount());
 
-            var dt = new DataTable();
-            dt.Columns.Add("age");
-            dt.Columns.Add("name");
-
-            dt.Rows.Add(60,"Jamie");
-            dt.Rows.Add(30,"Frank");
-            dt.Rows.Add(11,"Toad");
-            dt.Rows.Add(50, new string('A', 11));    
-            dt.Rows.Add(100,"King");
-            dt.Rows.Add(10,"Frog");        
-
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
+            using(var dt = new DataTable())
             {
-                bulk.Timeout = 30;
+                dt.Columns.Add("age");
+                dt.Columns.Add("name");
+
+                dt.Rows.Add(60,"Jamie");
+                dt.Rows.Add(30,"Frank");
+                dt.Rows.Add(11,"Toad");
+                dt.Rows.Add(50, new string('A', 11));    
+                dt.Rows.Add(100,"King");
+                dt.Rows.Add(10,"Frog"); 
                 
-                Exception ex = null;
-                try 
+                using (IBulkCopy bulk = tbl.BeginBulkInsert())
                 {
-                    bulk.Upload(dt);
-                }
-                catch(Exception e)
-                {
-                    ex = e;
-                }
+                    bulk.Timeout = 30;
+                
+                    Exception ex = null;
+                    try 
+                    {
+                        bulk.Upload(dt);
+                    }
+                    catch(Exception e)
+                    {
+                        ex = e;
+                    }
 
-                Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
+                    Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
 
-                switch (type)
-                {
-                    case DatabaseType.MicrosoftSQLServer:
-                        StringAssert.Contains("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>",ex.Message);
-                        break;
-                    case DatabaseType.MySql:
-                        Assert.AreEqual("Data too long for column 'Name' at row 4",ex.Message);
-                        break;
-                    case DatabaseType.Oracle:
-                        StringAssert.Contains("NAME",ex.Message);
-                        StringAssert.Contains("maximum: 10",ex.Message);
-                        StringAssert.Contains("actual: 11",ex.Message);
+                    switch (type)
+                    {
+                        case DatabaseType.MicrosoftSQLServer:
+                            StringAssert.Contains("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>",ex.Message);
+                            break;
+                        case DatabaseType.MySql:
+                            Assert.AreEqual("Data too long for column 'Name' at row 4",ex.Message);
+                            break;
+                        case DatabaseType.Oracle:
+                            StringAssert.Contains("NAME",ex.Message);
+                            StringAssert.Contains("maximum: 10",ex.Message);
+                            StringAssert.Contains("actual: 11",ex.Message);
 
-                        break;
-                    case DatabaseType.PostgreSql:
-                        StringAssert.Contains("value too long for type character varying(10)",ex.Message);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                            break;
+                        case DatabaseType.PostgreSql:
+                            StringAssert.Contains("value too long for type character varying(10)",ex.Message);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                    }
                 }
             }
+            
+            
         }
 
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -692,54 +733,57 @@ namespace FAnsiTests.Table
             //There are no rows in the table yet
             Assert.AreEqual(0, tbl.GetRowCount());
 
-            var dt = new DataTable();
-            dt.Columns.Add("age");
-            dt.Columns.Add("name");
-            dt.Columns.Add("score");
-
-            dt.Rows.Add(60,"Jamie",1.2);
-            dt.Rows.Add(30,"Frank",1.3);
-            dt.Rows.Add(11,"Toad",111111111.11); //bad data 
-            dt.Rows.Add(100,"King");
-            dt.Rows.Add(10,"Frog");        
-
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
+            using (var dt = new DataTable())
             {
-                bulk.Timeout = 30;
+                dt.Columns.Add("age");
+                dt.Columns.Add("name");
+                dt.Columns.Add("score");
+
+                dt.Rows.Add(60,"Jamie",1.2);
+                dt.Rows.Add(30,"Frank",1.3);
+                dt.Rows.Add(11,"Toad",111111111.11); //bad data 
+                dt.Rows.Add(100,"King");
+                dt.Rows.Add(10,"Frog");        
+
+                using (IBulkCopy bulk = tbl.BeginBulkInsert())
+                {
+                    bulk.Timeout = 30;
                 
-                Exception ex = null;
-                try 
-                {
-                    bulk.Upload(dt);
-                }
-                catch(Exception e)
-                {
-                    ex = e;
-                }
+                    Exception ex = null;
+                    try 
+                    {
+                        bulk.Upload(dt);
+                    }
+                    catch(Exception e)
+                    {
+                        ex = e;
+                    }
 
-                Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
+                    Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
 
-                switch (type)
-                {
-                    case DatabaseType.MicrosoftSQLServer:
-                        StringAssert.Contains("Failed to load data row 3 the following values were rejected by the database",ex.Message);
-                        StringAssert.Contains("Parameter value '111111111.1' is out of range",ex.Message);
-                        break;
-                    case DatabaseType.MySql:
-                        Assert.AreEqual("Out of range value for column 'Score' at row 3",ex.Message);
-                        break;
-                    case DatabaseType.Oracle:
-                        StringAssert.Contains("value larger than specified precision allowed for this column",ex.Message);
+                    switch (type)
+                    {
+                        case DatabaseType.MicrosoftSQLServer:
+                            StringAssert.Contains("Failed to load data row 3 the following values were rejected by the database",ex.Message);
+                            StringAssert.Contains("Parameter value '111111111.1' is out of range",ex.Message);
+                            break;
+                        case DatabaseType.MySql:
+                            Assert.AreEqual("Out of range value for column 'Score' at row 3",ex.Message);
+                            break;
+                        case DatabaseType.Oracle:
+                            StringAssert.Contains("value larger than specified precision allowed for this column",ex.Message);
 
-                        break;
-                    case DatabaseType.PostgreSql:
-                        StringAssert.Contains("numeric field overflow",ex.Message);
-                        break;
+                            break;
+                        case DatabaseType.PostgreSql:
+                            StringAssert.Contains("numeric field overflow",ex.Message);
+                            break;
 
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                    }
                 }
             }
+            
         }
     }
 }

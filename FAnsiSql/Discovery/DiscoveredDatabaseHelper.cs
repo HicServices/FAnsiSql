@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
 using FAnsi.Extensions;
@@ -178,7 +179,7 @@ namespace FAnsi.Discovery
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentNullException(FAnsiStrings.DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null, "tableName");
 
-            string bodySql = "";
+            StringBuilder bodySql = new StringBuilder();
 
             var server = database.Server;
             var syntaxHelper = server.GetQuerySyntaxHelper();
@@ -194,31 +195,32 @@ namespace FAnsi.Discovery
             //the name uflly specified e.g. [db]..[tbl] or `db`.`tbl` - See Test HorribleColumnNames
             var fullyQualifiedName = syntaxHelper.EnsureFullyQualified(database.GetRuntimeName(), schema, tableName);
 
-            bodySql += "CREATE TABLE " + fullyQualifiedName + "(" + Environment.NewLine;
+            bodySql.AppendLine("CREATE TABLE " + fullyQualifiedName + "(" );
 
             foreach (var col in columns)
             {
                 var datatype = col.GetSQLDbType(syntaxHelper.TypeTranslater);
                 
                 //add the column name and accompanying datatype
-                bodySql += GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper) + "," + Environment.NewLine;
+                bodySql.AppendLine(GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper) + ",");
             }
 
             var pks = columns.Where(c => c.IsPrimaryKey).ToArray();
             if (pks.Any())
-                bodySql += GetPrimaryKeyDeclarationSql(tableName, pks,syntaxHelper);
+                bodySql.Append(GetPrimaryKeyDeclarationSql(tableName, pks,syntaxHelper));
             
             if (foreignKeyPairs != null)
             {
-                bodySql += Environment.NewLine + GetForeignKeyConstraintSql(tableName, syntaxHelper, 
-                               foreignKeyPairs.ToDictionary(k=>(IHasRuntimeName)k.Key,v=>v.Value), cascadeDelete,null) + Environment.NewLine;
+                bodySql.AppendLine();
+                bodySql.AppendLine(GetForeignKeyConstraintSql(tableName, syntaxHelper,
+                    foreignKeyPairs.ToDictionary(k => (IHasRuntimeName) k.Key, v => v.Value), cascadeDelete, null));
             }
 
-            bodySql = bodySql.TrimEnd('\r', '\n', ',');
+            var toReturn = bodySql.ToString().TrimEnd('\r', '\n', ',');
+            
+            toReturn += ")" + Environment.NewLine;
 
-            bodySql += ")" + Environment.NewLine;
-
-            return bodySql;
+            return toReturn;
         }
 
         /// <summary>
