@@ -34,6 +34,11 @@ namespace FAnsi.Implementations.Oracle
             return answer.Trim('"').ToUpper();
         }
 
+        public override bool SupportsEmbeddedParameters()
+        {
+            return false;
+        }
+
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
             return '"' + GetRuntimeName(databaseOrTableName) + '"';
@@ -58,7 +63,7 @@ namespace FAnsi.Implementations.Oracle
 
         public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
         {
-            throw new System.NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override HashSet<string> GetReservedWords()

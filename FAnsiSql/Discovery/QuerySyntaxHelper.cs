@@ -155,6 +155,8 @@ namespace FAnsi.Discovery
             }
         }
 
+        public abstract bool SupportsEmbeddedParameters();
+
         public string EnsureWrapped(string databaseOrTableName)
         {
             if (databaseOrTableName.Contains(DatabaseTableSeparator))

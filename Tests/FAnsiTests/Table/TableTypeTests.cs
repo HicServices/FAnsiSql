@@ -53,6 +53,8 @@ syntax.EnsureWrapped("FF")
             //if we expect it to be a view
             view = tbl.Database.ExpectTable("MyView",null,TableType.View);
 
+            Assert.AreEqual(1,view.DiscoverColumns().Length);
+
             //we would be right!
             Assert.IsTrue(view.Exists());
             Assert.AreEqual(TableType.View,view.TableType);

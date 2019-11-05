@@ -101,6 +101,11 @@ namespace FAnsi.Implementations.MicrosoftSQL
             return Convert.ToDateTime(timeSpan.ToString());
         }
 
+        public override bool SupportsEmbeddedParameters()
+        {
+            return true;
+        }
+
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
             return "[" + GetRuntimeName(databaseOrTableName) + "]";

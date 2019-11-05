@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.10.10] - 2019-11-05
+
+### Added
+
+- Added `IQuerySyntaxHelper.SupportsEmbeddedParameters()` which returns whether or not the DBMS supports embedded SQL only parameters (e.g. `DECLARE @bob varchar(10)`).  In order to be qualify the DBMS must:
+  - have a pure SQL only declaration format (i.e. not injected from outside)
+  - support variable values canging during the query
+  - not require mutilating the entire SQL query (e.g. with BEGIN / END ) blocks and indentation
+  - not affect normal behaviour's such as SELECT returning result set from query
+
+### Fixed
+
+- AddColumn now works properly with dodgy column names (e.g. `"My Fun New Column[Lol]"`)
+- MySql `GetConnectionStringBuilder` method no longer swallows platform exceptions around trusted security
+
 ## [0.10.9] - 2019-11-04
 
 ### Fixed
@@ -177,7 +192,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.9...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.10...develop
+[0.10.10]: https://github.com/HicServices/FAnsiSql/compare/0.10.9...0.10.10
 [0.10.9]: https://github.com/HicServices/FAnsiSql/compare/0.10.8...0.10.9
 [0.10.8]: https://github.com/HicServices/FAnsiSql/compare/0.10.7...0.10.8
 [0.10.7]: https://github.com/HicServices/FAnsiSql/compare/0.10.6...0.10.7

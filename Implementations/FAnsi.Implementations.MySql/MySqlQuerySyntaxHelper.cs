@@ -17,6 +17,11 @@ namespace FAnsi.Implementations.MySql
         {
         }
 
+        public override bool SupportsEmbeddedParameters()
+        {
+            return true;
+        }
+
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
             return "`" + GetRuntimeName(databaseOrTableName) + "`";
