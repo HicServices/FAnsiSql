@@ -56,6 +56,53 @@ namespace FAnsiTests.Table
             }
         }
 
+        [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
+        public void TestBulkInsert_SpacedOutNames(DatabaseType type)
+        {
+            DiscoveredDatabase db = GetTestDatabase(type);
+
+            DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+                new[]
+                {
+                    new DatabaseColumnRequest("Na me", new DatabaseTypeRequest(typeof(string), 10)),
+                    new DatabaseColumnRequest("A ge", new DatabaseTypeRequest(typeof(int)))
+                });
+
+            //There are no rows in the table yet
+            Assert.AreEqual(0, tbl.GetRowCount());
+
+            using (var dt = new DataTable())
+            {
+                dt.Columns.Add("Na me");
+                dt.Columns.Add("A ge");
+                dt.Rows.Add("Dave", 50);
+                dt.Rows.Add("Jamie", 60);
+
+                using (IBulkCopy bulk = tbl.BeginBulkInsert())
+                {
+                    bulk.Timeout = 30;
+                    bulk.Upload(dt);
+
+                    Assert.AreEqual(2, tbl.GetRowCount());
+
+                    dt.Rows.Clear();
+                    dt.Rows.Add("Frank", 100);
+
+                    bulk.Upload(dt);
+
+                    Assert.AreEqual(3, tbl.GetRowCount());
+                }
+            }
+
+            tbl.Insert(new Dictionary<string, object>()
+            {
+                {"Na me", "George"},
+                {"A ge", "300"}
+            });
+
+            Assert.AreEqual(4, tbl.GetRowCount());
+        }
+
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBulkInsert_ColumnOrdinals(DatabaseType type)
         {
