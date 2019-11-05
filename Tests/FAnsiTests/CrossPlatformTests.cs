@@ -529,6 +529,8 @@ namespace FAnsiTests
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
         public void AddColumnTest(DatabaseType type,bool useTransaction)
         {
+            const string newColumnName = "My Fun New Column[Lol]"; //<- lets make sure dodgy names are also supported
+
             var database = GetTestDatabase(type);
 
             //create a single column table with primary key
@@ -552,25 +554,25 @@ namespace FAnsiTests
             {
                 using (var con = database.Server.BeginNewTransactedConnection())
                 {
-                    tbl.AddColumn("Field2", new DatabaseTypeRequest(typeof(DateTime)), true,new DatabaseOperationArgs{TimeoutInSeconds = 1000,TransactionIfAny = con.ManagedTransaction});
+                    tbl.AddColumn(newColumnName, new DatabaseTypeRequest(typeof(DateTime)), true,new DatabaseOperationArgs{TimeoutInSeconds = 1000,TransactionIfAny = con.ManagedTransaction});
                     con.ManagedTransaction.CommitAndCloseConnection();
                 }   
             }
             else
             {
-                tbl.AddColumn("Field2", new DatabaseTypeRequest(typeof(DateTime)), true, 1000);
+                tbl.AddColumn(newColumnName, new DatabaseTypeRequest(typeof(DateTime)), true, 1000);
             }
             
 
             //new column should exist
-            var newCol = tbl.DiscoverColumn("Field2");
+            var newCol = tbl.DiscoverColumn(newColumnName);
 
             //and should have a type of datetime as requested
             var typeCreated = newCol.DataType.SQLType;
             var tt = database.Server.GetQuerySyntaxHelper().TypeTranslater;
             Assert.AreEqual(typeof(DateTime), tt.GetCSharpTypeForSQLDBType(typeCreated));
 
-            var fieldsToAlter = new List<string>(new []{"Field1", "Field2"});
+            var fieldsToAlter = new List<string>(new []{"Field1", newColumnName});
 
             //sql server can't handle altering primary key columns or anything with a foreign key on it too!
             if (type == DatabaseType.MicrosoftSQLServer)
@@ -599,7 +601,7 @@ namespace FAnsiTests
             //and should still be a primary key
             Assert.IsTrue(tbl.DiscoverColumn("Field1").IsPrimaryKey);
             //and should not be a primary key
-            Assert.IsFalse(tbl.DiscoverColumn("Field2").IsPrimaryKey);
+            Assert.IsFalse(tbl.DiscoverColumn(newColumnName).IsPrimaryKey);
         }
 
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]

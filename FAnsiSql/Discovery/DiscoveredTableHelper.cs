@@ -46,9 +46,11 @@ namespace FAnsi.Discovery
 
         public virtual void AddColumn(DatabaseOperationArgs args,DiscoveredTable table, string name, string dataType, bool allowNulls)
         {
+            var syntax = table.GetQuerySyntaxHelper();
+            
             using (var con = args.GetManagedConnection(table))
             {
-                using(var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + name + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"),con))
+                using(var cmd = table.Database.Server.GetCommand("ALTER TABLE " + table.GetFullyQualifiedName() + " ADD " + syntax.EnsureWrapped(name) + " " + dataType + " " + (allowNulls ? "NULL" : "NOT NULL"),con))
                     args.ExecuteNonQuery(cmd);
             }
         }

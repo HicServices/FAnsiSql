@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Fixed
+
+- AddColumn now works properly with dodgy column names (e.g. `"My Fun New Column[Lol]"`)
+
 ## [0.10.9] - 2019-11-04
 
 ### Fixed
