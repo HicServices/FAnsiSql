@@ -73,14 +73,8 @@ namespace FAnsi.Implementations.MySql
                 toReturn.Password = password;
             }
             else
-            try
-            {
                 toReturn.IntegratedSecurity = true;
-            }
-            catch (PlatformNotSupportedException)
-            {
-            }
-
+           
             return toReturn;
         }
 

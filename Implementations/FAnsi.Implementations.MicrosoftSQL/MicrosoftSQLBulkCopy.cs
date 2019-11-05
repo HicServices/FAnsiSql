@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
@@ -233,18 +234,27 @@ namespace FAnsi.Implementations.MicrosoftSQL
         [Pure]
         public string ExceptionToListOfInnerMessages(Exception e, bool includeStackTrace = false)
         {
-            string message = e.Message;
+            StringBuilder message = new StringBuilder(e.Message);
             if (includeStackTrace)
-                message += Environment.NewLine + e.StackTrace;
-
+            {
+                message.AppendLine();
+                message.Append(e.StackTrace);
+            }
+                
             if (e is ReflectionTypeLoadException)
-                foreach (Exception loaderException in ((ReflectionTypeLoadException)e).LoaderExceptions)
-                    message += Environment.NewLine + ExceptionToListOfInnerMessages(loaderException, includeStackTrace);
+                foreach (Exception loaderException in ((ReflectionTypeLoadException) e).LoaderExceptions)
+                {
+                    message.AppendLine();
+                    message.Append(ExceptionToListOfInnerMessages(loaderException, includeStackTrace));
+                }
 
             if (e.InnerException != null)
-                message += Environment.NewLine + ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace);
-
-            return message;
+            {
+                message.AppendLine();
+                message.Append( ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace));
+            }
+                
+            return message.ToString();
         }
 
         private void InspectDataTableForFloats(DataTable dt)
