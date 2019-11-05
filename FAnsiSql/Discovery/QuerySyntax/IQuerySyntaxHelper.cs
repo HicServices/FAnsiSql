@@ -43,7 +43,14 @@ namespace FAnsi.Discovery.QuerySyntax
         bool TryGetRuntimeName(string s, out string name);
 
         DatabaseType DatabaseType {get;}
-        
+
+        /// <summary>
+        /// True if the DBMS supports SQL declared parameters (e.g. "DECLARE @bob varchar(10)") whose values can be changed in SQL.  False if the only way to
+        /// get parameters in SQL is by injecting them at the application level e.g. <see cref="DbParameter"/>.
+        /// </summary>
+        /// <returns></returns>
+        bool SupportsEmbeddedParameters();
+
         /// <summary>
         /// Ensures that the supplied single entity object e.g. "mytable" , "mydatabase, "[mydatabase]", "`mydatabase` etc is returned wrapped in appropriate qualifiers for
         /// the database we are providing syntax for

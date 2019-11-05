@@ -1,4 +1,5 @@
-﻿using FAnsi;
+﻿using System;
+using FAnsi;
 using FAnsi.Implementation;
 using NUnit.Framework;
 using System.Data;
@@ -9,6 +10,17 @@ namespace FAnsiTests.Parameters
 {
     class ParameterTests:DatabaseTests
     {
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void Test_SupportsEmbeddedParameters_DeclarationOrThrow(DatabaseType type)
+        {
+            var syntax = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
+                        
+            if(syntax.SupportsEmbeddedParameters())
+                Assert.IsNotEmpty(syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)));
+            else
+                Assert.Throws<NotSupportedException>(() =>syntax.GetParameterDeclaration("@bob", new DatabaseTypeRequest(typeof(string), 10)));
+        }
+
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         //[TestCase(DatabaseType.Oracle)]

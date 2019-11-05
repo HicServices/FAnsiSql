@@ -22,6 +22,11 @@ namespace FAnsi.Implementations.PostgreSql
         
         public const string DefaultPostgresSchema = "public";
 
+        public override bool SupportsEmbeddedParameters()
+        {
+            return false;
+        }
+
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
             return '"' + GetRuntimeName(databaseOrTableName) + '"';
@@ -54,7 +59,7 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override string GetScalarFunctionSql(MandatoryScalarFunctions function)

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ...
+### Added
+
+- Added `IQuerySyntaxHelper.SupportsEmbeddedParameters()` which returns whether or not the DBMS supports embedded SQL only parameters (e.g. `DECLARE @bob varchar(10)`).  In order to be qualify the DBMS must:
+  - have a pure SQL only declaration format (i.e. not injected from outside)
+  - support variable values canging during the query
+  - not require mutilating the entire SQL query (e.g. with BEGIN / END ) blocks and indentation
+  - not affect normal behaviour's such as SELECT returning result set from query
 
 ### Fixed
 
