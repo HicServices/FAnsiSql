@@ -123,10 +123,7 @@ namespace FAnsi.Implementations.PostgreSql
             {
                 lengthQualifier = "(" + Convert.ToInt32(r["character_maximum_length"]) + ")";
             }
-
-            if (columnType == "text")
-                return "varchar(max)";
-
+            
             return columnType + lengthQualifier;
         }
 
