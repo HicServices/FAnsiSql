@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed bug reading `text` data types out of Postgres databases (would be read as invalid type `varchar(max)`)
 
-## [0.10.10] - 2019-11-05
+## [0.10.10] - 2019-11-07
 
 ### Added
 
