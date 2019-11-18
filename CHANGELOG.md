@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.10.11] - 2019-11-18
+
+### Fixed
+
+- Fixed bug reading `text` data types out of Postgres databases (would be read as invalid type `varchar(max)`)
+
 ## [0.10.10] - 2019-11-07
 
 ### Added
@@ -192,7 +198,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.10...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.11...develop
+[0.10.11]: https://github.com/HicServices/FAnsiSql/compare/0.10.10...0.10.11
 [0.10.10]: https://github.com/HicServices/FAnsiSql/compare/0.10.9...0.10.10
 [0.10.9]: https://github.com/HicServices/FAnsiSql/compare/0.10.8...0.10.9
 [0.10.8]: https://github.com/HicServices/FAnsiSql/compare/0.10.7...0.10.8
