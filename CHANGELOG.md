@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## Fixed
+
+- Fixed bug where `GetFullyQualifiedName` in MySql would not wrap the column name in quotes
+
 ## [0.10.11] - 2019-11-18
 
 ### Fixed

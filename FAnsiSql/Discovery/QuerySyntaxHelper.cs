@@ -167,25 +167,14 @@ namespace FAnsi.Discovery
 
         public abstract string EnsureWrappedImpl(string databaseOrTableName);
 
-        public virtual string EnsureFullyQualified(string databaseName, string schema, string tableName)
-        {
-
-            string toReturn = GetRuntimeName(databaseName);
-
-            if (!string.IsNullOrWhiteSpace(schema))
-                toReturn += "." + schema;
-
-            toReturn += "." + GetRuntimeName(tableName);
-
-            return toReturn;
-        }
+        public abstract string EnsureFullyQualified(string databaseName, string schema, string tableName);
 
         public virtual string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false)
         {
             if (isTableValuedFunction)
                 return GetRuntimeName(tableName) + "." + GetRuntimeName(columnName);//table valued functions do not support database name being in the column level selection list area of sql queries
 
-            return EnsureFullyQualified(databaseName, schema, tableName) + "." + GetRuntimeName(columnName);
+            return EnsureFullyQualified(databaseName, schema, tableName) + "." + EnsureWrapped(GetRuntimeName(columnName));
         }
 
         public virtual string Escape(string sql)
