@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
@@ -140,6 +141,34 @@ namespace FAnsiTests.Query
             //normal unicode is fine
             Assert.AreEqual("你好", QuerySyntaxHelper.MakeHeaderNameSensible("你好"));
             Assert.AreEqual("你好DropDatabaseBob", QuerySyntaxHelper.MakeHeaderNameSensible("你好; drop database bob;"));
+        }
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void Test_GetFullyQualifiedName(DatabaseType dbType)
+        {
+            ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
+            var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
+
+            var name = syntaxHelper.EnsureFullyQualified("mydb", null, "Troll", ",,,");
+            Assert.AreEqual(",,,",syntaxHelper.GetRuntimeName(name));
+
+            switch (dbType)
+            {
+                case DatabaseType.MicrosoftSQLServer:
+                    Assert.AreEqual("[mydb]..[Troll].[,,,]",name);
+                    break;
+                case DatabaseType.MySql:
+                    Assert.AreEqual("`mydb`.`Troll`.`,,,`",name);
+                    break;
+                case DatabaseType.Oracle:
+                    Assert.AreEqual("\"MYDB\".\"TROLL\".\",,,\"",name);
+                    break;
+                case DatabaseType.PostgreSql:
+                    Assert.AreEqual("\"mydb\".public.\"Troll\".\",,,\"",name);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dbType), dbType, null);
+            }
         }
     }
 }
