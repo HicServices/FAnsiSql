@@ -8,9 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.10.13] - 2019-11-25
+
+### Fixed
+
+- Fixed `MakeDistinct` for Sql Server not wrapping column names (Only causes problems when using columns with spaces / reserved words)
+
 ## [0.10.12] - 2019-11-19
 
-## Fixed
+### Fixed
 
 - Fixed bug where `GetFullyQualifiedName` in MySql would not wrap the column name in quotes
 
@@ -204,7 +210,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.12...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.13...develop
+[0.10.12]: https://github.com/HicServices/FAnsiSql/compare/0.10.12...0.10.13
 [0.10.12]: https://github.com/HicServices/FAnsiSql/compare/0.10.11...0.10.12
 [0.10.11]: https://github.com/HicServices/FAnsiSql/compare/0.10.10...0.10.11
 [0.10.10]: https://github.com/HicServices/FAnsiSql/compare/0.10.9...0.10.10

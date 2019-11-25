@@ -309,6 +309,8 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
 
         public override void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)
         {
+            var syntax = discoveredTable.GetQuerySyntaxHelper();
+
             string sql = 
             @"DELETE f
             FROM (
@@ -318,7 +320,8 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
             ) as f
             where RowNum > 1";
             
-            string columnList = string.Join(",",discoveredTable.DiscoverColumns().Select(c=>c.GetRuntimeName()));
+            string columnList = string.Join(",",
+                discoveredTable.DiscoverColumns().Select(c=>syntax.EnsureWrapped(c.GetRuntimeName())));
 
             string sqlToExecute = string.Format(sql,columnList,discoveredTable.GetFullyQualifiedName());
 
