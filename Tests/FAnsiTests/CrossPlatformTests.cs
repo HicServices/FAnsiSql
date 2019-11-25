@@ -614,22 +614,22 @@ namespace FAnsiTests
             Assert.AreEqual(stringBefore, database1.Server.Builder.ConnectionString);
         }
 
-        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
-        public void TestDistincting(DatabaseType type,bool useTransaction)
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithTwoBoolFlags))]
+        public void TestDistincting(DatabaseType type,bool useTransaction, bool dodgyNames)
         {
             var database = GetTestDatabase(type);
 
-            var tbl = database.CreateTable("TestDistincting",new []
+            var tbl = database.CreateTable(dodgyNames?",,":"Field3",new []
             {
                 new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),int.MaxValue)), //varchar(max)
                 new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(DateTime))),
-                new DatabaseColumnRequest("Field3",new DatabaseTypeRequest(typeof(int)))
+                new DatabaseColumnRequest(dodgyNames?",,,,":"Field3",new DatabaseTypeRequest(typeof(int)))
             });
 
             var dt = new DataTable();
             dt.Columns.Add("Field1");
             dt.Columns.Add("Field2");
-            dt.Columns.Add("Field3");
+            dt.Columns.Add(dodgyNames?",,,,":"Field3");
 
             dt.Rows.Add(new[] {"dave", "2001-01-01", "50"});
             dt.Rows.Add(new[] {"dave", "2001-01-01", "50"});

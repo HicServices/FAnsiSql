@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Fixed
+
+- Fixed `MakeDistinct` for Sql Server not wrapping column names (Only causes problems when using columns with spaces / reserved words)
+
 ## [0.10.12] - 2019-11-19
 
-## Fixed
+### Fixed
 
 - Fixed bug where `GetFullyQualifiedName` in MySql would not wrap the column name in quotes
 
