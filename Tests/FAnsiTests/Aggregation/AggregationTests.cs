@@ -101,6 +101,8 @@ namespace FAnsiTests.Aggregation
                     }
                     catch (Exception)
                     {
+                        //they are not a match because they are not the same type and cannot be converted
+                        return false;
                     }
             
                 if (!a.Equals(b))
