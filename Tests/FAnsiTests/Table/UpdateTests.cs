@@ -14,24 +14,32 @@ namespace FAnsiTests.Table
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void Test_UpdateTableFromJoin(DatabaseType dbType)
         {
-            var dt1 = new DataTable();
-            dt1.Columns.Add("Name");
-            dt1.Columns.Add("HighScore");
-
-            dt1.Rows.Add("Dave", 100);
-            dt1.Rows.Add("Frank", DBNull.Value);
-            dt1.Rows.Add("Levo", DBNull.Value);
-
-            var dt2 = new DataTable();
-            dt2.Columns.Add("Name");
-            dt2.Columns.Add("Score");
-            dt2.Rows.Add("Dave", 50);
-            dt2.Rows.Add("Frank", 900);
-
             DiscoveredDatabase db = GetTestDatabase(dbType);
 
-            var tbl1 = db.CreateTable("HighScoresTable", dt1);
-            var tbl2 = db.CreateTable("NewScoresTable", dt2);
+            DiscoveredTable tbl1;
+            DiscoveredTable tbl2;
+
+            using (var dt1 = new DataTable())
+            {
+                dt1.Columns.Add("Name");
+                dt1.Columns.Add("HighScore");
+
+                dt1.Rows.Add("Dave", 100);
+                dt1.Rows.Add("Frank", DBNull.Value);
+                dt1.Rows.Add("Levo", DBNull.Value);
+
+                tbl1 = db.CreateTable("HighScoresTable", dt1);
+            }
+
+            using(var dt2 = new DataTable())
+            {
+                dt2.Columns.Add("Name");
+                dt2.Columns.Add("Score");
+                dt2.Rows.Add("Dave", 50);
+                dt2.Rows.Add("Frank", 900);
+                
+                tbl2 = db.CreateTable("NewScoresTable", dt2);
+            }
 
             var syntaxHelper = db.Server.GetQuerySyntaxHelper();
 

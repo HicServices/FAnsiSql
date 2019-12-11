@@ -62,16 +62,20 @@ namespace FAnsiTests.Aggregation
             {
                 con.Open();
 
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+                using (var da = svr.GetDataAdapter(sql, con))
+                {
+                    using (DataTable dt = new DataTable())
+                    {
+                        da.Fill(dt);
 
-                Assert.AreEqual(4, dt.Rows.Count);
-                Assert.AreEqual("E&, %a' mp;E", dt.Rows[0][1]);
-                Assert.AreEqual(3, dt.Rows[0][0]);
+                        Assert.AreEqual(4, dt.Rows.Count);
+                        Assert.AreEqual("E&, %a' mp;E", dt.Rows[0][1]);
+                        Assert.AreEqual(3, dt.Rows[0][0]);
 
-                Assert.AreEqual("F", dt.Rows[1][1]);
-                Assert.AreEqual(2, dt.Rows[1][0]);
+                        Assert.AreEqual("F", dt.Rows[1][1]);
+                        Assert.AreEqual(2, dt.Rows[1][0]);
+                    }
+                }
             }
         }
     }

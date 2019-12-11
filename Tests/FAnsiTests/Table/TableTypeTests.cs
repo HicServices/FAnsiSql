@@ -12,11 +12,13 @@ namespace FAnsiTests.Table
         public void CreateView(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
-            
-            var dt = new DataTable();
-            dt.Columns.Add("FF");
-            
-            var tbl = db.CreateTable("MyTable",dt);
+            DiscoveredTable tbl;
+
+            using (var dt = new DataTable())
+            {
+                dt.Columns.Add("FF");
+                tbl = db.CreateTable("MyTable",dt);
+            }
 
             Assert.AreEqual(TableType.Table, tbl.TableType);
 

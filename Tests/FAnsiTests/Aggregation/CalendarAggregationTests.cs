@@ -44,31 +44,35 @@ namespace FAnsiTests.Aggregation
             {
                 con.Open();
 
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+                using (var da = svr.GetDataAdapter(sql, con))
+                {
+                    using (DataTable dt = new DataTable())
+                    {
+                        da.Fill(dt);
 
-                Assert.AreEqual(10, dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
-                Assert.AreEqual(2001, dt.Rows[0][0]);
-                Assert.AreEqual(5, dt.Rows[0][1]);
-                Assert.AreEqual(2002, dt.Rows[1][0]);
-                Assert.AreEqual(5, dt.Rows[1][1]);
-                Assert.AreEqual(2003, dt.Rows[2][0]);
-                Assert.AreEqual(2, dt.Rows[2][1]);
-                Assert.AreEqual(2004, dt.Rows[3][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[3][1]);
-                Assert.AreEqual(2005, dt.Rows[4][0]);
-                Assert.AreEqual(1, dt.Rows[4][1]);
-                Assert.AreEqual(2006, dt.Rows[5][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[5][1]);
-                Assert.AreEqual(2007, dt.Rows[6][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[6][1]);
-                Assert.AreEqual(2008, dt.Rows[7][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[7][1]);
-                Assert.AreEqual(2009, dt.Rows[8][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[8][1]);
-                Assert.AreEqual(2010, dt.Rows[9][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
+                        Assert.AreEqual(10, dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
+                        Assert.AreEqual(2001, dt.Rows[0][0]);
+                        Assert.AreEqual(5, dt.Rows[0][1]);
+                        Assert.AreEqual(2002, dt.Rows[1][0]);
+                        Assert.AreEqual(5, dt.Rows[1][1]);
+                        Assert.AreEqual(2003, dt.Rows[2][0]);
+                        Assert.AreEqual(2, dt.Rows[2][1]);
+                        Assert.AreEqual(2004, dt.Rows[3][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[3][1]);
+                        Assert.AreEqual(2005, dt.Rows[4][0]);
+                        Assert.AreEqual(1, dt.Rows[4][1]);
+                        Assert.AreEqual(2006, dt.Rows[5][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[5][1]);
+                        Assert.AreEqual(2007, dt.Rows[6][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[6][1]);
+                        Assert.AreEqual(2008, dt.Rows[7][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[7][1]);
+                        Assert.AreEqual(2009, dt.Rows[8][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[8][1]);
+                        Assert.AreEqual(2010, dt.Rows[9][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
+                    }
+                }
             }
         }
 
@@ -102,16 +106,18 @@ namespace FAnsiTests.Aggregation
             {
                 con.Open();
 
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+                using(var da = svr.GetDataAdapter(sql, con))
+                    using (DataTable dt = new DataTable())
+                    {
+                        da.Fill(dt);
 
-                ConsoleWriteTable(dt);
+                        ConsoleWriteTable(dt);
 
-                Assert.AreEqual(37, dt.Rows.Count); // 4 quarters per year between 2001 and 2009 + 2010Q1
+                        Assert.AreEqual(37, dt.Rows.Count); // 4 quarters per year between 2001 and 2009 + 2010Q1
 
-                AssertHasRow(dt, "2001Q1", 5);
-                AssertHasRow(dt, "2001Q2", null);
+                        AssertHasRow(dt, "2001Q1", 5);
+                        AssertHasRow(dt, "2001Q2", null);
+                    }
             }
         }
 
@@ -146,16 +152,20 @@ namespace FAnsiTests.Aggregation
             {
                 con.Open();
 
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+                using (var da = svr.GetDataAdapter(sql, con))
+                {
+                    using (DataTable dt = new DataTable())
+                    {
+                        da.Fill(dt);
 
-                ConsoleWriteTable(dt);
+                        ConsoleWriteTable(dt);
 
-                Assert.AreEqual(109, dt.Rows.Count); // 109 months between 2001 and 2010 (inclusive)
+                        Assert.AreEqual(109, dt.Rows.Count); // 109 months between 2001 and 2010 (inclusive)
 
-                AssertHasRow(dt,"2001-01",5);
-                AssertHasRow(dt, "2001-02", null);
+                        AssertHasRow(dt,"2001-01",5);
+                        AssertHasRow(dt, "2001-02", null);
+                    }
+                }
             }
         }
 
@@ -237,35 +247,39 @@ namespace FAnsiTests.Aggregation
             {
                 con.Open();
 
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+                using (var da = svr.GetDataAdapter(sql, con))
+                {
+                    using (DataTable dt = new DataTable())
+                    {
+                        da.Fill(dt);
 
-                Assert.GreaterOrEqual(dt.Rows.Count, 19); //there are 19 years between 2001 and 2019 (use greater than because we don't want test to fail in 2020)
-                Assert.AreEqual(2001, dt.Rows[0][0]);
-                Assert.AreEqual(5, dt.Rows[0][1]);
-                Assert.AreEqual(2002, dt.Rows[1][0]);
-                Assert.AreEqual(5, dt.Rows[1][1]);
-                Assert.AreEqual(2003, dt.Rows[2][0]);
-                Assert.AreEqual(2, dt.Rows[2][1]);
-                Assert.AreEqual(2004, dt.Rows[3][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[3][1]);
-                Assert.AreEqual(2005, dt.Rows[4][0]);
-                Assert.AreEqual(1, dt.Rows[4][1]);
-                Assert.AreEqual(2006, dt.Rows[5][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[5][1]);
-                Assert.AreEqual(2007, dt.Rows[6][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[6][1]);
-                Assert.AreEqual(2008, dt.Rows[7][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[7][1]);
-                Assert.AreEqual(2009, dt.Rows[8][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[8][1]);
-                Assert.AreEqual(2010, dt.Rows[9][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
+                        Assert.GreaterOrEqual(dt.Rows.Count, 19); //there are 19 years between 2001 and 2019 (use greater than because we don't want test to fail in 2020)
+                        Assert.AreEqual(2001, dt.Rows[0][0]);
+                        Assert.AreEqual(5, dt.Rows[0][1]);
+                        Assert.AreEqual(2002, dt.Rows[1][0]);
+                        Assert.AreEqual(5, dt.Rows[1][1]);
+                        Assert.AreEqual(2003, dt.Rows[2][0]);
+                        Assert.AreEqual(2, dt.Rows[2][1]);
+                        Assert.AreEqual(2004, dt.Rows[3][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[3][1]);
+                        Assert.AreEqual(2005, dt.Rows[4][0]);
+                        Assert.AreEqual(1, dt.Rows[4][1]);
+                        Assert.AreEqual(2006, dt.Rows[5][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[5][1]);
+                        Assert.AreEqual(2007, dt.Rows[6][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[6][1]);
+                        Assert.AreEqual(2008, dt.Rows[7][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[7][1]);
+                        Assert.AreEqual(2009, dt.Rows[8][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[8][1]);
+                        Assert.AreEqual(2010, dt.Rows[9][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
 
-                //should go up to this year
-                Assert.AreEqual(DateTime.Now.Year, dt.Rows[dt.Rows.Count - 1][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
+                        //should go up to this year
+                        Assert.AreEqual(DateTime.Now.Year, dt.Rows[dt.Rows.Count - 1][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
+                    }
+                }
             }
         }
 
@@ -305,31 +319,35 @@ namespace FAnsiTests.Aggregation
             {
                 con.Open();
 
-                var da = svr.GetDataAdapter(sql, con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+                using (var da = svr.GetDataAdapter(sql, con))
+                {
+                    using (DataTable dt = new DataTable())
+                    {
+                        da.Fill(dt);
 
-                Assert.AreEqual(10, dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
-                Assert.AreEqual(2001, dt.Rows[0][0]);
-                Assert.AreEqual(5, dt.Rows[0][1]);
-                Assert.AreEqual(2002, dt.Rows[1][0]);
-                Assert.AreEqual(5, dt.Rows[1][1]);
-                Assert.AreEqual(2003, dt.Rows[2][0]);
-                Assert.AreEqual(2, dt.Rows[2][1]);
-                Assert.AreEqual(2004, dt.Rows[3][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[3][1]);
-                Assert.AreEqual(2005, dt.Rows[4][0]);
-                Assert.AreEqual(1, dt.Rows[4][1]);
-                Assert.AreEqual(2006, dt.Rows[5][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[5][1]);
-                Assert.AreEqual(2007, dt.Rows[6][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[6][1]);
-                Assert.AreEqual(2008, dt.Rows[7][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[7][1]);
-                Assert.AreEqual(2009, dt.Rows[8][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[8][1]);
-                Assert.AreEqual(2010, dt.Rows[9][0]);
-                Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
+                        Assert.AreEqual(10, dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
+                        Assert.AreEqual(2001, dt.Rows[0][0]);
+                        Assert.AreEqual(5, dt.Rows[0][1]);
+                        Assert.AreEqual(2002, dt.Rows[1][0]);
+                        Assert.AreEqual(5, dt.Rows[1][1]);
+                        Assert.AreEqual(2003, dt.Rows[2][0]);
+                        Assert.AreEqual(2, dt.Rows[2][1]);
+                        Assert.AreEqual(2004, dt.Rows[3][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[3][1]);
+                        Assert.AreEqual(2005, dt.Rows[4][0]);
+                        Assert.AreEqual(1, dt.Rows[4][1]);
+                        Assert.AreEqual(2006, dt.Rows[5][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[5][1]);
+                        Assert.AreEqual(2007, dt.Rows[6][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[6][1]);
+                        Assert.AreEqual(2008, dt.Rows[7][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[7][1]);
+                        Assert.AreEqual(2009, dt.Rows[8][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[8][1]);
+                        Assert.AreEqual(2010, dt.Rows[9][0]);
+                        Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
+                    }
+                }
             }
         }
     }
