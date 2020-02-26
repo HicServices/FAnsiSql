@@ -69,7 +69,7 @@ namespace FAnsiTests
 
             //Create a server object
             //var server = new DiscoveredServer(@"server=localhost\sqlexpress;Trusted_Connection=True;", DatabaseType.MicrosoftSQLServer);
-            var server = new DiscoveredServer(@"Server=localhost;Uid=root;Pwd=zombie;SSL-Mode=None", DatabaseType.MySql);
+            var server = new DiscoveredServer(@"Server=localhost;Uid=root;Pwd=zombie;SSLMode=None", DatabaseType.MySql);
 
             //Find the database
             var database = server.ExpectDatabase("FAnsiTests");

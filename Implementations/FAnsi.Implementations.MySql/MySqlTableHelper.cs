@@ -150,7 +150,7 @@ WHERE
   u.REFERENCED_TABLE_SCHEMA = @db AND
   u.REFERENCED_TABLE_NAME = @tbl";
 
-            using (var cmd = new MySqlCommand(sql, (MySqlConnection) connection))
+            using (var cmd = new MySqlCommand(sql, (MySqlConnection) connection,(MySqlTransaction) transaction?.Transaction))
             {
                 var p = new MySqlParameter("@db", MySqlDbType.String);
                 p.Value = table.Database.GetRuntimeName();
