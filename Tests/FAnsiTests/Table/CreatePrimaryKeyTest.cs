@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using FAnsi;
+using FAnsi.Discovery;
 using FAnsi.Exceptions;
 using NUnit.Framework;
 
@@ -12,19 +13,22 @@ namespace FAnsiTests.Table
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBasicCase_KeysCreated(DatabaseType databaseType)
         {
-            var dt = new DataTable("Fish");
-            dt.Columns.Add("A");
-            dt.Columns.Add("B");
-            dt.Columns.Add("C");
+            DiscoveredTable tbl;
+            using (var dt = new DataTable("Fish"))
+            {
+                dt.Columns.Add("A");
+                dt.Columns.Add("B");
+                dt.Columns.Add("C");
 
-            dt.Rows.Add("a1", null, null);
-            dt.Rows.Add("a2", null, null);
-            dt.Rows.Add("a3", null, null);
+                dt.Rows.Add("a1", null, null);
+                dt.Rows.Add("a2", null, null);
+                dt.Rows.Add("a3", null, null);
 
-            var db = GetTestDatabase(databaseType);
+                var db = GetTestDatabase(databaseType);
 
-            var tbl = db.CreateTable("Fish", dt);
-
+                tbl = db.CreateTable("Fish", dt);
+            }
+            
             var col = tbl.DiscoverColumn("A");
 
             Assert.IsTrue(col.AllowNulls);
@@ -41,19 +45,22 @@ namespace FAnsiTests.Table
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void TestBasicCase_FailHalfWay_SchemaUnchanged(DatabaseType databaseType)
         {
-            var dt = new DataTable("Fish");
-            dt.Columns.Add("A");
-            dt.Columns.Add("B");
-            dt.Columns.Add("C");
+            DiscoveredTable tbl;
+            using (var dt = new DataTable("Fish"))
+            {
+                dt.Columns.Add("A");
+                dt.Columns.Add("B");
+                dt.Columns.Add("C");
 
-            dt.Rows.Add("a1", "b1", null);
-            dt.Rows.Add("a2", null, null);
-            dt.Rows.Add("a3", "b2", null);
+                dt.Rows.Add("a1", "b1", null);
+                dt.Rows.Add("a2", null, null);
+                dt.Rows.Add("a3", "b2", null);
 
-            var db = GetTestDatabase(databaseType);
+                var db = GetTestDatabase(databaseType);
 
-            var tbl = db.CreateTable("Fish", dt);
-
+                tbl = db.CreateTable("Fish", dt);
+            }
+            
             var colA = tbl.DiscoverColumn("A");
             var colB = tbl.DiscoverColumn("B");
 

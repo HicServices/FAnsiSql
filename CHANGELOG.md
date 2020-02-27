@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.11.0] - 2020-02-27
+
+### Changed
+
+- Changed client library from MySql.Data to [MySqlConnector](https://github.com/mysql-net/MySqlConnector)
+  - If you have any connection strings with `Ssl-Mode` change it to `SSLMode` (i.e. remove the hyphen)
+  - Update your package references (if any)
+
 ## [0.10.13] - 2019-11-25
 
 ### Fixed
@@ -210,7 +218,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.10.13...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.11.0...develop
+[0.10.13]: https://github.com/HicServices/FAnsiSql/compare/0.10.13...0.11.0
 [0.10.13]: https://github.com/HicServices/FAnsiSql/compare/0.10.12...0.10.13
 [0.10.12]: https://github.com/HicServices/FAnsiSql/compare/0.10.11...0.10.12
 [0.10.11]: https://github.com/HicServices/FAnsiSql/compare/0.10.10...0.10.11

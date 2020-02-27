@@ -15,7 +15,6 @@ namespace FAnsi.Implementations.MySql
         static MySqlServerHelper()
         {
             AddConnectionStringKeyword(DatabaseType.MySql, "AllowUserVariables","True",ConnectionStringKeywordPriority.ApiRule);
-            AddConnectionStringKeyword(DatabaseType.MySql, "AllowBatch", "True", ConnectionStringKeywordPriority.ApiRule);
             AddConnectionStringKeyword(DatabaseType.MySql, "CharSet", "utf8", ConnectionStringKeywordPriority.ApiRule);     
         }
 
@@ -72,8 +71,6 @@ namespace FAnsi.Implementations.MySql
                 toReturn.UserID = username;
                 toReturn.Password = password;
             }
-            else
-                toReturn.IntegratedSecurity = true;
            
             return toReturn;
         }

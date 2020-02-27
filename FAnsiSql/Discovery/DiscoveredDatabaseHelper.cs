@@ -313,7 +313,7 @@ REFERENCES {2}({3}) {4}",
         {
             performanceFigures = new Dictionary<int, Stopwatch>();
 
-            string sqlBatch = string.Empty;
+            StringBuilder sqlBatch = new StringBuilder();
 
             var helper = ImplementationManager.GetImplementation(conn).GetServerHelper();
 
@@ -337,25 +337,26 @@ REFERENCES {2}({3}) {4}",
                     {
                         lineNumber++;
 
-                        if (line.ToUpperInvariant().Trim() == "GO")
+                        if (line.Trim().Equals("GO",StringComparison.CurrentCultureIgnoreCase))
                         {
-                            if (string.IsNullOrWhiteSpace(sqlBatch))
+                            var executeSql = sqlBatch.ToString();
+                            if (string.IsNullOrWhiteSpace(executeSql))
                                 continue;
 
                             if (!performanceFigures.ContainsKey(lineNumber))
                                 performanceFigures.Add(lineNumber, new Stopwatch());
                             performanceFigures[lineNumber].Start();
 
-                            cmd.CommandText = sqlBatch;
+                            cmd.CommandText = executeSql;
                             cmd.CommandTimeout = timeout;
                             cmd.ExecuteNonQuery();
 
                             performanceFigures[lineNumber].Stop();
-                            sqlBatch = string.Empty;
+                            sqlBatch.Clear();
                         }
                         else
                         {
-                            sqlBatch += line + "\n";
+                            sqlBatch.AppendLine(line);
                         }
                     }
                 }

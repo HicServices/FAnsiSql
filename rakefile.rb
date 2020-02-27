@@ -22,7 +22,7 @@ task :setup_connection do
           </TestDatabase>
           <TestDatabase>
             <DatabaseType>MySql</DatabaseType>
-            <ConnectionString>Server=#{MYSQLDB};Uid=#{MYSQLUSR};Pwd=#{MYSQLPASS};Ssl-Mode=Required</ConnectionString>
+            <ConnectionString>Server=#{MYSQLDB};Uid=#{MYSQLUSR};Pwd=#{MYSQLPASS};SslMode=Required</ConnectionString>
           </TestDatabase>
           <!--<TestDatabase>
             <DatabaseType>Oracle</DatabaseType>

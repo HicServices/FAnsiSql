@@ -3,6 +3,7 @@ using FAnsi.Discovery.QuerySyntax;
 using NUnit.Framework;
 using System;
 using System.Data;
+using FAnsi.Discovery;
 
 namespace FAnsiTests.Table
 {
@@ -13,18 +14,20 @@ namespace FAnsiTests.Table
         {
             var db = GetTestDatabase(type);
 
-            DataTable dt = new DataTable();
-            dt.Columns.Add("F");
-            dt.Columns.Add("X");
+            DiscoveredTable tbl;
+            using (DataTable dt = new DataTable())
+            {
+                dt.Columns.Add("F");
+                dt.Columns.Add("X");
 
-            dt.Rows.Add(1,DBNull.Value);
-            dt.Rows.Add(2,"fish");
-            dt.Rows.Add(3,"fish");
-            dt.Rows.Add(4,"fish");
+                dt.Rows.Add(1,DBNull.Value);
+                dt.Rows.Add(2,"fish");
+                dt.Rows.Add(3,"fish");
+                dt.Rows.Add(4,"fish");
 
-            var tbl = db.CreateTable("MyTopXTable",dt);
-
-
+                tbl = db.CreateTable("MyTopXTable",dt);
+            }
+            
             var topx = tbl.GetQuerySyntaxHelper().HowDoWeAchieveTopX(1);
             
             string sql;
