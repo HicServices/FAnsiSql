@@ -35,7 +35,7 @@ namespace FAnsiTests.Server
 
             acc.EnforceOptions(connectionStringBuilder);
 
-            StringAssert.Contains("autoenlist=False",connectionStringBuilder.ConnectionString);
+            StringAssert.Contains("AutoEnlist=false",connectionStringBuilder.ConnectionString);
         }
 
 
@@ -61,13 +61,11 @@ namespace FAnsiTests.Server
             StringAssert.Contains("Pooling=False", connectionStringBuilder.ConnectionString);
         }
 
-        [TestCase(DatabaseType.MySql, "sslmode", "None", "Ssl-Mode","Required")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "AttachDbFilename", @"c:\temp\db", "Initial File Name", @"x:\omg.mdf")]
         [TestCase(DatabaseType.Oracle, "CONNECTION TIMEOUT", "10", "Connection Timeout", "20")]
         [TestCase(DatabaseType.PostgreSql, "Database", "mydb", "DATABASE", "myotherdb")]
         public void TestKeywords_OverrideWithNovelButEquivalentKeyword_Ignored(DatabaseType databaseType, string key1, string value1, string equivalentKey, string value2)
         {
-            // SSL Mode , SslMode , Ssl-Mode 
             var acc = new ConnectionStringKeywordAccumulator(databaseType);
             acc.AddOrUpdateKeyword(key1,value1, ConnectionStringKeywordPriority.SystemDefaultHigh);
 
@@ -77,7 +75,7 @@ namespace FAnsiTests.Server
 
             StringAssert.Contains(key1 + "=" + value1, connectionStringBuilder.ConnectionString);
             
-            //attempt override with low priority setting it to true but also use the alias Ssl-Mode instead of SSL Mode
+            //attempt override with low priority setting it to true but also use the alias
             acc.AddOrUpdateKeyword(equivalentKey,value2,ConnectionStringKeywordPriority.SystemDefaultLow);
 
             acc.EnforceOptions(connectionStringBuilder);

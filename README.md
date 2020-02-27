@@ -183,7 +183,7 @@ Column DateOfBirth is of type datetime2
 We can get the same code to execute against a MySql server by changing only the connection string line:
 
 ```csharp
-var server = new DiscoveredServer(@"Server=localhost;Uid=root;Pwd=***;SSL-Mode=None", DatabaseType.MySql);
+var server = new DiscoveredServer(@"Server=localhost;Uid=root;Pwd=***;SSLMode=None", DatabaseType.MySql);
 ```
 
 In this case we get the following output:
