@@ -41,6 +41,8 @@ namespace FAnsi.Implementations.MicrosoftSQL
                     return "GETDATE()";
                case MandatoryScalarFunctions.GetGuid:
                     return "newid()";
+                case MandatoryScalarFunctions.Len:
+                    return "LEN";
                 default:
                     throw new ArgumentOutOfRangeException("function");
             }

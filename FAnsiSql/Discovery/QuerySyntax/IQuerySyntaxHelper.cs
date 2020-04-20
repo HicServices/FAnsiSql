@@ -201,6 +201,11 @@ namespace FAnsi.Discovery.QuerySyntax
         /// <summary>
         /// A scalar function which must return a new random GUID.
         /// </summary>
-        GetGuid
+        GetGuid,
+       
+        /// <summary>
+        /// A scalar function which must take a single argument (column name) and return the length of values in it
+        /// </summary>
+        Len,
     }
 }
