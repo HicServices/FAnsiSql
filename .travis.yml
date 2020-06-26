@@ -15,9 +15,10 @@ addons:
     - sourceline: 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/ubuntu/16.04/mssql-server-2017 xenial main'
 
 env:
-- MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
-- ACCEPT_EULA=Y
-- MSSQL_PID='evaluation'
+  global:
+  - MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
+  - ACCEPT_EULA=Y
+  - MSSQL_PID='evaluation'
 
 services:
   - postgresql
