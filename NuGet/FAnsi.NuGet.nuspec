@@ -16,7 +16,7 @@
       <dependency id="System.Data.SqlClient" version="4.6.0" />
       <dependency id="MySql.Data" version="8.0.13" />
       <dependency id="Oracle.ManagedDataAccess.Core" version="2.18.6" />
-      <dependency id="System.ComponentModel.Composition" version="4.5.0" />
+      <dependency id="System.ComponentModel.Composition" version="4.7.0" />
       <dependency id="HIC.TypeGuesser" version="0.0.4" />
       <dependency id="Npgsql" version="4.1.1" />
     </dependencies>
