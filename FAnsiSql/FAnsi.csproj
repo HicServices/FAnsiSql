@@ -19,7 +19,7 @@
     <None Include="Discovery\TypeTranslation\TypeTranslation.cd" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.TypeGuesser" Version="0.0.4" />
+    <PackageReference Include="HIC.TypeGuesser" Version="0.0.5" />
     <PackageReference Include="System.ComponentModel.Composition" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
