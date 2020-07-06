@@ -18,7 +18,7 @@ env:
   global:
   - MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
   - ACCEPT_EULA=Y
-  - MSSQL_PID='evaluation'
+  - MSSQL_PID='developer'
 
 services:
   - postgresql
