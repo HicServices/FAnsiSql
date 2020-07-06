@@ -10,6 +10,7 @@ addons:
   postgresql: "10"
   apt:
     sources:
+    - sourceline 'deb https://download.mono-project.com/repo/ubuntu stable-bionic main'
     - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main'
       key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
     - sourceline: 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/ubuntu/16.04/mssql-server-2017 xenial main'
@@ -25,6 +26,7 @@ services:
   - mysql
 
 before_install:
+- sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 - sudo apt-get install -y --no-install-recommends mssql-tools mssql-server dotnet-runtime-2.2 dotnet-sdk-3.1 nuget
 - sudo /opt/mssql/bin/mssql-conf -n setup accept-eula
 
