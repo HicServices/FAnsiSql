@@ -46,6 +46,8 @@ namespace Rdmp.Core.Tests.DataLoad.Engine.Integration
             Assert.AreEqual(1,tbl.GetRowCount());
             Assert.AreEqual(9223372036854775807L,tbl.GetDataTable().Rows[0][0]);
             tbl.Drop();
+            
+            dt.Dispose();
         }
     }
 }
