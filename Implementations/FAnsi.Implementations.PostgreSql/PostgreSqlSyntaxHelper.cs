@@ -70,6 +70,8 @@ namespace FAnsi.Implementations.PostgreSql
                     return "now()";
                 case MandatoryScalarFunctions.GetGuid:
                     return "gen_random_uuid()"; //requires pgcrypto e.g. CREATE EXTENSION pgcrypto;
+                case MandatoryScalarFunctions.Len:
+                    return "LENGTH";
                 default:
                     throw new ArgumentOutOfRangeException("function");
             }

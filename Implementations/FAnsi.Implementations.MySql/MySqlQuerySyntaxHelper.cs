@@ -76,6 +76,8 @@ namespace FAnsi.Implementations.MySql
                     return "now()";
                 case MandatoryScalarFunctions.GetGuid:  //using this as defaults in columns requires MySql 8 (2018)
                     return "(uuid())"; 
+                case MandatoryScalarFunctions.Len:
+                    return "LENGTH";
                 default:
                     throw new ArgumentOutOfRangeException("function");
             }

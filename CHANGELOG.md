@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [1.0.1] - 2020-07-06
+
+### Fixed
+
+- Updated dependencies, fixing issue in uploading string typed big integers e.g. `"9223372036854775807"`
+
+
+
 ## [0.11.0] - 2020-02-27
 
 ### Changed
@@ -218,7 +226,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/0.11.0...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.1...develop
+[1.0.1]: https://github.com/HicServices/FAnsiSql/compare/0.11.0...1.0.1
 [0.11.0]: https://github.com/HicServices/FAnsiSql/compare/0.10.13...0.11.0
 [0.10.13]: https://github.com/HicServices/FAnsiSql/compare/0.10.12...0.10.13
 [0.10.12]: https://github.com/HicServices/FAnsiSql/compare/0.10.11...0.10.12

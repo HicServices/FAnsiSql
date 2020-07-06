@@ -210,7 +210,7 @@ namespace FAnsiTests.Aggregation
                 AssertHasRow(dt, new DateTime(2001,1,1), 4);
                 AssertHasRow(dt, new DateTime(2001, 1, 2), 1);
                 AssertHasRow(dt, new DateTime(2001, 1, 3), null);
-
+                dt.Dispose();
             }
         }
 

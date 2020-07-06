@@ -77,8 +77,10 @@ namespace FAnsi.Implementations.Oracle
             {
                 case MandatoryScalarFunctions.GetTodaysDate:
                     return "CURRENT_TIMESTAMP";
-                    case MandatoryScalarFunctions.GetGuid:
+                case MandatoryScalarFunctions.GetGuid:
                     return "SYS_GUID()";
+                case MandatoryScalarFunctions.Len:
+                    return "LENGTH";
                 default:
                     throw new ArgumentOutOfRangeException("function");
             }

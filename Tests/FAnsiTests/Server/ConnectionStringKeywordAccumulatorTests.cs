@@ -35,7 +35,7 @@ namespace FAnsiTests.Server
 
             acc.EnforceOptions(connectionStringBuilder);
 
-            StringAssert.Contains("AutoEnlist=false",connectionStringBuilder.ConnectionString);
+            Assert.IsTrue(connectionStringBuilder.ConnectionString.IndexOf("AutoEnlist=false", StringComparison.InvariantCultureIgnoreCase) != -1);
         }
 
 
