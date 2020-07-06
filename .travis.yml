@@ -33,7 +33,7 @@ script:
  - dotnet build
  - dotnet test
  - cd NuGet
- - dotnet pack FAnsi.NuGet.csproj -c Release -p:NuspecFile=FAnsi.NuGet.nuspec
+ - dotnet pack FAnsi.NuGet.csproj -c Release -p:NuspecFile=FAnsi.NuGet.nuspec -p:PackageVersion=$(fgrep Version ../SharedAssemblyInfo.cs|cut -d'"' -f2|head -n1) -p:IncludeSymbols=true
  - ls -lh *.nupkg
  - if [ -z "$TRAVIS_TAG" ]; then travis_terminate 0; fi
  - dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY || true
