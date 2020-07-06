@@ -32,7 +32,8 @@ script:
  - dotnet restore
  - dotnet build
  - dotnet test
- - dotnet pack NuGet/FAnsi.NuGet.csproj -c Release -p:NuspecFile=NuGet/FAnsi.NuGet.nuspec
- - ls -lh NuGet/*.nupkg
+ - cd NuGet
+ - dotnet pack FAnsi.NuGet.csproj -c Release -p:NuspecFile=FAnsi.NuGet.nuspec
+ - ls -lh *.nupkg
  - if [ -z "$TRAVIS_TAG" ]; then travis_terminate 0; fi
- - dotnet nuget push NuGet/*.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY || true
+ - dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY || true
