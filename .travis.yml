@@ -32,3 +32,4 @@ script:
  - dotnet restore
  - dotnet build
  - dotnet test
+ - dotnet pack NuGet/FAnsi.NuGet.csproj -c Release -p:NuspecFile=NuGet/FAnsi.NuGet.nuspec
