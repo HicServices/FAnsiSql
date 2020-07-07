@@ -9,11 +9,12 @@
 
 | Package | Source Code | Version | License | Purpose | Additional Risk Assessment |
 | ------- | ------------| --------| ------- | ------- | -------------------------- |
-| System.Data.SqlClient | [GitHub](https://github.com/dotnet/corefx) | [4.6.1](https://www.nuget.org/packages/System.Data.SqlClient/4.6.1) | [MIT](https://opensource.org/licenses/MIT) | Enables interaction with Microsoft Sql Server databases |  |
-| MySql.Data | [GitHub](https://github.com/mysql/mysql-connector-net/tree/8.0/MySQL.Data/src) | [8.0.13](https://www.nuget.org/packages/MySql.Data/8.0.13) | [GPL 2.0](https://github.com/mysql/mysql-connector-net/blob/8.0/LICENSE) | Enables interaction with MySql databases |  |
-| Oracle ODP.NET Managed Driver | Closed Source | [18.3.0](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core/2.18.6) | [OTNLA](https://www.oracle.com/downloads/licenses/distribution-license.html) | Enables interaction with Oracle databases |
+| System.Data.SqlClient | [GitHub](https://github.com/dotnet/corefx) | [4.8.1](https://www.nuget.org/packages/System.Data.SqlClient/4.8.1) | [MIT](https://opensource.org/licenses/MIT) | Enables interaction with Microsoft Sql Server databases |  |
+| MySqlConnector | [GitHub](https://github.com/mysql-net/MySqlConnector) | [0.69.4](https://www.nuget.org/packages/MySqlConnector/0.69.4) | [MIT](https://github.com/mysql-net/MySqlConnector/blob/master/LICENSE) | Enables interaction with MySql databases |  |
+| Oracle.ManagedDataAccess.Core  | Closed Source | [2.19.70](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core/2.19.70) | [OTNLA](https://www.oracle.com/downloads/licenses/distribution-license.html) | Enables interaction with Oracle databases |
 | [Nunit](https://nunit.org/) |[GitHub](https://github.com/nunit/nunit) | [3.11.0](https://www.nuget.org/packages/NUnit/3.11.0) | [MIT](https://opensource.org/licenses/MIT) | Unit testing |
 | NUnit3TestAdapter | [GitHub](https://github.com/nunit/nunit3-vs-adapter)| [3.13.0](https://www.nuget.org/packages/NUnit3TestAdapter/3.13.0) | [MIT](https://opensource.org/licenses/MIT) | Run unit tests from within Visual Studio |
 | System.ComponentModel.Composition | [GitHub](https://github.com/dotnet/corefx) | [4.7.0](https://www.nuget.org/packages/System.ComponentModel.Composition/4.7.0) |[MIT](https://opensource.org/licenses/MIT) | Allows detecting and loading DBMS Implementations (Oracle / MySql etc) on demand|  |
 | HIC.TypeGuesser | [GitHub](https://github.com/HicServices/TypeGuesser) | [1.0.1](https://www.nuget.org/packages/HIC.TypeGuesser/1.0.1) | [MIT](https://opensource.org/licenses/MIT)| Allows picking system Types for untyped strings e.g. `"12.3"`| |
+| Npgsql | [GitHub](https://github.com/npgsql/npgsql) | [4.1.3.1](https://www.nuget.org/packages/Npgsql/4.1.3.1) | [PostgreSQL](https://github.com/npgsql/npgsql/blob/dev/LICENSE)| Enables interaction with Postgres databases  | |
 

@@ -20,6 +20,10 @@ namespace FAnsiTests
         static string[] Analyzers = new string[] { "SecurityCodeScan" };
 
         [TestCase("../../../../../FAnsiSql/FAnsi.csproj", "../../../../../NuGet/FAnsi.NuGet.nuspec", "../../../../../Packages.md")]
+        [TestCase("../../../../../Implementations/FAnsi.Implementations.MicrosoftSQL/FAnsi.Implementations.MicrosoftSQL.csproj", "../../../../../NuGet/FAnsi.NuGet.nuspec", "../../../../../Packages.md")]
+        [TestCase("../../../../../Implementations/FAnsi.Implementations.Oracle/FAnsi.Implementations.Oracle.csproj", "../../../../../NuGet/FAnsi.NuGet.nuspec", "../../../../../Packages.md")]
+        [TestCase("../../../../../Implementations/FAnsi.Implementations.MySql/FAnsi.Implementations.MySql.csproj", "../../../../../NuGet/FAnsi.NuGet.nuspec", "../../../../../Packages.md")]
+        [TestCase("../../../../../Implementations/FAnsi.Implementations.PostgreSql/FAnsi.Implementations.PostgreSql.csproj", "../../../../../NuGet/FAnsi.NuGet.nuspec", "../../../../../Packages.md")]
         public void TestDependencyCorrect(string csproj, string nuspec, string packagesMarkdown)
         {
             if(csproj != null && !Path.IsPathRooted(csproj))
