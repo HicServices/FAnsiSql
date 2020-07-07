@@ -87,7 +87,7 @@ namespace FAnsi.Implementations.PostgreSql
             format_type(pg_attribute.atttypid, pg_attribute.atttypmod) 
             FROM pg_index, pg_class, pg_attribute 
             WHERE 
-            pg_class.oid = '{table.GetFullyQualifiedName()}'::regclass AND 
+            pg_class.oid = @tableName::regclass AND 
                 indrelid = pg_class.oid AND  
             pg_attribute.attrelid = pg_class.oid AND 
             pg_attribute.attnum = any(pg_index.indkey)
@@ -98,6 +98,11 @@ namespace FAnsi.Implementations.PostgreSql
             using (DbCommand cmd = table.GetCommand(query, con.Connection))
             {
                 cmd.Transaction = con.Transaction;
+
+                var p = cmd.CreateParameter();
+                p.ParameterName = "@tableName";
+                p.Value = table.GetFullyQualifiedName();
+                cmd.Parameters.Add(p);
 
                 using(DbDataReader r = cmd.ExecuteReader())
                 {
