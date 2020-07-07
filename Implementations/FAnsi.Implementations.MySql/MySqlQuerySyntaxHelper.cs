@@ -4,6 +4,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementations.MySql.Aggregation;
 using FAnsi.Implementations.MySql.Update;
+using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MySql
 {
@@ -24,16 +25,25 @@ namespace FAnsi.Implementations.MySql
 
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
-            return "`" + GetRuntimeName(databaseOrTableName) + "`";
+            return "`" + GetRuntimeNameWithDoubledBackticks(databaseOrTableName) + "`";
         }
 
+        /// <summary>
+        /// Returns the runtime name of the string with all backticks escaped (but resulting string is not wrapped in backticks itself)
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        private string GetRuntimeNameWithDoubledBackticks(string s)
+        {
+            return GetRuntimeName(s).Replace("`","``");
+        }
         public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
         {
             //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
             if (!string.IsNullOrWhiteSpace(schema))
                 throw new NotSupportedException("Schema (e.g. .dbo. not supported by MySql)");
 
-            return "`" + GetRuntimeName(databaseName) + "`" + DatabaseTableSeparator + "`" + GetRuntimeName(tableName) + "`";
+            return "`" + GetRuntimeNameWithDoubledBackticks(databaseName) + "`" + DatabaseTableSeparator + "`" + GetRuntimeNameWithDoubledBackticks(tableName) + "`";
         }
 
         public override TopXResponse HowDoWeAchieveTopX(int x)

@@ -170,5 +170,19 @@ namespace FAnsiTests.Query
                     throw new ArgumentOutOfRangeException(nameof(dbType), dbType, null);
             }
         }
+        
+        [Test]
+        public void Test_GetFullyQualifiedName_BacktickMySql()
+        {
+            ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
+            var syntaxHelper = ImplementationManager.GetImplementation(DatabaseType.MySql).GetQuerySyntaxHelper();
+
+            //when names have backticks the correct response is to double back tick them
+            Assert.AreEqual("`ff``ff`",syntaxHelper.EnsureWrapped("ff`ff"));
+            Assert.AreEqual("`d``b`.`ta``ble`",syntaxHelper.EnsureFullyQualified("d`b",null,"ta`ble"));
+
+            //runtime name should still be the actual name of the column
+            Assert.AreEqual("ff`ff",syntaxHelper.GetRuntimeName("ff`ff"));
+        }
     }
 }

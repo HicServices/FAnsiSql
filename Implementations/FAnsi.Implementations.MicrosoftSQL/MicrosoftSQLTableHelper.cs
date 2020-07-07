@@ -155,10 +155,15 @@ sys.parameters.precision AS PRECISION
 sys.parameters 
 join
 sys.types on sys.parameters.user_type_id = sys.types.user_type_id
-where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + "')";
+where object_id = OBJECT_ID(@tableName)";
 
             using (DbCommand cmd = discoveredTableValuedFunction.GetCommand(query, connection))
             {
+                var p = cmd.CreateParameter();
+                p.ParameterName = "@tableName";
+                p.Value = GetObjectName(discoveredTableValuedFunction);
+                cmd.Parameters.Add(p);
+
                 cmd.Transaction = transaction;
 
                 using (var r = cmd.ExecuteReader())
@@ -375,7 +380,7 @@ where object_id = OBJECT_ID('" + GetObjectName(discoveredTableValuedFunction) + 
         {
             List<string> toReturn = new List<string>();
 
-            string query = String.Format(@"SELECT i.name AS IndexName, 
+            string query = @"SELECT i.name AS IndexName, 
 OBJECT_NAME(ic.OBJECT_ID) AS TableName, 
 COL_NAME(ic.OBJECT_ID,ic.column_id) AS ColumnName, 
 c.is_identity
@@ -384,11 +389,16 @@ INNER JOIN sys.index_columns AS ic
 INNER JOIN sys.columns AS c ON ic.object_id = c.object_id AND ic.column_id = c.column_id 
 ON i.OBJECT_ID = ic.OBJECT_ID 
 AND i.index_id = ic.index_id 
-WHERE (i.is_primary_key = 1) AND ic.OBJECT_ID = OBJECT_ID('{0}')
-ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal", GetObjectName(table));
+WHERE (i.is_primary_key = 1) AND ic.OBJECT_ID = OBJECT_ID(@tableName)
+ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal";
 
             using (DbCommand cmd = table.GetCommand(query, con.Connection))
             {
+                var p = cmd.CreateParameter();
+                p.ParameterName = "@tableName";
+                p.Value = GetObjectName(table);
+                cmd.Parameters.Add(p);
+
                 cmd.Transaction = con.Transaction;
                 using(DbDataReader r = cmd.ExecuteReader())
                 {
