@@ -8,7 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
-## [1.0.1] - 2020-07-06
+## [1.0.2] - 2020-07-07
+
+### Fixed
+
+- Fixed Nuget package dependencies
+
+## [1.0.1] - 2020-07-07
 
 ### Fixed
 
@@ -225,7 +231,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.1...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.2...develop
+[1.0.2]: https://github.com/HicServices/FAnsiSql/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/HicServices/FAnsiSql/compare/0.11.0...1.0.1
 [0.11.0]: https://github.com/HicServices/FAnsiSql/compare/0.10.13...0.11.0
 [0.10.13]: https://github.com/HicServices/FAnsiSql/compare/0.10.12...0.10.13
