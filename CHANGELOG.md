@@ -13,8 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Updated dependencies, fixing issue in uploading string typed big integers e.g. `"9223372036854775807"`
-
-
+- Fixed bug in Sql Server implementation for column/table names containing single quotes
 
 ## [0.11.0] - 2020-02-27
 
