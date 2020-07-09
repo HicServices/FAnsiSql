@@ -212,7 +212,7 @@ namespace FAnsi.Discovery
         /// Returns the estimated number of rows in the table.  This may use a short cut e.g. consulting sys.partitions in Sql
         /// Server (https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-partitions-transact-sql?view=sql-server-2017)
         /// </summary>
-        /// <param name="transaction">Optional - if set the query will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
+        /// <param name="args">Options for the operation e.g timeout, using existing connection etc</param>
         /// <returns></returns>
         public int GetRowCount(DatabaseOperationArgs args)
         {
@@ -232,7 +232,7 @@ namespace FAnsi.Discovery
         /// <summary>
         /// Returns true if there are no rows in the table
         /// </summary>
-        /// <param name="transaction">Optional - if set the query will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
+        /// <param name="args"></param>
         /// <returns></returns>
         public bool IsEmpty(DatabaseOperationArgs args)
         {
@@ -250,13 +250,14 @@ namespace FAnsi.Discovery
         {
             AddColumn(name, type, allowNulls, new DatabaseOperationArgs {TimeoutInSeconds = timeoutInSeconds});
         }
-        
+
         /// <summary>
         /// Creates and runs an ALTER TABLE SQL statement that adds a new column to the table
         /// </summary>
         /// <param name="name">The unqualified name for the new column e.g. "MyCol2"</param>
         /// <param name="type">The data type for the new column</param>
         /// <param name="allowNulls">True to allow null</param>
+        /// <param name="args"></param>
         public void AddColumn(string name, DatabaseTypeRequest type, bool allowNulls, DatabaseOperationArgs args)
         {
             AddColumn(name, Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(type), allowNulls, args);
@@ -306,6 +307,7 @@ namespace FAnsi.Discovery
         /// Creates a new object for bulk inserting records into the table.  You should use a using block since <see cref="IBulkCopy"/> is <see cref="IDisposable"/>.
         /// Depending on implementation, records may not be committed to the server until the <see cref="IBulkCopy"/> is disposed.
         /// </summary>
+        /// <param name="culture"></param>
         /// <param name="transaction">Optional - records inserted should form part of the supplied ongoing transaction</param>
         /// <returns></returns>
         public IBulkCopy BeginBulkInsert(CultureInfo culture,IManagedTransaction transaction = null)
@@ -336,7 +338,7 @@ namespace FAnsi.Discovery
         /// <summary>
         /// Deletes all EXACT duplicate rows from the table leaving only unique records.  This is method may not be transaction/threadsafe
         /// </summary>
-        /// <param name="timeoutInSeconds">The length of time to allow for the command to complete (See <see cref="DbCommand.CommandTimeout"/>)</param>
+        /// <param name="args">Options for timeout, transaction etc</param>
         public void MakeDistinct(DatabaseOperationArgs args)
         {
             Helper.MakeDistinct(args,this);
@@ -580,6 +582,8 @@ namespace FAnsi.Discovery
         /// Key is the foreign key column (and the table the constraint will be put on).
         /// Value is the primary key table column (which the constraint reference points to)</param>
         /// <param name="cascadeDeletes"></param>
+        /// <param name="constraintName">Specify an explicit name for the foreign key, leave null to pick one arbitrarily</param>
+        /// <param name="args">Options for timeout, transaction etc</param>
         /// <returns></returns>
         public DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs,
             bool cascadeDeletes,string constraintName = null, DatabaseOperationArgs args = null)

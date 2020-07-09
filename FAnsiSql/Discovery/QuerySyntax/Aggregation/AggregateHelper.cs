@@ -61,10 +61,7 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation
         /// the axis column in the SELECT section of the query (e.g. "[MyDb]..[mytbl].[AdmissionDate] as Admt,")  with
         /// the appropriate axis increment (e.g. "YEAR([MyDb]..[mytbl].[AdmissionDate])," and "YEAR([MyDb]..[mytbl].[AdmissionDate]) as Admt,")
         /// </summary>
-        /// <param name="axisColumn"></param>
-        /// <param name="lines"></param>
-        /// <param name="axis"></param>
-        /// <param name="axisColumnWithoutAlias"></param>
+        /// <param name="query"></param>
         /// <param name="axisColumnAlias"></param>
         protected void WrapAxisColumnWithDatePartFunction(AggregateCustomLineCollection query, string axisColumnAlias)
         {

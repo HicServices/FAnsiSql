@@ -49,6 +49,7 @@ namespace FAnsi.Discovery
         /// </summary>
         /// <param name="targetTable"></param>
         /// <param name="connection"></param>
+        /// <param name="culture">For parsing string date expressions etc</param>
         protected BulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture)
         {
             Culture = culture;
