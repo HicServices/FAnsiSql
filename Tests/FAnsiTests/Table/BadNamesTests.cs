@@ -13,7 +13,7 @@ namespace FAnsiTests.Table
         /// <summary>
         /// It would be a bad idea to name your column this but if you really wanted to...
         /// </summary>
-        const string BadColumnName = "Da'   ,,;ve";
+        const string BadColumnName = "Da'   \",,;ve";
 
         private DiscoveredTable SetupBadNamesTable(DatabaseType dbType)
         {
