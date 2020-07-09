@@ -83,10 +83,12 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
         /// <returns></returns>
         private string GetObjectName(DiscoveredTable table)
         {
-            var objectName = table.GetRuntimeName();
+            var syntax = table.GetQuerySyntaxHelper();
+
+            var objectName = syntax.EnsureWrapped(table.GetRuntimeName());
 
             if (table.Schema != null)
-                return table.Schema + "." + objectName;
+                return syntax.EnsureWrapped(table.Schema) + "." + objectName;
 
             return objectName;
         }

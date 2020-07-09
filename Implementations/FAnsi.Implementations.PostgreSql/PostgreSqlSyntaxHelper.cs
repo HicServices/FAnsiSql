@@ -33,7 +33,7 @@ namespace FAnsi.Implementations.PostgreSql
         }
 
         /// <summary>
-        /// Returns the runtime name of the string with all backticks escaped (but resulting string is not wrapped in backticks itself)
+        /// Returns the runtime name of the string with all double quotes escaped (but resulting string is not wrapped itself)
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>

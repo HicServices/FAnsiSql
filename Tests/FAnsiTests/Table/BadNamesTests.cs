@@ -13,13 +13,14 @@ namespace FAnsiTests.Table
         /// <summary>
         /// It would be a bad idea to name your column this but if you really wanted to...
         /// </summary>
-        const string BadColumnName = "Da'   \",,;ve";
+        const string BadColumnName = "Da'   ][\",,;ve";
+        const string BadTableName = "Fi ; ][\"'`sh";
 
         private DiscoveredTable SetupBadNamesTable(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
 
-            return db.CreateTable("Fi ; '`sh",new[]
+            return db.CreateTable(BadTableName,new[]
             {
                 new DatabaseColumnRequest(BadColumnName,new DatabaseTypeRequest(typeof(string),100)), 
                 new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int))) 
@@ -89,6 +90,35 @@ namespace FAnsiTests.Table
 
             tbl.Drop();
 
+        }
+
+        /////////// Table tests ///////////////////
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void BadNames_TopXTable(DatabaseType dbType)
+        {
+            var tbl = SetupBadNamesTable(dbType);
+            var col = tbl.DiscoverColumn(BadColumnName);
+
+            Assert.AreEqual(0,tbl.GetRowCount());
+
+            tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,"ff" } });
+            tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,"ff" } });
+            tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,DBNull.Value } });
+            
+            string topx = tbl.GetTopXSql(2);
+
+            var svr = tbl.Database.Server;
+            using(var con = svr.GetConnection())
+            {
+                con.Open();
+                var cmd = svr.GetCommand(topx,con);
+                var r= cmd.ExecuteReader();
+
+                Assert.IsTrue(r.Read());
+                Assert.IsTrue(r.Read());
+                Assert.IsFalse(r.Read());
+            }
         }
 
     }
