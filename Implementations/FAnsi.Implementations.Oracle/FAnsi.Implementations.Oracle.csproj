@@ -10,7 +10,7 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.70" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.80" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FAnsiSql\FAnsi.csproj" />
