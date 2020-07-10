@@ -61,6 +61,12 @@ namespace FAnsi.Discovery.QuerySyntax
 
         string EnsureFullyQualified(string databaseName,string schemaName, string tableName);
         string EnsureFullyQualified(string databaseName, string schemaName,string tableName, string columnName, bool isTableValuedFunction = false);
+        
+        /// <summary>
+        /// Returns the given <paramref name="sql"/> escaped e.g. doubling up single quotes.  Does not add any wrapping.
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
         string Escape(string sql);
 
         TopXResponse HowDoWeAchieveTopX(int x);

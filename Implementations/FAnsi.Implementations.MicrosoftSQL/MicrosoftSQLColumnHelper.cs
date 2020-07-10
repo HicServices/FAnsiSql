@@ -21,8 +21,6 @@ namespace FAnsi.Implementations.MicrosoftSQL
 
         public string GetAlterColumnToSql(DiscoveredColumn column, string newType, bool allowNulls)
         {
-            var syntax = column.Table.GetQuerySyntaxHelper();
-
             if(column.DataType.SQLType == "bit" && newType != "bit")
             {
 
@@ -35,14 +33,14 @@ namespace FAnsi.Implementations.MicrosoftSQL
                  alter table T alter column A datetime2 null
                  */
 
-                sb.AppendLine("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + syntax.EnsureWrapped(column.GetRuntimeName()) + " varchar(4000) " + (allowNulls ? "NULL" : "NOT NULL"));
-                sb.AppendLine("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + syntax.EnsureWrapped(column.GetRuntimeName()) + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL"));
+                sb.AppendLine("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + column.GetWrappedName() + " varchar(4000) " + (allowNulls ? "NULL" : "NOT NULL"));
+                sb.AppendLine("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + column.GetWrappedName() + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL"));
                 
                 return sb.ToString();
             }
 
             
-            return "ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + syntax.EnsureWrapped(column.GetRuntimeName()) + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL");
+            return "ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + column.GetWrappedName() + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL");
         }
     }
 }
