@@ -44,22 +44,22 @@ namespace FAnsi.Discovery.TableCreation
         /// Key is the foreign key column (and the table the constraint will be put on).
         /// Value is the primary key table column (which the constraint reference points to)
         /// </summary>
-        public Dictionary<DatabaseColumnRequest, DiscoveredColumn> ForeignKeyPairs { get; private set; }
+        public Dictionary<DatabaseColumnRequest, DiscoveredColumn> ForeignKeyPairs { get; set; }
 
         /// <summary>
         /// When creating a foreign key constraint (See <see cref="ForeignKeyPairs"/>) determines whether ON DELETE CASCADE should be set.
         /// </summary>
-        public bool CascadeDelete { get; private set; }
+        public bool CascadeDelete { get; set; }
 
         /// <summary>
         /// The data to use to determine table schema and load into the newly created table (unless <see cref="CreateEmpty"/> is set).
         /// </summary>
-        public DataTable DataTable { get; private set; }
+        public DataTable DataTable { get; set; }
 
         /// <summary>
         /// When creating the table, do not upload any rows supplied in <see cref="DataTable"/>
         /// </summary>
-        public bool CreateEmpty { get; private set; }
+        public bool CreateEmpty { get;  set; }
 
         /// <summary>
         /// True if the table has been created

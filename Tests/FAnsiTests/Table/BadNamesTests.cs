@@ -1,8 +1,10 @@
 ﻿using FAnsi;
 using FAnsi.Discovery;
+using FAnsi.Discovery.TableCreation;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TypeGuesser;
 
@@ -119,7 +121,41 @@ namespace FAnsiTests.Table
                 Assert.IsTrue(r.Read());
                 Assert.IsFalse(r.Read());
             }
-        }
 
+            tbl.Drop();
+        }
+        
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void BadNames_DiscoverRelationships(DatabaseType dbType)
+        {
+           var db = GetTestDatabase(dbType);
+
+            
+            var tbl1 = db.CreateTable(BadTableName,new[]
+            {
+                new DatabaseColumnRequest(BadColumnName,new DatabaseTypeRequest(typeof(string),100)){IsPrimaryKey = true }, 
+                new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int))) 
+            });
+
+            DiscoveredColumn pk = tbl1.DiscoverColumns().Single(c=>c.IsPrimaryKey);
+            DatabaseColumnRequest fk;
+
+            var tbl2 = db.CreateTable(new CreateTableArgs(db,BadTableName+"2",null)
+            {
+                ExplicitColumnDefinitions = new []{fk = new DatabaseColumnRequest(BadColumnName+"2",new DatabaseTypeRequest(typeof(string),100)) }, 
+                ForeignKeyPairs = new Dictionary<DatabaseColumnRequest, DiscoveredColumn> {{fk, pk} }
+            });
+
+            var r = tbl1.DiscoverRelationships().Single();
+
+            Assert.AreEqual(tbl1,r.PrimaryKeyTable);
+            Assert.AreEqual(tbl2,r.ForeignKeyTable);
+
+            Assert.AreEqual(pk, r.Keys.Single().Key);
+            Assert.AreEqual(tbl2.DiscoverColumn(BadColumnName +"2"), r.Keys.Single().Value);
+                
+            tbl2.Drop();
+            tbl1.Drop();
+        }
     }
 }
