@@ -136,7 +136,7 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
 
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
-            using(SqlCommand cmd = new SqlCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + " DROP column " + columnToDrop.GetRuntimeName(), (SqlConnection)connection))
+            using(SqlCommand cmd = new SqlCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + " DROP column " + columnToDrop.GetWrappedName(), (SqlConnection)connection))
                 cmd.ExecuteNonQuery();
         }
 

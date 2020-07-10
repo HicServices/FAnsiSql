@@ -13,6 +13,10 @@ namespace FAnsi.Implementations.Oracle
         public override int MaximumTableLength => 128;
         public override int MaximumColumnLength => 128;
 
+        
+        public override string OpenQualifier => "\"";
+
+        public override string CloseQualifier => "\"";
 
         public OracleQuerySyntaxHelper() : base(new OracleTypeTranslater(), new OracleAggregateHelper(),new OracleUpdateHelper(),DatabaseType.Oracle)//no custom translater
         {

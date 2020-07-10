@@ -14,6 +14,12 @@ namespace FAnsi.Implementations.MySql
         public override int MaximumTableLength => 64;
         public override int MaximumColumnLength => 64;
 
+
+        
+        public override string OpenQualifier => "`";
+
+        public override string CloseQualifier => "`";
+
         public MySqlQuerySyntaxHelper() : base(new MySqlTypeTranslater(), new MySqlAggregateHelper(),new MySqlUpdateHelper(),DatabaseType.MySql)//no specific type translation required
         {
         }

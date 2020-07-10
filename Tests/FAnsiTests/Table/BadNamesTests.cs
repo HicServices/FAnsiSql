@@ -31,6 +31,16 @@ namespace FAnsiTests.Table
 
         }
 
+        [Test]
+        public void BadNames_EnsureWrapped()
+        {
+            var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer);
+            var tbl = db.ExpectTable("][nquisitor");
+
+            Assert.IsFalse(tbl.Exists());
+            Assert.AreEqual("[]][nquisitor]",tbl.GetWrappedName());
+        }
+
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void BadNames_DiscoverColumns(DatabaseType dbType)
         {
@@ -93,6 +103,22 @@ namespace FAnsiTests.Table
 
             tbl.Drop();
 
+        }
+        
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void BadNames_DropColumn(DatabaseType dbType)
+        {
+            var tbl = SetupBadNamesTable(dbType);
+
+            Assert.AreEqual(2,tbl.DiscoverColumns().Length);
+
+            var col = tbl.DiscoverColumn(BadColumnName);
+            
+            tbl.DropColumn(col);
+            
+            Assert.AreEqual(1,tbl.DiscoverColumns().Length);
+
+            tbl.Drop();
         }
 
         /////////// Table tests ///////////////////
@@ -174,6 +200,8 @@ namespace FAnsiTests.Table
             {
                 insert.Upload(dt);
             }
+            
+            dt.Dispose();
 
             Assert.AreEqual(1,dt.Rows.Count);
 

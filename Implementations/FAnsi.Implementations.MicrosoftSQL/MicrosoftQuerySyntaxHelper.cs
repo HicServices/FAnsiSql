@@ -23,6 +23,10 @@ namespace FAnsi.Implementations.MicrosoftSQL
         public override int MaximumTableLength => 128;
         public override int MaximumColumnLength => 128;
 
+        public override string OpenQualifier => "[";
+
+        public override string CloseQualifier => "]";
+
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
             return new TopXResponse("TOP " + x, QueryComponent.SELECT);

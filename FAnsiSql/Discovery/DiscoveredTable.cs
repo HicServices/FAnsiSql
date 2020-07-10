@@ -102,7 +102,15 @@ namespace FAnsi.Discovery
         {
             return QuerySyntaxHelper.EnsureFullyQualified(Database.GetRuntimeName(),Schema, GetRuntimeName());
         }
-
+        
+        /// <summary>
+        /// Returns the wrapped e.g. "[MyTbl]" name of the table including escaping e.g. if you wanted to name a table "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
+        /// </summary>
+        /// <returns></returns>
+        public string GetWrappedName()
+        {
+            return QuerySyntaxHelper.EnsureWrapped(GetRuntimeName());
+        }
         /// <summary>
         /// Connects to the server and returns a list of columns found in the table as <see cref="DiscoveredColumn"/>.
         /// </summary>

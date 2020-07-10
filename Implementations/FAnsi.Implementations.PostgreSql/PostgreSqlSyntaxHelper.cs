@@ -21,6 +21,10 @@ namespace FAnsi.Implementations.PostgreSql
         public override int MaximumColumnLength => 63;
         
         public const string DefaultPostgresSchema = "public";
+        
+        public override string OpenQualifier => "\"";
+
+        public override string CloseQualifier => "\"";
 
         public override bool SupportsEmbeddedParameters()
         {
