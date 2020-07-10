@@ -4,6 +4,7 @@ using FAnsi.Discovery.TableCreation;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using TypeGuesser;
@@ -17,7 +18,7 @@ namespace FAnsiTests.Table
         /// </summary>
         const string BadColumnName = "Da'   ][\",,;ve";
         const string BadTableName = "Fi ; ][\"'`sh";
-
+        const string BadColumnName2 = "Frrrrr ##' ank";
         private DiscoveredTable SetupBadNamesTable(DatabaseType dbType)
         {
             var db = GetTestDatabase(dbType);
@@ -25,7 +26,7 @@ namespace FAnsiTests.Table
             return db.CreateTable(BadTableName,new[]
             {
                 new DatabaseColumnRequest(BadColumnName,new DatabaseTypeRequest(typeof(string),100)), 
-                new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int))) 
+                new DatabaseColumnRequest(BadColumnName2,new DatabaseTypeRequest(typeof(int))) 
             });
 
         }
@@ -156,6 +157,27 @@ namespace FAnsiTests.Table
                 
             tbl2.Drop();
             tbl1.Drop();
+        }
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void BadNames_BulkInsert(DatabaseType dbType)
+        {
+            var tbl = SetupBadNamesTable(dbType);
+            
+            var dt = new DataTable();
+            dt.Columns.Add(BadColumnName);
+            dt.Columns.Add(BadColumnName2);
+            
+            dt.Rows.Add (new object[]{ "fff",5});
+
+            using(var insert = tbl.BeginBulkInsert())
+            {
+                insert.Upload(dt);
+            }
+
+            Assert.AreEqual(1,dt.Rows.Count);
+
+            tbl.Drop();
         }
     }
 }
