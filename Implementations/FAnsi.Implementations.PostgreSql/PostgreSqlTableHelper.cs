@@ -148,8 +148,8 @@ namespace FAnsi.Implementations.PostgreSql
             using(var cmd = new NpgsqlCommand(
                 string.Format(
                     @"ALTER TABLE {0} 
-DROP COLUMN ""{1}"";",columnToDrop.Table.GetFullyQualifiedName(),
-                    columnToDrop.GetRuntimeName()
+DROP COLUMN {1};",columnToDrop.Table.GetFullyQualifiedName(),
+                    columnToDrop.GetWrappedName()
                     ),(NpgsqlConnection) connection))
                 cmd.ExecuteNonQuery();
         }
