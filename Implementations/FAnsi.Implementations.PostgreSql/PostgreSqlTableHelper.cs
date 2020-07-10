@@ -199,8 +199,8 @@ join information_schema.key_column_usage y
     on y.ordinal_position = x.position_in_unique_constraint
     and y.constraint_name = c.unique_constraint_name
 where 
-    y.table_name='{table.GetRuntimeName()}' AND
-    y.table_schema='{table.Schema??PostgreSqlSyntaxHelper.DefaultPostgresSchema}'
+    y.table_name=@tableName AND
+    y.table_schema=@schema
 order by c.constraint_name, x.ordinal_position";
 
             
@@ -208,6 +208,16 @@ order by c.constraint_name, x.ordinal_position";
 
             using (var cmd = table.GetCommand(sql, connection, transaction?.Transaction))
             {
+                var p = cmd.CreateParameter();
+                p.ParameterName = "@tableName";
+                p.Value = table.GetFullyQualifiedName();
+                cmd.Parameters.Add(p);
+                
+                var p2 = cmd.CreateParameter();
+                p2.ParameterName = "@schema";
+                p2.Value = string.IsNullOrWhiteSpace(table.Schema)? PostgreSqlSyntaxHelper.DefaultPostgresSchema : table.Schema;
+                cmd.Parameters.Add(p2);
+
                 //fill data table to avoid multiple active readers
                 using (DataTable dt = new DataTable())
                 {
