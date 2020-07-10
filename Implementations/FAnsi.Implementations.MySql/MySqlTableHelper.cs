@@ -113,7 +113,7 @@ WHERE table_schema = @db
 
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
-            using(var cmd = new MySqlCommand("alter table " + columnToDrop.Table.GetFullyQualifiedName() + " drop column " + columnToDrop.GetRuntimeName(), (MySqlConnection)connection))
+            using(var cmd = new MySqlCommand("alter table " + columnToDrop.Table.GetFullyQualifiedName() + " drop column " + columnToDrop.GetWrappedName(), (MySqlConnection)connection))
                 cmd.ExecuteNonQuery();
         }
 
