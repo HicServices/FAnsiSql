@@ -30,7 +30,7 @@ namespace FAnsi.Implementations.PostgreSql
             sb.Append("COPY ");
             sb.Append(TargetTable.GetFullyQualifiedName());
             sb.Append(" (");
-            sb.Append(string.Join(",", matchedColumns.Values.Select(v => '"' + v.GetRuntimeName() + '"')));
+            sb.Append(string.Join(",", matchedColumns.Values.Select(v => v.GetWrappedName())));
             sb.Append(")");
             sb.Append(" FROM STDIN (FORMAT BINARY)");
 
