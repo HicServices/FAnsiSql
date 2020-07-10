@@ -210,7 +210,7 @@ order by c.constraint_name, x.ordinal_position";
             {
                 var p = cmd.CreateParameter();
                 p.ParameterName = "@tableName";
-                p.Value = table.GetFullyQualifiedName();
+                p.Value = table.GetRuntimeName();
                 cmd.Parameters.Add(p);
                 
                 var p2 = cmd.CreateParameter();
