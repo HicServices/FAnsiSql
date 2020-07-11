@@ -219,7 +219,7 @@ WHERE
         {
             var syntax = discoveredTable.GetQuerySyntaxHelper();
 
-            return string.Format("RENAME TABLE `{0}` TO `{1}`;", syntax.Escape(discoveredTable.GetRuntimeName()), syntax.Escape(newName));
+            return string.Format("RENAME TABLE {0} TO {1};", discoveredTable.GetWrappedName(), syntax.EnsureWrapped(newName));
         }
 
         public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
