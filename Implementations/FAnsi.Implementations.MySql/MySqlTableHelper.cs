@@ -217,7 +217,9 @@ WHERE
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
         {
-            return string.Format("RENAME TABLE `{0}` TO `{1}`;", discoveredTable.GetRuntimeName(), newName);
+            var syntax = discoveredTable.GetQuerySyntaxHelper();
+
+            return string.Format("RENAME TABLE `{0}` TO `{1}`;", syntax.Escape(discoveredTable.GetRuntimeName()), syntax.Escape(newName));
         }
 
         public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
