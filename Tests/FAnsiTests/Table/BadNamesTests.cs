@@ -207,5 +207,20 @@ namespace FAnsiTests.Table
 
             tbl.Drop();
         }
+
+        
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void BadNames_Rename(DatabaseType dbType)
+        {
+            var tbl = SetupBadNamesTable(dbType);
+            
+            var nameBefore = tbl.GetFullyQualifiedName();
+
+            tbl.Rename(BadTableName.Replace('F','A'));
+
+            Assert.AreNotEqual(nameBefore,tbl.GetFullyQualifiedName());
+
+            tbl.Drop();
+        }
     }
 }
