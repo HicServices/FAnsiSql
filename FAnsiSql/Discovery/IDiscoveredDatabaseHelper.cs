@@ -32,7 +32,7 @@ namespace FAnsi.Discovery
         /// <summary>
         /// Generates foreign key creation SQL such that it can be slotted into either a CREATE TABLE statement OR a ALTER TABLE statement
         /// </summary>
-        /// <param name="tableName">The foreign table on which to declare the constraint</param>
+        /// <param name="foreignTable">The foreign table on which to declare the constraint</param>
         /// <param name="syntaxHelper">The language to use e.g. for wrapping entity names</param>
         /// <param name="foreignKeyPairs">The columns to match up, key must be either <see cref="DiscoveredColumn"/> or <see cref="DatabaseColumnRequest"/>.
         ///
@@ -68,6 +68,7 @@ namespace FAnsi.Discovery
         /// is a layer below server and database but above table it groups tables within a single database.
         /// 
         /// </summary>
+        /// <param name="discoveredDatabase">Database to create schema in</param>
         /// <param name="name"></param>
         /// <returns></returns>
         void CreateSchema(DiscoveredDatabase discoveredDatabase, string name);

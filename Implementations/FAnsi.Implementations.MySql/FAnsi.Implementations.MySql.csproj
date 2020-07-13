@@ -5,8 +5,7 @@
     <Product>FAnsi.Implementations.MySql</Product>
     <Copyright>Copyright ©  2019</Copyright>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />

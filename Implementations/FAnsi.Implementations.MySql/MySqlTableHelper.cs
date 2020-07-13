@@ -113,7 +113,7 @@ WHERE table_schema = @db
 
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
-            using(var cmd = new MySqlCommand("alter table " + columnToDrop.Table.GetFullyQualifiedName() + " drop column " + columnToDrop.GetRuntimeName(), (MySqlConnection)connection))
+            using(var cmd = new MySqlCommand("alter table " + columnToDrop.Table.GetFullyQualifiedName() + " drop column " + columnToDrop.GetWrappedName(), (MySqlConnection)connection))
                 cmd.ExecuteNonQuery();
         }
 
@@ -217,7 +217,9 @@ WHERE
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
         {
-            return string.Format("RENAME TABLE `{0}` TO `{1}`;", discoveredTable.GetRuntimeName(), newName);
+            var syntax = discoveredTable.GetQuerySyntaxHelper();
+
+            return string.Format("RENAME TABLE {0} TO {1};", discoveredTable.GetWrappedName(), syntax.EnsureWrapped(newName));
         }
 
         public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)

@@ -1,5 +1,6 @@
 ﻿using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Naming;
+using System;
 using TypeGuesser;
 
 namespace FAnsi.Discovery
@@ -150,6 +151,15 @@ namespace FAnsi.Discovery
             {
                 return ((_name != null ? _name.GetHashCode() : 0) * 397) ^ (Table != null ? Table.GetHashCode() : 0);
             }
+        }
+
+        /// <summary>
+        /// Returns the wrapped e.g. "[MyCol]" name of the column including escaping e.g. if you wanted to name a column "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
+        /// </summary>
+        /// <returns></returns>
+        public string GetWrappedName()
+        {
+            return Table.GetQuerySyntaxHelper().EnsureWrapped(GetRuntimeName());
         }
     }
 }

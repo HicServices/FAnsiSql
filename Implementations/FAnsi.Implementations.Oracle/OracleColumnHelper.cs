@@ -8,10 +8,12 @@ namespace FAnsi.Implementations.Oracle
     {
         public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table, IHasRuntimeName column, int topX, bool discardNulls)
         {
-           string sql = "SELECT " + column.GetRuntimeName() + " FROM " + table.GetFullyQualifiedName();
+            var syntax = new OracleQuerySyntaxHelper();
+
+           string sql = "SELECT " + syntax.EnsureWrapped(column.GetRuntimeName()) + " FROM " + table.GetFullyQualifiedName();
 
             if (discardNulls)
-                sql += " WHERE " + column.GetRuntimeName() + " IS NOT NULL";
+                sql += " WHERE " + syntax.EnsureWrapped(column.GetRuntimeName()) + " IS NOT NULL";
 
              sql += " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY";
             return sql;
@@ -19,7 +21,9 @@ namespace FAnsi.Implementations.Oracle
 
         public string GetAlterColumnToSql(DiscoveredColumn column, string newType, bool allowNulls)
         {
-            StringBuilder sb = new StringBuilder("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " MODIFY " + column.GetRuntimeName() + " " + newType + " ");
+            var syntax = column.Table.Database.Server.GetQuerySyntaxHelper();
+
+            StringBuilder sb = new StringBuilder("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " MODIFY " + syntax.EnsureWrapped(column.GetRuntimeName()) + " " + newType + " ");
 
             //If you are already null then Oracle will complain (https://www.techonthenet.com/oracle/errors/ora01451.php)
             if (allowNulls != column.AllowNulls)

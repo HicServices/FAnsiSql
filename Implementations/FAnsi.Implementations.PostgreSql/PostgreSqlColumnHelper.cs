@@ -11,10 +11,12 @@ namespace FAnsi.Implementations.PostgreSql
             IHasRuntimeName column, int topX,
             bool discardNulls)
         {
-            string sql = "SELECT \"" + column.GetRuntimeName() + "\" FROM " + table.GetFullyQualifiedName();
+            var syntax = new PostgreSqlSyntaxHelper();
+
+            string sql = "SELECT " + syntax.EnsureWrapped(column.GetRuntimeName()) + " FROM " + table.GetFullyQualifiedName();
 
             if (discardNulls)
-                sql += " WHERE \"" + column.GetRuntimeName() + "\" IS NOT NULL";
+                sql += " WHERE " + syntax.EnsureWrapped(column.GetRuntimeName()) + " IS NOT NULL";
 
             sql += " fetch first " + topX + " rows only";
             return sql;
@@ -22,15 +24,17 @@ namespace FAnsi.Implementations.PostgreSql
 
         public string GetAlterColumnToSql(DiscoveredColumn column, string newType, bool allowNulls)
         {
+            var syntax = column.Table.Database.Server.GetQuerySyntaxHelper();
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(
-                $@"ALTER TABLE ""{column.Table.GetRuntimeName()}"" ALTER COLUMN ""{column.GetRuntimeName()}"" TYPE {newType};");
+                $@"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {syntax.EnsureWrapped(column.GetRuntimeName())} TYPE {newType};");
 
             var newNullability = allowNulls ? "NULL" : "NOT NULL";
 
             if (allowNulls != column.AllowNulls)
                 sb.AppendFormat(
-                    $@"ALTER TABLE ""{column.Table.GetRuntimeName()}"" ALTER COLUMN ""{column.GetRuntimeName()}"" SET {newNullability}");
+                    $@"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {syntax.EnsureWrapped(column.GetRuntimeName())} SET {newNullability}");
             return sb.ToString();
         }
     }

@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Added
+
+- Added `GetWrappedName` method for columns/tables for when a full expression is not allowed but wrapping is still needed. 
+
 ## [1.0.2] - 2020-07-07
 
 ### Fixed

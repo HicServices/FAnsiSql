@@ -14,6 +14,12 @@ namespace FAnsi.Implementations.MySql
         public override int MaximumTableLength => 64;
         public override int MaximumColumnLength => 64;
 
+
+        
+        public override string OpenQualifier => "`";
+
+        public override string CloseQualifier => "`";
+
         public MySqlQuerySyntaxHelper() : base(new MySqlTypeTranslater(), new MySqlAggregateHelper(),new MySqlUpdateHelper(),DatabaseType.MySql)//no specific type translation required
         {
         }
@@ -35,7 +41,7 @@ namespace FAnsi.Implementations.MySql
         /// <returns></returns>
         private string GetRuntimeNameWithDoubledBackticks(string s)
         {
-            return GetRuntimeName(s).Replace("`","``");
+            return GetRuntimeName(s)?.Replace("`","``");
         }
         public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
         {
@@ -43,7 +49,7 @@ namespace FAnsi.Implementations.MySql
             if (!string.IsNullOrWhiteSpace(schema))
                 throw new NotSupportedException("Schema (e.g. .dbo. not supported by MySql)");
 
-            return "`" + GetRuntimeNameWithDoubledBackticks(databaseName) + "`" + DatabaseTableSeparator + "`" + GetRuntimeNameWithDoubledBackticks(tableName) + "`";
+            return  EnsureWrapped(databaseName) + DatabaseTableSeparator + EnsureWrapped(tableName);
         }
 
         public override TopXResponse HowDoWeAchieveTopX(int x)

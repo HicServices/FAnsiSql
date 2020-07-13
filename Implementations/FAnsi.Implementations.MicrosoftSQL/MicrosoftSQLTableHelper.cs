@@ -83,10 +83,12 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
         /// <returns></returns>
         private string GetObjectName(DiscoveredTable table)
         {
-            var objectName = table.GetRuntimeName();
+            var syntax = table.GetQuerySyntaxHelper();
+
+            var objectName = syntax.EnsureWrapped(table.GetRuntimeName());
 
             if (table.Schema != null)
-                return table.Schema + "." + objectName;
+                return syntax.EnsureWrapped(table.Schema) + "." + objectName;
 
             return objectName;
         }
@@ -110,7 +112,7 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
                     if(!connection.Database.ToLower().Equals(tableToDrop.Database.GetRuntimeName().ToLower()))
                         throw new NotSupportedException("Cannot drop view "+tableToDrop +" because it exists in database "+ tableToDrop.Database.GetRuntimeName() +" while the current current database connection is pointed at database:" + connection.Database + " (use .ChangeDatabase on the connection first) - SQL Server does not support cross database view dropping");
 
-                    cmd = new SqlCommand("DROP VIEW " + tableToDrop.GetRuntimeName(), (SqlConnection)connection);
+                    cmd = new SqlCommand("DROP VIEW " + tableToDrop.GetWrappedName(), (SqlConnection)connection);
                     break;
                 case TableType.Table:
                     cmd = new SqlCommand("DROP TABLE " + tableToDrop.GetFullyQualifiedName(), (SqlConnection)connection);
@@ -134,7 +136,7 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
 
         public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
         {
-            using(SqlCommand cmd = new SqlCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + " DROP column " + columnToDrop.GetRuntimeName(), (SqlConnection)connection))
+            using(SqlCommand cmd = new SqlCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + " DROP column " + columnToDrop.GetWrappedName(), (SqlConnection)connection))
                 cmd.ExecuteNonQuery();
         }
 
@@ -304,12 +306,14 @@ where object_id = OBJECT_ID(@tableName)";
 
         protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
         {
-            string oldName = "["+discoveredTable.GetRuntimeName() +"]";
+            string oldName = discoveredTable.GetWrappedName();
+            
+            var syntax = discoveredTable.GetQuerySyntaxHelper();
 
             if (!string.IsNullOrWhiteSpace(discoveredTable.Schema))
-                oldName = "[" + discoveredTable.Schema + "]." + oldName;
+                oldName = syntax.EnsureWrapped( discoveredTable.Schema) + "." + oldName;
 
-            return string.Format("exec sp_rename '{0}', '{1}'", oldName, newName);
+            return string.Format("exec sp_rename '{0}', '{1}'", syntax.Escape(oldName), syntax.Escape(newName));
         }
 
         public override void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)

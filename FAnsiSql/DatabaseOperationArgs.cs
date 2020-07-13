@@ -139,7 +139,7 @@ namespace FAnsi
         /// Opens a new connection or passes back an existing opened connection (that matches
         /// <see cref="TransactionIfAny"/>).  This command should be wrapped in a using statement
         /// </summary>
-        /// <param name="table"></param>
+        /// <param name="database"></param>
         /// <returns></returns>
         public IManagedConnection GetManagedConnection(DiscoveredDatabase database)
         {
@@ -150,7 +150,7 @@ namespace FAnsi
         /// Opens a new connection or passes back an existing opened connection (that matches
         /// <see cref="TransactionIfAny"/>).  This command should be wrapped in a using statement
         /// </summary>
-        /// <param name="table"></param>
+        /// <param name="server"></param>
         /// <returns></returns>
         public IManagedConnection GetManagedConnection(DiscoveredServer server)
         {

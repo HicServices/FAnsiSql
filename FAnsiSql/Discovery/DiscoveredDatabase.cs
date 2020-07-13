@@ -82,6 +82,15 @@ namespace FAnsi.Discovery
         {
             return _querySyntaxHelper.GetRuntimeName(_database);
         }
+        
+        /// <summary>
+        /// Returns the wrapped e.g. "[MyDatabase]" name of the database including escaping e.g. if you wanted to name a database "][nquisitor" (which would return "[]][nquisitor]").
+        /// </summary>
+        /// <returns></returns>
+        public string GetWrappedName()
+        {
+            return _querySyntaxHelper.EnsureWrapped(GetRuntimeName());
+        }
 
         /// <summary>
         /// <para>Creates an expectation (See <see cref="IMightNotExist"/>) that there is a table with the given name in the database.

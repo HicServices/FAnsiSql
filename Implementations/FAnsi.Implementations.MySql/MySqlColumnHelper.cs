@@ -8,10 +8,12 @@ namespace FAnsi.Implementations.MySql
 
         public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table, IHasRuntimeName column, int topX, bool discardNulls)
         {
-            string sql = "SELECT " + column.GetRuntimeName() + " FROM " + table.GetFullyQualifiedName();
+            var syntax = new MySqlQuerySyntaxHelper();
+
+            string sql = "SELECT " + syntax.EnsureWrapped(column.GetRuntimeName()) + " FROM " + table.GetFullyQualifiedName();
 
             if (discardNulls)
-                sql += " WHERE " + column.GetRuntimeName() + " IS NOT NULL";
+                sql += " WHERE " + syntax.EnsureWrapped(column.GetRuntimeName()) + " IS NOT NULL";
 
              sql += " LIMIT "+topX;
             return sql;
@@ -19,7 +21,8 @@ namespace FAnsi.Implementations.MySql
 
         public string GetAlterColumnToSql(DiscoveredColumn column, string newType, bool allowNulls)
         {
-            return "ALTER TABLE " + column.Table.GetRuntimeName() + " MODIFY COLUMN " + column.GetRuntimeName() + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL");
+            var syntax = column.Table.Database.Server.GetQuerySyntaxHelper();
+            return "ALTER TABLE " + column.Table.GetFullyQualifiedName() + " MODIFY COLUMN " + syntax.EnsureWrapped(column.GetRuntimeName()) + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL");
         }
     }
 }
