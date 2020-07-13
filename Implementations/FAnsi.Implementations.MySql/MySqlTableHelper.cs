@@ -9,7 +9,7 @@ using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Naming;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql
 {
