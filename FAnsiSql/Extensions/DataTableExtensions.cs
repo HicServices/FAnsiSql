@@ -13,7 +13,8 @@ namespace FAnsi.Extensions
         ///
         /// <para>Method has no effect on columns where the <see cref="DataColumn.DataType"/> is not <see cref="string"/></para>
         /// </summary>
-        /// <param name="dc"></param>
+        /// <param name="dt"></param>
+        /// <param name="value">True to prevent datatype changes, false to allow</param>
         public static void SetDoNotReType(this DataTable dt, bool value)
         {
             foreach (DataColumn dc in dt.Columns)

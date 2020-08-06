@@ -21,6 +21,10 @@ namespace FAnsi.Implementations.PostgreSql
         public override int MaximumColumnLength => 63;
         
         public const string DefaultPostgresSchema = "public";
+        
+        public override string OpenQualifier => "\"";
+
+        public override string CloseQualifier => "\"";
 
         public override bool SupportsEmbeddedParameters()
         {
@@ -29,24 +33,34 @@ namespace FAnsi.Implementations.PostgreSql
 
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
-            return '"' + GetRuntimeName(databaseOrTableName) + '"';
+            return "\"" + GetRuntimeNameWithDoubledDoubleQuotes(databaseOrTableName) + "\"";
+        }
+
+        /// <summary>
+        /// Returns the runtime name of the string with all double quotes escaped (but resulting string is not wrapped itself)
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        private string GetRuntimeNameWithDoubledDoubleQuotes(string s)
+        {
+            return GetRuntimeName(s)?.Replace("\"","\"\"");
         }
 
         public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
         {
             //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
             if(string.IsNullOrWhiteSpace(schema))
-                return '"'+ GetRuntimeName(databaseName) +'"'+ DatabaseTableSeparator + DefaultPostgresSchema + DatabaseTableSeparator + '"'+GetRuntimeName(tableName)+'"';
+                return EnsureWrapped(databaseName) + DatabaseTableSeparator + DefaultPostgresSchema + DatabaseTableSeparator + EnsureWrapped(tableName);
 
             //there is a schema so add it in
-            return '"' + GetRuntimeName(databaseName) + '"' + DatabaseTableSeparator + schema + DatabaseTableSeparator + '"' + GetRuntimeName(tableName) + '"';
+            return EnsureWrapped(databaseName) + DatabaseTableSeparator + schema + DatabaseTableSeparator + EnsureWrapped(tableName);
         }
 
         public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName,
             bool isTableValuedFunction = false)
         {
             if (isTableValuedFunction)
-                return '"' + GetRuntimeName(tableName) + "\".\"" + GetRuntimeName(columnName) + "\"";//table valued functions do not support database name being in the column level selection list area of sql queries
+                return EnsureWrapped(tableName) + "." + EnsureWrapped(GetRuntimeName(columnName));//table valued functions do not support database name being in the column level selection list area of sql queries
 
             return EnsureFullyQualified(databaseName, schema, tableName) + ".\"" + GetRuntimeName(columnName) + '"';
         }

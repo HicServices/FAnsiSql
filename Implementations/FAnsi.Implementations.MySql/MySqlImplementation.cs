@@ -2,7 +2,7 @@
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementation;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql
 {

@@ -36,6 +36,15 @@ namespace FAnsi.Discovery
         /// </summary>
         public static char[] TableNameQualifiers = { '[', ']', '`' ,'"'};
 
+        /// <summary>
+        /// The character that is used to qualify database entity names e.g. "[" for "[My Table]"
+        /// </summary>
+        public abstract string OpenQualifier {get;}
+        /// <summary>
+        /// The character that is used to end qualifying database entity names e.g. "]" for "[My Table]".  For some DBMS this is the same as <see cref="OpenQualifier"/>
+        /// </summary>
+        public abstract string CloseQualifier {get;}
+
         public ITypeTranslater TypeTranslater { get; private set; }
         
         private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = new Dictionary<CultureInfo, TypeDeciderFactory>();
@@ -123,6 +132,7 @@ namespace FAnsi.Discovery
             DatabaseType = databaseType;
         }
 
+        
         public virtual string GetRuntimeName(string s)
         {
             if (string.IsNullOrWhiteSpace(s))
@@ -138,7 +148,17 @@ namespace FAnsi.Discovery
             if (s.IndexOfAny(new char[]{'(',')' }) != -1)
                 throw new RuntimeNameException("Could not determine runtime name for Sql:'" + s + "'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
 
-            return s.Substring(s.LastIndexOf(".") + 1).Trim('[', ']', '`','"');
+            //Last symbol with no whitespace
+            var lastWord = s.Substring(s.LastIndexOf(".") + 1)?.Trim();
+
+            if(string.IsNullOrWhiteSpace(lastWord) || lastWord.Length<2)
+                return lastWord;
+
+            //trim off any brackets e.g. return "My Table" for "[My Table]"
+            if(lastWord.StartsWith(OpenQualifier) && lastWord.EndsWith(CloseQualifier))
+                return lastWord.Substring(1,lastWord.Length -2);
+
+            return lastWord;
         }
         
         public virtual bool TryGetRuntimeName(string s,out string name)

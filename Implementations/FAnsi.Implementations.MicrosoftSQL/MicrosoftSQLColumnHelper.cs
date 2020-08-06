@@ -8,11 +8,13 @@ namespace FAnsi.Implementations.MicrosoftSQL
     {
         public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table, IHasRuntimeName column, int topX, bool discardNulls)
         {
+            var syntax = new MicrosoftQuerySyntaxHelper();
+
             //[dbx].[table]
-            string sql = "SELECT TOP " + topX + " " + column.GetRuntimeName() + " FROM " + table.GetFullyQualifiedName();
+            string sql = "SELECT TOP " + topX + " " + syntax.EnsureWrapped(column.GetRuntimeName()) + " FROM " + table.GetFullyQualifiedName();
 
             if (discardNulls)
-                sql += " WHERE " + column.GetRuntimeName() + " IS NOT NULL";
+                sql += " WHERE " + syntax.EnsureWrapped(column.GetRuntimeName()) + " IS NOT NULL";
 
             return sql;
         }
@@ -31,13 +33,14 @@ namespace FAnsi.Implementations.MicrosoftSQL
                  alter table T alter column A datetime2 null
                  */
 
-                sb.AppendLine("ALTER TABLE " + column.Table.GetRuntimeName() + " ALTER COLUMN " + column.GetRuntimeName() + " varchar(4000) " + (allowNulls ? "NULL" : "NOT NULL"));
-                sb.AppendLine("ALTER TABLE " + column.Table.GetRuntimeName() + " ALTER COLUMN " + column.GetRuntimeName() + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL"));
+                sb.AppendLine("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + column.GetWrappedName() + " varchar(4000) " + (allowNulls ? "NULL" : "NOT NULL"));
+                sb.AppendLine("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + column.GetWrappedName() + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL"));
                 
                 return sb.ToString();
             }
 
-            return "ALTER TABLE " + column.Table.GetRuntimeName() + " ALTER COLUMN " + column.GetRuntimeName() + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL");
+            
+            return "ALTER TABLE " + column.Table.GetFullyQualifiedName() + " ALTER COLUMN " + column.GetWrappedName() + " " + newType + " " + (allowNulls ? "NULL" : "NOT NULL");
         }
     }
 }

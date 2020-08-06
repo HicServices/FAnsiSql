@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql
 {

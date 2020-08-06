@@ -22,6 +22,7 @@ namespace FAnsi.Extensions
         /// <para>Method has no effect on columns where the <see cref="DataColumn.DataType"/> is not <see cref="string"/></para>
         /// </summary>
         /// <param name="dc"></param>
+        /// <param name="value">True to prevent retyping, false to allow it</param>
         public static void SetDoNotReType(this DataColumn dc, bool value)
         {
             if(!dc.ExtendedProperties.ContainsKey(DoNotReTypeExtendedProperty))
@@ -34,7 +35,7 @@ namespace FAnsi.Extensions
         /// Returns true if the <see cref="DataColumn.ExtendedProperties"/> of the <see cref="DataColumn"/> lists
         /// true for <see cref="DoNotReTypeExtendedProperty"/> and the <see cref="DataColumn.DataType"/> is string
         /// </summary>
-        /// <param name="column"></param>
+        /// <param name="dc"></param>
         /// <returns></returns>
         public static bool GetDoNotReType(this DataColumn dc)
         {

@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 using System.Globalization;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Implementations.MicrosoftSQL;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using NUnit.Framework;
 using Oracle.ManagedDataAccess.Client;
 using TypeGuesser;

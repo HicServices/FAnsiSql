@@ -17,8 +17,9 @@ namespace FAnsi.Implementations.MicrosoftSQL
                 throw new InvalidOperationException("Expected connection to be open");
 
             List<DiscoveredTable> tables = new List<DiscoveredTable>();
+            
 
-            using (var cmd = new SqlCommand("use [" + database + "]; EXEC sp_tables", (SqlConnection) connection))
+            using (var cmd = new SqlCommand("use " + querySyntaxHelper.EnsureWrapped(database) + "; EXEC sp_tables", (SqlConnection) connection))
             {
                 cmd.Transaction = transaction as SqlTransaction;
 
@@ -54,7 +55,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
         {
             List<DiscoveredTableValuedFunction> functionsToReturn = new List<DiscoveredTableValuedFunction>();
 
-            using( DbCommand cmd = new SqlCommand("use [" + database + @"];select name,
+            using( DbCommand cmd = new SqlCommand("use " + querySyntaxHelper.EnsureWrapped(database) + @";select name,
  (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name
   from sys.objects o
 WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection))
@@ -81,12 +82,13 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
         public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
         {
             List<DiscoveredStoredprocedure> toReturn = new List<DiscoveredStoredprocedure>();
+            var querySyntaxHelper = new MicrosoftQuerySyntaxHelper();
 
             using (var con = new SqlConnection(builder.ConnectionString))
             {
                 con.Open();
                 using (SqlCommand cmdFindStoredprocedure =
-                    new SqlCommand("use [" + database + @"];  SELECT * FROM sys.procedures", con))
+                    new SqlCommand("use " + querySyntaxHelper.EnsureWrapped(database) + ";  SELECT * FROM sys.procedures", con))
                 {
                     var result = cmdFindStoredprocedure.ExecuteReader();
 
@@ -113,10 +115,10 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
 
             // Create a new server so we don't mutate database.Server and cause a whole lot of side-effects in other code, e.g. attachers
             var server = new DiscoveredServer(serverConnectionBuilder);
-            var databaseToDrop = database.GetRuntimeName();
+            var databaseToDrop = database.GetWrappedName();
 
-            string sql = "ALTER DATABASE [" + databaseToDrop + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE" + Environment.NewLine;
-            sql += "DROP DATABASE [" + databaseToDrop + "]";
+            string sql = "ALTER DATABASE " + databaseToDrop + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE" + Environment.NewLine;
+            sql += "DROP DATABASE " + databaseToDrop;
 
             using (var con = (SqlConnection) server.GetConnection())
             {
@@ -166,11 +168,11 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
 
             // Create a new server so we don't mutate database.Server and cause a whole lot of side-effects in other code, e.g. attachers
             var server = database.Server;
-            var databaseToDetach = database.GetRuntimeName();
+            var databaseToDetach = database.GetWrappedName();
 
             // set in simple recovery and truncate all logs!
-            string sql = "ALTER DATABASE [" + databaseToDetach + "] SET RECOVERY SIMPLE; " + Environment.NewLine + 
-                         "DBCC SHRINKFILE ([" + databaseToDetach + "], 1)";
+            string sql = "ALTER DATABASE " + databaseToDetach + " SET RECOVERY SIMPLE; " + Environment.NewLine + 
+                         "DBCC SHRINKFILE (" + databaseToDetach + ", 1)";
             using (var con = (SqlConnection)server.GetConnection())
             {
                 con.Open();
@@ -182,7 +184,7 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
             server.ChangeDatabase("master");
             
             // set single user before detaching
-            sql = "ALTER DATABASE [" + databaseToDetach + "] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
+            sql = "ALTER DATABASE " + databaseToDetach + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
             using (var con = (SqlConnection)server.GetConnection())
             {
                 con.Open();
@@ -190,8 +192,10 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
                     cmd.ExecuteNonQuery();
             }
 
+            var dbLiteralName = database.Server.GetQuerySyntaxHelper().Escape(database.GetRuntimeName());
+
             // detach!
-            sql = @"EXEC sys.sp_detach_db '" + databaseToDetach + "';";
+            sql = @"EXEC sys.sp_detach_db '" + dbLiteralName + "';";
             using (var con = (SqlConnection)server.GetConnection())
             {
                 con.Open();
@@ -219,7 +223,7 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
 
                 string sql = string.Format(
                     "BACKUP DATABASE {0} TO  DISK = '{0}.bak' WITH  INIT ,  NOUNLOAD ,  NAME = N'{1}',  NOSKIP ,  STATS = 10,  NOFORMAT",
-                    discoveredDatabase.GetRuntimeName(),backupName);
+                    discoveredDatabase.GetWrappedName(),backupName);
 
                 using(var cmd = server.GetCommand(sql,con))
                     cmd.ExecuteNonQuery();
@@ -228,6 +232,9 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
 
         public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
         {
+            var syntax = discoveredDatabase.Server.GetQuerySyntaxHelper();
+            name = syntax.EnsureWrapped(name);
+
             using (var con = discoveredDatabase.Server.GetConnection())
             {
                 con.Open();

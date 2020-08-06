@@ -132,10 +132,13 @@ namespace FAnsi.Implementations.MicrosoftSQL
             var b = new SqlConnectionStringBuilder(builder.ConnectionString);
             b.InitialCatalog = "master";
 
+            var syntax = new MicrosoftQuerySyntaxHelper();
+            
+
             using (var con = new SqlConnection(b.ConnectionString))
             {
                 con.Open();
-                using(SqlCommand cmd = new SqlCommand("CREATE DATABASE [" + newDatabaseName.GetRuntimeName() + "]", con))
+                using(SqlCommand cmd = new SqlCommand("CREATE DATABASE " + syntax.EnsureWrapped(newDatabaseName.GetRuntimeName()) , con))
                     cmd.ExecuteNonQuery();                
             }
         }

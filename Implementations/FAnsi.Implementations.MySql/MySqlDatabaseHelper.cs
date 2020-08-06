@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql
 {
