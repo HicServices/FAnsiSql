@@ -134,7 +134,7 @@ namespace FAnsi.Implementations.MicrosoftSQL
                 return EnsureWrapped( GetRuntimeName(databaseName)) + DatabaseTableSeparator + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(tableName));
 
             //there is a schema so add it in
-            return EnsureWrapped(databaseName) + DatabaseTableSeparator + schema + DatabaseTableSeparator + EnsureWrapped( GetRuntimeName(tableName));
+            return EnsureWrapped(GetRuntimeName(databaseName)) + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(schema)) + DatabaseTableSeparator + EnsureWrapped( GetRuntimeName(tableName));
         }
 
         public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false)
