@@ -233,8 +233,8 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
         public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
         {
             var syntax = discoveredDatabase.Server.GetQuerySyntaxHelper();
-            name = syntax.EnsureWrapped(name);
             var runtimeName = syntax.GetRuntimeName(name);
+            name = syntax.EnsureWrapped(name);
 
             using (var con = discoveredDatabase.Server.GetConnection())
             {
