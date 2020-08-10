@@ -51,6 +51,17 @@ namespace FAnsiTests.Query
         }
         
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void EnsureWrapped_MultipleCalls(DatabaseType dbType)
+        {
+            var syntax = new QuerySyntaxHelperFactory().Create(dbType);
+
+            string once = syntax.EnsureWrapped("ff");
+            string twice = syntax.EnsureWrapped(once);
+
+            Assert.AreEqual(once,twice);
+        }
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void SyntaxHelperTest_GetRuntimeName_Impossible(DatabaseType t)
         {
             ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
