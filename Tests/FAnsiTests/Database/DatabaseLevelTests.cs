@@ -37,6 +37,7 @@ namespace FAnsiTests.Database
             Assert.DoesNotThrow(()=>db.CreateSchema("Frank"));
             Assert.DoesNotThrow(()=>db.CreateSchema("Frank"));
             Assert.DoesNotThrow(()=>db.CreateSchema("[Frank]"));
+            Assert.DoesNotThrow(()=>db.CreateSchema("[Frank]"));
 
             if (type == DatabaseType.MicrosoftSQLServer)
             {
