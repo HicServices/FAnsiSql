@@ -53,7 +53,7 @@ namespace FAnsi.Implementations.PostgreSql
                 return EnsureWrapped(databaseName) + DatabaseTableSeparator + DefaultPostgresSchema + DatabaseTableSeparator + EnsureWrapped(tableName);
 
             //there is a schema so add it in
-            return EnsureWrapped(databaseName) + DatabaseTableSeparator + schema + DatabaseTableSeparator + EnsureWrapped(tableName);
+            return EnsureWrapped(databaseName) + DatabaseTableSeparator + EnsureWrapped(schema) + DatabaseTableSeparator + EnsureWrapped(tableName);
         }
 
         public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName,

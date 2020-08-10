@@ -149,7 +149,9 @@ namespace FAnsi.Implementations.PostgreSql
             {
                 con.Open();
 
-                string sql = $@"create schema if not exists {name}";
+                var syntax = discoveredDatabase.Server.GetQuerySyntaxHelper();
+                
+                string sql = $@"create schema if not exists {syntax.EnsureWrapped(name)}";
 
                 using(var cmd = discoveredDatabase.Server.GetCommand(sql, con))
                     cmd.ExecuteNonQuery();

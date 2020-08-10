@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [1.0.4] - 2020-08-10
+
+### Fixed
+
+- Fixed bug in CreateSchema (Sql Server) where a schema with the same name already exists.  This bug was introduced in 1.0.3 (only affects repeated calls).
+
 ## [1.0.3] - 2020-08-06
 
 ### Changed
@@ -241,7 +247,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.3...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.4...develop
+[1.0.4]: https://github.com/HicServices/FAnsiSql/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/HicServices/FAnsiSql/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/HicServices/FAnsiSql/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/HicServices/FAnsiSql/compare/0.11.0...1.0.1
