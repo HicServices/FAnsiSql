@@ -34,24 +34,20 @@ namespace FAnsiTests.Database
         {
             var db = GetTestDatabase(type);
 
-            Assert.DoesNotThrow(()=>db.CreateSchema("Frank"));
-            Assert.DoesNotThrow(()=>db.CreateSchema("Frank"));
+            Assert.DoesNotThrow(()=>db.CreateSchema("Fr ank"));
+            Assert.DoesNotThrow(()=>db.CreateSchema("Fr ank"));
 
-            if(type == DatabaseType.MicrosoftSQLServer)
-            {
-                Assert.DoesNotThrow(()=>db.CreateSchema("[Frank]"));
-                Assert.DoesNotThrow(()=>db.CreateSchema("[Frank]"));
-            }
+            db.Server.GetQuerySyntaxHelper().EnsureWrapped("Fr ank");
 
-            if (type == DatabaseType.MicrosoftSQLServer)
+            if (type == DatabaseType.MicrosoftSQLServer || type == DatabaseType.PostgreSql)
             {
                 var tbl = db.CreateTable("Heyyy",
-                    new[] {new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))},"Frank");
+                    new[] {new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))},"Fr ank");
 
                 Assert.IsTrue(tbl.Exists());
 
                 if(type == DatabaseType.MicrosoftSQLServer)
-                    Assert.AreEqual("Frank",tbl.Schema);
+                    Assert.AreEqual("Fr ank",tbl.Schema);
             }
         }
     }
