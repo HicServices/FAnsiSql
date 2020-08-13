@@ -13,8 +13,8 @@
     <copyright>Copyright 2019</copyright>
     <tags>Ansi,SQL</tags>
     <dependencies>
-      <dependency id="System.Data.SqlClient" version="4.8.1" />
-      <dependency id="MySqlConnector" version="1.0.0" />
+      <dependency id="System.Data.SqlClient" version="4.8.2" />
+      <dependency id="MySqlConnector" version="1.0.1" />
       <dependency id="Oracle.ManagedDataAccess.Core" version="2.19.80" />
       <dependency id="System.ComponentModel.Composition" version="4.7.0" />
       <dependency id="HIC.TypeGuesser" version="1.0.1" />

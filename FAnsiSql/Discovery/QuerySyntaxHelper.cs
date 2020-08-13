@@ -19,10 +19,16 @@ namespace FAnsi.Discovery
     {
         public virtual string DatabaseTableSeparator => ".";
         
+        /// <inheritdoc/>
         public abstract int MaximumDatabaseLength { get; }
-        public abstract int MaximumTableLength { get; }
-        public abstract int MaximumColumnLength { get; }
 
+        /// <inheritdoc/>
+        public abstract int MaximumTableLength { get; }
+
+        /// <inheritdoc/>
+        public abstract int MaximumColumnLength { get; }
+        
+        /// <inheritdoc/>
         public virtual char[] IllegalNameChars { get; } = new []{'.','(',')'};
 
         /// <summary>
@@ -36,13 +42,10 @@ namespace FAnsi.Discovery
         /// </summary>
         public static char[] TableNameQualifiers = { '[', ']', '`' ,'"'};
 
-        /// <summary>
-        /// The character that is used to qualify database entity names e.g. "[" for "[My Table]"
-        /// </summary>
+        /// <inheritdoc/>
         public abstract string OpenQualifier {get;}
-        /// <summary>
-        /// The character that is used to end qualifying database entity names e.g. "]" for "[My Table]".  For some DBMS this is the same as <see cref="OpenQualifier"/>
-        /// </summary>
+        
+        /// <inheritdoc/>
         public abstract string CloseQualifier {get;}
 
         public ITypeTranslater TypeTranslater { get; private set; }
@@ -156,11 +159,26 @@ namespace FAnsi.Discovery
 
             //trim off any brackets e.g. return "My Table" for "[My Table]"
             if(lastWord.StartsWith(OpenQualifier) && lastWord.EndsWith(CloseQualifier))
-                return lastWord.Substring(1,lastWord.Length -2);
+            {
+                return UnescapeWrappedNameBody(lastWord.Substring(1,lastWord.Length -2));
+            }
+                
 
             return lastWord;
         }
-        
+
+        /// <summary>
+        /// <para>Removes qualifiers/escape sequences in the suplied <paramref name="name"/>.  This should for example convert MySql double backtick escape sequences fi``sh into singles (fi`sh).</para>
+        /// 
+        /// <para>Method is only called after a successful detection and stripping of <see cref="OpenQualifier"/> and <see cref="CloseQualifier"/></para>
+        /// </summary>
+        /// <param name="name">A wrapped name after it has had the opening and closing qualifiers stripped off e.g. "Fi``sh"</param>
+        /// <returns>The final runtime name unescaped e.g. "Fi`sh"</returns>
+        protected virtual string UnescapeWrappedNameBody(string name)
+        {
+            return name;
+        }
+
         public virtual bool TryGetRuntimeName(string s,out string name)
         {
             try
