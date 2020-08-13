@@ -19,10 +19,16 @@ namespace FAnsi.Discovery
     {
         public virtual string DatabaseTableSeparator => ".";
         
+        /// <inheritdoc/>
         public abstract int MaximumDatabaseLength { get; }
-        public abstract int MaximumTableLength { get; }
-        public abstract int MaximumColumnLength { get; }
 
+        /// <inheritdoc/>
+        public abstract int MaximumTableLength { get; }
+
+        /// <inheritdoc/>
+        public abstract int MaximumColumnLength { get; }
+        
+        /// <inheritdoc/>
         public virtual char[] IllegalNameChars { get; } = new []{'.','(',')'};
 
         /// <summary>
@@ -36,13 +42,10 @@ namespace FAnsi.Discovery
         /// </summary>
         public static char[] TableNameQualifiers = { '[', ']', '`' ,'"'};
 
-        /// <summary>
-        /// The character that is used to qualify database entity names e.g. "[" for "[My Table]"
-        /// </summary>
+        /// <inheritdoc/>
         public abstract string OpenQualifier {get;}
-        /// <summary>
-        /// The character that is used to end qualifying database entity names e.g. "]" for "[My Table]".  For some DBMS this is the same as <see cref="OpenQualifier"/>
-        /// </summary>
+        
+        /// <inheritdoc/>
         public abstract string CloseQualifier {get;}
 
         public ITypeTranslater TypeTranslater { get; private set; }

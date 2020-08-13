@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Added
+
+- Updated IQuerySyntaxHelper to expose properties (OpenQualifier, CloseQualifier, DatabaseTableSeparator, IllegalNameChars)
+
 ### Fixed
 
 - Fixed bug in repeated calls to GetRuntimeName and EnsureWrapped when a column/table name had escaped qualifiers (e.g. `[Hey]]There]`)

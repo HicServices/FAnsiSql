@@ -36,6 +36,25 @@ namespace FAnsi.Discovery.QuerySyntax
         IAggregateHelper AggregateHelper { get; }
         IUpdateHelper UpdateHelper { get; set; }
 
+        
+        /// <summary>
+        /// The character that is used to qualify database entity names e.g. "[" for "[My Table]"
+        /// </summary>
+        string OpenQualifier {get;}
+        /// <summary>
+        /// The character that is used to end qualifying database entity names e.g. "]" for "[My Table]".  For some DBMS this is the same as <see cref="OpenQualifier"/>
+        /// </summary>
+        string CloseQualifier {get;}
+
+        /// <summary>
+        /// Separator between table and column names (and database, schema etc).  Usually "."
+        /// </summary>
+        string DatabaseTableSeparator {get; }
+        /// <summary>
+        /// Characters which are not permitted in column names by FAnsi
+        /// </summary>
+        char[] IllegalNameChars { get; }
+
         char ParameterSymbol { get; }
 
         string GetRuntimeName(string s);
