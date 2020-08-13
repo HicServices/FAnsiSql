@@ -49,6 +49,48 @@ namespace FAnsiTests.Query
 
             Assert.AreEqual(expected,syntaxHelper.GetRuntimeName(forInput));
         }
+
+        /// <summary>
+        /// Tests that no matter how many times you call EnsureWrapped or GetRuntimeName you always end up with the format that matches the last method call
+        /// </summary>
+        /// <param name="dbType"></param>
+        /// <param name="runtime"></param>
+        /// <param name="wrapped"></param>
+        [TestCase(DatabaseType.MySql,"Fra`nk","`Fra``nk`")]
+        [TestCase(DatabaseType.MySql,"Fra``nk`","`Fra````nk```")]
+        [TestCase(DatabaseType.MicrosoftSQLServer,"Fra]nk","[Fra]]nk]")]
+        [TestCase(DatabaseType.MicrosoftSQLServer,"Fra]]nk]","[Fra]]]]nk]]]")]
+        [TestCase(DatabaseType.PostgreSql,"Fra\"nk","\"Fra\"\"nk\"")]
+        [TestCase(DatabaseType.PostgreSql,"Fra\"\"nk\"","\"Fra\"\"\"\"nk\"\"\"")]
+         public void SyntaxHelperTest_GetRuntimeName_MultipleCalls(DatabaseType dbType,  string runtime, string wrapped)
+        {
+            // NOTE: Oracle does not support such shenanigans https://docs.oracle.com/cd/B19306_01/server.102/b14200/sql_elements008.htm
+            // "neither quoted nor nonquoted identifiers can contain double quotation marks or the null character (\0)."
+
+            ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
+
+            var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
+
+            var currentName = runtime;
+
+            for(int i=0;i<10;i++)
+            {
+                if(i%2 ==0 )
+                {
+                    Assert.AreEqual(runtime,currentName);
+                    currentName = syntaxHelper.EnsureWrapped(currentName);
+                    currentName = syntaxHelper.EnsureWrapped(currentName);
+                    currentName = syntaxHelper.EnsureWrapped(currentName);
+                }
+                else
+                {
+                    Assert.AreEqual(wrapped,currentName);
+                    currentName = syntaxHelper.GetRuntimeName(currentName);
+                    currentName = syntaxHelper.GetRuntimeName(currentName);
+                    currentName = syntaxHelper.GetRuntimeName(currentName);
+                }
+            }
+        }
         
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
         public void EnsureWrapped_MultipleCalls(DatabaseType dbType)

@@ -156,11 +156,26 @@ namespace FAnsi.Discovery
 
             //trim off any brackets e.g. return "My Table" for "[My Table]"
             if(lastWord.StartsWith(OpenQualifier) && lastWord.EndsWith(CloseQualifier))
-                return lastWord.Substring(1,lastWord.Length -2);
+            {
+                return UnescapeWrappedNameBody(lastWord.Substring(1,lastWord.Length -2));
+            }
+                
 
             return lastWord;
         }
-        
+
+        /// <summary>
+        /// <para>Removes qualifiers/escape sequences in the suplied <paramref name="name"/>.  This should for example convert MySql double backtick escape sequences fi``sh into singles (fi`sh).</para>
+        /// 
+        /// <para>Method is only called after a successful detection and stripping of <see cref="OpenQualifier"/> and <see cref="CloseQualifier"/></para>
+        /// </summary>
+        /// <param name="name">A wrapped name after it has had the opening and closing qualifiers stripped off e.g. "Fi``sh"</param>
+        /// <returns>The final runtime name unescaped e.g. "Fi`sh"</returns>
+        protected virtual string UnescapeWrappedNameBody(string name)
+        {
+            return name;
+        }
+
         public virtual bool TryGetRuntimeName(string s,out string name)
         {
             try

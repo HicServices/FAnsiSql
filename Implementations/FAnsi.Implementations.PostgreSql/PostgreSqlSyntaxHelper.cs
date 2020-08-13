@@ -45,6 +45,11 @@ namespace FAnsi.Implementations.PostgreSql
         {
             return GetRuntimeName(s)?.Replace("\"","\"\"");
         }
+                
+        protected override string UnescapeWrappedNameBody(string name)
+        {
+            return name.Replace("\"\"","\"");
+        }
 
         public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
         {

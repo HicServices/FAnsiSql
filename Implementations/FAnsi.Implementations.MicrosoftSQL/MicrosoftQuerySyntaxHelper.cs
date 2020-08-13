@@ -117,6 +117,12 @@ namespace FAnsi.Implementations.MicrosoftSQL
             return "[" + GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName) + "]";
         }
 
+        
+        protected override string UnescapeWrappedNameBody(string name)
+        {
+            return name.Replace("]]","]");
+        }
+
         /// <summary>
         /// Returns the runtime name of the string with all ending square brackets escaped by doubling up (but resulting string is not wrapped itself)
         /// </summary>
