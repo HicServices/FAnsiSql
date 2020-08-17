@@ -35,22 +35,24 @@ namespace FAnsiTests.Query
         {
             var db = GetTestDatabase(dbType,false);
 
-            DataTable dt = new DataTable();
-            dt.Columns.Add("f");
-            dt.Rows.Add("Troll Doll");
-
-            var tbl = db.CreateTable("strlentesttable",dt);
-
-            var len = tbl.GetQuerySyntaxHelper().GetScalarFunctionSql(MandatoryScalarFunctions.Len);
-
-            using(var con = tbl.Database.Server.GetConnection())
+            using (DataTable dt = new DataTable())
             {
-                con.Open();
+                dt.Columns.Add("f");
+                dt.Rows.Add("Troll Doll");
 
-                var sql = $"SELECT MAX({len}(f)) from {tbl.GetFullyQualifiedName()}";
+                var tbl = db.CreateTable("strlentesttable", dt);
 
-                var cmd = tbl.Database.Server.GetCommand(sql,con);
-                Assert.AreEqual(10, cmd.ExecuteScalar());
+                var len = tbl.GetQuerySyntaxHelper().GetScalarFunctionSql(MandatoryScalarFunctions.Len);
+
+                using (var con = tbl.Database.Server.GetConnection())
+                {
+                    con.Open();
+
+                    var sql = $"SELECT MAX({len}(f)) from {tbl.GetFullyQualifiedName()}";
+
+                    var cmd = tbl.Database.Server.GetCommand(sql, con);
+                    Assert.AreEqual(10, cmd.ExecuteScalar());
+                }
             }
         }
     }
