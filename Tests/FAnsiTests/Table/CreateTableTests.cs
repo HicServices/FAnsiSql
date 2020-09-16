@@ -562,7 +562,7 @@ namespace FAnsiTests.Table
         public void GuessSettings_CopyProperties()
         {
             var props = typeof(GuessSettings).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty).Select(p => p.Name).ToArray();
-            Assert.AreEqual(1,props.Length,"There are new settable Properties in GuessSettings, we should copy them across in DiscoveredDatabaseHelper.CreateTable");
+            Assert.AreEqual(2,props.Length,"There are new settable Properties in GuessSettings, we should copy them across in DiscoveredDatabaseHelper.CreateTable");
         }
     }
 }

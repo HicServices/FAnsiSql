@@ -86,9 +86,6 @@ namespace FAnsi.Discovery
                         guesser.Culture = args.Culture;
                         
                         CopySettings(guesser,args);
-                        //cannot change the instance so have to copy across the values.  If this gets new properties that's a problem
-                        //See tests GuessSettings_CopyProperties
-                        guesser.Settings.CharCanBeBoolean = args.GuessSettings.CharCanBeBoolean;
 
                         guesser.AdjustToCompensateForValues(column);
                         
@@ -141,6 +138,7 @@ namespace FAnsi.Discovery
             //cannot change the instance so have to copy across the values.  If this gets new properties that's a problem
             //See tests GuessSettings_CopyProperties
             guesser.Settings.CharCanBeBoolean = args.GuessSettings.CharCanBeBoolean;
+            guesser.Settings.ExplicitDateFormats = args.GuessSettings.ExplicitDateFormats;
         }
 
         /// <summary>
