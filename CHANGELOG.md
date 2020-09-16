@@ -6,9 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.5] - 2020-08-13
-
 ...
+
+## [1.0.6] - 2020-09-16
+
+### Added
+
+- Support for ExplicitDateFormats in CreateTable and BulkInsert
+
+## [1.0.5] - 2020-08-13
 
 ### Added
 
@@ -257,7 +263,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.5...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.6...develop
+[1.0.6]: https://github.com/HicServices/FAnsiSql/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/HicServices/FAnsiSql/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/HicServices/FAnsiSql/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/HicServices/FAnsiSql/compare/1.0.2...1.0.3

@@ -123,8 +123,13 @@ namespace FAnsi.Discovery
                     var decider = deciders[dataType];
                     
                     //if it's a DateTime decider then guess DateTime culture based on values in the table
-                    if(decider is DateTimeTypeDecider dtDecider)
-                        dtDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
+                    if(decider is DateTimeTypeDecider)
+                    {
+                        //also use this one incase the user has set up explicit stuff on it e.g. Culture/Settings
+                        decider = DateTimeDecider;
+                        DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
+                    }
+                        
 
                     foreach(DataRow dr in dt.Rows)
                     {
