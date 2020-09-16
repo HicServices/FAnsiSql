@@ -126,9 +126,8 @@ namespace FAnsi.Discovery
 
             //unless we are being asked to create it empty then upload the DataTable to it
             if(args.DataTable != null && !args.CreateEmpty)
-                using(var bulk = tbl.BeginBulkInsert())
+                using(var bulk = tbl.BeginBulkInsert(args.Culture))
                 {
-                    // TODO: pretty sure this disrespects Culture
                     bulk.DateTimeDecider.Settings.ExplicitDateFormats = args.GuessSettings.ExplicitDateFormats;
                     bulk.Upload(args.DataTable);
                 }
