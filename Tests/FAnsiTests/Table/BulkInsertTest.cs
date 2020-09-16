@@ -759,8 +759,37 @@ namespace FAnsiTests.Table
                     }
                 }
             }
+        }
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void TestBulkInsert_ExplicitDateTimeFormats(DatabaseType type)
+        {
             
+            DiscoveredDatabase db = GetTestDatabase(type);
+            DiscoveredTable tbl = db.CreateTable("MyDateTestTable",
+                new[]
+                {
+                    new DatabaseColumnRequest("MyDate", new DatabaseTypeRequest(typeof (DateTime))){AllowNulls=false },
+                });
+
+            //There are no rows in the table yet
+            Assert.AreEqual(0, tbl.GetRowCount());
+
+            using (var dt = new DataTable())
+            {
+                dt.Columns.Add("MyDate");
+                dt.Rows.Add("20011230");
+
+                using (IBulkCopy bulk = tbl.BeginBulkInsert())
+                {
+                    bulk.Timeout = 30;
+                    bulk.DateTimeDecider.Settings.ExplicitDateFormats = new []{"yyyyMMdd" };
+                    bulk.Upload(dt);
+                }
+            }
             
+            var dtDown = tbl.GetDataTable();
+            Assert.AreEqual(new DateTime(2001,12,30),dtDown.Rows[0]["MyDate"]);
         }
 
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]

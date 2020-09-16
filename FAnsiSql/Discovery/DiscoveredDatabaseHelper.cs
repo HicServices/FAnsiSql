@@ -86,9 +86,6 @@ namespace FAnsi.Discovery
                         guesser.Culture = args.Culture;
                         
                         CopySettings(guesser,args);
-                        //cannot change the instance so have to copy across the values.  If this gets new properties that's a problem
-                        //See tests GuessSettings_CopyProperties
-                        guesser.Settings.CharCanBeBoolean = args.GuessSettings.CharCanBeBoolean;
 
                         guesser.AdjustToCompensateForValues(column);
                         
@@ -129,7 +126,12 @@ namespace FAnsi.Discovery
 
             //unless we are being asked to create it empty then upload the DataTable to it
             if(args.DataTable != null && !args.CreateEmpty)
-                tbl.BeginBulkInsert().Upload(args.DataTable);
+                using(var bulk = tbl.BeginBulkInsert(args.Culture))
+                {
+                    bulk.DateTimeDecider.Settings.ExplicitDateFormats = args.GuessSettings.ExplicitDateFormats;
+                    bulk.Upload(args.DataTable);
+                }
+                    
 
             args.OnTableCreated(typeDictionary);
 
@@ -141,6 +143,7 @@ namespace FAnsi.Discovery
             //cannot change the instance so have to copy across the values.  If this gets new properties that's a problem
             //See tests GuessSettings_CopyProperties
             guesser.Settings.CharCanBeBoolean = args.GuessSettings.CharCanBeBoolean;
+            guesser.Settings.ExplicitDateFormats = args.GuessSettings.ExplicitDateFormats;
         }
 
         /// <summary>
