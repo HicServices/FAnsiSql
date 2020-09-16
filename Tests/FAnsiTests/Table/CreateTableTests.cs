@@ -558,6 +558,30 @@ namespace FAnsiTests.Table
             Assert.AreEqual(treatAsBoolean ? -1: 1,col.DataType.GetLengthIfString(),"Expected string length to be 1 for 'T'");
         }
 
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
+        public void CreateTable_GuessSettings_ExplicitDateTimeFormat(DatabaseType dbType, bool useCustomDate)
+        {
+            //Values like 013020 would normally be treated as string data (due to leading zero) but maybe the user wants it to be a date?
+            var db = GetTestDatabase(dbType);
+            DataTable dt = new DataTable();
+            dt.Columns.Add("DateCol");
+            dt.Rows.Add("013020");
+            
+            var args = new CreateTableArgs(db,"Hb",null,dt,false);
+            Assert.AreEqual(args.GuessSettings.ExplicitDateFormats, GuessSettingsFactory.Defaults.ExplicitDateFormats,"Default should match the static default");
+            Assert.IsFalse(args.GuessSettings == GuessSettingsFactory.Defaults,"Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
+
+            //change the args settings to treat this date format
+            args.GuessSettings.ExplicitDateFormats = useCustomDate ? new string[]{"MMddyy" } :null;
+            
+            var tbl = db.CreateTable(args);
+            var col = tbl.DiscoverColumn("DateCol");
+
+            Assert.AreEqual(useCustomDate ? typeof(DateTime): typeof(string),col.DataType.GetCSharpDataType());
+
+            var dtDown = tbl.GetDataTable();
+            Assert.AreEqual(useCustomDate? new DateTime(2020,01,30): (object)"013020" ,dtDown.Rows[0][0]);
+        }
         [Test]
         public void GuessSettings_CopyProperties()
         {
