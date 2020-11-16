@@ -16,5 +16,5 @@
 | NUnit3TestAdapter | [GitHub](https://github.com/nunit/nunit3-vs-adapter)| [3.13.0](https://www.nuget.org/packages/NUnit3TestAdapter/3.13.0) | [MIT](https://opensource.org/licenses/MIT) | Run unit tests from within Visual Studio |
 | System.ComponentModel.Composition | [GitHub](https://github.com/dotnet/corefx) | [5.0.0](https://www.nuget.org/packages/System.ComponentModel.Composition/5.0.0) |[MIT](https://opensource.org/licenses/MIT) | Allows detecting and loading DBMS Implementations (Oracle / MySql etc) on demand|  |
 | HIC.TypeGuesser | [GitHub](https://github.com/HicServices/TypeGuesser) | [1.0.2](https://www.nuget.org/packages/HIC.TypeGuesser/1.0.2) | [MIT](https://opensource.org/licenses/MIT)| Allows picking system Types for untyped strings e.g. `"12.3"`| |
-| Npgsql | [GitHub](https://github.com/npgsql/npgsql) | [4.1.5](https://www.nuget.org/packages/Npgsql/4.1.5) | [PostgreSQL](https://github.com/npgsql/npgsql/blob/dev/LICENSE)| Enables interaction with Postgres databases  | |
+| Npgsql | [GitHub](https://github.com/npgsql/npgsql) | [5.0.0](https://www.nuget.org/packages/Npgsql/5.0.0) | [PostgreSQL](https://github.com/npgsql/npgsql/blob/dev/LICENSE)| Enables interaction with Postgres databases  | |
 
