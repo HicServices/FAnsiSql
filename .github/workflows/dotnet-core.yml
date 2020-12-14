@@ -9,6 +9,19 @@ env:
   MSSQL_PID: "developer"
   
 jobs:
+  services:
+    postgres:
+      image: postgres:latest
+      env:
+        POSTGRES_PASSWORD: pgpass4291
+      options: >-
+        --health-cmd pg_isready
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5
+      ports:
+        - 5432:5432
+  
   build:
 
     runs-on: ubuntu-18.04
@@ -25,6 +38,7 @@ jobs:
       run: sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
     - name: MySQL
       run: |
+        sed -i '' -e 's/Password=;/Password=pgpass4291/' Tests/FAnsiTests/TestDatabases.xml
         sudo mkdir -p /var/run/mysqld
         sudo chown mysql:mysql /var/run/mysqld
         sudo mysqld_safe --port=3306 --skip-grant-tables &
