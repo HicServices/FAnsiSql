@@ -37,7 +37,7 @@ jobs:
       run: sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
     - name: MySQL
       run: |
-        sed -i '' -e 's/Password=;/Password=pgpass4291/' Tests/FAnsiTests/TestDatabases.xml
+        sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
         sudo mkdir -p /var/run/mysqld
         sudo chown mysql:mysql /var/run/mysqld
         sudo mysqld_safe --port=3306 --skip-grant-tables &
