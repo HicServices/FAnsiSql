@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Changed
+
+- Bump Oracle.ManagedDataAccess.Core from 2.19.100 to 2.19.101
+
 ## [1.0.6] - 2020-09-16
 
 ### Added
