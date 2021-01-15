@@ -861,5 +861,58 @@ namespace FAnsiTests.Table
             }
             
         }
+
+        [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+        public void TestBulkInsert_BadDecimalFormat_DecimalError(DatabaseType type)
+        {
+            DiscoveredDatabase db = GetTestDatabase(type);
+            
+            DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+                new[]
+                {
+                    new DatabaseColumnRequest("Id", new DatabaseTypeRequest(typeof (int))){IsAutoIncrement = true, IsPrimaryKey = true},
+                    new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
+                    new DatabaseColumnRequest("Score", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(2,1))),
+                    new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
+                });
+
+            //There are no rows in the table yet
+            Assert.AreEqual(0, tbl.GetRowCount());
+
+            using (var dt = new DataTable())
+            {
+                dt.Columns.Add("age");
+                dt.Columns.Add("name");
+                dt.Columns.Add("score");
+
+                dt.Rows.Add(60,"Jamie",1.2);
+                dt.Rows.Add(30,"Frank",1.3);
+                dt.Rows.Add(11,"Toad","."); //bad data 
+                dt.Rows.Add(100,"King");
+                dt.Rows.Add(10,"Frog");        
+
+                using (IBulkCopy bulk = tbl.BeginBulkInsert())
+                {
+                    bulk.Timeout = 30;
+                
+                    Exception ex = null;
+                    try 
+                    {
+                        bulk.Upload(dt);
+                    }
+                    catch(Exception e)
+                    {
+                        ex = e;
+                    }
+
+                    Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is bad");
+
+                    Assert.AreEqual("Failed to parse value '.' in column 'score'",ex.Message);
+                    Assert.IsNotNull(ex.InnerException,"Expected parse error to be an inner exception");
+                    StringAssert.Contains("Could not parse string value '.' with Decider Type:DecimalTypeDecider",ex.InnerException.Message);
+                }
+            }
+            
+        }
     }
 }

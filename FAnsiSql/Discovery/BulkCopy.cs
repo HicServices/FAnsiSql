@@ -133,8 +133,16 @@ namespace FAnsi.Discovery
 
                     foreach(DataRow dr in dt.Rows)
                     {
-                        //parse the value
-                        dr[newColumn] = decider.Parse(dr[kvp.Key] as string)??DBNull.Value;
+                        try
+                        {
+                            //parse the value
+                            dr[newColumn] = decider.Parse(dr[kvp.Key] as string)??DBNull.Value;
+
+                        }
+                        catch(Exception ex)
+                        {
+                            throw new Exception($"Failed to parse value '{dr[kvp.Key]}' in column '{kvp.Key}'",ex);
+                        }
                     }
 
                     //if the DataColumn is part of the Primary Key of the DataTable (in memory)
