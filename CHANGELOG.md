@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Added
+
+- String parse errors in bulk insert now include the column name
+
 ### Changed
 
 - Bump Oracle.ManagedDataAccess.Core from 2.19.100 to 2.19.101
