@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bump Oracle.ManagedDataAccess.Core from 2.19.100 to 2.19.101
 - Bump Npgsql from 5.0.1.1 to 5.0.2
+- Bump Oracle.ManagedDataAccess.Core from 2.19.101 to 3.21.1
 
 ## [1.0.6] - 2020-09-16
 
