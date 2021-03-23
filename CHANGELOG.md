@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump MySqlConnector from 1.3.0 to 1.3.1
+- Bump MySqlConnector from 1.3.0 to 1.3.2
 
 ...
 
