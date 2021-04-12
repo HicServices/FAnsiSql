@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump MySqlConnector from 1.3.0 to 1.3.2
+- Bump MySqlConnector from 1.3.0 to 1.3.3
 - Bump Npgsql from 5.0.3 to 5.0.4
 
 ### Added
