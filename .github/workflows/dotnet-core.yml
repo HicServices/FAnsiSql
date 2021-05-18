@@ -1,0 +1,75 @@
+name: .NET Core
+
+on:
+  pull_request
+
+env:
+  MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+  ACCEPT_EULA: "Y"
+  MSSQL_PID: "developer"
+  
+jobs:  
+  build:
+
+    runs-on: ubuntu-18.04
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_PASSWORD: pgpass4291
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Add MSFT code signing key
+      run: wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+    - name: Add MSFT package repo
+      run: sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
+    - name: MySQL
+      run: |
+        sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
+        sudo mkdir -p /var/run/mysqld
+        sudo chown mysql:mysql /var/run/mysqld
+        sudo mysqld_safe --port=3306 --skip-grant-tables &
+    - name: Install Sql Server
+      run: sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
+    - name: Configure Sql Server
+      run: sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+    - name: Pack
+      run: |
+        mkdir -p NuGet/bin
+        ln -sf Release/netstandard2.0 NuGet/bin/
+        dotnet pack NuGet/FAnsi.NuGet.csproj -c Release --include-source --include-symbols --nologo -p:NuspecFile=`pwd`/NuGet/FAnsi.NuGet.nuspec -p:NuspecProperties=Version=$(fgrep AssemblyInformationalVersion SharedAssemblyInfo.cs|cut -d'"' -f2)\;configuration=Release  -p:SymbolPackageFormat=snupkg
+    - name: Nuget push
+      if: contains(github.ref,'refs/tags/')
+      run: nuget push NuGet/bin/Release/HIC.FAnsiSql.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_KEY }} --skip-duplicate
+    - name: Store created nupkg files
+      uses: actions/upload-artifact@v2
+      with:
+        path: NuGet/bin/Release/*.nupkg
+        retention-days: 1
+    - name: Upload release binaries
+      if: contains(github.ref,'refs/tags/')
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref }}
+        file: NuGet/bin/Release/*.nupkg
+        file_glob: true
+        overwrite: true

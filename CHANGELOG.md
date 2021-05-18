@@ -6,7 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+
+## [1.0.7] - 2021-05-18
+
+### Added
+
+- String parse errors in bulk insert now include the column name
+
+### Changed
+
+- Bump Oracle.ManagedDataAccess.Core from 2.19.100 to 2.19.101
+- Bump Npgsql from 5.0.1.1 to 5.0.5
+- Bump MySqlConnector from 1.2.1 to 1.3.8
 
 ## [1.0.6] - 2020-09-16
 
@@ -263,7 +274,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.6...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.7...develop
+[1.0.7]: https://github.com/HicServices/FAnsiSql/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/HicServices/FAnsiSql/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/HicServices/FAnsiSql/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/HicServices/FAnsiSql/compare/1.0.3...1.0.4
