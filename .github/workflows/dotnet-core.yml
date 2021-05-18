@@ -58,7 +58,7 @@ jobs:
         dotnet pack NuGet/FAnsi.NuGet.csproj -c Release --include-source --include-symbols --nologo -p:NuspecFile=`pwd`/NuGet/FAnsi.NuGet.nuspec -p:NuspecProperties=Version=$(fgrep AssemblyInformationalVersion SharedAssemblyInfo.cs|cut -d'"' -f2)\;configuration=Release  -p:SymbolPackageFormat=snupkg
     - name: Nuget push
       if: contains(github.ref,'refs/tags/')
-      run: nuget push NuGet/bin/Release/HIC.FAnsiSql.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_KEY }} --skip-duplicate
+      run: dotnet nuget push NuGet/bin/Release/HIC.FAnsiSql.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_KEY }} --skip-duplicate
     - name: Store created nupkg files
       uses: actions/upload-artifact@v2
       with:
