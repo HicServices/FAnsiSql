@@ -101,7 +101,11 @@ namespace FAnsi.Implementations.MySql
             {
                 con.Open();
                 using(var cmd = GetCommand("CREATE DATABASE `" + newDatabaseName.GetRuntimeName() + "`",con))
+                {
+                    cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
                     cmd.ExecuteNonQuery();
+                }
+                    
             }
         }
 

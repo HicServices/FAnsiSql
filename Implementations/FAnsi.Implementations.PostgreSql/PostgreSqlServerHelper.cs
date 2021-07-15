@@ -52,7 +52,11 @@ namespace FAnsi.Implementations.PostgreSql
             {
                 con.Open();
                 using(var cmd = GetCommand("CREATE DATABASE \"" + newDatabaseName.GetRuntimeName() + '"',con))
+                {
+
+                    cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
                     cmd.ExecuteNonQuery();
+                }
             }
         }
 
