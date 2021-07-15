@@ -101,12 +101,6 @@ namespace FAnsi.Implementations.MicrosoftSQL
             return "dbo";
         }
 
-        protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
-        {
-            //Value must be a DateTime even if DBParameter is of Type DbType.Time
-            return Convert.ToDateTime(timeSpan.ToString());
-        }
-
         public override bool SupportsEmbeddedParameters()
         {
             return true;

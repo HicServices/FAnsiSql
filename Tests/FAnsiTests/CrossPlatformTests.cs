@@ -251,19 +251,6 @@ namespace FAnsiTests
             }
         }
 
-
-        [Test]
-        public void MicrosoftHatesDbTypeTime()
-        {
-            var p = new SqlParameter("m", DBNull.Value)
-            {
-                DbType = DbType.Time
-            };
-
-            Assert.AreNotEqual(DbType.Time, p.DbType);
-            Assert.AreEqual(DbType.DateTime, p.DbType);
-        }
-
         [Test]
         [TestCase(DatabaseType.MicrosoftSQLServer, "int", "-23.00")]
         [TestCase(DatabaseType.MicrosoftSQLServer, "int", "23.0")]
