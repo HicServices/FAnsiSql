@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Globalization;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Implementations.MicrosoftSQL;

@@ -14,7 +14,7 @@
     <tags>Ansi,SQL</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-      <dependency id="System.Data.SqlClient" version="4.8.2" />
+      <dependency id="Microsoft.Data.SqlClient" version="3.0.0" />
       <dependency id="MySqlConnector" version="1.3.8" />
       <dependency id="Oracle.ManagedDataAccess.Core" version="2.19.101" />
       <dependency id="System.ComponentModel.Composition" version="5.0.0" />

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementations.MicrosoftSQL.Aggregation;

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded Sql Server library from `Microsoft.Data.SqlClient` to `Microsoft.Data.SqlClient`
 
 ## [1.0.7] - 2021-05-18
 
@@ -265,7 +268,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- FAnsi.csproj no longer depends on System.Data.SqlClient (dependency moved to FAnsi.Implementations.MicrosoftSQL)
+- FAnsi.csproj no longer depends on Microsoft.Data.SqlClient (dependency moved to FAnsi.Implementations.MicrosoftSQL)
 
 ### Fixed 
 
