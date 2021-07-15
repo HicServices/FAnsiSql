@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -249,19 +249,6 @@ namespace FAnsiTests
                 var eval = t.Subtract(new TimeSpan(0, 0, 0, t.Seconds));
                 Assert.AreEqual(expectedTime,eval);
             }
-        }
-
-
-        [Test]
-        public void MicrosoftHatesDbTypeTime()
-        {
-            var p = new SqlParameter("m", DBNull.Value)
-            {
-                DbType = DbType.Time
-            };
-
-            Assert.AreNotEqual(DbType.Time, p.DbType);
-            Assert.AreEqual(DbType.DateTime, p.DbType);
         }
 
         [Test]

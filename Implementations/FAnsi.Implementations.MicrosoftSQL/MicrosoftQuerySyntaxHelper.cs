@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementations.MicrosoftSQL.Aggregation;
@@ -99,12 +99,6 @@ namespace FAnsi.Implementations.MicrosoftSQL
         public override string GetDefaultSchemaIfAny()
         {
             return "dbo";
-        }
-
-        protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
-        {
-            //Value must be a DateTime even if DBParameter is of Type DbType.Time
-            return Convert.ToDateTime(timeSpan.ToString());
         }
 
         public override bool SupportsEmbeddedParameters()
