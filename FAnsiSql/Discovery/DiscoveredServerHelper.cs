@@ -165,6 +165,12 @@ namespace FAnsi.Discovery
         Regex rVagueVersion = new Regex(@"\d+\.\d+(\.\d+)?(\.\d+)?");
 
         /// <summary>
+        /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
+        /// Defaults to 30.
+        /// </summary>
+        public static int CreateDatabaseTimeoutInSeconds = 30;
+
+        /// <summary>
         /// Returns a new <see cref="Version"/> by parsing the <paramref name="versionString"/>.  If the string
         /// is a valid version the full version string is represented otherwise a regex match is used to find
         /// numbers with dots separating them (e.g. 1.2.3  / 5.1 etc).

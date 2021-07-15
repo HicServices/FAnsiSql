@@ -139,7 +139,11 @@ namespace FAnsi.Implementations.MicrosoftSQL
             {
                 con.Open();
                 using(SqlCommand cmd = new SqlCommand("CREATE DATABASE " + syntax.EnsureWrapped(newDatabaseName.GetRuntimeName()) , con))
-                    cmd.ExecuteNonQuery();                
+                {
+                    cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
+                    cmd.ExecuteNonQuery();
+                }
+                    
             }
         }
 
