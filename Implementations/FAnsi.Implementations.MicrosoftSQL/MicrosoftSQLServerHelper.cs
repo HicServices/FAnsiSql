@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Naming;
@@ -139,7 +139,11 @@ namespace FAnsi.Implementations.MicrosoftSQL
             {
                 con.Open();
                 using(SqlCommand cmd = new SqlCommand("CREATE DATABASE " + syntax.EnsureWrapped(newDatabaseName.GetRuntimeName()) , con))
-                    cmd.ExecuteNonQuery();                
+                {
+                    cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
+                    cmd.ExecuteNonQuery();
+                }
+                    
             }
         }
 

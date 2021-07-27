@@ -8,8 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Upgraded Sql Server library from `System.Data.SqlClient` to `Microsoft.Data.SqlClient`
 - Bump Npgsql from 5.0.5 to 5.0.7
 - Bump MySqlConnector from 1.3.9 to 1.3.11
+
+### Added
+
+- Added `CreateDatabaseTimeoutInSeconds` static property to `DiscoveredServerHelper`
+
 
 
 ## [1.0.7] - 2021-05-18

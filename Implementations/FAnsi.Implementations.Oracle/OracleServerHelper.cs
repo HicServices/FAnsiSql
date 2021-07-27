@@ -106,14 +106,25 @@ namespace FAnsi.Implementations.Oracle
                 //create a new user with a random password!!! - go oracle this makes perfect sense database=user!
                 using(var cmd = new OracleCommand("CREATE USER \"" + newDatabaseName.GetRuntimeName() + "\" IDENTIFIED BY pwd" +
                                                   Guid.NewGuid().ToString().Replace("-", "").Substring(0, 27) //oracle only allows 30 character passwords
-                    ,con))
+                    , con))
+                {
+                    cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
                     cmd.ExecuteNonQuery();
+                }
+                    
 
                 using(var cmd = new OracleCommand("ALTER USER \"" + newDatabaseName.GetRuntimeName() + "\" quota unlimited on system", con))
+                {
+                    cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
                     cmd.ExecuteNonQuery();
+                }
+
 
                 using(var cmd = new OracleCommand("ALTER USER \"" + newDatabaseName.GetRuntimeName() + "\" quota unlimited on users", con))
+                {
+                    cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
                     cmd.ExecuteNonQuery();
+                }
             }
         }
 
