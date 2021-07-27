@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2021-07-27
+
 ### Changed
 
 - Upgraded Sql Server library from `System.Data.SqlClient` to `Microsoft.Data.SqlClient`
@@ -285,7 +287,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.7...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/2.0.1...develop
+[2.0.1]: https://github.com/HicServices/FAnsiSql/compare/1.0.7...2.0.1
 [1.0.7]: https://github.com/HicServices/FAnsiSql/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/HicServices/FAnsiSql/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/HicServices/FAnsiSql/compare/1.0.4...1.0.5
