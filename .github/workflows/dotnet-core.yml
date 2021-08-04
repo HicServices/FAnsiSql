@@ -60,6 +60,8 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
+    - name: Wait for Larry's lousy DB to start
+      run: docker logs --follow oracle19c | timeout 30m fgrep -qm1 "DATABASE IS READY TO USE"
     - name: Test
       run: dotnet test --no-restore --verbosity normal
     - name: Pack
