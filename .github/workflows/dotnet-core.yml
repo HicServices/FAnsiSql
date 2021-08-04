@@ -28,6 +28,7 @@ jobs:
     steps:
     - name: Oracle
       run: |
+        docker pull oracledb19c/oracle.19.3.0-ee:latest
         docker run \
         --name oracle19c \
         -p 1521:1521 -p 5500:5500 \
