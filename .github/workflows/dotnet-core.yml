@@ -35,7 +35,7 @@ jobs:
         -e ORACLE_PWD=password \
         -e ORACLE_MEM=4000 \
         -d \
-        oracle/database:19.3.0-ee
+        oracledb19c/oracle.19.3.0-ee
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
