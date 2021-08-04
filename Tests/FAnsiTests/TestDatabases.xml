@@ -13,7 +13,7 @@
           </TestDatabase>
          <TestDatabase>
             <DatabaseType>Oracle</DatabaseType>
-            <ConnectionString>Data Source=localhost:1521/orclcdb;User Id=sys;DBA Privilege=SYSDBA;Password=password;</ConnectionString>
+            <ConnectionString>Data Source=localhost:1521/orclcdb;Service Name=orcl;User Id=sys;DBA Privilege=SYSDBA;Password=password;</ConnectionString>
           </TestDatabase>
          <TestDatabase>
             <DatabaseType>PostgreSql</DatabaseType>
