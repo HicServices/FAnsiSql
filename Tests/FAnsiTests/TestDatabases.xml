@@ -11,11 +11,10 @@
             <DatabaseType>MySql</DatabaseType>
             <ConnectionString>server=127.0.0.1;Uid=root;Pwd=;SslMode=None</ConnectionString>
           </TestDatabase>
-<!--         <TestDatabase>
+         <TestDatabase>
             <DatabaseType>Oracle</DatabaseType>
-            <ConnectionString>Data Source=localhost:1521/orclpdb.dundee.uni;User Id=ora;Password=zombie;</ConnectionString>
+            <ConnectionString>Data Source=localhost:1521/orclcdb;User Id=sys;Password=password;</ConnectionString>
           </TestDatabase>
--->
          <TestDatabase>
             <DatabaseType>PostgreSql</DatabaseType>
             <ConnectionString>

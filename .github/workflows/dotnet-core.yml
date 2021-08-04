@@ -26,6 +26,16 @@ jobs:
           - 5432:5432
 
     steps:
+    - name: Oracle
+      run: |
+        docker run \
+        --name oracle19c \
+        -p 1521:1521 -p 5500:5500 \
+        -e ORACLE_PDB=orcl \
+        -e ORACLE_PWD=password \
+        -e ORACLE_MEM=4000 \
+        -d \
+        oracle/database:19.3.0-ee
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
