@@ -53,5 +53,61 @@ namespace FAnsiTests.Aggregation
                 Assert.AreEqual("Cat", dt.Columns[0].ColumnName);
             }
         }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
+        public void Test_PivotOnly_CaseStatement(DatabaseType type)
+        {
+            var tbl = GetTestTable(type);
+            var svr = tbl.Database.Server;
+
+            var lines = new List<CustomLine>();
+
+            string caseStatement = "CASE WHEN EventDate = '2001-01-01' THEN 'CriticalDate' ELSE 'TrivialDate' END as Ev";
+            string caseStatementGroupBy = "CASE WHEN EventDate = '2001-01-01' THEN 'CriticalDate' ELSE 'TrivialDate' END";
+
+
+            lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
+
+            lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction });
+            lines.Add(new CustomLine("Category as Cat,", QueryComponent.QueryTimeColumn));
+            lines.Add(new CustomLine(caseStatement, QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Pivot });
+
+            lines.Add(new CustomLine("FROM " + tbl.GetFullyQualifiedName(), QueryComponent.FROM));
+
+            lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
+            lines.Add(new CustomLine("Category,", QueryComponent.GroupBy));
+            lines.Add(new CustomLine(caseStatementGroupBy, QueryComponent.GroupBy) { Role = CustomLineRole.Pivot });
+
+            var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null);
+
+            using (var con = svr.GetConnection())
+            {
+                con.Open();
+                //Expected Test Results:
+                /*
+                    Cat           TrivialDate, CriticalDate
+                    E&, %a' mp;E	2	1
+                    F	2	0
+                    G	1	1
+                    T	5	2
+                 */
+
+                var cmd = svr.GetCommand(sql, con);
+                var da = svr.GetDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                // Category + the two entries in the CASE statement (the PIVOT columns)
+                Assert.AreEqual(3, dt.Columns.Count);
+
+
+                Assert.AreEqual(4, dt.Rows.Count);
+                Assert.AreEqual("Cat", dt.Columns[0].ColumnName);
+                Assert.AreEqual("TrivialDate", dt.Columns[1].ColumnName);
+                Assert.AreEqual("CriticalDate", dt.Columns[2].ColumnName);
+            }
+        }
     }
 }
