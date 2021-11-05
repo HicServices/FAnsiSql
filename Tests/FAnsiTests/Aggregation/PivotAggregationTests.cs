@@ -56,7 +56,6 @@ namespace FAnsiTests.Aggregation
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.PostgreSql)]
         public void Test_PivotOnly_CaseStatement(DatabaseType type)
         {
             var tbl = GetTestTable(type);
