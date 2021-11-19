@@ -14,8 +14,8 @@
     <tags>Ansi,SQL</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-      <dependency id="Microsoft.Data.SqlClient" version="3.0.1" />
       <dependency id="MySqlConnector" version="2.0.0" />
+      <dependency id="Microsoft.Data.SqlClient" version="4.0.0" />
       <dependency id="Oracle.ManagedDataAccess.Core" version="2.19.101" />
       <dependency id="System.ComponentModel.Composition" version="6.0.0" />
       <dependency id="HIC.TypeGuesser" version="1.0.2" />
