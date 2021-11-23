@@ -34,8 +34,9 @@ namespace FAnsi.Implementations.PostgreSql
         {
             // Starting with 4.0.0 npgsql crashes if it has to read a DateTime Unspecified Kind
             // See : https://github.com/npgsql/efcore.pg/issues/2000
+            // Also it doesn't support DateTime.Kind.Local
 
-            return dateTime.Kind == DateTimeKind.Unspecified ? new DateTime(dateTime.Ticks,DateTimeKind.Local):dateTime;
+            return dateTime.Kind == DateTimeKind.Unspecified ? dateTime.ToUniversalTime():dateTime;
         }
 
         public override string EnsureWrappedImpl(string databaseOrTableName)
