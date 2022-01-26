@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded Sql Server library from `System.Data.SqlClient` to `Microsoft.Data.SqlClient`
 - Bump Microsoft.Data.SqlClient from 3.0.1 to 4.0.1
 - Bump Npgsql from 5.0.5 to 6.0.2
-- Bump MySqlConnector from 1.3.9 to 2.1.3
+- Bump MySqlConnector from 1.3.9 to 2.1.4
 - Bump System.ComponentModel.Composition from 5.0.0 to 6.0.0
 
 ### Added
