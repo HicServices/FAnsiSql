@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.0.8] - 2022-02-03
+
 ### Changed
 
 - Upgraded Sql Server library from `System.Data.SqlClient` to `Microsoft.Data.SqlClient`
@@ -17,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added `CreateDatabaseTimeoutInSeconds` static property to `DiscoveredServerHelper`
-
 
 
 ## [1.0.7] - 2021-05-18
@@ -287,7 +289,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.7...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/1.0.8...develop
+[1.0.8]: https://github.com/HicServices/FAnsiSql/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/HicServices/FAnsiSql/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/HicServices/FAnsiSql/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/HicServices/FAnsiSql/compare/1.0.4...1.0.5
