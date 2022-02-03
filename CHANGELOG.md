@@ -6,18 +6,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [2.0.2] - 2022-02-03
+
+### Changed
+
+- Bump Microsoft.Data.SqlClient from 3.0.1 to 4.1.0
+- Bump Npgsql from 5.0.7 to 6.0.3
+- Bump MySqlConnector from 1.3.11 to 2.1.5
+
 ## [2.0.1] - 2021-07-27
 
 ### Changed
 
 - Upgraded Sql Server library from `System.Data.SqlClient` to `Microsoft.Data.SqlClient`
-- Bump Npgsql from 5.0.5 to 5.0.7
 - Bump MySqlConnector from 1.3.9 to 1.3.11
+- Bump Npgsql from 5.0.5 to 5.0.7
 
 ### Added
 
 - Added `CreateDatabaseTimeoutInSeconds` static property to `DiscoveredServerHelper`
-
 
 
 ## [1.0.7] - 2021-05-18
@@ -287,7 +295,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/2.0.1...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/2.0.2...develop
+[2.0.2]: https://github.com/HicServices/FAnsiSql/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/HicServices/FAnsiSql/compare/1.0.7...2.0.1
 [1.0.7]: https://github.com/HicServices/FAnsiSql/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/HicServices/FAnsiSql/compare/1.0.5...1.0.6
