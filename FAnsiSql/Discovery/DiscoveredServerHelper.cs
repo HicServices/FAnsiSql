@@ -62,7 +62,13 @@ namespace FAnsi.Discovery
             return builder;
         }
 
-        private void EnforceKeywords(DbConnectionStringBuilder builder)
+        /// <summary>
+        /// Modifies the <paramref name="builder"/> with the connection string keywords
+        /// specified in <see cref="ConnectionStringKeywordAccumulators"/>.  Override to
+        /// perform last second changes to connection strings.
+        /// </summary>
+        /// <param name="builder"></param>
+        protected virtual void EnforceKeywords(DbConnectionStringBuilder builder)
         {
             //if we have any keywords to enforce
             if (ConnectionStringKeywordAccumulators.ContainsKey(DatabaseType))

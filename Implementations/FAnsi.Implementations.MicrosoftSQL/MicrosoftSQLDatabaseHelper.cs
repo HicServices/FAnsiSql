@@ -11,6 +11,14 @@ namespace FAnsi.Implementations.MicrosoftSQL
 {
     public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     {
+        /// <summary>
+        /// True to attempt sending "ALTER DATABASE MyDatabase SET SINGLE_USER WITH ROLLBACK IMMEDIATE"
+        /// before DROP DATABASE command when using <see cref="DropDatabase(DiscoveredDatabase)"/>.
+        /// Defaults to true.  This command makes dropping databases more robust so is recommended but 
+        /// is not supported by some servers (e.g. Microsoft Azure)
+        /// </summary>
+        public static bool SetSingleUserWhenDroppingDatabases = true;
+
         public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
         {
             if (connection.State == ConnectionState.Closed)
@@ -28,13 +36,14 @@ namespace FAnsi.Implementations.MicrosoftSQL
                     {
                         //its a system table
                         string schema = r["TABLE_OWNER"] as string;
-                        
-                        //its a system table
-                        if (schema == "sys")
-                            continue;
 
-                        if (schema == "INFORMATION_SCHEMA")
-                            continue;
+                        switch (schema)
+                        {
+                            //it's a system table
+                            case "sys":
+                            case "INFORMATION_SCHEMA":
+                                continue;
+                        }
 
                         //add views if we are including them
                         if (includeViews && r["TABLE_TYPE"].Equals("VIEW"))
@@ -42,9 +51,9 @@ namespace FAnsi.Implementations.MicrosoftSQL
                                 tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.View));
 
                         //add tables
-                        if (r["TABLE_TYPE"].Equals("TABLE"))
-                            if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
-                                tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.Table));
+                        if (!r["TABLE_TYPE"].Equals("TABLE")) continue;
+                        if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
+                            tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.Table));
                     }
             }
             
@@ -107,7 +116,7 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
 
         public override void DropDatabase(DiscoveredDatabase database)
         {
-            bool userIsCurrentlyInDatabase = database.Server.GetCurrentDatabase().GetRuntimeName().Equals(database.GetRuntimeName());
+            var userIsCurrentlyInDatabase = database.Server.GetCurrentDatabase().GetRuntimeName().Equals(database.GetRuntimeName());
 
             var serverConnectionBuilder = new SqlConnectionStringBuilder(database.Server.Builder.ConnectionString);
             if (userIsCurrentlyInDatabase)
@@ -117,17 +126,43 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
             var server = new DiscoveredServer(serverConnectionBuilder);
             var databaseToDrop = database.GetWrappedName();
 
-            string sql = "ALTER DATABASE " + databaseToDrop + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE" + Environment.NewLine;
+            try
+            {
+                // try dropping the db with single user mode enabled if the user wanted
+                DropDatabase(databaseToDrop, server, SetSingleUserWhenDroppingDatabases);
+            }
+            catch (Exception)
+            {
+                // failed to drop... maybe it dropped anyway though?
+                if (SetSingleUserWhenDroppingDatabases && database.Exists())
+                    // try without the single user mode bit
+                    DropDatabase(databaseToDrop, server, false);
+                else
+                    throw;
+            }
+            
+            SqlConnection.ClearAllPools();
+        }
+
+        /// <summary>
+        /// Sends a DROP database command to the <paramref name="server"/>.  Optionally sets to SINGLE_USER 
+        /// first in order to more reliably drop the database.
+        /// </summary>
+        /// <param name="databaseToDrop"></param>
+        /// <param name="server"></param>
+        /// <param name="setSingleUserModeFirst"></param>
+        private void DropDatabase(string databaseToDrop, DiscoveredServer server, bool setSingleUserModeFirst)
+        {
+            var sql = setSingleUserModeFirst ? $"ALTER DATABASE {databaseToDrop} SET SINGLE_USER WITH ROLLBACK IMMEDIATE{Environment.NewLine}"
+                : "";
             sql += "DROP DATABASE " + databaseToDrop;
 
-            using (var con = (SqlConnection) server.GetConnection())
+            using (var con = (SqlConnection)server.GetConnection())
             {
                 con.Open();
-                using(var cmd = new SqlCommand(sql, con))
+                using (var cmd = new SqlCommand(sql, con))
                     cmd.ExecuteNonQuery();
             }
-
-            SqlConnection.ClearAllPools();
         }
 
         public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
