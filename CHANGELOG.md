@@ -8,8 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump MySqlConnector from 2.1.5 to 2.1.6
+- `IntegratedSecurity` is now disabled when creating `SqlConnectionStringBuilder` instances where `Authentication` keyword is specified (Azure compatibility)
+- Made SqlServer `SET SINGLE_USER [...]` SQL optional when issuing Drop Database.  Configure with `MicrosoftSQLDatabaseHelper.SetSingleUserWhenDroppingDatabases`.
+- When sending `SET SINGLE_USER [...]` SQL during `DROP DATABASE` on an SqlServer fails, try the drop again without the SINGLE_USER statement.
 
+### Dependencies
+
+- Bump MySqlConnector from 2.1.5 to 2.1.6
 
 ## [2.0.2] - 2022-02-03
 
