@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Made SqlServer `SET SINGLE_USER [...]` SQL optional when issuing Drop Database.  Configure with `MicrosoftSQLDatabaseHelper.SetSingleUserWhenDroppingDatabases`.
+- When sending `SET SINGLE_USER [...]` SQL during `DROP DATABASE` on an SqlServer fails.  API now attempts the drop again without the SINGLE_USER statement.
+
 ## [2.0.1] - 2021-07-27
 
 ### Changed
