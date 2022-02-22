@@ -14,7 +14,8 @@ namespace FAnsi.Implementations.MicrosoftSQL
         /// <summary>
         /// True to attempt sending "ALTER DATABASE MyDatabase SET SINGLE_USER WITH ROLLBACK IMMEDIATE"
         /// before DROP DATABASE command when using <see cref="DropDatabase(DiscoveredDatabase)"/>.
-        /// Defaults to true.
+        /// Defaults to true.  This command makes dropping databases more robust so is recommended but 
+        /// is not supported by some servers (e.g. Microsoft Azure)
         /// </summary>
         public static bool SetSingleUserWhenDroppingDatabases = true;
 
@@ -144,7 +145,7 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
             else
             {
                 // API user doesn't want to set single user mode so just issue
-                // a relgular drop
+                // a regular drop
                 DropDatabase(databaseToDrop, server, false);
             }
             
