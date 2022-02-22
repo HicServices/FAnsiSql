@@ -403,9 +403,17 @@ namespace FAnsi.Discovery
                         var decider = factories[culture].Create(cSharpType);
                         var o = decider.Parse(strVal);
 
+                        if(o is DateTime d)
+                        {
+                            o = FormatDateTimeForDbParameter(d);
+                        }
+
                         //Not all DBMS support DBParameter.Value = new TimeSpan(...);
-                        if (o is TimeSpan)
-                            o = FormatTimespanForDbParameter((TimeSpan) o);
+                        if (o is TimeSpan t)
+                        {
+                            o = FormatTimespanForDbParameter(t);
+                        }
+                            
 
                         p.Value = o;
 
@@ -489,6 +497,20 @@ namespace FAnsi.Discovery
         public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
         {
             return GetParameter(p,discoveredColumn,value,null);
+        }
+
+        /// <summary>
+        /// <para>
+        /// Return the appropriate value such that it can be put into a DbParameter.Value field and be succesfully inserted into a
+        /// column in the database designed to represent datetime fields (without date).
+        /// </para>
+        /// <para>Default behaviour is to return unaltered but some DBMS require alterations e.g. UTC tinkering</para>
+        /// </summary>
+        /// <param name="dateTime"></param>
+        /// <returns></returns>
+        protected virtual object FormatDateTimeForDbParameter(DateTime dateTime)
+        {
+            return dateTime;
         }
 
         /// <summary>
