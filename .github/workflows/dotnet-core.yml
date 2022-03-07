@@ -1,7 +1,7 @@
 name: .NET Core
 
 on:
-  [push,pull_request]
+  push
 
 env:
   MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
