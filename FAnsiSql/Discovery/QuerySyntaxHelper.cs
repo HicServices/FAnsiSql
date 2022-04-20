@@ -99,7 +99,7 @@ namespace FAnsi.Discovery
         public static HashSet<string> GetAllParameterNamesFromQuery(string query)
         {
             //Only look at the start of the string or following an equals or whitespace and stop at word boundaries
-            var regex = new Regex(@"(?:^|[\s+\-*/\\=(])+" + ParameterNamesRegex + @"\b");
+            var regex = new Regex(@"(?:^|[\s+\-*/\\=(,])+" + ParameterNamesRegex + @"\b");
 
             var toReturn = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
