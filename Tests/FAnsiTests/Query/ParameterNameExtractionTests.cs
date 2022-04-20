@@ -15,7 +15,6 @@ namespace FAnsiTests.Query
         [TestCase(@"[bob]=1\@bobby")]
         [TestCase("[bob]=   @bobby")]
         [TestCase("dbo.MyFunc('fish',@bobby)")]
-        [TestCase("[bob]=   @bobby")]
         [TestCase("[bob]=@bobby OR [bob2]=@bobby")]
         [TestCase("[bob]=@bobby OR [bob2]=@BObby")]
         [TestCase("@bobby='active'")]
