@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed returning length estimate of -1 for `ntext` datatype
+
 ## [2.0.4] - 2022-04-21
 
 ### Fixed
