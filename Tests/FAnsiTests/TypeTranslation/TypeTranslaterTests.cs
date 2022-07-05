@@ -68,6 +68,23 @@ namespace FAnsiTests.TypeTranslation
             //And does the TypeTranslater know that this datatype is string
             Assert.AreEqual(typeof(string), _translaters[type].GetCSharpTypeForSQLDBType(expectedType));
         }
+
+        [TestCase(DatabaseType.MicrosoftSQLServer, "varchar(max)",false)]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "nvarchar(max)",true)]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "text",false)]
+        [TestCase(DatabaseType.MicrosoftSQLServer, "ntext",true)]
+        [TestCase(DatabaseType.MySql, "text",false)]
+        [TestCase(DatabaseType.Oracle, "CLOB", false)]
+        [TestCase(DatabaseType.PostgreSql, "text", false)]
+        public void Test_GetLengthIfString_VarcharMaxCols(DatabaseType type, string datatype, bool expectUnicode)
+        {
+            Assert.AreEqual(int.MaxValue, _translaters[type].GetLengthIfString(datatype));
+            var dbType = _translaters[type].GetDataTypeRequestForSQLDBType(datatype);
+
+            Assert.AreEqual(typeof(string), dbType.CSharpType);
+            Assert.AreEqual(int.MaxValue, dbType.Width);
+            Assert.AreEqual(expectUnicode, dbType.Unicode);
+        }
         
         [TestCase(DatabaseType.MicrosoftSQLServer,"bigint",typeof(long))]
         [TestCase(DatabaseType.MicrosoftSQLServer,"binary",typeof(byte[]))]

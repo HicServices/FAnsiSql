@@ -335,7 +335,7 @@ namespace FAnsi.Discovery.TypeTranslation
             if (string.IsNullOrWhiteSpace(sqlType))
                 return -1;
 
-            if (sqlType.ToLower().Contains("(max)") || sqlType.ToLower().Equals("text"))
+            if (sqlType.ToLower().Contains("(max)") || sqlType.ToLower().Equals("text") || sqlType.ToLower().Equals("ntext"))
                 return int.MaxValue;
 
             if (sqlType.ToLower().Contains("char"))
