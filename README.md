@@ -57,7 +57,7 @@ Assert.AreEqual(new DateTime(1910,5,22),
     table.GetDataTable().Rows[1][1]);
 ```
 
-FAnsi Sql! it's like a budget version of [SMO](https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/sql-server-management-objects-smo-programming-guide?view=sql-server-2017) (that works cross platform - Sql Server,  MySql and Oracle).  It supports:
+FAnsi Sql! it's like a budget version of [SMO](https://docs.microsoft.com/en-us/sql/relational-databases/server-management-objects-smo/sql-server-management-objects-smo-programming-guide?view=sql-server-2017) (that works cross platform - Sql Server,  MySql, Postgres and Oracle).  It supports:
 
  * Table Creation
  * Assigning types to untyped (string) data
