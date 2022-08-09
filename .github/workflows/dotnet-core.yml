@@ -47,7 +47,7 @@ jobs:
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
         sed -i'' -e 's/Pwd=;/Pwd=root;/' Tests/FAnsiTests/TestDatabases.xml
-        sudo service start mysql
+        sudo systemctl start mysql.service
     - name: Install dependencies
       run: dotnet restore --nologo
     - name: Build
