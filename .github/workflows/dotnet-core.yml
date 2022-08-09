@@ -48,7 +48,6 @@ jobs:
         sudo mkdir -p /var/run/mysqld
         sudo chown mysql:mysql /var/run/mysqld
         sudo mysqld_safe --port=3306 --skip-grant-tables &
-      run: 
     - name: Install dependencies
       run: dotnet restore
     - name: Build
