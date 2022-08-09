@@ -46,15 +46,14 @@ jobs:
     - name: Start MySQL
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
-        sudo mkdir -p /var/run/mysqld
-        sudo chown mysql:mysql /var/run/mysqld
-        sudo mysqld_safe --port=3306 --skip-grant-tables &
+        sed -i'' -e 's/Pwd=;/Pwd=root;/' Tests/FAnsiTests/TestDatabases.xml
+        sudo service start mysql
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore --nologo
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore --nologo
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test --no-restore --verbosity normal --nologo
     - name: Pack
       run: |
         mkdir -p NuGet/bin
