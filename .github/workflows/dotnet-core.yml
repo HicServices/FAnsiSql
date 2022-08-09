@@ -11,7 +11,7 @@ env:
 jobs:  
   build:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     services:
       postgres:
         image: postgres:latest
@@ -40,7 +40,7 @@ jobs:
     - name: Install Sql Server
       run: |
         wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
+        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
         sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: Start MySQL
