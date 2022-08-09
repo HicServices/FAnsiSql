@@ -11,7 +11,7 @@ env:
 jobs:  
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     services:
       postgres:
         image: postgres:latest
@@ -26,25 +26,29 @@ jobs:
           - 5432:5432
 
     steps:
+    - name: Disable write flush for CI runs
+      run: apt-get install -y libeatmydata
     - uses: actions/checkout@v2
+    - uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.301
-    - name: Add MSFT code signing key
-      run: wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-    - name: Add MSFT package repo
-      run: sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
-    - name: MySQL
+        dotnet-version: 6.0.x
+    - name: Install Sql Server
+      run: |
+        wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
+        sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
+        sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
+    - name: Start MySQL
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
         sudo mkdir -p /var/run/mysqld
         sudo chown mysql:mysql /var/run/mysqld
         sudo mysqld_safe --port=3306 --skip-grant-tables &
-    - name: Install Sql Server
-      run: sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
-    - name: Configure Sql Server
-      run: sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
+      run: 
     - name: Install dependencies
       run: dotnet restore
     - name: Build
@@ -54,7 +58,7 @@ jobs:
     - name: Pack
       run: |
         mkdir -p NuGet/bin
-        ln -sf Release/netstandard2.0 NuGet/bin/
+        ln -sf Release/netstandard2.1 NuGet/bin/
         dotnet pack NuGet/FAnsi.NuGet.csproj -c Release --include-source --include-symbols --nologo -p:NuspecFile=`pwd`/NuGet/FAnsi.NuGet.nuspec -p:NuspecProperties=Version=$(fgrep AssemblyInformationalVersion SharedAssemblyInfo.cs|cut -d'"' -f2)\;configuration=Release  -p:SymbolPackageFormat=snupkg
     - name: Nuget push
       if: contains(github.ref,'refs/tags/')
