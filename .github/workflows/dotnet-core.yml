@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Disable write flush for CI runs
-      run: sudo apt-get install -y libeatmydata
+      run: sudo apt-get install -y libeatmydata1
     - uses: actions/checkout@v2
     - uses: actions/cache@v3
       with:
