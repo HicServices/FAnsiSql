@@ -53,7 +53,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore --nologo
     - name: Test
-      run: dotnet test --no-restore --verbosity quiet --nologo
+      run: dotnet test --no-restore --logger "console;verbosity=normal" --nologo
     - name: Pack
       run: |
         mkdir -p NuGet/bin
