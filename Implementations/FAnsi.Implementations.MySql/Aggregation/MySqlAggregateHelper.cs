@@ -288,12 +288,12 @@ order by
 {5}
 );
 
-/* Build case when x='fish' then 1 else 0 end as 'fish', case when x='cammel' then 1 end as 'cammel' etc*/
+/* Build case when x='fish' then 1 else null end as 'fish', case when x='cammel' then 1 end as 'cammel' etc*/
 SET @columnsSelectCases = NULL;
 SELECT
   GROUP_CONCAT(
     CONCAT(
-      '{0}(case when {1} = ''', REPLACE(pivotValues.piv,'\'','\\\''), ''' then {2} else 0 end) AS `', pivotValues.piv,'`'
+      '{0}(case when {1} = \'', REPLACE(pivotValues.piv,'\'','\\\''), '\' then {2} else null end) AS `', pivotValues.piv,'`'
     )
   ) INTO @columnsSelectCases
 FROM
