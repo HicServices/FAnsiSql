@@ -288,7 +288,7 @@ order by
 {5}
 );
 
-/* Build case when x='fish' then 1 end as 'fish', case when x='cammel' then 1 end as 'cammel' etc*/
+/* Build case when x='fish' then 1 else 0 end as 'fish', case when x='cammel' then 1 end as 'cammel' etc*/
 SET @columnsSelectCases = NULL;
 SELECT
   GROUP_CONCAT(
