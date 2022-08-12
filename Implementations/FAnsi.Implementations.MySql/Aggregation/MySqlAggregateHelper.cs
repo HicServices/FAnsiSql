@@ -181,7 +181,7 @@ DEALLOCATE PREPARE stmt;",
         {
             string part1 = GetPivotPart1(query);
             
-            string nonPivotColumnSql = nonPivotColumn.GetTextWithoutAlias(query.SyntaxHelper);
+            string joinAlias = nonPivotColumn.GetAliasFromText(query.SyntaxHelper);
 
             return string.Format(@"
 {0}
@@ -213,7 +213,7 @@ DEALLOCATE PREPARE stmt;",
                 //everything inclusive of FROM but stopping before GROUP BY 
                 query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert < QueryComponent.GroupBy))),
                 
-                nonPivotColumnSql,
+                joinAlias,
 
                 //any HAVING SQL
                 query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert == QueryComponent.Having)))
@@ -371,9 +371,9 @@ pivotValues;
 //SELECT
 //  GROUP_CONCAT(DISTINCT
 //    CONCAT(
-//      'count(case when `test`.`biochemistry`.`hb_extract` = ''',
+//      'count(case when `test`.`biochemistry`.`hb_extract` = \'',
 //      b.`Pivot`,
-//      ''' then 1 end) AS `',
+//      \'' then 1 else null end) AS `',
 //      b.`Pivot`,'`'
 //    ) order by b.`CountName` desc
 //  ) INTO @columns
