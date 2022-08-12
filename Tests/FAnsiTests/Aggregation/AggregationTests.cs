@@ -10,16 +10,24 @@ namespace FAnsiTests.Aggregation
 {
     class AggregationTests:DatabaseTests
     {
-        protected readonly Dictionary<DatabaseType, DiscoveredTable> _testTables = new Dictionary<DatabaseType, DiscoveredTable>();
-            
+        protected readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = new Dictionary<DatabaseType, DiscoveredTable>();
+        protected readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = new Dictionary<DatabaseType, DiscoveredTable>();
+
         [OneTimeSetUp]
         public void Setup()
+        {
+            SetupDatabaseTable(true, "AggregateDataBasedTestsEasy");
+
+            SetupDatabaseTable(false, "AggregateDataBasedTestsHard");
+        }
+
+        private void SetupDatabaseTable(bool easy, string name)
         {
             try
             {
                 using (DataTable dt = new DataTable())
                 {
-                    dt.TableName = "AggregateDataBasedTests";
+                    dt.TableName = name;
 
                     dt.Columns.Add("EventDate");
                     dt.Columns.Add("Category");
@@ -38,21 +46,27 @@ namespace FAnsiTests.Aggregation
                     dt.Rows.Add("2002-01-01", "F", "29");
                     dt.Rows.Add("2002-01-01", "F", "31");
 
-                    dt.Rows.Add("2001-01-01", "E&, %a' mp;E", "37");
-                    dt.Rows.Add("2002-01-01", "E&, %a' mp;E", "41");
-                    dt.Rows.Add("2005-01-01", "E&, %a' mp;E", "59");  //note there are no records in 2004 it is important for axis tests (axis involves you having to build a calendar table)
+                    if(!easy)
+                    {
+                        dt.Rows.Add("2001-01-01", "E&, %a' mp;E", "37");
+                        dt.Rows.Add("2002-01-01", "E&, %a' mp;E", "41");
+                        dt.Rows.Add("2005-01-01", "E&, %a' mp;E", "59");  //note there are no records in 2004 it is important for axis tests (axis involves you having to build a calendar table)
+                    }
+                    
 
                     dt.Rows.Add(null, "G", "47");
                     dt.Rows.Add("2001-01-01", "G", "53");
 
-            
+
                     foreach (KeyValuePair<DatabaseType, string> kvp in TestConnectionStrings)
                     {
                         try
                         {
                             var db = GetTestDatabase(kvp.Key);
                             var tbl = db.CreateTable("AggregateDataBasedTests", dt);
-                            _testTables.Add(kvp.Key,tbl);
+
+                            var dic = easy ? _easyTables : _hardTables;
+                            dic.Add(kvp.Key, tbl);
 
                         }
                         catch (Exception e)
@@ -61,7 +75,7 @@ namespace FAnsiTests.Aggregation
                             Console.WriteLine(e);
 
                         }
-                        
+
                     }
                 }
             }
@@ -152,12 +166,14 @@ namespace FAnsiTests.Aggregation
             Console.Write(Environment.NewLine);
         }
 
-        protected DiscoveredTable GetTestTable(DatabaseType type)
+        protected DiscoveredTable GetTestTable(DatabaseType type, bool easy = false)
         {
-            if (!_testTables.ContainsKey(type))
+            var dic = easy ? _easyTables : _hardTables;
+
+            if (!dic.ContainsKey(type))
                 Assert.Inconclusive("No connection string found for Test database type {0}", type);
             
-            return _testTables[type];
+            return dic[type];
         }
             
     }

@@ -10,14 +10,16 @@ namespace FAnsiTests.Aggregation;
 
 class CalendarWithPivotAggregationTests:AggregationTests
 {
-    [TestCase(DatabaseType.MicrosoftSQLServer)]
-    [TestCase(DatabaseType.MySql)]
-    public void Test_Calendar_WithPivot(DatabaseType type)
+    [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+    [TestCase(DatabaseType.MySql,true)]
+    [TestCase(DatabaseType.MicrosoftSQLServer, false)]
+    [TestCase(DatabaseType.MySql, false)]
+    public void Test_Calendar_WithPivot(DatabaseType type,bool easy)
     {
         string sql=null!;
         try
         {
-            var tbl = GetTestTable(type);
+            var tbl = GetTestTable(type,easy);
             var svr = tbl.Database.Server;
 
             var lines = new List<CustomLine>();
@@ -69,6 +71,10 @@ class CalendarWithPivotAggregationTests:AggregationTests
 
             Assert.AreEqual(10,
                 dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
+
+            // only validate hard output, we got rows on easy thats enough for now
+            if (easy)
+                return;
 
             StringAssert.AreEqualIgnoringCase("joinDt", dt.Columns[0].ColumnName);
             StringAssert.AreEqualIgnoringCase("T", dt.Columns[1].ColumnName);
