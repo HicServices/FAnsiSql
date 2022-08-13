@@ -453,7 +453,7 @@ namespace FAnsiTests.Table
                     Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt)); //affected rows should match batch size
                 }
                 sw.Stop();
-                Console.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
+                TestContext.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
 
                 dt.Rows.Clear();
 
@@ -469,7 +469,7 @@ namespace FAnsiTests.Table
                 }
 
                 sw.Stop();
-                Console.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
+                TestContext.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
             }
                 
             
@@ -501,7 +501,7 @@ namespace FAnsiTests.Table
                     if(type != DatabaseType.MySql)
                         StringAssert.Contains("cancel",ex.InnerException.Message);
                     else
-                        Console.WriteLine($"MySql error was:{ex.InnerException}");
+                        TestContext.WriteLine($"MySql error was:{ex.InnerException}");
                 }
                 
             }

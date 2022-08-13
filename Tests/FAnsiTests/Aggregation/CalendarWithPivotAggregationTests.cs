@@ -118,7 +118,7 @@ class CalendarWithPivotAggregationTests:AggregationTests
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"SQL triggering error was: '{(sql ?? "None defined")}'");
+            TestContext.Error.WriteLine($"SQL triggering error was: '{(sql ?? "None defined")}'");
             throw;
         }
     }
