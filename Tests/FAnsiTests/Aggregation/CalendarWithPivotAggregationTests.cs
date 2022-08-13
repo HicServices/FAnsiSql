@@ -22,20 +22,22 @@ class CalendarWithPivotAggregationTests:AggregationTests
             var tbl = GetTestTable(type,easy);
             var svr = tbl.Database.Server;
 
-            var lines = new List<CustomLine>();
-            lines.Add(new CustomLine("SELECT", QueryComponent.SELECT));
-            lines.Add(new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
-                { Role = CustomLineRole.CountFunction });
-            lines.Add(new CustomLine("EventDate,", QueryComponent.QueryTimeColumn)
-                { Role = CustomLineRole.Axis }); //tell it which the axis are 
-            lines.Add(new CustomLine("Category", QueryComponent.QueryTimeColumn)
-                { Role = CustomLineRole.Pivot }); //tell it which the pivot
-            lines.Add(new CustomLine("FROM ", QueryComponent.FROM));
-            lines.Add(new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM));
-            lines.Add(new CustomLine("GROUP BY", QueryComponent.GroupBy));
-            lines.Add(new CustomLine("EventDate,", QueryComponent.GroupBy)
-                { Role = CustomLineRole.Axis }); //tell it which the axis are 
-            lines.Add(new CustomLine("Category", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot });
+            var lines = new List<CustomLine>
+            {
+                new("SELECT", QueryComponent.SELECT),
+                new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
+                    { Role = CustomLineRole.CountFunction },
+                new("EventDate,", QueryComponent.QueryTimeColumn)
+                    { Role = CustomLineRole.Axis }, //tell it which the axis are 
+                new("Category", QueryComponent.QueryTimeColumn)
+                    { Role = CustomLineRole.Pivot }, //tell it which the pivot
+                new("FROM ", QueryComponent.FROM),
+                new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
+                new("GROUP BY", QueryComponent.GroupBy),
+                new("EventDate,", QueryComponent.GroupBy)
+                    { Role = CustomLineRole.Axis }, //tell it which the axis are 
+                new("Category", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot }
+            };
 
             var axis = new QueryAxis()
             {
@@ -116,7 +118,7 @@ class CalendarWithPivotAggregationTests:AggregationTests
             Assert.AreEqual(0, dt.Rows[4][3]);
             Assert.AreEqual(0, dt.Rows[4][4]);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             TestContext.Error.WriteLine($"SQL triggering error was: '{(sql ?? "None defined")}'");
             throw;

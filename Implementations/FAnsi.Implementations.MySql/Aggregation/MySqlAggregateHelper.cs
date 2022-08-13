@@ -168,7 +168,7 @@ DEALLOCATE PREPARE stmt;",
                 query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement,axisColumnWithoutAlias)),
 
                 //the order by (should be count so that heavy populated columns come first)
-                query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert <= QueryComponent.WHERE)))
+                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert <= QueryComponent.WHERE).Select(x=> query.SyntaxHelper.Escape(x.Text)))
                 );
         }
         
