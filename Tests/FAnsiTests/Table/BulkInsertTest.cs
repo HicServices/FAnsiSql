@@ -436,7 +436,7 @@ namespace FAnsiTests.Table
 
                 for (int i = 0; i < 30; i++)
                 {
-                    dt.Columns.Add("Column" + i);
+                    dt.Columns.Add($"Column{i}");
                 }
 
 
@@ -453,7 +453,7 @@ namespace FAnsiTests.Table
                     Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt)); //affected rows should match batch size
                 }
                 sw.Stop();
-                Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
+                Console.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
 
                 dt.Rows.Clear();
 
@@ -469,7 +469,7 @@ namespace FAnsiTests.Table
                 }
 
                 sw.Stop();
-                Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
+                Console.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
             }
                 
             
@@ -501,15 +501,15 @@ namespace FAnsiTests.Table
                     if(type != DatabaseType.MySql)
                         StringAssert.Contains("cancel",ex.InnerException.Message);
                     else
-                        Console.WriteLine("MySql error was:" + ex.InnerException);
+                        Console.WriteLine($"MySql error was:{ex.InnerException}");
                 }
                 
             }
 
-            //Now lets test cancelling GetDataTable
+            //Now let's test cancelling GetDataTable
             using (var con = tbl.Database.Server.BeginNewTransactedConnection())
             {
-                //give it 100 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
+                //give it 300 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
                 using (cts = new CancellationTokenSource(300))
                 {
                     //GetDataTable should have been cancelled at the database level
