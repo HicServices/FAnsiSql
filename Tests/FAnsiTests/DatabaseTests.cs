@@ -81,7 +81,7 @@ namespace FAnsiTests
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
+                TestContext.WriteLine(exception);
                 throw;
             }
             

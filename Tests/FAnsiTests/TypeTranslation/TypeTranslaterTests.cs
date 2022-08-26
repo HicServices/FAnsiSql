@@ -243,7 +243,8 @@ namespace FAnsiTests.TypeTranslation
                 Assert.AreEqual(tBefore, tAfter,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'",sqlType,col.DataType.SQLType,tBefore,tAfter);
 
                 if(!string.Equals(col.DataType.SQLType,sqlType,StringComparison.CurrentCultureIgnoreCase))
-                    Console.WriteLine("{0} created a '{1}' when asked to create a '{2}'",type,col.DataType.SQLType,sqlType);
+                    TestContext.WriteLine("{0} created a '{1}' when asked to create a '{2}'", type,
+                        col.DataType.SQLType, sqlType);
 
             }
             finally

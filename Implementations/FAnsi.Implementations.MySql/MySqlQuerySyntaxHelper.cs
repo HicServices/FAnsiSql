@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementations.MySql.Aggregation;
@@ -31,7 +32,7 @@ namespace FAnsi.Implementations.MySql
 
         public override string EnsureWrappedImpl(string databaseOrTableName)
         {
-            return "`" + GetRuntimeNameWithDoubledBackticks(databaseOrTableName) + "`";
+            return $"`{GetRuntimeNameWithDoubledBackticks(databaseOrTableName)}`";
         }
 
         /// <summary>
@@ -60,49 +61,52 @@ namespace FAnsi.Implementations.MySql
 
         public override TopXResponse HowDoWeAchieveTopX(int x)
         {
-            return new TopXResponse("LIMIT " + x,QueryComponent.Postfix);
+            return new TopXResponse($"LIMIT {x}",QueryComponent.Postfix);
         }
 
         public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
         {
             //MySql doesn't require parameter declaration you just start using it like javascript
-            return "/*" + proposedNewParameterName + "*/";
+            return $"/* {proposedNewParameterName} */";
         }
 
         public override string Escape(string sql)
         {
-            //https://dev.mysql.com/doc/refman/5.7/en/string-literals.html
-            
-            sql = sql.Replace("\\", "\\\\"); //first of all swap current \ for \\ (don't do this later because we are going to inject a bunch of that stuff!).
-
-            sql = sql.Replace("'", "\\'"); //swap ' for \'
-
-            sql = sql.Replace("\"", "\\\""); //swap " for \"
-            sql = sql.Replace("\r\n", "\\n"); //swap newline whitespace with \r for \n
-            sql = sql.Replace("\n", "\\n"); //swap newline whitespace for \n
-            sql = sql.Replace("\t", "\\t"); //swap tab whitespace for \t
-
-            //only apply in pattern matching use cases (rare?) otherwise they break it! you will have to handle this yourself if you have that situation
-            //sql = sql.Replace("%", "\\%"); //swap % for \%
-            //sql = sql.Replace("_", "\\_"); //swap _ for \_
-            
-            return sql;
+            // https://dev.mysql.com/doc/refman/8.0/en/string-literals.html
+            var r = new StringBuilder(sql.Length);
+            foreach (var c in sql)
+            {
+                r.Append(c switch
+                {
+                    '\0'    => "\\0",
+                    '\'' => "\\'",
+                    '"' => "\"",
+                    '\b'    => "\\b",
+                    '\n'    => "\\n",
+                    '\r'    => "\\r",
+                    '\t'    => "\\t",
+                    '\u001a'    => "\\Z",
+                    '\\' => "\\",
+// Pattern matching only:
+// '%' => "\\%",
+// '_' => "\\_",
+                    _   => $"{c}"
+                });
+            }
+            return r.ToString();
         }
 
         public override string GetScalarFunctionSql(MandatoryScalarFunctions function)
         {
-            
-            switch (function)
+            return function switch
             {
-                case MandatoryScalarFunctions.GetTodaysDate:  //this works at least as of 5.7.19
-                    return "now()";
-                case MandatoryScalarFunctions.GetGuid:  //using this as defaults in columns requires MySql 8 (2018)
-                    return "(uuid())"; 
-                case MandatoryScalarFunctions.Len:
-                    return "LENGTH";
-                default:
-                    throw new ArgumentOutOfRangeException("function");
-            }
+                MandatoryScalarFunctions.GetTodaysDate => //this works at least as of 5.7.19
+                    "now()",
+                MandatoryScalarFunctions.GetGuid => //using this as defaults in columns requires MySql 8 (2018)
+                    "(uuid())",
+                MandatoryScalarFunctions.Len => "LENGTH",
+                _ => throw new ArgumentOutOfRangeException(nameof(function))
+            };
         }
 
         public override string GetAutoIncrementKeywordIfAny()
@@ -130,7 +134,7 @@ namespace FAnsi.Implementations.MySql
 
         public override string HowDoWeAchieveMd5(string selectSql)
         {
-            return "md5(" + selectSql + ")";
+            return $"md5({selectSql})";
         }
     }
 }

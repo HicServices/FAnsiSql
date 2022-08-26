@@ -343,13 +343,16 @@ namespace FAnsiTests
                 {
                     con.Open();
 
-                    var cmd = tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (100,'chucky')", con);
+                    var cmd = tblParent.Database.Server.GetCommand(
+                        $"INSERT INTO {tblChild.GetFullyQualifiedName()} VALUES (100,'chucky')", con);
                 
                     //violation of fk
                     Assert.That(() => cmd.ExecuteNonQuery(), Throws.Exception);
 
-                    tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,'chucky')", con).ExecuteNonQuery();
-                    tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,'chucky2')", con).ExecuteNonQuery();
+                    tblParent.Database.Server.GetCommand(
+                        $"INSERT INTO {tblChild.GetFullyQualifiedName()} VALUES (1,'chucky')", con).ExecuteNonQuery();
+                    tblParent.Database.Server.GetCommand(
+                        $"INSERT INTO {tblChild.GetFullyQualifiedName()} VALUES (1,'chucky2')", con).ExecuteNonQuery();
                 }
             
                 Assert.AreEqual(2,tblParent.GetRowCount());
@@ -359,7 +362,7 @@ namespace FAnsiTests
                 {
                     con.Open();
 
-                    var cmd = tblParent.Database.Server.GetCommand("DELETE FROM " + tblParent.GetFullyQualifiedName(), con);
+                    var cmd = tblParent.Database.Server.GetCommand($"DELETE FROM {tblParent.GetFullyQualifiedName()}", con);
                     cmd.ExecuteNonQuery();
                 }
             
@@ -418,13 +421,16 @@ namespace FAnsiTests
             {
                 con.Open();
 
-                var cmd = tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,3,'chucky')", con);
+                var cmd = tblParent.Database.Server.GetCommand(
+                    $"INSERT INTO {tblChild.GetFullyQualifiedName()} VALUES (1,3,'chucky')", con);
 
                 //violation of fk
                 Assert.That(() => cmd.ExecuteNonQuery(), Throws.Exception);
 
-                tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,2,'chucky')", con).ExecuteNonQuery();
-                tblParent.Database.Server.GetCommand("INSERT INTO " + tblChild.GetFullyQualifiedName() + " VALUES (1,2,'chucky2')", con).ExecuteNonQuery();
+                tblParent.Database.Server.GetCommand(
+                    $"INSERT INTO {tblChild.GetFullyQualifiedName()} VALUES (1,2,'chucky')", con).ExecuteNonQuery();
+                tblParent.Database.Server.GetCommand(
+                    $"INSERT INTO {tblChild.GetFullyQualifiedName()} VALUES (1,2,'chucky2')", con).ExecuteNonQuery();
             }
 
             Assert.AreEqual(1, tblParent.GetRowCount());
@@ -433,7 +439,7 @@ namespace FAnsiTests
             using (var con = tblParent.Database.Server.GetConnection())
             {
                 con.Open();
-                var cmd = tblParent.Database.Server.GetCommand("DELETE FROM " + tblParent.GetFullyQualifiedName(), con);
+                var cmd = tblParent.Database.Server.GetCommand($"DELETE FROM {tblParent.GetFullyQualifiedName()}", con);
 
                 if (cascadeDelete)
                 {
@@ -1003,7 +1009,7 @@ namespace FAnsiTests
             var databaseValue = (string)dt2.Rows.Cast<DataRow>().Single()["MyGuid"];
             
             Assert.IsNotNull(databaseValue);
-            Console.WriteLine(databaseValue);
+            TestContext.WriteLine(databaseValue);
         }
 
         [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -1308,7 +1314,7 @@ namespace FAnsiTests
             foreach(string f in DateTimeTypeDecider.DateFormatsDM)
             {
                 var val = dt.ToString(f);
-                Console.WriteLine(val);
+                TestContext.WriteLine(val);
                 
                 d.Parse(val);
             }
@@ -1317,7 +1323,7 @@ namespace FAnsiTests
             foreach(string f in DateTimeTypeDecider.TimeFormats)
             {
                 var t = dt.ToString(f);
-                Console.WriteLine(t); 
+                TestContext.WriteLine(t); 
                 d.Parse(t);
             }
 
@@ -1326,7 +1332,7 @@ namespace FAnsiTests
 
             //12s
             sw.Stop();
-            Console.WriteLine(sw.ElapsedMilliseconds + " ms");
+            TestContext.WriteLine($"{sw.ElapsedMilliseconds} ms");
         }
     }
 }
