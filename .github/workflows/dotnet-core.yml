@@ -45,7 +45,7 @@ jobs:
         sudo sh -c "echo 'deb https://mirrors.xtom.com/mariadb/repo/10.9/ubuntu focal main' >>/etc/apt/sources.list"
         sudo apt-get update
         sudo apt-get install mariadb-server
-        mysql -uroot -proot "SHOW VARIABLES LIKE ‘%version%’;"
+        mysql -uroot -p'' "SHOW VARIABLES LIKE ‘%version%’;"
     - name: Install Sql Server
       run: sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
     - name: Configure Sql Server
