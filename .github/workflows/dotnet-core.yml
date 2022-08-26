@@ -46,7 +46,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install mariadb-server
         sudo mysql -uroot <<EOM
-        ALTER USER USER() IDENTIFIED BY 'root';
+        ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
         EOM
     - name: Install Sql Server
       run: sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
