@@ -38,7 +38,7 @@ jobs:
     - name: MySQL
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
-        sed -i'' -e 's/Pwd=;/Pwd=root;/' Tests/FAnsiTests/TestDatabases.xml
+        sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=true/' Tests/FAnsiTests/TestDatabases.xml
         
         sudo apt-get install apt-transport-https curl
         sudo curl -o /etc/apt/trusted.gpg.d/mariadb_release_signing_key.asc 'https://mariadb.org/mariadb_release_signing_key.asc'
