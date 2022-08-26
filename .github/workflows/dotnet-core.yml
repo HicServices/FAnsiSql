@@ -38,9 +38,12 @@ jobs:
     - name: MySQL
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
-        sudo mkdir -p /var/run/mysqld
-        sudo chown mysql:mysql /var/run/mysqld
-        sudo mysqld_safe --port=3306 --skip-grant-tables &
+        
+        sudo apt-get install apt-transport-https curl
+        sudo curl -o /etc/apt/trusted.gpg.d/mariadb_release_signing_key.asc 'https://mariadb.org/mariadb_release_signing_key.asc'
+        sudo sh -c "echo 'deb https://mirrors.xtom.com/mariadb/repo/10.9/ubuntu bionic main' >>/etc/apt/sources.list"
+        sudo apt-get update
+        sudo apt-get install mariadb-server
     - name: Install Sql Server
       run: sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
     - name: Configure Sql Server
