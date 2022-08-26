@@ -11,7 +11,7 @@ env:
 jobs:  
   build:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
     services:
       postgres:
         image: postgres:latest
@@ -26,34 +26,31 @@ jobs:
           - 5432:5432
 
     steps:
-    - name: Disable write flush for CI runs
-      run: sudo apt-get install -y libeatmydata1
     - uses: actions/checkout@v3
-    - uses: actions/cache@v3
-      with:
-        key: ${{ runner.os }}
-        path: ~/.nuget/packages
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.0.x
-    - name: Install Sql Server
-      run: |
-        wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
-        sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
-        sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
-    - name: Start MySQL
+        dotnet-version: 3.1.301
+    - name: Add MSFT code signing key
+      run: wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+    - name: Add MSFT package repo
+      run: sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
+    - name: MySQL
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
-        sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=True/' Tests/FAnsiTests/TestDatabases.xml
-        sudo systemctl start mysql.service
+        sudo mkdir -p /var/run/mysqld
+        sudo chown mysql:mysql /var/run/mysqld
+        sudo mysqld_safe --port=3306 --skip-grant-tables &
+    - name: Install Sql Server
+      run: sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
+    - name: Configure Sql Server
+      run: sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: Install dependencies
-      run: dotnet restore --nologo
+      run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore --nologo
+      run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --logger "console;verbosity=minimal" --nologo
+      run: dotnet test --no-restore --verbosity normal
     - name: Pack
       run: |
         mkdir -p NuGet/bin
