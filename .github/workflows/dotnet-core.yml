@@ -46,7 +46,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install mariadb-server
         sudo mysql -uroot <<EOM
-        SHOW VARIABLES LIKE ‘%version%’;
         ALTER USER USER() IDENTIFIED BY 'root';
         EOM
     - name: Install Sql Server
