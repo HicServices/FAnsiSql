@@ -30,7 +30,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 3.1.301
+        dotnet-version: 6.0.x
     - name: Add MSFT code signing key
       run: wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
     - name: Add MSFT package repo
