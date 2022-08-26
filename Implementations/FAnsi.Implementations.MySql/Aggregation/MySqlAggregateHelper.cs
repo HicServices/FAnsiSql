@@ -269,7 +269,7 @@ DEALLOCATE PREPARE stmt;",
             string havingSqlIfAny = string.Join(Environment.NewLine,
                 query.Lines.Where(l => l.LocationToInsert == QueryComponent.Having).Select(l => l.Text));
 
-            return string.Format(@"
+            return $@"
 SET SESSION group_concat_max_len = 1000000; 
 
 DROP TEMPORARY TABLE IF EXISTS pivotValues;
@@ -277,15 +277,18 @@ DROP TEMPORARY TABLE IF EXISTS pivotValues;
 /*Get the unique values in the pivot column into a temporary table ordered by size of the count*/
 CREATE TEMPORARY TABLE pivotValues AS (
 SELECT
-{1} as piv
-{3}
-{4}
+{pivotSqlWithoutAlias} as piv
+{string.Join(Environment.NewLine,
+    query.Lines.Where(l =>
+        l.LocationToInsert >= QueryComponent.FROM && l.LocationToInsert <= QueryComponent.WHERE &&
+        l.Role != CustomLineRole.Axis))}
+{whereDateColumnNotNull}
 group by
-{1}
-{7}
+{pivotSqlWithoutAlias}
+{havingSqlIfAny}
 order by
-{6}
-{5}
+{orderBy}
+{topXLimitSqlIfAny}
 );
 
 /* Build case when x='fish' then 1 else null end as 'fish', case when x='cammel' then 1 end as 'cammel' etc*/
@@ -293,7 +296,7 @@ SET @columnsSelectCases = NULL;
 SELECT
   GROUP_CONCAT(
     CONCAT(
-      '{0}(case when {1} = \'', REPLACE(pivotValues.piv,'\'','\\\''), '\' then {2} else null end) AS `', pivotValues.piv,'`'
+      '{aggregateMethod}(case when {pivotSqlWithoutAlias} = \'', REPLACE(pivotValues.piv,'\'','\\\''), '\' then {aggregateParameter} else null end) AS `', pivotValues.piv,'`'
     )
   ) INTO @columnsSelectCases
 FROM
@@ -308,21 +311,7 @@ SELECT
   ) INTO @columnsSelectFromDataset
 FROM
 pivotValues;
-",
-                aggregateMethod,
-                pivotSqlWithoutAlias,
-                aggregateParameter,
-
-                //the from including all table joins and where but no calendar table join
-                string.Join(Environment.NewLine,
-                    query.Lines.Where(l =>
-                        l.LocationToInsert >= QueryComponent.FROM && l.LocationToInsert <= QueryComponent.WHERE &&
-                        l.Role != CustomLineRole.Axis)),
-                whereDateColumnNotNull,
-                topXLimitSqlIfAny,
-                orderBy,
-                havingSqlIfAny
-            );
+";
             
         }
 
