@@ -61,7 +61,7 @@ jobs:
       run: |
         mkdir -p NuGet/bin
         ln -sf Release/netstandard2.1 NuGet/bin/
-        dotnet pack NuGet/FAnsi.NuGet.csproj -c Release --include-source --include-symbols --nologo -p:NuspecFile=`pwd`/NuGet/FAnsi.NuGet.nuspec -p:NuspecProperties=Version=$(fgrep AssemblyInformationalVersion SharedAssemblyInfo.cs|cut -d'"' -f2)\;configuration=Release  -p:SymbolPackageFormat=snupkg
+        dotnet pack NuGet/FAnsi.NuGet.csproj -c Release --include-source --include-symbols --nologo -p:NuspecFile=`pwd`/NuGet/FAnsi.NuGet.nuspec -p:NuspecProperties=Version=$(fgrep AssemblyInformationalVersion SharedAssemblyInfo.cs|cut -d'"' -f2) -p:SymbolPackageFormat=snupkg
     - name: Nuget push
       if: contains(github.ref,'refs/tags/')
       run: dotnet nuget push NuGet/bin/Release/HIC.FAnsiSql.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_KEY }} --skip-duplicate
