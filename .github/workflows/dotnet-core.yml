@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Disable write flush for CI runs
-      run: sudo apt-get install -y libeatmydata1
+      run: sudo apt-get install -y libeatmydata1 apt-transport-https curl
     - uses: actions/checkout@v3
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v2
@@ -39,11 +39,18 @@ jobs:
         sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
         sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
-    - name: Start MySQL
+    - name: MySQL
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
-        sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=True/' Tests/FAnsiTests/TestDatabases.xml
-        sudo systemctl start mysql.service
+        sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=true/' Tests/FAnsiTests/TestDatabases.xml
+
+        sudo curl -o /etc/apt/trusted.gpg.d/mariadb_release_signing_key.asc 'https://mariadb.org/mariadb_release_signing_key.asc'
+        sudo sh -c "echo 'deb https://mirrors.xtom.com/mariadb/repo/10.9/ubuntu focal main' >>/etc/apt/sources.list"
+        sudo apt-get update
+        sudo apt-get install mariadb-server
+        sudo mysql -uroot <<EOM
+        ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
+        EOM
     - name: Install dependencies
       run: dotnet restore --nologo
     - name: Build
