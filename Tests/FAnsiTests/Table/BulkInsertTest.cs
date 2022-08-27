@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using FAnsi;
-using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Exceptions;
@@ -436,7 +434,7 @@ namespace FAnsiTests.Table
 
                 for (int i = 0; i < 30; i++)
                 {
-                    dt.Columns.Add("Column" + i);
+                    dt.Columns.Add($"Column{i}");
                 }
 
 
@@ -453,7 +451,7 @@ namespace FAnsiTests.Table
                     Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt)); //affected rows should match batch size
                 }
                 sw.Stop();
-                Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
+                TestContext.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
 
                 dt.Rows.Clear();
 
@@ -469,7 +467,7 @@ namespace FAnsiTests.Table
                 }
 
                 sw.Stop();
-                Console.WriteLine("Time taken:" + sw.ElapsedMilliseconds + "ms");
+                TestContext.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
             }
                 
             
@@ -488,34 +486,28 @@ namespace FAnsiTests.Table
             Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
 
 
-            CancellationTokenSource cts;
             using (var con = tbl.Database.Server.BeginNewTransactedConnection())
             {
                 //give it 100 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
-                using (cts = new CancellationTokenSource(100))
-                {
-                    //creation should have been cancelled at the database level
-                    var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
+                using var cts = new CancellationTokenSource(100);
+                //creation should have been cancelled at the database level
+                var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
                 
-                    //MySql seems to be throwing null reference inside ExecuteNonQueryAsync.  No idea why but it is still cancelled
-                    if(type != DatabaseType.MySql)
-                        StringAssert.Contains("cancel",ex.InnerException.Message);
-                    else
-                        Console.WriteLine("MySql error was:" + ex.InnerException);
-                }
-                
+                //MySql seems to be throwing null reference inside ExecuteNonQueryAsync.  No idea why but it is still cancelled
+                if(type != DatabaseType.MySql)
+                    StringAssert.Contains("cancel",ex?.InnerException?.Message);
+                else
+                    TestContext.WriteLine($"MySql error was:{ex?.InnerException?.Message}");
             }
 
-            //Now lets test cancelling GetDataTable
+            //Now let's test cancelling GetDataTable
             using (var con = tbl.Database.Server.BeginNewTransactedConnection())
             {
-                //give it 100 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
-                using (cts = new CancellationTokenSource(300))
-                {
-                    //GetDataTable should have been cancelled at the database level
-                    Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,cts.Token,50000)));
-                    tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default(CancellationToken),50000));
-                }
+                //give it 300 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
+                using var cts = new CancellationTokenSource(300);
+                //GetDataTable should have been cancelled at the database level
+                Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,cts.Token,50000)));
+                tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default(CancellationToken),50000));
             }
 
             
@@ -523,7 +515,7 @@ namespace FAnsiTests.Table
             Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
 
             //now give it a bit longer to create it
-            using(cts = new CancellationTokenSource(50000000))
+            using(var cts = new CancellationTokenSource(50000000))
                 tbl.CreatePrimaryKey(null, cts.Token, 50000, bobCol);
 
             bobCol = tbl.DiscoverColumn("bob");

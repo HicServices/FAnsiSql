@@ -25,63 +25,61 @@ namespace FAnsiTests.Aggregation
         {
             try
             {
-                using (DataTable dt = new DataTable())
+                using DataTable dt = new DataTable();
+                dt.TableName = name;
+
+                dt.Columns.Add("EventDate");
+                dt.Columns.Add("Category");
+                dt.Columns.Add("NumberInTrouble");
+
+                dt.Rows.Add("2001-01-01", "T", "7");
+                dt.Rows.Add("2001-01-02", "T", "11");
+                dt.Rows.Add("2001-01-01", "T", "49");
+
+                dt.Rows.Add("2002-02-01", "T", "13");
+                dt.Rows.Add("2002-03-02", "T", "17");
+                dt.Rows.Add("2003-01-01", "T", "19");
+                dt.Rows.Add("2003-04-02", "T", "23");
+
+
+                dt.Rows.Add("2002-01-01", "F", "29");
+                dt.Rows.Add("2002-01-01", "F", "31");
+
+                if (!easy)
                 {
-                    dt.TableName = name;
-
-                    dt.Columns.Add("EventDate");
-                    dt.Columns.Add("Category");
-                    dt.Columns.Add("NumberInTrouble");
-
-                    dt.Rows.Add("2001-01-01", "T", "7");
-                    dt.Rows.Add("2001-01-02", "T", "11");
-                    dt.Rows.Add("2001-01-01", "T", "49");
-
-                    dt.Rows.Add("2002-02-01", "T", "13");
-                    dt.Rows.Add("2002-03-02", "T", "17");
-                    dt.Rows.Add("2003-01-01", "T", "19");
-                    dt.Rows.Add("2003-04-02", "T", "23");
+                    dt.Rows.Add("2001-01-01", "E&, %a' mp;E", "37");
+                    dt.Rows.Add("2002-01-01", "E&, %a' mp;E", "41");
+                    dt.Rows.Add("2005-01-01", "E&, %a' mp;E", "59");  //note there are no records in 2004 it is important for axis tests (axis involves you having to build a calendar table)
+                }
 
 
-                    dt.Rows.Add("2002-01-01", "F", "29");
-                    dt.Rows.Add("2002-01-01", "F", "31");
+                dt.Rows.Add(null, "G", "47");
+                dt.Rows.Add("2001-01-01", "G", "53");
 
-                    if(!easy)
+
+                foreach (var (key, _) in TestConnectionStrings)
+                {
+                    try
                     {
-                        dt.Rows.Add("2001-01-01", "E&, %a' mp;E", "37");
-                        dt.Rows.Add("2002-01-01", "E&, %a' mp;E", "41");
-                        dt.Rows.Add("2005-01-01", "E&, %a' mp;E", "59");  //note there are no records in 2004 it is important for axis tests (axis involves you having to build a calendar table)
-                    }
-                    
+                        var db = GetTestDatabase(key);
+                        var tbl = db.CreateTable("AggregateDataBasedTests", dt);
 
-                    dt.Rows.Add(null, "G", "47");
-                    dt.Rows.Add("2001-01-01", "G", "53");
-
-
-                    foreach (KeyValuePair<DatabaseType, string> kvp in TestConnectionStrings)
-                    {
-                        try
-                        {
-                            var db = GetTestDatabase(kvp.Key);
-                            var tbl = db.CreateTable("AggregateDataBasedTests", dt);
-
-                            var dic = easy ? _easyTables : _hardTables;
-                            dic.Add(kvp.Key, tbl);
-
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Could not setup test database for DatabaseType " + kvp.Key);
-                            Console.WriteLine(e);
-
-                        }
+                        var dic = easy ? _easyTables : _hardTables;
+                        dic.Add(key, tbl);
 
                     }
+                    catch (Exception e)
+                    {
+                        TestContext.WriteLine($"Could not setup test database for DatabaseType {key}");
+                        TestContext.WriteLine(e);
+
+                    }
+
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                TestContext.WriteLine(e);
                 throw;
             }
         }
@@ -129,7 +127,7 @@ namespace FAnsiTests.Aggregation
 
         protected void ConsoleWriteTable(DataTable dt)
         {
-            Console.WriteLine("--- DebugTable(" + dt.TableName + ") ---");
+            TestContext.WriteLine($"--- DebugTable({dt.TableName}) ---");
             int zeilen = dt.Rows.Count;
             int spalten = dt.Columns.Count;
 
@@ -137,33 +135,33 @@ namespace FAnsiTests.Aggregation
             for (int i = 0; i < dt.Columns.Count; i++)
             {
                 string s = dt.Columns[i].ToString();
-                Console.Write(String.Format("{0,-20} | ", s));
+                TestContext.Write($"{s,-20} | ");
             }
-            Console.Write(Environment.NewLine);
+            TestContext.Write(Environment.NewLine);
             for (int i = 0; i < dt.Columns.Count; i++)
             {
-                Console.Write("---------------------|-");
+                TestContext.Write("---------------------|-");
             }
-            Console.Write(Environment.NewLine);
+            TestContext.Write(Environment.NewLine);
 
             // Data
             for (int i = 0; i < zeilen; i++)
             {
                 DataRow row = dt.Rows[i];
-                //Console.WriteLine("{0} {1} ", row[0], row[1]);
+                //TestContext.WriteLine("{0} {1} ", row[0], row[1]);
                 for (int j = 0; j < spalten; j++)
                 {
                     string s = row[j].ToString();
-                    if (s.Length > 20) s = s.Substring(0, 17) + "...";
-                    Console.Write(String.Format("{0,-20} | ", s));
+                    if (s.Length > 20) s = $"{s[..17]}...";
+                    TestContext.Write($"{s,-20} | ");
                 }
-                Console.Write(Environment.NewLine);
+                TestContext.Write(Environment.NewLine);
             }
             for (int i = 0; i < dt.Columns.Count; i++)
             {
-                Console.Write("---------------------|-");
+                TestContext.Write("---------------------|-");
             }
-            Console.Write(Environment.NewLine);
+            TestContext.Write(Environment.NewLine);
         }
 
         protected DiscoveredTable GetTestTable(DatabaseType type, bool easy = false)
