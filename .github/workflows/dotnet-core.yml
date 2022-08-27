@@ -39,6 +39,8 @@ jobs:
         sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
         sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
+    - name: Setup upterm session
+      uses: lhotari/action-upterm@v1
     - name: MySQL
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
