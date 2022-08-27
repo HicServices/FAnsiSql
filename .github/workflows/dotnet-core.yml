@@ -55,11 +55,11 @@ jobs:
     - name: Configure Sql Server
       run: sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore --nologo
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore --nologo
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test --no-restore --logger "console;verbosity=minimal" --nologo
     - name: Pack
       run: |
         mkdir -p NuGet/bin
