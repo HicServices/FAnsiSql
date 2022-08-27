@@ -33,10 +33,12 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
-    - name: Add MSFT code signing key
-      run: wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-    - name: Add MSFT package repo
-      run: sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
+    - name: Install Sql Server
+      run: |
+        wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
+        sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
+        sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: MySQL
       run: |
         sed -i'' -e 's/Password=;/Password=pgpass4291;/' Tests/FAnsiTests/TestDatabases.xml
@@ -50,10 +52,6 @@ jobs:
         sudo mysql -uroot <<EOM
         ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
         EOM
-    - name: Install Sql Server
-      run: sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
-    - name: Configure Sql Server
-      run: sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: Install dependencies
       run: dotnet restore --nologo
     - name: Build
