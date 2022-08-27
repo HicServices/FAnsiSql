@@ -41,7 +41,7 @@ jobs:
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: MySQL
       run: |
-        sed -i'' -e 's|</TestDatabases>|<TestDatabase><DatabaseType>PostgreSql</DatabaseType><ConnectionString>User ID=postgres;Password=;Host=127.0.0.1;Port=5432</ConnectionString></TestDatabase></TestDatabases>|' Tests/FAnsiTests/TestDatabases.xml
+        sed -i'' -e 's|</TestDatabases>|<TestDatabase><DatabaseType>PostgreSql</DatabaseType><ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432</ConnectionString></TestDatabase></TestDatabases>|' Tests/FAnsiTests/TestDatabases.xml
         sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=true/' Tests/FAnsiTests/TestDatabases.xml
 
         sudo curl -o /etc/apt/trusted.gpg.d/mariadb_release_signing_key.asc 'https://mariadb.org/mariadb_release_signing_key.asc'
