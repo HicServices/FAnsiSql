@@ -26,6 +26,8 @@ jobs:
           - 5432:5432
 
     steps:
+    - name: Disable write flush for CI runs
+      run: sudo apt-get install -y libeatmydata1
     - uses: actions/checkout@v3
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v2
