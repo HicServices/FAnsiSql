@@ -50,6 +50,7 @@ jobs:
         mkdir build
         cd build
         cmake .. -DDOWNLOAD_BOOST=1 -DWITH_BOOST=$HOME/my_boost
+        make -sj`nproc`
     - name: Setup upterm session
       uses: lhotari/action-upterm@v1
       if: contains(github.ref,'refs/tags/')
