@@ -39,8 +39,21 @@ jobs:
         sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
         sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+    - name: Prep for MySQL bisection
+      run: |
+        export PATH=/usr/lib/ccache:$PATH
+        git clone https://github.com/mysql/mysql-server.git
+        cd mysql-server
+        mkdir build
+        cd build
+        cmake .. -DDOWNLOAD_BOOST=1 -DWITH_BOOST=$HOME/my_boost
     - name: Setup upterm session
       uses: lhotari/action-upterm@v1
+      if: contains(github.ref,'refs/tags/')
+
     - name: MySQL
       run: |
         sed -i'' -e 's|</TestDatabases>|<TestDatabase><DatabaseType>PostgreSql</DatabaseType><ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432</ConnectionString></TestDatabase></TestDatabases>|' Tests/FAnsiTests/TestDatabases.xml
@@ -53,13 +66,11 @@ jobs:
         sudo mysql -uroot <<EOM
         ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
         EOM
-    - name: Install dependencies
-      run: dotnet restore --nologo
-    - name: Build
-      run: dotnet build --configuration Release --no-restore --nologo
     - name: Test
-      run: dotnet test --no-restore --logger "console;verbosity=minimal" --nologo
+      if: contains(github.ref,'refs/tags/')
+      run: dotnet --logger "console;verbosity=minimal" --nologo
     - name: Pack
+      if: contains(github.ref,'refs/tags/')
       run: |
         mkdir -p NuGet/bin
         ln -sf Release/netstandard2.1 NuGet/bin/
