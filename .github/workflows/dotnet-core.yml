@@ -8,20 +8,6 @@ env:
   ACCEPT_EULA: "Y"
   MSSQL_PID: "developer"
 
-services:
-  oracle:
-    image: gvenzl/oracle-xe:latest
-    env:
-      ORACLE_RANDOM_PASSWORD: true
-      APP_USER: ora
-      APP_USER_PASSWORD: zombie
-    ports:
-      - 1521:1521
-    options: >-
-      --health-cmd healthcheck.sh
-      --health-interval 10s
-      --health-timeout 5s
-      --health-retries 10
           
 jobs:  
   build:
@@ -39,6 +25,19 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+      oracle:
+        image: gvenzl/oracle-xe:latest
+        env:
+          ORACLE_RANDOM_PASSWORD: true
+          APP_USER: ora
+          APP_USER_PASSWORD: zombie
+        ports:
+          - 1521:1521
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
     - name: Disable write flush for CI runs
