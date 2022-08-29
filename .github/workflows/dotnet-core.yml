@@ -71,7 +71,7 @@ jobs:
         #ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
         #EOM
     - name: Test
-      run: dotnet --logger "console;verbosity=minimal" --nologo
+      run: dotnet test --logger "console;verbosity=minimal" --nologo
     - name: Pack
       run: |
         mkdir -p NuGet/bin
