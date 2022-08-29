@@ -14,12 +14,12 @@
     <tags>Ansi,SQL</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-      <dependency id="Microsoft.Data.SqlClient" version="3.0.0" />
-      <dependency id="MySqlConnector" version="1.3.11" />
+      <dependency id="MySqlConnector" version="2.1.12" />
+      <dependency id="Microsoft.Data.SqlClient" version="5.0.0" />
       <dependency id="Oracle.ManagedDataAccess.Core" version="2.19.101" />
-      <dependency id="System.ComponentModel.Composition" version="5.0.0" />
-      <dependency id="HIC.TypeGuesser" version="1.0.2" />
-      <dependency id="Npgsql" version="5.0.7" />
+      <dependency id="System.ComponentModel.Composition" version="6.0.0" />
+      <dependency id="HIC.TypeGuesser" version="1.0.3" />
+      <dependency id="Npgsql" version="6.0.6" />
       </group>
     </dependencies>
   </metadata>

@@ -27,15 +27,15 @@ namespace FAnsiTests.Server
         public void TestKeywords()
         {
             var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MySql);
-            acc.AddOrUpdateKeyword("AutoEnlist", "false", ConnectionStringKeywordPriority.SystemDefaultLow);
+            acc.AddOrUpdateKeyword("Auto Enlist", "false", ConnectionStringKeywordPriority.SystemDefaultLow);
             
             DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb","frank","kangaro");
 
-            StringAssert.DoesNotContain("autoenlist",connectionStringBuilder.ConnectionString);
+            StringAssert.DoesNotContain("auto enlist",connectionStringBuilder.ConnectionString);
 
             acc.EnforceOptions(connectionStringBuilder);
 
-            Assert.IsTrue(connectionStringBuilder.ConnectionString.IndexOf("AutoEnlist=false", StringComparison.InvariantCultureIgnoreCase) != -1);
+            Assert.IsTrue(connectionStringBuilder.ConnectionString.IndexOf("Auto Enlist=false", StringComparison.InvariantCultureIgnoreCase) != -1);
         }
 
 

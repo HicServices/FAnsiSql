@@ -192,6 +192,20 @@ namespace FAnsi.Implementations.MicrosoftSQL
             return string.IsNullOrWhiteSpace(pwd) ? null : pwd;
         }
 
+        protected override void EnforceKeywords(DbConnectionStringBuilder builder)
+        {
+            base.EnforceKeywords(builder);
+
+            var msb = (SqlConnectionStringBuilder)builder;
+
+            // if user has specified a keyword that indicates Azure authentication
+            // then disable IntegratedSecurity
+            if (msb.Authentication != SqlAuthenticationMethod.NotSpecified)
+            {
+                msb.IntegratedSecurity = false;
+            }
+        }
+
         public override Version GetVersion(DiscoveredServer server)
         {
             using (var con = server.GetConnection())
