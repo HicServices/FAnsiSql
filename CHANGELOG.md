@@ -8,7 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
-## [2.0.4] - 2022-08-23
+## [3.0.0] - 2022-08-29
+
+### Fixed
+
+- Fixed bug with Aggregate graph in some specific versions of MySql
+
+### Changed
+
+- Switched to targeting net standard 2.1 (previously of 2.0)
+
+## [2.0.5] - 2022-08-23
 
 ### Fixed
 
@@ -321,7 +331,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/2.0.5...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/3.0.0...develop
+[3.0.0]: https://github.com/HicServices/FAnsiSql/compare/2.0.5...3.0.0
 [2.0.5]: https://github.com/HicServices/FAnsiSql/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/HicServices/FAnsiSql/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/HicServices/FAnsiSql/compare/2.0.2...2.0.3
