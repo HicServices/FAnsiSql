@@ -178,7 +178,9 @@ PIVOT
 (
 	sum({3})
 	for {4} in ('+@Columns+') --The dynamic Column list we just fetched at top of query
-) piv'
+) piv
+ORDER BY 
+joinDt'
 
 EXECUTE(@Query)
 ",

@@ -31,7 +31,7 @@ namespace FAnsiTests.Server
         {
             var server = GetTestServer(type);
 
-            Assert.IsTrue(server.RespondsWithinTime(3,out Exception ex));
+            Assert.IsTrue(server.RespondsWithinTime(3,out _));
         }
 
         /// <summary>
@@ -219,7 +219,7 @@ namespace FAnsiTests.Server
             var db = GetTestDatabase(dbType, false);
             var ver = db.Server.GetVersion();
 
-            Console.WriteLine("Version:" + ver);
+            TestContext.WriteLine($"Version:{ver}");
             Assert.IsNotNull(ver);
 
             Assert.Greater(ver.Major,0);

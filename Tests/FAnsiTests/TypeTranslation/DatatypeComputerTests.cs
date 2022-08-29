@@ -238,7 +238,7 @@ namespace FAnsiTests.TypeTranslation
             Guesser t = new Guesser();
             
             Console.WriteLine(CultureInfo.CurrentCulture.EnglishName);
-            Console.WriteLine(CultureInfo.CurrentCulture.DateTimeFormat.MonthDayPattern);
+            TestContext.WriteLine(CultureInfo.CurrentCulture.DateTimeFormat.MonthDayPattern);
 
             t.AdjustToCompensateForValue(GetCultureSpecificDate() + " 11:10");
             t.AdjustToCompensateForValue(null);
