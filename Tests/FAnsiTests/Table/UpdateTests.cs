@@ -57,25 +57,23 @@ namespace FAnsiTests.Table
 
             string sql = updateHelper.BuildUpdate(tbl1, tbl2, queryLines);
 
-            Console.WriteLine("UPDATE Sql:" + sql);
+            TestContext.WriteLine($"UPDATE Sql:{sql}");
 
-            using (var con = db.Server.GetConnection())
-            {
-                con.Open();
+            using var con = db.Server.GetConnection();
+            con.Open();
 
-                DbCommand cmd = db.Server.GetCommand(sql, con);
-                int affectedRows = cmd.ExecuteNonQuery();
+            DbCommand cmd = db.Server.GetCommand(sql, con);
+            int affectedRows = cmd.ExecuteNonQuery();
 
-                Assert.AreEqual(1,affectedRows);
+            Assert.AreEqual(1,affectedRows);
 
-                //Frank should have got a new high score of 900
-                cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Frank'", con);
-                Assert.AreEqual(900,cmd.ExecuteScalar());
+            //Frank should have got a new high score of 900
+            cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Frank'", con);
+            Assert.AreEqual(900,cmd.ExecuteScalar());
 
-                //Dave should have his old score of 100
-                cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Dave'", con);
-                Assert.AreEqual(100, cmd.ExecuteScalar());
-            }
+            //Dave should have his old score of 100
+            cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Dave'", con);
+            Assert.AreEqual(100, cmd.ExecuteScalar());
         }
 
     }

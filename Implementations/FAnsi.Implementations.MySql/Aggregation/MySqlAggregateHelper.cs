@@ -64,19 +64,14 @@ delete from dateAxis where dt > @endDate;";
 
         public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
         {
-            switch (increment)
+            return increment switch
             {
-                case AxisIncrement.Day:
-                    return "DATE(" + columnSql + ")";
-                case AxisIncrement.Month:
-                    return "DATE_FORMAT("+columnSql+",'%Y-%m')";
-                case AxisIncrement.Year:
-                    return "YEAR(" + columnSql + ")";
-                case AxisIncrement.Quarter:
-                    return "CONCAT(YEAR(" + columnSql + "),'Q',QUARTER(" + columnSql + "))";
-                default:
-                    throw new ArgumentOutOfRangeException("increment");
-            }
+                AxisIncrement.Day => $"DATE({columnSql})",
+                AxisIncrement.Month => $"DATE_FORMAT({columnSql},'%Y-%m')",
+                AxisIncrement.Year => $"YEAR({columnSql})",
+                AxisIncrement.Quarter => $"CONCAT(YEAR({columnSql}),'Q',QUARTER({columnSql}))",
+                _ => throw new ArgumentOutOfRangeException(nameof(increment))
+            };
         }
 
 
@@ -173,7 +168,7 @@ DEALLOCATE PREPARE stmt;",
                 query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement,axisColumnWithoutAlias)),
 
                 //the order by (should be count so that heavy populated columns come first)
-                query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert <= QueryComponent.WHERE)))
+                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert <= QueryComponent.WHERE).Select(x=> query.SyntaxHelper.Escape(x.Text)))
                 );
         }
         
@@ -181,7 +176,7 @@ DEALLOCATE PREPARE stmt;",
         {
             string part1 = GetPivotPart1(query);
             
-            string nonPivotColumnSql = nonPivotColumn.GetTextWithoutAlias(query.SyntaxHelper);
+            string joinAlias = nonPivotColumn.GetAliasFromText(query.SyntaxHelper);
 
             return string.Format(@"
 {0}
@@ -213,7 +208,7 @@ DEALLOCATE PREPARE stmt;",
                 //everything inclusive of FROM but stopping before GROUP BY 
                 query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert < QueryComponent.GroupBy))),
                 
-                nonPivotColumnSql,
+                joinAlias,
 
                 //any HAVING SQL
                 query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert == QueryComponent.Having)))
@@ -249,11 +244,11 @@ DEALLOCATE PREPARE stmt;",
                 var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
                 
                 whereDateColumnNotNull += query.Lines.Any(l => l.LocationToInsert == QueryComponent.WHERE) ? "AND " : "WHERE ";
-                whereDateColumnNotNull += axisColumnWithoutAlias + " IS NOT NULL";
+                whereDateColumnNotNull += $"{axisColumnWithoutAlias} IS NOT NULL";
             }
 
             //work out how to order the pivot columns
-            string orderBy = countSqlWithoutAlias + " desc"; //default, order by the count(*) / sum(*) etc column desc
+            string orderBy = $"{countSqlWithoutAlias} desc"; //default, order by the count(*) / sum(*) etc column desc
 
             //theres an explicit topX so order by it verbatim instead
             var topXOrderByLine =
@@ -288,12 +283,12 @@ order by
 {5}
 );
 
-/* Build case when x='fish' then 1 end as 'fish', case when x='cammel' then 1 end as 'cammel' etc*/
+/* Build case when x='fish' then 1 else null end as 'fish', case when x='cammel' then 1 end as 'cammel' etc*/
 SET @columnsSelectCases = NULL;
 SELECT
   GROUP_CONCAT(
     CONCAT(
-      '{0}(case when {1} = ''', REPLACE(pivotValues.piv,'\'','\\\''), ''' then {2} end) AS `', pivotValues.piv,'`'
+      '{0}(case when {1} = ', QUOTE(pivotValues.piv), ' then {2} else null end) AS `', pivotValues.piv,'`'
     )
   ) INTO @columnsSelectCases
 FROM
@@ -371,9 +366,9 @@ pivotValues;
 //SELECT
 //  GROUP_CONCAT(DISTINCT
 //    CONCAT(
-//      'count(case when `test`.`biochemistry`.`hb_extract` = ''',
+//      'count(case when `test`.`biochemistry`.`hb_extract` = \'',
 //      b.`Pivot`,
-//      ''' then 1 end) AS `',
+//      \'' then 1 else null end) AS `',
 //      b.`Pivot`,'`'
 //    ) order by b.`CountName` desc
 //  ) INTO @columns
