@@ -7,7 +7,22 @@ env:
   MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
   ACCEPT_EULA: "Y"
   MSSQL_PID: "developer"
-  
+
+services:
+  oracle:
+    image: gvenzl/oracle-xe:latest
+    env:
+      ORACLE_RANDOM_PASSWORD: true
+      APP_USER: ora
+      APP_USER_PASSWORD: zombie
+    ports:
+      - 1521:1521
+    options: >-
+      --health-cmd healthcheck.sh
+      --health-interval 10s
+      --health-timeout 5s
+      --health-retries 10
+          
 jobs:  
   build:
 
@@ -41,7 +56,6 @@ jobs:
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: MySQL
       run: |
-        sed -i'' -e 's|</TestDatabases>|<TestDatabase><DatabaseType>PostgreSql</DatabaseType><ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432</ConnectionString></TestDatabase></TestDatabases>|' Tests/FAnsiTests/TestDatabases.xml
         sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=true/' Tests/FAnsiTests/TestDatabases.xml
         sudo systemctl start mysql.service
     - name: Test
