@@ -39,37 +39,11 @@ jobs:
         sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
         sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
-
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      if: false
-    - name: Prep for MySQL bisection
-      if: false
-      run: |
-        export PATH=/usr/lib/ccache:$PATH
-        git clone https://github.com/mysql/mysql-server.git
-        cd mysql-server
-        mkdir build
-        cd build
-        cmake .. -DDOWNLOAD_BOOST=1 -DWITH_BOOST=$HOME/my_boost
-        make -sj`nproc`
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
-      if: false
-
     - name: MySQL
       run: |
         sed -i'' -e 's|</TestDatabases>|<TestDatabase><DatabaseType>PostgreSql</DatabaseType><ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432</ConnectionString></TestDatabase></TestDatabases>|' Tests/FAnsiTests/TestDatabases.xml
         sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=true/' Tests/FAnsiTests/TestDatabases.xml
         sudo systemctl start mysql.service
-
-        #sudo curl -o /etc/apt/trusted.gpg.d/mariadb_release_signing_key.asc 'https://mariadb.org/mariadb_release_signing_key.asc'
-        #sudo sh -c "echo 'deb https://mirrors.xtom.com/mariadb/repo/10.9/ubuntu focal main' >>/etc/apt/sources.list"
-        #sudo apt-get update
-        #sudo apt-get install mariadb-server
-        #sudo mysql -uroot <<EOM
-        #ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
-        #EOM
     - name: Test
       run: dotnet test --logger "console;verbosity=minimal" --nologo
     - name: Pack
