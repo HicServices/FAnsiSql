@@ -71,10 +71,8 @@ jobs:
         #ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
         #EOM
     - name: Test
-      if: contains(github.ref,'refs/tags/')
       run: dotnet --logger "console;verbosity=minimal" --nologo
     - name: Pack
-      if: contains(github.ref,'refs/tags/')
       run: |
         mkdir -p NuGet/bin
         ln -sf Release/netstandard2.1 NuGet/bin/
