@@ -72,7 +72,7 @@ namespace FAnsi.Discovery.QuerySyntax
 
         /// <summary>
         /// Ensures that the supplied single entity object e.g. "mytable" , "mydatabase, "[mydatabase]", "`mydatabase` etc is returned wrapped in appropriate qualifiers for
-        /// the database we are providing syntax for
+        /// the database we are providing syntax for.  Returns string unchanged if null or whitespace.
         /// </summary>
         /// <param name="databaseOrTableName"></param>
         /// <returns></returns>

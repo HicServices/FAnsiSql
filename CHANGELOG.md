@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Fixed
+
+- Fixed bug where passing empty string to `EnsureWrapped` would return wrapped empty string e.g. `[]`
+
 ## [3.0.0] - 2022-08-29
 
 ### Fixed

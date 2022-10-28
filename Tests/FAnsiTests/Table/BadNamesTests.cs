@@ -1,5 +1,6 @@
 ﻿using FAnsi;
 using FAnsi.Discovery;
+using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.TableCreation;
 using NUnit.Framework;
 using System;
@@ -28,6 +29,19 @@ namespace FAnsiTests.Table
                 new DatabaseColumnRequest(BadColumnName,new DatabaseTypeRequest(typeof(string),100)), 
                 new DatabaseColumnRequest(BadColumnName2,new DatabaseTypeRequest(typeof(int))) 
             });
+
+        }
+
+        [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
+        public void Test_EnsureWrapped_EmptyExpressions(DatabaseType dbType)
+        {
+            var factory = new QuerySyntaxHelperFactory();
+            var syntax = factory.Create(dbType);
+
+            Assert.AreEqual("",syntax.EnsureWrapped(""));
+            Assert.AreEqual(" ", syntax.EnsureWrapped(" "));
+            Assert.AreEqual("\t", syntax.EnsureWrapped("\t"));
+            Assert.IsNull(syntax.EnsureWrapped(null));
 
         }
 
