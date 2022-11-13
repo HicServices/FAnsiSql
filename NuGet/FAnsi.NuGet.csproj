@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PackageId>HIC.FAnsiSql</PackageId>
+    <title>HIC.FAnsiSql</title>
     <RootNamespace>NuGet</RootNamespace>
     <AssemblyName>NuGet</AssemblyName>
     <TargetFramework>netstandard2.1</TargetFramework>
