@@ -10,7 +10,7 @@
 | Package | Source Code | Version | License | Purpose | Additional Risk Assessment |
 | ------- | ------------| --------| ------- | ------- | -------------------------- |
 | Microsoft.Data.SqlClient | [GitHub](https://github.com/dotnet/SqlClient) | [5.0.1](https://www.nuget.org/packages/Microsoft.Data.SqlClient/5.0.1) | [MIT](https://opensource.org/licenses/MIT) | Enables interaction with Microsoft Sql Server databases |  |
-| MySqlConnector | [GitHub](https://github.com/mysql-net/MySqlConnector) | [2.2.0](https://www.nuget.org/packages/MySqlConnector/2.2.0.) | [MIT](https://github.com/mysql-net/MySqlConnector/blob/master/LICENSE) | Enables interaction with MySql databases |  |
+| MySqlConnector | [GitHub](https://github.com/mysql-net/MySqlConnector) | [2.2.1](https://www.nuget.org/packages/MySqlConnector/2.2.1.) | [MIT](https://github.com/mysql-net/MySqlConnector/blob/master/LICENSE) | Enables interaction with MySql databases |  |
 | Oracle.ManagedDataAccess.Core  | Closed Source | [2.19.101](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core/2.19.101) | [OTNLA](https://www.oracle.com/downloads/licenses/distribution-license.html) | Enables interaction with Oracle databases |
 | [Nunit](https://nunit.org/) |[GitHub](https://github.com/nunit/nunit) | [3.11.0](https://www.nuget.org/packages/NUnit/3.11.0) | [MIT](https://opensource.org/licenses/MIT) | Unit testing |
 | NUnit3TestAdapter | [GitHub](https://github.com/nunit/nunit3-vs-adapter)| [3.13.0](https://www.nuget.org/packages/NUnit3TestAdapter/3.13.0) | [MIT](https://opensource.org/licenses/MIT) | Run unit tests from within Visual Studio |
