@@ -197,6 +197,9 @@ namespace FAnsi.Discovery
 
         public string EnsureWrapped(string databaseOrTableName)
         {
+            if (string.IsNullOrWhiteSpace(databaseOrTableName))
+                return databaseOrTableName;
+
             if (databaseOrTableName.Contains(DatabaseTableSeparator))
                 throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__,databaseOrTableName, DatabaseTableSeparator));
 

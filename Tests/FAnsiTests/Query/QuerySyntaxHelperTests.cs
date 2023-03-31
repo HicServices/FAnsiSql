@@ -232,7 +232,39 @@ namespace FAnsiTests.Query
                     throw new ArgumentOutOfRangeException(nameof(dbType), dbType, null);
             }
         }
-        
+
+        [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
+        public void Test_GetFullyQualifiedName_WhitespaceSchema(DatabaseType dbType)
+        {
+            ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
+            var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
+
+            foreach(var emptySchemaExpression in new [] { null,"", " ", "\t"})
+            {
+                var name = syntaxHelper.EnsureFullyQualified("mydb", emptySchemaExpression, "Troll", "MyCol");
+                Assert.IsTrue(string.Equals("MyCol", syntaxHelper.GetRuntimeName(name),StringComparison.InvariantCultureIgnoreCase));
+
+                switch (dbType)
+                {
+                    case DatabaseType.MicrosoftSQLServer:
+                        Assert.AreEqual("[mydb]..[Troll].[MyCol]",name);
+                        break;
+                    case DatabaseType.MySql:
+                        Assert.AreEqual("`mydb`.`Troll`.`MyCol`", name);
+                        break;
+                    case DatabaseType.Oracle:
+                        Assert.AreEqual("\"MYDB\".\"TROLL\".\"MYCOL\"", name);
+                        break;
+                    case DatabaseType.PostgreSql:
+                        Assert.AreEqual("\"mydb\".public.\"Troll\".\"MyCol\"", name);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(dbType), dbType, null);
+                }
+            }
+            
+        }
+
         [Test]
         public void Test_GetFullyQualifiedName_BacktickMySql()
         {
