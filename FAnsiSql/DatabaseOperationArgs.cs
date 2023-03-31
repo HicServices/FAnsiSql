@@ -76,7 +76,7 @@ public class DatabaseOperationArgs
                 case TaskStatus.Canceled:
                     throw new OperationCanceledException();
                 default:
-                    t.Wait(CancellationToken);
+                    t.Wait();
                     break;
             }
         }
