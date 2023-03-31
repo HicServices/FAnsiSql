@@ -99,7 +99,7 @@ public class MySqlServerHelper : DiscoveredServerHelper
         return null;
     }
         
-    public override string[] ListDatabases(DbConnectionStringBuilder builder)
+    public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
         var b = (MySqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
         b.Database = null!;

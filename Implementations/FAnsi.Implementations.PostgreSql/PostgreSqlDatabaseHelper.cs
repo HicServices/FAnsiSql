@@ -9,8 +9,11 @@ using Npgsql;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
+public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
 {
+    public static readonly PostgreSqlDatabaseHelper Instance = new();
+    private PostgreSqlDatabaseHelper(){}
+
     public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection,
         string database, bool includeViews, DbTransaction transaction = null)
     {
@@ -38,15 +41,15 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
         {
             cmd.Transaction = transaction as NpgsqlTransaction;
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                {
-                    //its a system table
-                    var schema = r["schemaname"] as string;
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                //its a system table
+                var schema = r["schemaname"] as string;
                     
-                    if(querySyntaxHelper.IsValidTableName((string)r["tablename"], out _))
-                        tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema));
-                }
+                if(querySyntaxHelper.IsValidTableName((string)r["tablename"], out _))
+                    tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema));
+            }
         }
             
         if (includeViews)
@@ -69,20 +72,14 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
     }
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null)
-    {
-        return Enumerable.Empty<DiscoveredTableValuedFunction>();
-    }
+        DbConnection connection, string database, DbTransaction transaction = null) =>
+        Enumerable.Empty<DiscoveredTableValuedFunction>();
 
-    public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
-    {
-        return new DiscoveredStoredprocedure[0];
-    }
+    public override DiscoveredStoredprocedure[]
+        ListStoredprocedures(DbConnectionStringBuilder builder, string database) =>
+        Array.Empty<DiscoveredStoredprocedure>();
 
-    public override IDiscoveredTableHelper GetTableHelper()
-    {
-        return new PostgreSqlTableHelper();
-    }
+    public override IDiscoveredTableHelper GetTableHelper() => PostgreSqlTableHelper.Instance;
 
     public override void DropDatabase(DiscoveredDatabase database)
     {

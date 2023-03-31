@@ -7,9 +7,10 @@ using FAnsi.Implementations.PostgreSql.Update;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlSyntaxHelper : QuerySyntaxHelper
+public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
 {
-    public PostgreSqlSyntaxHelper() : base(new PostgreSqlTypeTranslater(), new PostgreSqlAggregateHelper(), new PostgreSqlUpdateHelper(), DatabaseType.PostgreSql)
+    public static readonly PostgreSqlSyntaxHelper Instance = new();
+    private PostgreSqlSyntaxHelper() : base(PostgreSqlTypeTranslater.Instance,PostgreSqlAggregateHelper.Instance,PostgreSqlUpdateHelper.Instance, DatabaseType.PostgreSql)
     {
     }
 

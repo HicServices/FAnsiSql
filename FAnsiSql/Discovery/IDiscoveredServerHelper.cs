@@ -42,7 +42,7 @@ public interface IDiscoveredServerHelper
 
     DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder);
 
-    string[] ListDatabases(DbConnectionStringBuilder builder);
+    IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder);
     string[] ListDatabasesAsync(DbConnectionStringBuilder builder, CancellationToken token);
 
     IDiscoveredDatabaseHelper GetDatabaseHelper();

@@ -38,7 +38,7 @@ internal class TopXTests :DatabaseTests
                 $"SELECT {topx.SQL} {f} FROM {tbl.GetFullyQualifiedName()} ORDER BY {f} {(asc ? "ASC" : "DESC")}",
             QueryComponent.Postfix =>
                 $"SELECT {f} FROM {tbl.GetFullyQualifiedName()} ORDER BY {f} {(asc ? "ASC " : "DESC ")}{topx.SQL}",
-            _ => throw new ArgumentOutOfRangeException("Did not expect this location")
+            _ => throw new ArgumentOutOfRangeException(nameof(type),$"Did not expect location {topx.Location} for {type}")
         };
 
         using(var con = db.Server.GetConnection())

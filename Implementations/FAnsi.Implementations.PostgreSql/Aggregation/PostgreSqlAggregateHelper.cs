@@ -5,16 +5,15 @@ using FAnsi.Discovery.QuerySyntax.Aggregation;
 
 namespace FAnsi.Implementations.PostgreSql.Aggregation;
 
-public class PostgreSqlAggregateHelper : AggregateHelper
+public sealed class PostgreSqlAggregateHelper : AggregateHelper
 {
-    protected override IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return new PostgreSqlSyntaxHelper();
-    }
+    public static readonly PostgreSqlAggregateHelper Instance = new();
+    private PostgreSqlAggregateHelper(){}
+    protected override IQuerySyntaxHelper GetQuerySyntaxHelper() => PostgreSqlSyntaxHelper.Instance;
 
     protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
     {
-        string interval = query.Axis.AxisIncrement switch
+        var interval = query.Axis.AxisIncrement switch
         {
             AxisIncrement.Day => "1 day",
             AxisIncrement.Month => "1 month",
@@ -58,15 +57,9 @@ ORDER BY
         return sql;
     }
 
-    protected override string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn)
-    {
-        throw new NotImplementedException();
-    }
+    protected override string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn) => throw new NotImplementedException();
 
-    protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query)
-    {
-        throw new NotImplementedException();
-    }
+    protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query) => throw new NotImplementedException();
 
     public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql) =>
         increment switch

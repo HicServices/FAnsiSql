@@ -33,7 +33,7 @@ public class PostgreSqlBulkCopy : BulkCopy
         sb.Append(")");
         sb.Append(" FROM STDIN (FORMAT BINARY)");
 
-        var tt = new PostgreSqlTypeTranslater();
+        var tt = PostgreSqlTypeTranslater.Instance;
 
         var dataColumns = matchedColumns.Keys.ToArray();
         var types = matchedColumns.Keys.Select(v => tt.GetNpgsqlDbTypeForCSharpType(v.DataType)).ToArray();

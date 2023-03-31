@@ -12,17 +12,17 @@ public class DiscoveredColumn : IHasFullyQualifiedNameToo,ISupplementalColumnInf
     /// <summary>
     /// The <see cref="DiscoveredTable"/> on which the <see cref="DiscoveredColumn"/> was found
     /// </summary>
-    public DiscoveredTable Table { get; private set; }
+    public DiscoveredTable Table { get; }
 
     /// <summary>
     /// Stateless helper class with DBMS specific implementation of the logic required by <see cref="DiscoveredColumn"/>.
     /// </summary>
-    public IDiscoveredColumnHelper Helper;
+    public readonly IDiscoveredColumnHelper Helper;
 
     /// <summary>
     /// True if the column allows rows with nulls in this column
     /// </summary>
-    public bool AllowNulls { get; private set; }
+    public bool AllowNulls { get; }
 
     /// <summary>
     /// True if the column is part of the <see cref="Table"/> primary key (a primary key can consist of mulitple columns)

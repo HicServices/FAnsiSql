@@ -53,7 +53,7 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
     }
 
     public override Dictionary<string, string> GetSQLFunctionsDictionary() =>
-        new Dictionary<string, string>
+        new()
         {
             { "left", "LEFT ( character_expression , integer_expression )" },
             { "right", "RIGHT ( character_expression , integer_expression )" },

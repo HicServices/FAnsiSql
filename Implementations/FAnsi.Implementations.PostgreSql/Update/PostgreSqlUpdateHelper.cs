@@ -9,6 +9,9 @@ namespace FAnsi.Implementations.PostgreSql.Update;
 
 public class PostgreSqlUpdateHelper : UpdateHelper
 {
+    public static readonly PostgreSqlUpdateHelper Instance = new();
+    private PostgreSqlUpdateHelper(){}
+
     protected override string BuildUpdateImpl(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
     {
         //https://stackoverflow.com/a/7869611

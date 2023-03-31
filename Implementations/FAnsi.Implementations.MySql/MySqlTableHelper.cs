@@ -124,7 +124,7 @@ WHERE table_schema = @db
     }
 
 
-    public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,
+    public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
         DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
     {
         throw new NotImplementedException();

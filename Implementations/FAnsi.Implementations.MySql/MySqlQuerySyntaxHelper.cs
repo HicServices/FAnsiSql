@@ -21,7 +21,7 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "`";
 
-    private MySqlQuerySyntaxHelper() : base(new MySqlTypeTranslater(), new MySqlAggregateHelper(),new MySqlUpdateHelper(),DatabaseType.MySql)//no specific type translation required
+    private MySqlQuerySyntaxHelper() : base(MySqlTypeTranslater.Instance, MySqlAggregateHelper.Instance,MySqlUpdateHelper.Instance,DatabaseType.MySql)//no specific type translation required
     {
     }
 
@@ -47,7 +47,7 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
         return $"{EnsureWrapped(databaseName)}{DatabaseTableSeparator}{EnsureWrapped(tableName)}";
     }
 
-    public override TopXResponse HowDoWeAchieveTopX(int x) => new TopXResponse($"LIMIT {x}",QueryComponent.Postfix);
+    public override TopXResponse HowDoWeAchieveTopX(int x) => new($"LIMIT {x}",QueryComponent.Postfix);
 
     public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
     {
@@ -99,7 +99,7 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
         return Functions;
     }
 
-    private static readonly Dictionary<string, string> Functions = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> Functions = new()
     {
         {"left", "LEFT ( string , length)"},
         {"right", "RIGHT ( string , length )"},

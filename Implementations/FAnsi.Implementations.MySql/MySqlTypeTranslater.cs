@@ -1,20 +1,20 @@
 ﻿using System;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using FAnsi.Discovery.TypeTranslation;
-using FAnsi.Extensions;
 
 namespace FAnsi.Implementations.MySql;
 
 public class MySqlTypeTranslater : TypeTranslater
 {
+    public static readonly MySqlTypeTranslater Instance = new();
+
     //yup thats right!, long is string (MEDIUMTEXT)
     //https://dev.mysql.com/doc/refman/8.0/en/other-vendor-data-types.html
     private static readonly Regex AlsoBitRegex = new(@"tinyint\(1\)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
     private static readonly Regex AlsoStringRegex = new("(long)|(enum)|(set)|(text)|(mediumtext)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
     private static readonly Regex AlsoFloatingPoint = new("^(dec)|(fixed)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
 
-    public MySqlTypeTranslater() : base(4000, 4000)
+    private MySqlTypeTranslater() : base(4000, 4000)
     {
         //match bigint and bigint(20) etc
         ByteRegex = new Regex(@"^(tinyint)|(int1)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
@@ -47,7 +47,7 @@ public class MySqlTypeTranslater : TypeTranslater
 
     protected override bool IsString(string sqlType)
     {
-        if (sqlType.Contains("binary",CompareOptions.IgnoreCase))
+        if (sqlType.Contains("binary",StringComparison.InvariantCultureIgnoreCase))
             return false;
 
         return base.IsString(sqlType) || AlsoStringRegex.IsMatch(sqlType);

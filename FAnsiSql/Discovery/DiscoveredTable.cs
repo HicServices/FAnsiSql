@@ -116,7 +116,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
     /// <param name="managedTransaction">Optional - if set the connection to list tables will be sent on the connection on which the current
     /// <paramref name="managedTransaction"/> is open</param>
     /// <returns></returns>
-    public virtual DiscoveredColumn[] DiscoverColumns(IManagedTransaction managedTransaction=null)
+    public DiscoveredColumn[] DiscoverColumns(IManagedTransaction managedTransaction=null)
     {
         using var connection = Database.Server.GetManagedConnection(managedTransaction);
         return Helper.DiscoverColumns(this, connection, Database.GetRuntimeName());
@@ -177,12 +177,12 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
     /// schema of the <see cref="DiscoveredTable"/></param>
     /// <param name="transaction">Optional - if set the connection to fetch the data will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
     /// <returns></returns>
-    public virtual DataTable GetDataTable(int topX = int.MaxValue,bool enforceTypesAndNullness = true, IManagedTransaction transaction = null)
+    public DataTable GetDataTable(int topX = int.MaxValue,bool enforceTypesAndNullness = true, IManagedTransaction transaction = null)
     {
         return  GetDataTable(new DatabaseOperationArgs {TransactionIfAny = transaction},topX,enforceTypesAndNullness);
     }
 
-    public virtual DataTable GetDataTable(DatabaseOperationArgs args,int topX = int.MaxValue, bool enforceTypesAndNullness = true)
+    public DataTable GetDataTable(DatabaseOperationArgs args,int topX = int.MaxValue, bool enforceTypesAndNullness = true)
     {
         var dt = new DataTable();
             
@@ -449,8 +449,8 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
         using var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
         foreach (var p in toInsert
                      .Select(kvp => new { kvp, parameter = server.Helper.GetParameter(_parameterNames[kvp.Key]) })
-                     .Select(@t =>
-                         GetQuerySyntaxHelper().GetParameter(@t.parameter, @t.kvp.Key, @t.kvp.Value, culture)))
+                     .Select(t =>
+                         GetQuerySyntaxHelper().GetParameter(t.parameter, t.kvp.Key, t.kvp.Value, culture)))
             cmd.Parameters.Add(p);
 
         return Helper.ExecuteInsertReturningIdentity(this, cmd, connection.ManagedTransaction);
@@ -481,7 +481,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
 
         foreach (var k in toInsert.Keys)
         {
-            var match = cols.SingleOrDefault(c => c.GetRuntimeName().Equals(k, StringComparison.CurrentCultureIgnoreCase));
+            var match = cols.SingleOrDefault(c => c.GetRuntimeName().Equals(k, StringComparison.InvariantCultureIgnoreCase));
             if(match == null)
                 throw new ColumnMappingException(string.Format(FAnsiStrings.DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__, k,_table));
 

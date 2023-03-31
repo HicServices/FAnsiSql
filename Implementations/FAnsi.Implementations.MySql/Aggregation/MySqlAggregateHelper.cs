@@ -7,6 +7,8 @@ namespace FAnsi.Implementations.MySql.Aggregation;
 
 public class MySqlAggregateHelper : AggregateHelper
 {
+    public static readonly MySqlAggregateHelper Instance=new();
+    private MySqlAggregateHelper() {}
     private string GetDateAxisTableDeclaration(IQueryAxis axis)
     {
         //if the axis is days then there are likely to be thousands of them but if we start adding thousands of years

@@ -31,15 +31,9 @@ public class PostgreSqlServerHelper : DiscoveredServerHelper
         return builder;
     }
 
-    public override IDiscoveredDatabaseHelper GetDatabaseHelper()
-    {
-        return new PostgreSqlDatabaseHelper();
-    }
+    public override IDiscoveredDatabaseHelper GetDatabaseHelper() => PostgreSqlDatabaseHelper.Instance;
 
-    public override IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return new PostgreSqlSyntaxHelper();
-    }
+    public override IQuerySyntaxHelper GetQuerySyntaxHelper() => PostgreSqlSyntaxHelper.Instance;
 
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
@@ -80,7 +74,7 @@ public class PostgreSqlServerHelper : DiscoveredServerHelper
     }
 
 
-    public override string[] ListDatabases(DbConnectionStringBuilder builder)
+    public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
         //create a copy so as not to corrupt the original
         var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString)

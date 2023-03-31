@@ -131,7 +131,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
         return null;
     }
 
-    public override string[] ListDatabases(DbConnectionStringBuilder builder)
+    public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
         //todo do we have to edit the builder in here incase it is pointed at nothing?
         using var con = new OracleConnection(builder.ConnectionString);

@@ -56,7 +56,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         return Convert.ToInt32(args.ExecuteScalar(cmd));
     }
 
-    public abstract DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
+    public abstract IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
 
     public abstract IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture);
 
@@ -283,7 +283,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             _ => false
         };
 
-    public virtual bool HasPrecisionAndScale(string columnType) =>
+    public bool HasPrecisionAndScale(string columnType) =>
         columnType.ToLowerInvariant() switch
         {
             "decimal" => true,

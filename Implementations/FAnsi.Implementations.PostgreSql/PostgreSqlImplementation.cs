@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlImplementation : Implementation<NpgsqlConnectionStringBuilder>
+public sealed class PostgreSqlImplementation : Implementation<NpgsqlConnectionStringBuilder>
 {
     public PostgreSqlImplementation() : base(DatabaseType.PostgreSql)
     {
@@ -16,5 +16,5 @@ public class PostgreSqlImplementation : Implementation<NpgsqlConnectionStringBui
 
     public override bool IsFor(DbConnection connection) => connection is NpgsqlConnection;
 
-    public override IQuerySyntaxHelper GetQuerySyntaxHelper() => new PostgreSqlSyntaxHelper();
+    public override IQuerySyntaxHelper GetQuerySyntaxHelper() => PostgreSqlSyntaxHelper.Instance;
 }

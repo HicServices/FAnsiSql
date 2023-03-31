@@ -69,33 +69,31 @@ public class DatabaseOperationArgs
             
         try
         {
-            if (t.Status == TaskStatus.Faulted)
-                throw t.Exception?? new Exception("Task crashed without Exception!");
-                
-            if(t.Status != TaskStatus.Canceled)
-                t.Wait();
-            else
-                throw new OperationCanceledException();
-                
+            switch (t.Status)
+            {
+                case TaskStatus.Faulted:
+                    throw t.Exception?? new Exception("Task crashed without Exception!");
+                case TaskStatus.Canceled:
+                    throw new OperationCanceledException();
+                default:
+                    t.Wait(CancellationToken);
+                    break;
+            }
         }
         catch (AggregateException e)
         {
             if (e.InnerExceptions.Count == 1)
                 throw e.InnerExceptions[0];
-                
             throw;
         }
             
         if (!t.IsCompleted) 
             cmd.Cancel();
-            
-        if( t.Exception != null)
-            if (t.Exception.InnerExceptions.Count == 1)
-                throw t.Exception.InnerExceptions[0];
-            else
-                throw t.Exception;
 
-        return t.Result;
+        if (t.Exception == null) return t.Result;
+        if (t.Exception.InnerExceptions.Count == 1)
+            throw t.Exception.InnerExceptions[0];
+        throw t.Exception;
     }
         
     public void Fill(DbDataAdapter da, DbCommand cmd, DataTable dt)

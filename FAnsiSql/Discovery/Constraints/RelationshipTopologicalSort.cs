@@ -49,24 +49,24 @@ public class RelationshipTopologicalSort
     /// <param name="nodes">All nodes of directed acyclic graph.</param>
     /// <param name="edges">All edges of directed acyclic graph.</param>
     /// <returns>Sorted node in topological order.</returns>
-    private List<T> TopologicalSort<T>(HashSet<T> nodes, HashSet<Tuple<T, T>> edges) where T : IEquatable<T>
+    private List<T> TopologicalSort<T>(IEnumerable<T> nodes, ICollection<Tuple<T, T>> edges) where T : IEquatable<T>
     {
         // Empty list that will contain the sorted elements
-        var L = new List<T>();
+        var l = new List<T>();
 
         // Set of all nodes with no incoming edges
-        var S = new HashSet<T>(nodes.Where(n => edges.All(e => e.Item2.Equals(n) == false)));
+        var s = new HashSet<T>(nodes.Where(n => edges.All(e => e.Item2.Equals(n) == false)));
 
         // while S is non-empty do
-        while (S.Any())
+        while (s.Any())
         {
 
             //  remove a node n from S
-            var n = S.First();
-            S.Remove(n);
+            var n = s.First();
+            s.Remove(n);
 
             // add n to tail of L
-            L.Add(n);
+            l.Add(n);
 
             // for each node m with an edge e from n to m do
             foreach (var e in edges.Where(e => e.Item1.Equals(n)).ToList())
@@ -80,7 +80,7 @@ public class RelationshipTopologicalSort
                 if (edges.All(me => me.Item2.Equals(m) == false))
                 {
                     // insert m into S
-                    S.Add(m);
+                    s.Add(m);
                 }
             }
         }
@@ -92,6 +92,6 @@ public class RelationshipTopologicalSort
             
             
         // return L (a topologically sorted order)
-        return L;
+        return l;
     }
 }

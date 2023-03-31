@@ -9,12 +9,11 @@ public abstract class UpdateHelper:IUpdateHelper
     /// <summary>
     /// You only have to support CustomLines that fulfil this role in the query i.e. no parameter support etc
     /// </summary>
-    protected QueryComponent[] permissableLocations = {QueryComponent.SET, QueryComponent.JoinInfoJoin, QueryComponent.WHERE};
+    private readonly QueryComponent[] _permissableLocations = {QueryComponent.SET, QueryComponent.JoinInfoJoin, QueryComponent.WHERE};
 
     public string BuildUpdate(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
     {
-        var illegalLine = lines.FirstOrDefault(l => !permissableLocations.Contains(l.LocationToInsert));
-        if(illegalLine != null)
+        if(lines.Any(l => !_permissableLocations.Contains(l.LocationToInsert)))
             throw new NotSupportedException();
 
         return BuildUpdateImpl(table1, table2, lines);

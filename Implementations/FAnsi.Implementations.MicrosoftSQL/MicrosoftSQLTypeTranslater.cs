@@ -11,6 +11,7 @@ public class MicrosoftSQLTypeTranslater : TypeTranslater
 
     private MicrosoftSQLTypeTranslater() : base(8000, 4000)
     {
+        DateRegex = new Regex("date", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
     }
 
     protected override string GetDateDateTimeDataType() => "datetime2";

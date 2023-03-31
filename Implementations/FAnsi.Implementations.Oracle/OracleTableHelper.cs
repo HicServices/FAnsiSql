@@ -180,7 +180,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         throw new NotImplementedException();
     }
         
-    public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,
+    public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
         DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
     {
         throw new NotImplementedException();

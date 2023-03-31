@@ -14,6 +14,8 @@ namespace FAnsi.Implementations.PostgreSql;
 
 public class PostgreSqlTableHelper : DiscoveredTableHelper
 {
+    public static readonly PostgreSqlTableHelper Instance = new();
+    private PostgreSqlTableHelper() {}
     public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
     {
         return $"SELECT * FROM {table.GetFullyQualifiedName()} FETCH FIRST {topX} ROWS ONLY";
@@ -130,15 +132,10 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
     }
 
 
-    public override IDiscoveredColumnHelper GetColumnHelper()
-    {
-        return new PostgreSqlColumnHelper();
-    }
+    public override IDiscoveredColumnHelper GetColumnHelper() => PostgreSqlColumnHelper.Instance;
 
-    public override void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop)
-    {
+    public override void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop) =>
         throw new NotImplementedException();
-    }
 
     public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
     {
@@ -148,16 +145,11 @@ DROP COLUMN {columnToDrop.GetWrappedName()};",(NpgsqlConnection) connection);
         cmd.ExecuteNonQuery();
     }
 
-    public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,
-        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
-    {
+    public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction) =>
         throw new NotImplementedException();
-    }
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture)
-    {
-        return new PostgreSqlBulkCopy(discoveredTable, connection,culture);
-    }
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) => new PostgreSqlBulkCopy(discoveredTable, connection,culture);
 
     public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd,
         IManagedTransaction transaction = null)
@@ -213,55 +205,52 @@ order by c.constraint_name, x.ordinal_position";
             cmd.Parameters.Add(p2);
 
             //fill data table to avoid multiple active readers
-            using (var dt = new DataTable())
+            using var dt = new DataTable();
+            using(var da = new NpgsqlDataAdapter((NpgsqlCommand) cmd))
+                da.Fill(dt);
+
+            foreach(DataRow r in dt.Rows)
             {
-                using(var da = new NpgsqlDataAdapter((NpgsqlCommand) cmd))
-                    da.Fill(dt);
+                var fkName = r["constraint_name"].ToString();
 
-                foreach(DataRow r in dt.Rows)
+                DiscoveredRelationship current;
+
+                //could be a 2+ columns foreign key?
+                if (toReturn.ContainsKey(fkName))
                 {
-                    var fkName = r["constraint_name"].ToString();
-
-                    DiscoveredRelationship current;
-
-                    //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
-                    {
-                        current = toReturn[fkName];
-                    }
-                    else
-                    {
-                        var pkDb = table.Database.GetRuntimeName();
-                        var pkSchema = r["table_schema"].ToString();
-                        var pkTableName = r["table_name"].ToString();
-
-                        var fkSchema = r["foreign_table_schema"].ToString();
-                        var fkTableName = r["foreign_table_name"].ToString();
-
-                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
-                        var fktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(fkTableName,fkSchema);
-
-                        var deleteRule = CascadeRule.Unknown;
-
-                        var deleteRuleString = r["delete_rule"].ToString();
-
-                        deleteRule = deleteRuleString switch
-                        {
-                            "CASCADE" => CascadeRule.Delete,
-                            "NO ACTION" => CascadeRule.NoAction,
-                            "RESTRICT" => CascadeRule.NoAction,
-                            "SET NULL" => CascadeRule.SetNull,
-                            "SET DEFAULT" => CascadeRule.SetDefault,
-                            _ => deleteRule
-                        };
-
-                        current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
-                        toReturn.Add(current.Name, current);
-                    }
-
-                    current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
+                    current = toReturn[fkName];
                 }
-            
+                else
+                {
+                    var pkDb = table.Database.GetRuntimeName();
+                    var pkSchema = r["table_schema"].ToString();
+                    var pkTableName = r["table_name"].ToString();
+
+                    var fkSchema = r["foreign_table_schema"].ToString();
+                    var fkTableName = r["foreign_table_name"].ToString();
+
+                    var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
+                    var fktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(fkTableName,fkSchema);
+
+                    var deleteRule = CascadeRule.Unknown;
+
+                    var deleteRuleString = r["delete_rule"].ToString();
+
+                    deleteRule = deleteRuleString switch
+                    {
+                        "CASCADE" => CascadeRule.Delete,
+                        "NO ACTION" => CascadeRule.NoAction,
+                        "RESTRICT" => CascadeRule.NoAction,
+                        "SET NULL" => CascadeRule.SetNull,
+                        "SET DEFAULT" => CascadeRule.SetDefault,
+                        _ => deleteRule
+                    };
+
+                    current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                    toReturn.Add(current.Name, current);
+                }
+
+                current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
             }
         }
             
@@ -270,7 +259,7 @@ order by c.constraint_name, x.ordinal_position";
 
     protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
     {
-        var syntax = new PostgreSqlSyntaxHelper();
+        var syntax = PostgreSqlSyntaxHelper.Instance;
 
         return $@"ALTER TABLE {discoveredTable.GetFullyQualifiedName()}
                 RENAME TO {syntax.EnsureWrapped(newName)}";

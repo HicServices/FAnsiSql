@@ -8,35 +8,35 @@ namespace FAnsi.Discovery.TypeTranslation;
 /// <inheritdoc cref="ITypeTranslater"/>
 public abstract class TypeTranslater:ITypeTranslater
 {
-    protected const string StringSizeRegexPattern = @"\(([0-9]+)\)";
-    protected const string DecimalsBeforeAndAfterPattern = @"\(([0-9]+),([0-9]+)\)";
+    private const string StringSizeRegexPattern = @"\(([0-9]+)\)";
+    private const string DecimalsBeforeAndAfterPattern = @"\(([0-9]+),([0-9]+)\)";
 
     //Take special note of the use or absence of ^ in the regex to do Contains or StartsWith
     //Ideally dont use $ (end of string) since databases can stick extraneous stuff on the end in many cases
 
-    protected static readonly Regex BitRegex = new("^(bit)|(bool)|(boolean)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex BitRegex = new("^(bit)|(bool)|(boolean)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
     protected Regex ByteRegex = new("^tinyint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
     protected Regex SmallIntRegex = new("^smallint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
     protected Regex IntRegex = new("^(int)|(integer)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
     protected Regex LongRegex = new("^bigint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected Regex DateRegex = new("date", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    protected Regex DateRegex;
     protected Regex TimeRegex = new("^time$", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected static readonly Regex StringRegex = new("(char)|(text)|(xml)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected static readonly Regex ByteArrayRegex = new("(binary)|(blob)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected static readonly Regex FloatingPointRegex = new("^(float)|(decimal)|(numeric)|(real)|(money)|(smallmoney)|(double)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected static readonly Regex GuidRegex = new("^uniqueidentifier",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex StringRegex = new("(char)|(text)|(xml)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex ByteArrayRegex = new("(binary)|(blob)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex FloatingPointRegex = new("^(float)|(decimal)|(numeric)|(real)|(money)|(smallmoney)|(double)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex GuidRegex = new("^uniqueidentifier",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
 
     /// <summary>
     /// The maximum number of characters to declare explicitly in the char type (e.g. varchar(500)) before instead declaring the text/varchar(max) etc type
     /// appropriate to the database engine being targeted
     /// </summary>
-    protected int MaxStringWidthBeforeMax;
+    private readonly int MaxStringWidthBeforeMax;
 
     /// <summary>
     /// The size to declare string fields when the API user has neglected to supply a length.  This should be high, if you want to avoid lots of extra long columns
     /// use <see cref="Guesser"/> to determine the required length/type at runtime.
     /// </summary>
-    protected int StringWidthWhenNotSupplied;
+    private readonly int StringWidthWhenNotSupplied;
         
     /// <summary>
     /// 
@@ -94,17 +94,17 @@ public abstract class TypeTranslater:ITypeTranslater
         throw new TypeNotMappedException(string.Format(FAnsiStrings.TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__, t.Name, GetType().Name));
     }
         
-    protected virtual string GetByteArrayDataType()
+    protected string GetByteArrayDataType()
     {
         return "varbinary(max)";
     }
 
-    protected virtual string GetByteDataType()
+    protected string GetByteDataType()
     {
         return "tinyint";
     }
 
-    protected virtual string GetFloatingPointDataType(DecimalSize decimalSize)
+    protected string GetFloatingPointDataType(DecimalSize decimalSize)
     {
         if (decimalSize == null || decimalSize.IsEmpty)
             return "decimal(20,10)";
@@ -164,12 +164,12 @@ public abstract class TypeTranslater:ITypeTranslater
         return "bit";
     }
 
-    protected virtual string GetSmallIntDataType()
+    protected string GetSmallIntDataType()
     {
         return "smallint";
     }
 
-    protected virtual string GetIntDataType()
+    protected string GetIntDataType()
     {
         return "int";
     }
@@ -179,7 +179,7 @@ public abstract class TypeTranslater:ITypeTranslater
         return "bigint";
     }
 
-    protected virtual string GetGuidDataType()
+    protected string GetGuidDataType()
     {
         return "uniqueidentifier";
     }
@@ -187,15 +187,11 @@ public abstract class TypeTranslater:ITypeTranslater
     /// <inheritdoc/>
     public Type GetCSharpTypeForSQLDBType(string sqlType)
     {
-        var result = TryGetCSharpTypeForSQLDBType(sqlType);
-
-        if (result == null)
+        return TryGetCSharpTypeForSQLDBType(sqlType) ??
             throw new TypeNotMappedException(string.Format(
                 FAnsiStrings
                     .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
                 sqlType, GetType().Name));
-
-        return result;
     }
 
     /// <inheritdoc/>
@@ -318,7 +314,7 @@ public abstract class TypeTranslater:ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    public virtual bool IsUnicode(string sqlType)
+    public bool IsUnicode(string sqlType)
     {
         return sqlType != null && sqlType.StartsWith("n",StringComparison.CurrentCultureIgnoreCase);
     }
@@ -384,7 +380,7 @@ public abstract class TypeTranslater:ITypeTranslater
     /// currently loaded data.
     /// </summary>
     /// <returns></returns>
-    protected virtual int GetStringLengthForTimeSpan()
+    protected int GetStringLengthForTimeSpan()
     {
         /*
          * 
@@ -415,7 +411,7 @@ select LEN(dt) from omgTimes
     /// currently loaded data.
     /// </summary>
     /// <returns></returns>
-    protected virtual int GetStringLengthForDateTime()
+    protected int GetStringLengthForDateTime()
     {
         /*
          To determine this you can run the following SQL:
@@ -440,7 +436,7 @@ select LEN(dt) from omgdates
     {
         return BitRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsByte(string sqlType)
+    protected bool IsByte(string sqlType)
     {
         return ByteRegex.IsMatch(sqlType);
     }
@@ -452,15 +448,15 @@ select LEN(dt) from omgdates
     {
         return IntRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsLong(string sqlType)
+    protected bool IsLong(string sqlType)
     {
         return LongRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsDate(string sqlType)
+    protected bool IsDate(string sqlType)
     {
         return DateRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsTime(string sqlType)
+    protected bool IsTime(string sqlType)
     {
         return TimeRegex.IsMatch(sqlType);
     }
@@ -476,7 +472,7 @@ select LEN(dt) from omgdates
     {
         return FloatingPointRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsGuid(string sqlType)
+    protected bool IsGuid(string sqlType)
     {
         return GuidRegex.IsMatch(sqlType);
     }

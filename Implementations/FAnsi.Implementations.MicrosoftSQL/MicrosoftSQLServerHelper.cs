@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Runtime.InteropServices;
 using Microsoft.Data.SqlClient;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
@@ -77,7 +76,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
     #endregion
 
         
-    public override string[] ListDatabases(DbConnectionStringBuilder builder)
+    public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
         //create a copy so as not to corrupt the original
         var b = new SqlConnectionStringBuilder(builder.ConnectionString)

@@ -20,12 +20,12 @@ namespace FAnsiTests;
 [NonParallelizable]
 public class DatabaseTests
 {
-    protected Dictionary<DatabaseType,string> TestConnectionStrings = new();
+    protected readonly Dictionary<DatabaseType,string> TestConnectionStrings = new();
 
-    protected bool AllowDatabaseCreation;
+    private bool _allowDatabaseCreation;
     private string _testScratchDatabase;
 
-    protected const string TestFilename = "TestDatabases.xml";
+    private const string TestFilename = "TestDatabases.xml";
 
     [OneTimeSetUp]
     public void CheckFiles()
@@ -48,19 +48,15 @@ public class DatabaseTests
             if(root == null)
                 throw new Exception($"Missing element 'TestDatabases' in {TestFilename}");
 
-            var settings = root.Element("Settings");
+            var settings = root.Element("Settings") ??
+                           throw new Exception($"Missing element 'Settings' in {TestFilename}");
 
-            if (settings == null)
-                throw new Exception($"Missing element 'Settings' in {TestFilename}");
+            var e = settings.Element("AllowDatabaseCreation") ??
+                    throw new Exception($"Missing element 'AllowDatabaseCreation' in {TestFilename}");
 
-            var e = settings.Element("AllowDatabaseCreation");
-            if (e == null)
-                throw new Exception($"Missing element 'AllowDatabaseCreation' in {TestFilename}");
+            _allowDatabaseCreation = Convert.ToBoolean(e.Value);
 
-            AllowDatabaseCreation = Convert.ToBoolean(e.Value);
-
-            e = settings.Element("TestScratchDatabase");
-            if (e == null)
+            e = settings.Element("TestScratchDatabase") ??
                 throw new Exception($"Missing element 'TestScratchDatabase' in {TestFilename}");
 
             _testScratchDatabase = e.Value;
@@ -104,7 +100,7 @@ public class DatabaseTests
         var db = server.ExpectDatabase(_testScratchDatabase);
 
         if(!db.Exists())
-            if(AllowDatabaseCreation)
+            if(_allowDatabaseCreation)
                 db.Create();
             else
             {
@@ -141,31 +137,31 @@ public class DatabaseTests
 
     protected void AssertCanCreateDatabases()
     {
-        if(!AllowDatabaseCreation)
+        if(!_allowDatabaseCreation)
             Assert.Inconclusive("Test cannot run when AllowDatabaseCreation is false");
     }
 
-    protected bool AreBasicallyEquals(object o, object o2, bool handleSlashRSlashN = true)
+    private static bool AreBasicallyEquals(object o, object o2, bool handleSlashRSlashN = true)
     {
         //if they are legit equals
         if (Equals(o, o2))
             return true;
 
         //if they are null but basically the same
-        var oIsNull = o == null || o == DBNull.Value || o?.ToString()?.Equals("0")==true;
-        var o2IsNull = o2 == null || o2 == DBNull.Value || o2?.ToString()?.Equals("0")==true;
+        var oIsNull = o == null || o == DBNull.Value || o.ToString()?.Equals("0")==true;
+        var o2IsNull = o2 == null || o2 == DBNull.Value || o2.ToString()?.Equals("0")==true;
 
         if (oIsNull || o2IsNull)
             return oIsNull == o2IsNull;
 
         //they are not null so tostring them deals with int vs long etc that DbDataAdapters can be a bit flaky on
         if (handleSlashRSlashN)
-            return string.Equals(o?.ToString()?.Replace("\r", "").Replace("\n", ""), o2?.ToString()?.Replace("\r", "").Replace("\n", ""));
+            return string.Equals(o.ToString()?.Replace("\r", "").Replace("\n", ""), o2.ToString()?.Replace("\r", "").Replace("\n", ""));
 
         return string.Equals(o.ToString(), o2.ToString());
     }
 
-    protected void AssertAreEqual(DataTable dt1, DataTable dt2)
+    protected static void AssertAreEqual(DataTable dt1, DataTable dt2)
     {
         Assert.AreEqual(dt1.Columns.Count, dt2.Columns.Count, "DataTables had a column count mismatch");
         Assert.AreEqual(dt1.Rows.Count, dt2.Rows.Count, "DataTables had a row count mismatch");

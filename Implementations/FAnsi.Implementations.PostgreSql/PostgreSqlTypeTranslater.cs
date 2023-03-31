@@ -5,14 +5,13 @@ using NpgsqlTypes;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlTypeTranslater : TypeTranslater
+public sealed class PostgreSqlTypeTranslater : TypeTranslater
 {
-    private static readonly Regex PgDateRegex= new Regex("timestamp", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex PgTimeRegex = new Regex("^time ", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant); //space is important
-    public PostgreSqlTypeTranslater() : base(8000, 4000)
+    public static readonly PostgreSqlTypeTranslater Instance = new();
+    private PostgreSqlTypeTranslater() : base(8000, 4000)
     {
-        DateRegex = PgDateRegex;
-        TimeRegex = PgTimeRegex;
+        DateRegex = new Regex("timestamp", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        TimeRegex = new Regex("^time ", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant); //space is important
     }
 
     public override string GetStringDataTypeWithUnlimitedWidth()

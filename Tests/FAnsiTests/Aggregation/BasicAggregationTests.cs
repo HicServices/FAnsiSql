@@ -17,9 +17,9 @@ internal class BasicAggregationTests : AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine("count(*)", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
-            new CustomLine($"FROM {tbl.GetFullyQualifiedName()}", QueryComponent.FROM)
+            new("SELECT", QueryComponent.SELECT),
+            new("count(*)", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
+            new($"FROM {tbl.GetFullyQualifiedName()}", QueryComponent.FROM)
         };
 
         var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null);
@@ -41,14 +41,14 @@ internal class BasicAggregationTests : AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine("count(*),", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
-            new CustomLine(category.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn),
-            new CustomLine($"FROM {tbl.GetFullyQualifiedName()}", QueryComponent.FROM),
-            new CustomLine("GROUP BY", QueryComponent.GroupBy),
-            new CustomLine(category.GetFullyQualifiedName(), QueryComponent.GroupBy),
-            new CustomLine("ORDER BY", QueryComponent.OrderBy),
-            new CustomLine(category.GetFullyQualifiedName(), QueryComponent.OrderBy)
+            new("SELECT", QueryComponent.SELECT),
+            new("count(*),", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
+            new(category.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn),
+            new($"FROM {tbl.GetFullyQualifiedName()}", QueryComponent.FROM),
+            new("GROUP BY", QueryComponent.GroupBy),
+            new(category.GetFullyQualifiedName(), QueryComponent.GroupBy),
+            new("ORDER BY", QueryComponent.OrderBy),
+            new(category.GetFullyQualifiedName(), QueryComponent.OrderBy)
         };
 
 

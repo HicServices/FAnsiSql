@@ -64,7 +64,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// " AS " qualifier is used explicitly.  The capture groups of this Regex must match <see cref="SplitLineIntoSelectSQLAndAlias"/>
     /// </summary>
     /// <returns></returns>
-    protected virtual Regex GetAliasRegex()
+    protected Regex GetAliasRegex()
     {
         //whitespace followed by as and more whitespace
         //Then any word (optionally bounded by a table name qualifier)
@@ -78,7 +78,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         return new Regex(@"\s+as\s+((\w+)|([[`""]([^[`""]+)[]`""]))$", RegexOptions.IgnoreCase);
     }
 
-    protected virtual string GetAliasConst()
+    protected string GetAliasConst()
     {
         return " AS ";
     }

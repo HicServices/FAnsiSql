@@ -107,7 +107,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
         return newBuilder;
     }
 
-    public abstract string[] ListDatabases(DbConnectionStringBuilder builder);
+    public abstract IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder);
     public abstract string[] ListDatabases(DbConnection con);
 
     public string[] ListDatabasesAsync(DbConnectionStringBuilder builder, CancellationToken token)

@@ -6,28 +6,28 @@ namespace FAnsi.Implementations.PostgreSql;
 
 public class PostgreSqlColumnHelper : IDiscoveredColumnHelper
 {
+    public static readonly PostgreSqlColumnHelper Instance = new();
+    private PostgreSqlColumnHelper(){}
     public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table,
         IHasRuntimeName column, int topX,
         bool discardNulls)
     {
-        var syntax = new PostgreSqlSyntaxHelper();
+        var syntax = PostgreSqlSyntaxHelper.Instance;
 
-        var sql = $"SELECT {syntax.EnsureWrapped(column.GetRuntimeName())} FROM {table.GetFullyQualifiedName()}";
+        var sql = new StringBuilder($"SELECT {syntax.EnsureWrapped(column.GetRuntimeName())} FROM {table.GetFullyQualifiedName()}");
 
         if (discardNulls)
-            sql += $" WHERE {syntax.EnsureWrapped(column.GetRuntimeName())} IS NOT NULL";
+            sql.Append($" WHERE {syntax.EnsureWrapped(column.GetRuntimeName())} IS NOT NULL");
 
-        sql += $" fetch first {topX} rows only";
-        return sql;
+        sql.Append($" fetch first {topX} rows only");
+        return sql.ToString();
     }
 
     public string GetAlterColumnToSql(DiscoveredColumn column, string newType, bool allowNulls)
     {
         var syntax = column.Table.Database.Server.GetQuerySyntaxHelper();
 
-        var sb = new StringBuilder();
-        sb.AppendLine(
-            $@"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {syntax.EnsureWrapped(column.GetRuntimeName())} TYPE {newType};");
+        var sb = new StringBuilder($@"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {syntax.EnsureWrapped(column.GetRuntimeName())} TYPE {newType};");
 
         var newNullability = allowNulls ? "NULL" : "NOT NULL";
 

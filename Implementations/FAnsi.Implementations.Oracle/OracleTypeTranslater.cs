@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using FAnsi.Discovery;
 using FAnsi.Discovery.TypeTranslation;
-using FAnsi.Extensions;
 using TypeGuesser;
 
 namespace FAnsi.Implementations.Oracle;
@@ -20,13 +18,11 @@ public sealed class OracleTypeTranslater:TypeTranslater
     /// Oracle specific string types, these are all max length as returned by <see cref="GetLengthIfString"/>
     /// </summary>
     private static readonly Regex AlsoStringRegex = new("^([N]?CLOB)|(LONG)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    private static readonly Regex OracleDateRegex =
-        new("(date)|(timestamp)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        
 
     private OracleTypeTranslater(): base(4000, 4000)
     {
-        DateRegex = OracleDateRegex;
+        DateRegex = new Regex("(date)|(timestamp)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
     }
     protected override string GetStringDataTypeImpl(int maxExpectedStringWidth) => $"varchar2({maxExpectedStringWidth})";
 
@@ -61,7 +57,7 @@ public sealed class OracleTypeTranslater:TypeTranslater
 
     protected override bool IsString(string sqlType)
     {
-        return !sqlType.Contains("RAW", CompareOptions.OrdinalIgnoreCase) &&
+        return !sqlType.Contains("RAW", StringComparison.InvariantCultureIgnoreCase) &&
                (base.IsString(sqlType) || AlsoStringRegex.IsMatch(sqlType));
     }
 

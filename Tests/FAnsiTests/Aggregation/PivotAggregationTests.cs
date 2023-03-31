@@ -17,15 +17,15 @@ internal class PivotAggregationTests:AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
+            new("SELECT", QueryComponent.SELECT),
+            new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new CustomLine("Category as Cat,", QueryComponent.QueryTimeColumn),
-            new CustomLine("EventDate as Ev", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Pivot },
-            new CustomLine($"FROM {tbl.GetFullyQualifiedName()}", QueryComponent.FROM),
-            new CustomLine("GROUP BY", QueryComponent.GroupBy),
-            new CustomLine("Category,", QueryComponent.GroupBy),
-            new CustomLine("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot }
+            new("Category as Cat,", QueryComponent.QueryTimeColumn),
+            new("EventDate as Ev", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Pivot },
+            new($"FROM {tbl.GetFullyQualifiedName()}", QueryComponent.FROM),
+            new("GROUP BY", QueryComponent.GroupBy),
+            new("Category,", QueryComponent.GroupBy),
+            new("EventDate", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot }
         };
 
         var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, null);

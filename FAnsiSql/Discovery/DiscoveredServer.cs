@@ -199,13 +199,16 @@ public class DiscoveredServer : IMightNotExist
         {
             try
             {
-                openTask.Wait();
+                openTask.Wait(tokenSource.Token);
             }
             catch (AggregateException e)
             {
                 if (openTask.IsCanceled)
-                    throw new TimeoutException(string.Format(FAnsiStrings.DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,Name, timeoutInMillis), e);
-
+                    throw new TimeoutException(
+                        string.Format(
+                            FAnsiStrings
+                                .DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,
+                            Name, timeoutInMillis), e);
                 throw;
             }
         }
@@ -232,7 +235,7 @@ public class DiscoveredServer : IMightNotExist
     /// Connects to the server and returns a list of databases found as <see cref="DiscoveredDatabase"/> objects
     /// </summary>
     /// <returns></returns>
-    public DiscoveredDatabase[] DiscoverDatabases() => Helper.ListDatabases(Builder)
+    public IEnumerable<DiscoveredDatabase> DiscoverDatabases() => Helper.ListDatabases(Builder)
         .Select(database => new DiscoveredDatabase(this, database, Helper.GetQuerySyntaxHelper())).ToArray();
 
     /// <summary>

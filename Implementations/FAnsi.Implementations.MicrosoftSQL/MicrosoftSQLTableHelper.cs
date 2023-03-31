@@ -129,7 +129,7 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
     }
 
         
-    public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
+    public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
     {
         var toReturn = new List<DiscoveredParameter>();
 

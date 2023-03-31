@@ -37,10 +37,7 @@ public abstract class AggregateHelper:IAggregateHelper
 
     protected abstract IQuerySyntaxHelper GetQuerySyntaxHelper();
 
-    protected virtual string BuildBasicAggregate(AggregateCustomLineCollection query)
-    {
-        return string.Join(Environment.NewLine, query.Lines);
-    }
+    protected string BuildBasicAggregate(AggregateCustomLineCollection query) => string.Join(Environment.NewLine, query.Lines);
 
     /// <summary>
     /// Builds an SQL GROUP BY query in from the lines in <paramref name="query"/> where records are counted and put into

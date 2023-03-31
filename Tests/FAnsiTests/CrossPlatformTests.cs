@@ -648,7 +648,7 @@ public class CrossPlatformTests:DatabaseTests
             tbl.MakeDistinct();
 
         Assert.AreEqual(3, tbl.GetRowCount());
-        Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Count());
+        Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Length);
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -967,6 +967,7 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (type)
         {
             case DatabaseType.MySql when database.Server.GetVersion().Major < 8:

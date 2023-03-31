@@ -72,20 +72,18 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("Dave", 50);
             dt.Rows.Add("Jamie", 60);
 
-            using (var bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
-                bulk.Upload(dt);
+            using var bulk = tbl.BeginBulkInsert();
+            bulk.Timeout = 30;
+            bulk.Upload(dt);
 
-                Assert.AreEqual(2, tbl.GetRowCount());
+            Assert.AreEqual(2, tbl.GetRowCount());
 
-                dt.Rows.Clear();
-                dt.Rows.Add("Frank", 100);
+            dt.Rows.Clear();
+            dt.Rows.Add("Frank", 100);
 
-                bulk.Upload(dt);
+            bulk.Upload(dt);
 
-                Assert.AreEqual(3, tbl.GetRowCount());
-            }
+            Assert.AreEqual(3, tbl.GetRowCount());
         }
 
         tbl.Insert(new Dictionary<string, object>
@@ -156,27 +154,25 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("Dave", 50);
             dt.Rows.Add("Jamie", 60);
 
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using var transaction = tbl.Database.Server.BeginNewTransactedConnection();
+            using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
             {
-                using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
-                {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                bulk.Timeout = 30;
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                //inside transaction the count is 2
+                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frank", 100);
+                dt.Rows.Clear();
+                dt.Rows.Add("Frank", 100);
 
-                    bulk.Upload(dt);
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
-                }
-
-                transaction.ManagedTransaction.CommitAndCloseConnection();
+                //inside transaction the count is 3
+                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
             }
+
+            transaction.ManagedTransaction.CommitAndCloseConnection();
         }
 
         //Transaction was committed final row count should be 3
@@ -205,27 +201,25 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("Dave", 50);
             dt.Rows.Add("Jamie", 60);
 
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using var transaction = tbl.Database.Server.BeginNewTransactedConnection();
+            using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
             {
-                using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
-                {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                bulk.Timeout = 30;
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                //inside transaction the count is 2
+                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frank", 100);
+                dt.Rows.Clear();
+                dt.Rows.Add("Frank", 100);
 
-                    bulk.Upload(dt);
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
-                }
-
-                transaction.ManagedTransaction.AbandonAndCloseConnection();
+                //inside transaction the count is 3
+                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
             }
+
+            transaction.ManagedTransaction.AbandonAndCloseConnection();
         }
 
         //We abandoned transaction so final rowcount should be 0
@@ -254,35 +248,33 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("Dave", 50);
             dt.Rows.Add("Jamie", 60);
 
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using var transaction = tbl.Database.Server.BeginNewTransactedConnection();
+            using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
             {
-                using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
-                {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                bulk.Timeout = 30;
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                //inside transaction the count is 2
+                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    //New row is too long for the data type
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frankyyyyyyyyyyyyyyyyyyyyyy", 100);
+                //New row is too long for the data type
+                dt.Rows.Clear();
+                dt.Rows.Add("Frankyyyyyyyyyyyyyyyyyyyyyy", 100);
 
-                    //So alter the data type to handle up to string lengths of 100
-                    //Find the column
-                    var col = tbl.DiscoverColumn("Name", transaction.ManagedTransaction);
+                //So alter the data type to handle up to string lengths of 100
+                //Find the column
+                var col = tbl.DiscoverColumn("Name", transaction.ManagedTransaction);
 
-                    //Make it bigger
-                    col.DataType.Resize(100, transaction.ManagedTransaction);
+                //Make it bigger
+                col.DataType.Resize(100, transaction.ManagedTransaction);
 
-                    bulk.Upload(dt);
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
-                }
-
-                transaction.ManagedTransaction.CommitAndCloseConnection();
+                //inside transaction the count is 3
+                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
             }
+
+            transaction.ManagedTransaction.CommitAndCloseConnection();
         }
             
         //We abandoned transaction so final rowcount should be 0
@@ -308,13 +300,12 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("no", "yes");
             dt.Rows.Add("no", "no");
 
-            using (var blk = tbl.BeginBulkInsert())
-                blk.Upload(dt);
-
+            using var blk = tbl.BeginBulkInsert();
+            blk.Upload(dt);
         }
-                
-        using(var result = tbl.GetDataTable())
-            Assert.AreEqual(2, result.Rows.Count); //2 rows inserted
+
+        using var result = tbl.GetDataTable();
+        Assert.AreEqual(2, result.Rows.Count); //2 rows inserted
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -343,10 +334,8 @@ internal class BulkInsertTest : DatabaseTests
             dt.Columns.Add("bob");
             dt.Rows.Add("no", "yes");
 
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                blk.Upload(dt);
-            }
+            using var blk = tbl.BeginBulkInsert();
+            blk.Upload(dt);
         }
                 
 
@@ -567,10 +556,8 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("fish");
             dt.Rows.Add("tank");
 
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                Assert.AreEqual(3, blk.Upload(dt));
-            }
+            using var blk = tbl.BeginBulkInsert();
+            Assert.AreEqual(3, blk.Upload(dt));
         }
             
 
@@ -603,10 +590,8 @@ internal class BulkInsertTest : DatabaseTests
             dt.Columns.Add("num");
             dt.Rows.Add("-4.10235746055587E-05"); //-0.0000410235746055587  <- this is what the number is
             //-0.0000410235           <- this is what goes into db since we only asked for 10 digits after decimal place
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                Assert.AreEqual(1, blk.Upload(dt));
-            }
+            using var blk = tbl.BeginBulkInsert();
+            Assert.AreEqual(1, blk.Upload(dt));
         }
             
 
@@ -656,9 +641,8 @@ internal class BulkInsertTest : DatabaseTests
             dt2.Columns.Add("yay");
             dt2.Rows.Add("你好");
 
-            using (var insert = table.BeginBulkInsert())
-                insert.Upload(dt2);
-
+            using var insert = table.BeginBulkInsert();
+            insert.Upload(dt2);
         }
             
         table.Insert(new Dictionary<string, object> {{"Yay", "مرحبا"}});
@@ -758,12 +742,10 @@ internal class BulkInsertTest : DatabaseTests
             dt.Columns.Add("MyDate");
             dt.Rows.Add("20011230");
 
-            using (var bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
-                bulk.DateTimeDecider.Settings.ExplicitDateFormats = new []{"yyyyMMdd" };
-                bulk.Upload(dt);
-            }
+            using var bulk = tbl.BeginBulkInsert();
+            bulk.Timeout = 30;
+            bulk.DateTimeDecider.Settings.ExplicitDateFormats = new []{"yyyyMMdd" };
+            bulk.Upload(dt);
         }
             
         var dtDown = tbl.GetDataTable();

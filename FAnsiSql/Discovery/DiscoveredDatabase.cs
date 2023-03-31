@@ -66,7 +66,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - if provided the database query will be sent using the connection/transaction provided</param>
     /// <returns></returns>
-    public DiscoveredTableValuedFunction[] DiscoverTableValuedFunctions(IManagedTransaction transaction = null)
+    public IEnumerable<DiscoveredTableValuedFunction> DiscoverTableValuedFunctions(IManagedTransaction transaction = null)
     {
         using var managedConnection = Server.GetManagedConnection(transaction);
         return

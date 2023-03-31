@@ -255,22 +255,16 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
         return GetForeignKeyConstraintNameFor(foreignTable.GetRuntimeName(), primaryTable.GetRuntimeName());
     }
 
-    protected virtual string GetForeignKeyConstraintNameFor(string foreignTable, string primaryTable)
-    {
-        return MakeSensibleConstraintName("FK_", $"{foreignTable}_{primaryTable}");
-    }
+    private string GetForeignKeyConstraintNameFor(string foreignTable, string primaryTable) =>
+        MakeSensibleConstraintName("FK_", $"{foreignTable}_{primaryTable}");
 
     public abstract DirectoryInfo Detach(DiscoveredDatabase database);
 
     public abstract void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName);
-        
-    protected virtual string GetPrimaryKeyDeclarationSql(string tableName, DatabaseColumnRequest[] pks, IQuerySyntaxHelper syntaxHelper)
-    {
-        var constraintName = MakeSensibleConstraintName("PK_", tableName);
 
-        return
-            $"{$" CONSTRAINT {constraintName} PRIMARY KEY ({string.Join(",", pks.Select(c => syntaxHelper.EnsureWrapped(c.ColumnName)))})"},{Environment.NewLine}";
-    }
+    private string GetPrimaryKeyDeclarationSql(string tableName, IEnumerable<DatabaseColumnRequest> pks,
+        IQuerySyntaxHelper syntaxHelper) =>
+        $" CONSTRAINT {MakeSensibleConstraintName("PK_", tableName)} PRIMARY KEY ({string.Join(",", pks.Select(c => syntaxHelper.EnsureWrapped(c.ColumnName)))}),{Environment.NewLine}";
 
     private string MakeSensibleConstraintName(string prefix, string tableName)
     {
@@ -282,7 +276,7 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
             constraintName = $"Constraint{r.Next(10000)}";
         }
 
-        return prefix + constraintName;
+        return $"{prefix}{constraintName}";
     }
         
     public void ExecuteBatchNonQuery(string sql, DbConnection conn, DbTransaction transaction = null, int timeout = 30)

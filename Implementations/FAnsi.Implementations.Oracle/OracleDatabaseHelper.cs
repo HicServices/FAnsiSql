@@ -83,12 +83,12 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
         DbConnection connection, string database, DbTransaction transaction = null)
     {
-        return new DiscoveredTableValuedFunction[0];
+        return Array.Empty<DiscoveredTableValuedFunction>();
     }
         
     public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
     {
-        return new DiscoveredStoredprocedure[0];
+        return Array.Empty<DiscoveredStoredprocedure>();
     }
 
     protected override Guesser GetGuesser(DatabaseTypeRequest request)

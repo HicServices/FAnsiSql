@@ -7,24 +7,17 @@ using FAnsi.Discovery.QuerySyntax.Update;
 
 namespace FAnsi.Implementations.MySql.Update;
 
-public class MySqlUpdateHelper : UpdateHelper
+public sealed class MySqlUpdateHelper : UpdateHelper
 {
-    protected override string BuildUpdateImpl(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
-    {
-        return string.Format(
-            @"UPDATE {1} t1
- join  {2} t2 
+    public static readonly MySqlUpdateHelper Instance=new();
+    private MySqlUpdateHelper() {}
+    protected override string BuildUpdateImpl(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines) =>
+        $@"UPDATE {table1.GetFullyQualifiedName()} t1
+ join  {table2.GetFullyQualifiedName()} t2 
 on 
-{3}
+{string.Join(" AND ", lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text))}
 SET 
-    {0}
+    {string.Join($", {Environment.NewLine}", lines.Where(l => l.LocationToInsert == QueryComponent.SET).Select(c => c.Text))}
 WHERE
-{4}",
-            string.Join($", {Environment.NewLine}",lines.Where(l=>l.LocationToInsert == QueryComponent.SET).Select(c => c.Text)),
-            table1.GetFullyQualifiedName(),
-            table2.GetFullyQualifiedName(),
-            string.Join(" AND ", lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text)),
-            string.Join(" AND ", lines.Where(l => l.LocationToInsert == QueryComponent.WHERE).Select(c => c.Text)));
-
-    }
+{string.Join(" AND ", lines.Where(l => l.LocationToInsert == QueryComponent.WHERE).Select(c => c.Text))}";
 }
