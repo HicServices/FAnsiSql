@@ -5,21 +5,21 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Discovery.QuerySyntax.Update;
 
-namespace FAnsi.Implementations.PostgreSql.Update
+namespace FAnsi.Implementations.PostgreSql.Update;
+
+public class PostgreSqlUpdateHelper : UpdateHelper
 {
-    public class PostgreSqlUpdateHelper : UpdateHelper
+    protected override string BuildUpdateImpl(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
     {
-        protected override string BuildUpdateImpl(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
-        {
-            //https://stackoverflow.com/a/7869611
-            string joinSql = string.Join(" AND ",
-                lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text));
+        //https://stackoverflow.com/a/7869611
+        string joinSql = string.Join(" AND ",
+            lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text));
 
-            string whereSql = string.Join(" AND ",
-                lines.Where(l => l.LocationToInsert == QueryComponent.WHERE).Select(c => c.Text));
+        string whereSql = string.Join(" AND ",
+            lines.Where(l => l.LocationToInsert == QueryComponent.WHERE).Select(c => c.Text));
 
-            return string.Format(
-                @"UPDATE {1} AS t1
+        return string.Format(
+            @"UPDATE {1} AS t1
 SET 
     {0}
 FROM
@@ -30,17 +30,16 @@ WHERE
 {5}
 ",
 
-                string.Join(", " + Environment.NewLine ,lines.Where(l=>l.LocationToInsert == QueryComponent.SET)
-                    .Select(c => 
-                        //seems like you cant specify the table alias in the SET section of the query
-                        c.Text.Replace("t1.",""))),
-                table1.GetFullyQualifiedName(),
-                table2.GetFullyQualifiedName(),
-                joinSql,
-                !string.IsNullOrWhiteSpace(whereSql) ? "AND" :"",
-                !string.IsNullOrWhiteSpace(whereSql) ? "(" + whereSql + ")":""
-                );
+            string.Join(", " + Environment.NewLine ,lines.Where(l=>l.LocationToInsert == QueryComponent.SET)
+                .Select(c => 
+                    //seems like you cant specify the table alias in the SET section of the query
+                    c.Text.Replace("t1.",""))),
+            table1.GetFullyQualifiedName(),
+            table2.GetFullyQualifiedName(),
+            joinSql,
+            !string.IsNullOrWhiteSpace(whereSql) ? "AND" :"",
+            !string.IsNullOrWhiteSpace(whereSql) ? "(" + whereSql + ")":""
+        );
 
-        }
     }
 }

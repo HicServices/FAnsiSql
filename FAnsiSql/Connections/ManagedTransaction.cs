@@ -2,67 +2,66 @@
 using System.Data.Common;
 using System.Diagnostics;
 
-namespace FAnsi.Connections
+namespace FAnsi.Connections;
+
+/// <inheritdoc/>
+public class ManagedTransaction : IManagedTransaction
 {
     /// <inheritdoc/>
-    public class ManagedTransaction : IManagedTransaction
+    public DbConnection Connection { get; private set; }
+
+    /// <inheritdoc/>
+    public DbTransaction Transaction { get; private set; }
+
+    internal ManagedTransaction(DbConnection connection, DbTransaction transaction)
     {
-        /// <inheritdoc/>
-        public DbConnection Connection { get; private set; }
+        Connection = connection;
+        Transaction = transaction;
+    }
 
-        /// <inheritdoc/>
-        public DbTransaction Transaction { get; private set; }
+    private bool closed = false;
 
-        internal ManagedTransaction(DbConnection connection, DbTransaction transaction)
+    /// <summary>
+    /// Attempts to rollback the DbTransaction (swallowing any Exception) and closes/disposes the DbConnection
+    /// </summary>
+    public void AbandonAndCloseConnection()
+    {
+        if(closed)
+            return;
+        closed = true;
+
+        try
         {
-            Connection = connection;
-            Transaction = transaction;
+            Transaction.Rollback();
         }
-
-        private bool closed = false;
-
-        /// <summary>
-        /// Attempts to rollback the DbTransaction (swallowing any Exception) and closes/disposes the DbConnection
-        /// </summary>
-        public void AbandonAndCloseConnection()
+        catch (Exception e)
         {
-            if(closed)
-                return;
-            closed = true;
-
-            try
-            {
-                Transaction.Rollback();
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine("Transaction rollback failed during AbandonAndCloseConnection" + e.Message);
-            }
-            finally
-            {
-                Connection.Close();
-                Connection.Dispose();
-            }
+            Trace.WriteLine("Transaction rollback failed during AbandonAndCloseConnection" + e.Message);
         }
-
-        /// <summary>
-        /// Attempts to commit the DbTransaction and then closes/disposes the DbConnection
-        /// </summary>
-        public void CommitAndCloseConnection()
+        finally
         {
-            if(closed)
-                return;
-            closed = true;
+            Connection.Close();
+            Connection.Dispose();
+        }
+    }
 
-            try
-            {
-                Transaction.Commit();
-            }
-            finally
-            {
-                Connection.Close();
-                Connection.Dispose();
-            }
+    /// <summary>
+    /// Attempts to commit the DbTransaction and then closes/disposes the DbConnection
+    /// </summary>
+    public void CommitAndCloseConnection()
+    {
+        if(closed)
+            return;
+        closed = true;
+
+        try
+        {
+            Transaction.Commit();
+        }
+        finally
+        {
+            Connection.Close();
+            Connection.Dispose();
         }
     }
 }
