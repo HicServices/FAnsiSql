@@ -24,10 +24,10 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         if (connection.State == ConnectionState.Closed)
             throw new InvalidOperationException("Expected connection to be open");
 
-        List<DiscoveredTable> tables = new List<DiscoveredTable>();
+        var tables = new List<DiscoveredTable>();
             
 
-        using (var cmd = new SqlCommand("use " + querySyntaxHelper.EnsureWrapped(database) + "; EXEC sp_tables", (SqlConnection) connection))
+        using (var cmd = new SqlCommand($"use {querySyntaxHelper.EnsureWrapped(database)}; EXEC sp_tables", (SqlConnection) connection))
         {
             cmd.Transaction = transaction as SqlTransaction;
 
@@ -35,7 +35,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
                 while (r.Read())
                 {
                     //its a system table
-                    string schema = r["TABLE_OWNER"] as string;
+                    var schema = r["TABLE_OWNER"] as string;
 
                     switch (schema)
                     {
@@ -53,7 +53,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
                     //add tables
                     if (!r["TABLE_TYPE"].Equals("TABLE")) continue;
                     if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
-                        tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.Table));
+                        tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema));
                 }
         }
             
@@ -62,20 +62,18 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction transaction = null)
     {
-        List<DiscoveredTableValuedFunction> functionsToReturn = new List<DiscoveredTableValuedFunction>();
+        var functionsToReturn = new List<DiscoveredTableValuedFunction>();
 
-        using( DbCommand cmd = new SqlCommand("use " + querySyntaxHelper.EnsureWrapped(database) + @";select name,
- (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name
-  from sys.objects o
-WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection))
+        using( DbCommand cmd = new SqlCommand(
+                  $"use {querySyntaxHelper.EnsureWrapped(database)};select name,\r\n (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name\r\n  from sys.objects o\r\nWHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection))
 
         {
             cmd.Transaction = transaction;
 
-            using (DbDataReader r = cmd.ExecuteReader())
+            using (var r = cmd.ExecuteReader())
                 while (r.Read())
                 {
-                    string schema = r["schema_name"] as string;
+                    var schema = r["schema_name"] as string;
 
                     if (string.Equals("dbo", schema))
                         schema = null;
@@ -90,20 +88,18 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
 
     public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
     {
-        List<DiscoveredStoredprocedure> toReturn = new List<DiscoveredStoredprocedure>();
-        var querySyntaxHelper = new MicrosoftQuerySyntaxHelper();
+        var toReturn = new List<DiscoveredStoredprocedure>();
+        var querySyntaxHelper = MicrosoftQuerySyntaxHelper.Instance;
 
-        using (var con = new SqlConnection(builder.ConnectionString))
+        using var con = new SqlConnection(builder.ConnectionString);
+        con.Open();
+        using (var cmdFindStoredprocedure =
+               new SqlCommand($"use {querySyntaxHelper.EnsureWrapped(database)};  SELECT * FROM sys.procedures", con))
         {
-            con.Open();
-            using (SqlCommand cmdFindStoredprocedure =
-                   new SqlCommand("use " + querySyntaxHelper.EnsureWrapped(database) + ";  SELECT * FROM sys.procedures", con))
-            {
-                var result = cmdFindStoredprocedure.ExecuteReader();
+            var result = cmdFindStoredprocedure.ExecuteReader();
 
-                while (result.Read())
-                    toReturn.Add(new DiscoveredStoredprocedure((string)result["name"]));
-            }
+            while (result.Read())
+                toReturn.Add(new DiscoveredStoredprocedure((string)result["name"]));
         }
 
         return toReturn.ToArray();
@@ -155,40 +151,34 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
     {
         var sql = setSingleUserModeFirst ? $"ALTER DATABASE {databaseToDrop} SET SINGLE_USER WITH ROLLBACK IMMEDIATE{Environment.NewLine}"
             : "";
-        sql += "DROP DATABASE " + databaseToDrop;
+        sql += $"DROP DATABASE {databaseToDrop}";
 
-        using (var con = (SqlConnection)server.GetConnection())
-        {
-            con.Open();
-            using (var cmd = new SqlCommand(sql, con))
-                cmd.ExecuteNonQuery();
-        }
+        using var con = (SqlConnection)server.GetConnection();
+        con.Open();
+        using var cmd = new SqlCommand(sql, con);
+        cmd.ExecuteNonQuery();
     }
 
     public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
     {
         var toReturn = new Dictionary<string, string>();
 
-        using (var con = new SqlConnection(builder.ConnectionString))
-        {
-            con.Open();
-            con.ChangeDatabase(database);
-            using (DataSet ds = new DataSet())
-            {
-                using (SqlCommand cmd = new SqlCommand("exec sp_spaceused", con))
-                using (var da = new SqlDataAdapter(cmd))
-                    da.Fill(ds);
+        using var con = new SqlConnection(builder.ConnectionString);
+        con.Open();
+        con.ChangeDatabase(database);
+        using var ds = new DataSet();
+        using (var cmd = new SqlCommand("exec sp_spaceused", con))
+        using (var da = new SqlDataAdapter(cmd))
+            da.Fill(ds);
 
-                toReturn.Add(ds.Tables[0].Columns[0].ColumnName, ds.Tables[0].Rows[0][0].ToString());
-                toReturn.Add(ds.Tables[0].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
+        toReturn.Add(ds.Tables[0].Columns[0].ColumnName, ds.Tables[0].Rows[0][0].ToString());
+        toReturn.Add(ds.Tables[0].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
 
-                toReturn.Add(ds.Tables[1].Columns[0].ColumnName, ds.Tables[1].Rows[0][0].ToString());
-                toReturn.Add(ds.Tables[1].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
-                toReturn.Add(ds.Tables[1].Columns[2].ColumnName, ds.Tables[1].Rows[0][2].ToString());
-            }
-                
-            return toReturn;
-        }
+        toReturn.Add(ds.Tables[1].Columns[0].ColumnName, ds.Tables[1].Rows[0][0].ToString());
+        toReturn.Add(ds.Tables[1].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
+        toReturn.Add(ds.Tables[1].Columns[2].ColumnName, ds.Tables[1].Rows[0][2].ToString());
+
+        return toReturn;
     }
 
     public override DirectoryInfo Detach(DiscoveredDatabase database)
@@ -206,8 +196,8 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
         var databaseToDetach = database.GetWrappedName();
 
         // set in simple recovery and truncate all logs!
-        string sql = "ALTER DATABASE " + databaseToDetach + " SET RECOVERY SIMPLE; " + Environment.NewLine + 
-                     "DBCC SHRINKFILE (" + databaseToDetach + ", 1)";
+        var sql =
+            $"ALTER DATABASE {databaseToDetach} SET RECOVERY SIMPLE; {Environment.NewLine}DBCC SHRINKFILE ({databaseToDetach}, 1)";
         using (var con = (SqlConnection)server.GetConnection())
         {
             con.Open();
@@ -219,7 +209,7 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
         server.ChangeDatabase("master");
             
         // set single user before detaching
-        sql = "ALTER DATABASE " + databaseToDetach + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
+        sql = $"ALTER DATABASE {databaseToDetach} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
         using (var con = (SqlConnection)server.GetConnection())
         {
             con.Open();
@@ -230,7 +220,7 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
         var dbLiteralName = database.Server.GetQuerySyntaxHelper().Escape(database.GetRuntimeName());
 
         // detach!
-        sql = @"EXEC sys.sp_detach_db '" + dbLiteralName + "';";
+        sql = $@"EXEC sys.sp_detach_db '{dbLiteralName}';";
         using (var con = (SqlConnection)server.GetConnection())
         {
             con.Open();
@@ -252,17 +242,15 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
     public override void CreateBackup(DiscoveredDatabase discoveredDatabase,string backupName)
     {
         var server = discoveredDatabase.Server;
-        using(var con = server.GetConnection())
-        {
-            con.Open();
+        using var con = server.GetConnection();
+        con.Open();
 
-            string sql = string.Format(
-                "BACKUP DATABASE {0} TO  DISK = '{0}.bak' WITH  INIT ,  NOUNLOAD ,  NAME = N'{1}',  NOSKIP ,  STATS = 10,  NOFORMAT",
-                discoveredDatabase.GetWrappedName(),backupName);
+        var sql = string.Format(
+            "BACKUP DATABASE {0} TO  DISK = '{0}.bak' WITH  INIT ,  NOUNLOAD ,  NAME = N'{1}',  NOSKIP ,  STATS = 10,  NOFORMAT",
+            discoveredDatabase.GetWrappedName(),backupName);
 
-            using(var cmd = server.GetCommand(sql,con))
-                cmd.ExecuteNonQuery();
-        }
+        using var cmd = server.GetCommand(sql,con);
+        cmd.ExecuteNonQuery();
     }
 
     public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
@@ -271,15 +259,13 @@ WHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_V
         var runtimeName = syntax.GetRuntimeName(name);
         name = syntax.EnsureWrapped(name);
 
-        using (var con = discoveredDatabase.Server.GetConnection())
-        {
-            con.Open();
+        using var con = discoveredDatabase.Server.GetConnection();
+        con.Open();
 
-            string sql = $@"if not exists (select 1 from sys.schemas where name = '{runtimeName}')
+        var sql = $@"if not exists (select 1 from sys.schemas where name = '{runtimeName}')
 	    EXEC('CREATE SCHEMA {name}')";
 
-            using(var cmd = discoveredDatabase.Server.GetCommand(sql, con))
-                cmd.ExecuteNonQuery();
-        }
+        using var cmd = discoveredDatabase.Server.GetCommand(sql, con);
+        cmd.ExecuteNonQuery();
     }
 }

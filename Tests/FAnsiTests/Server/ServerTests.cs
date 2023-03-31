@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Server;
 
-class ServerLevelTests:DatabaseTests
+internal class ServerLevelTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Server_Exists(DatabaseType type)
@@ -163,7 +163,7 @@ class ServerLevelTests:DatabaseTests
     public void MoveData_BetweenServerTypes(DatabaseType from, DatabaseType to)
     {
         //Create some test data
-        DataTable dtToMove = new DataTable();
+        var dtToMove = new DataTable();
         dtToMove.Columns.Add("MyCol");
         dtToMove.Columns.Add("DateOfBirth");
         dtToMove.Columns.Add("Sanity");
@@ -185,7 +185,7 @@ class ServerLevelTests:DatabaseTests
         Assert.IsFalse(toTable.Exists());
 
         //Get the clone table sql adjusted to work on the other DBMS
-        string sql = tblFrom.ScriptTableCreation(false, false, false, toTable);
+        var sql = tblFrom.ScriptTableCreation(false, false, false, toTable);
             
         //open connection and run the code to create the new table
         using(var con = toDb.Server.GetConnection())

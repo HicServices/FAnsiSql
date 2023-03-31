@@ -12,18 +12,9 @@ public class PostgreSqlImplementation : Implementation<NpgsqlConnectionStringBui
     {
     }
 
-    public override IDiscoveredServerHelper GetServerHelper()
-    {
-        return new PostgreSqlServerHelper();
-    }
+    public override IDiscoveredServerHelper GetServerHelper() => PostgreSqlServerHelper.Instance;
 
-    public override bool IsFor(DbConnection connection)
-    {
-        return connection is NpgsqlConnection;
-    }
+    public override bool IsFor(DbConnection connection) => connection is NpgsqlConnection;
 
-    public override IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return new PostgreSqlSyntaxHelper();
-    }
+    public override IQuerySyntaxHelper GetQuerySyntaxHelper() => new PostgreSqlSyntaxHelper();
 }

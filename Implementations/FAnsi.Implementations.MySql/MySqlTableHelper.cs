@@ -15,34 +15,43 @@ namespace FAnsi.Implementations.MySql;
 
 public class MySqlTableHelper : DiscoveredTableHelper
 {
-    private readonly static Regex IntParentheses = new Regex(@"^int\(\d+\)", RegexOptions.IgnoreCase);
-    private readonly static Regex SmallintParentheses = new Regex(@"^smallint\(\d+\)", RegexOptions.IgnoreCase);
-    private readonly static Regex BitParentheses = new Regex(@"^bit\(\d+\)", RegexOptions.IgnoreCase);
+    public static readonly MySqlTableHelper Instance = new();
 
-    public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
+    private MySqlTableHelper() {}
+
+    private static readonly Regex IntParentheses = new(@"^int\(\d+\)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex SmallintParentheses = new(@"^smallint\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex BitParentheses = new(@"^bit\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection,
+        string database)
     {
-        List<DiscoveredColumn> columns = new List<DiscoveredColumn>();
+        var columns = new List<DiscoveredColumn>();
         var tableName = discoveredTable.GetRuntimeName();
 
-        using (DbCommand cmd = discoveredTable.Database.Server.Helper.GetCommand(
+        using (var cmd = discoveredTable.Database.Server.Helper.GetCommand(
                    @"SELECT * FROM information_schema.`COLUMNS` 
 WHERE table_schema = @db
   AND table_name = @tbl", connection.Connection))
         {
             cmd.Transaction = connection.Transaction;
 
-            var p = new MySqlParameter("@db", MySqlDbType.String);
-            p.Value = discoveredTable.Database.GetRuntimeName();
+            var p = new MySqlParameter("@db", MySqlDbType.String)
+            {
+                Value = discoveredTable.Database.GetRuntimeName()
+            };
             cmd.Parameters.Add(p);
 
-            p = new MySqlParameter("@tbl", MySqlDbType.String);
-            p.Value = discoveredTable.GetRuntimeName();
+            p = new MySqlParameter("@tbl", MySqlDbType.String)
+            {
+                Value = discoveredTable.GetRuntimeName()
+            };
             cmd.Parameters.Add(p);
 
-            using(DbDataReader r = cmd.ExecuteReader())
+            using(var r = cmd.ExecuteReader())
             {
                 if (!r.HasRows)
-                    throw new Exception("Could not find any columns for table " + tableName + " in database " + database);
+                    throw new Exception($"Could not find any columns for table {tableName} in database {database}");
 
                 while (r.Read())
                 {
@@ -73,19 +82,18 @@ WHERE table_schema = @db
 
     private bool YesNoToBool(object o)
     {
-        if (o is bool)
-            return (bool)o;
+        if (o is bool b)
+            return b;
 
         if (o == null || o == DBNull.Value)
             return false;
 
-        if (o.ToString() == "NO")
-            return false;
-            
-        if (o.ToString() == "YES")
-            return true;
-
-        return Convert.ToBoolean(o);
+        return o.ToString() switch
+        {
+            "NO" => false,
+            "YES" => true,
+            _ => Convert.ToBoolean(o)
+        };
     }
 
 
@@ -106,15 +114,13 @@ WHERE table_schema = @db
         return type;
     }
 
-    public override IDiscoveredColumnHelper GetColumnHelper()
-    {
-        return new MySqlColumnHelper();
-    }
+    public override IDiscoveredColumnHelper GetColumnHelper() => MySqlColumnHelper.Instance;
 
     public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
     {
-        using(var cmd = new MySqlCommand("alter table " + columnToDrop.Table.GetFullyQualifiedName() + " drop column " + columnToDrop.GetWrappedName(), (MySqlConnection)connection))
-            cmd.ExecuteNonQuery();
+        using var cmd = new MySqlCommand(
+            $"alter table {columnToDrop.Table.GetFullyQualifiedName()} drop column {columnToDrop.GetWrappedName()}", (MySqlConnection)connection);
+        cmd.ExecuteNonQuery();
     }
 
 
@@ -131,9 +137,9 @@ WHERE table_schema = @db
 
     public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
     {
-        Dictionary<string,DiscoveredRelationship> toReturn = new Dictionary<string,DiscoveredRelationship>();
+        var toReturn = new Dictionary<string,DiscoveredRelationship>();
 
-        string sql = @"SELECT DISTINCT
+        const string sql = @"SELECT DISTINCT
 u.CONSTRAINT_NAME,
 u.TABLE_SCHEMA,
 u.TABLE_NAME,
@@ -152,12 +158,16 @@ WHERE
 
         using (var cmd = new MySqlCommand(sql, (MySqlConnection) connection,(MySqlTransaction) transaction?.Transaction))
         {
-            var p = new MySqlParameter("@db", MySqlDbType.String);
-            p.Value = table.Database.GetRuntimeName();
+            var p = new MySqlParameter("@db", MySqlDbType.String)
+            {
+                Value = table.Database.GetRuntimeName()
+            };
             cmd.Parameters.Add(p);
 
-            p = new MySqlParameter("@tbl", MySqlDbType.String);
-            p.Value = table.GetRuntimeName();
+            p = new MySqlParameter("@tbl", MySqlDbType.String)
+            {
+                Value = table.GetRuntimeName()
+            };
             cmd.Parameters.Add(p);
 
             using (var dt = new DataTable())
@@ -190,18 +200,24 @@ WHERE
                         //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
                         var deleteRuleString = r["DELETE_RULE"].ToString();
 
-                        CascadeRule deleteRule = CascadeRule.Unknown;
+                        var deleteRule = CascadeRule.Unknown;
                             
-                        if(deleteRuleString == "CASCADE")
-                            deleteRule = CascadeRule.Delete;
-                        else if(deleteRuleString == "NO ACTION")
-                            deleteRule = CascadeRule.NoAction;
-                        else if(deleteRuleString == "RESTRICT")
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleString == "SET NULL")
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleString == "SET DEFAULT")
-                            deleteRule = CascadeRule.SetDefault;
+                        switch (deleteRuleString)
+                        {
+                            case "CASCADE":
+                                deleteRule = CascadeRule.Delete;
+                                break;
+                            case "NO ACTION":
+                            case "RESTRICT":
+                                deleteRule = CascadeRule.NoAction;
+                                break;
+                            case "SET NULL":
+                                deleteRule = CascadeRule.SetNull;
+                                break;
+                            case "SET DEFAULT":
+                                deleteRule = CascadeRule.SetDefault;
+                                break;
+                        }
 
                         current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
                         toReturn.Add(current.Name,current);
@@ -219,12 +235,12 @@ WHERE
     {
         var syntax = discoveredTable.GetQuerySyntaxHelper();
 
-        return string.Format("RENAME TABLE {0} TO {1};", discoveredTable.GetWrappedName(), syntax.EnsureWrapped(newName));
+        return $"RENAME TABLE {discoveredTable.GetWrappedName()} TO {syntax.EnsureWrapped(newName)};";
     }
 
     public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
     {
-        return "SELECT * FROM " + table.GetFullyQualifiedName() + " LIMIT " + topX;
+        return $"SELECT * FROM {table.GetFullyQualifiedName()} LIMIT {topX}";
     }
 
 

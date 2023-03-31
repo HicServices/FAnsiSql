@@ -14,32 +14,21 @@ public class PostgreSqlAggregateHelper : AggregateHelper
 
     protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
     {
-        string interval;
-
-        switch (query.Axis.AxisIncrement)
+        string interval = query.Axis.AxisIncrement switch
         {
-            case AxisIncrement.Day:
-                interval = "1 day";
-                break;
-            case AxisIncrement.Month:
-                interval = "1 month";
-                break;
-            case AxisIncrement.Year:
-                interval = "1 year";
-                break;
-            case AxisIncrement.Quarter:
-                interval = "3 months";
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-            
-        string countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);
-        string axisColumnAlias = query.AxisSelect.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
+            AxisIncrement.Day => "1 day",
+            AxisIncrement.Month => "1 month",
+            AxisIncrement.Year => "1 year",
+            AxisIncrement.Quarter => "3 months",
+            _ => throw new ArgumentOutOfRangeException(nameof(query),$"Invalid AxisIncrement {query.Axis.AxisIncrement}")
+        };
+
+        var countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);
+        var axisColumnAlias = query.AxisSelect.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
 
         WrapAxisColumnWithDatePartFunction(query,axisColumnAlias);
 
-        string sql =
+        var sql =
             string.Format(@"
 {0}
 SELECT
@@ -60,7 +49,7 @@ ORDER BY
                 string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
                 GetDatePartOfColumn(query.Axis.AxisIncrement, "generate_series.date"),
                 //the entire query
-                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.SELECT && c.LocationToInsert <= QueryComponent.Having)), query.Axis.StartDate,
+                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)), query.Axis.StartDate,
                 query.Axis.EndDate,
                 interval,
                 countAlias,
@@ -71,28 +60,21 @@ ORDER BY
 
     protected override string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
-    public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
-    {
-        switch (increment)
+    public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql) =>
+        increment switch
         {
-            case AxisIncrement.Day:
-                return columnSql + "::date";
-            case AxisIncrement.Month:
-                return $"to_char({columnSql},'YYYY-MM')";
-            case AxisIncrement.Year:
-                return $"date_part('year', {columnSql})";
-            case AxisIncrement.Quarter:
-                return $"to_char({columnSql},'YYYY\"Q\"Q')";
-            default:
-                throw new ArgumentOutOfRangeException(nameof(increment), increment, null);
-        }
-    }
+            AxisIncrement.Day => $"{columnSql}::date",
+            AxisIncrement.Month => $"to_char({columnSql},'YYYY-MM')",
+            AxisIncrement.Year => $"date_part('year', {columnSql})",
+            AxisIncrement.Quarter => $"to_char({columnSql},'YYYY\"Q\"Q')",
+            _ => throw new ArgumentOutOfRangeException(nameof(increment), increment, null)
+        };
 }

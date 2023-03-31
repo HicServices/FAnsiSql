@@ -5,30 +5,19 @@ namespace FAnsi.Implementations.MicrosoftSQL;
 
 public class MicrosoftSQLTypeTranslater : TypeTranslater
 {
-    protected Regex AlsoBinaryRegex = new Regex("(image)|(timestamp)|(rowversion)",RegexOptions.IgnoreCase);
+    public static readonly MicrosoftSQLTypeTranslater Instance = new();
 
+    private static readonly Regex AlsoBinaryRegex = new("(image)|(timestamp)|(rowversion)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
 
-    public MicrosoftSQLTypeTranslater() : base(8000, 4000)
+    private MicrosoftSQLTypeTranslater() : base(8000, 4000)
     {
     }
 
-    protected override string GetDateDateTimeDataType()
-    {
-        return "datetime2";
-    }
-        
-    public override string GetStringDataTypeWithUnlimitedWidth()
-    {
-        return "varchar(max)";
-    }
+    protected override string GetDateDateTimeDataType() => "datetime2";
 
-    public override string GetUnicodeStringDataTypeWithUnlimitedWidth()
-    {
-        return "nvarchar(max)";
-    }
+    public override string GetStringDataTypeWithUnlimitedWidth() => "varchar(max)";
 
-    protected override bool IsByteArray(string sqlType)
-    {
-        return base.IsByteArray(sqlType) || AlsoBinaryRegex.IsMatch(sqlType);
-    }
+    public override string GetUnicodeStringDataTypeWithUnlimitedWidth() => "nvarchar(max)";
+
+    protected override bool IsByteArray(string sqlType) => base.IsByteArray(sqlType) || AlsoBinaryRegex.IsMatch(sqlType);
 }

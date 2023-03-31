@@ -17,23 +17,10 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
 {
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
-        List<DiscoveredColumn> toReturn = new List<DiscoveredColumn>();
+        var toReturn = new List<DiscoveredColumn>();
 
-        using (DbCommand cmd = discoveredTable.GetCommand("use [" + database + @"];
-SELECT  
-sys.columns.name AS COLUMN_NAME,
- sys.types.name AS TYPE_NAME,
-  sys.columns.collation_name AS COLLATION_NAME,
-   sys.columns.max_length as LENGTH,
-   sys.columns.scale as SCALE,
-    sys.columns.is_identity,
-    sys.columns.is_nullable,
-   sys.columns.precision as PRECISION,
-sys.columns.collation_name
-from sys.columns 
-join 
-sys.types on sys.columns.user_type_id = sys.types.user_type_id
-where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Transaction))
+        using (var cmd = discoveredTable.GetCommand(
+                   $"use [{database}];\r\nSELECT  \r\nsys.columns.name AS COLUMN_NAME,\r\n sys.types.name AS TYPE_NAME,\r\n  sys.columns.collation_name AS COLLATION_NAME,\r\n   sys.columns.max_length as LENGTH,\r\n   sys.columns.scale as SCALE,\r\n    sys.columns.is_identity,\r\n    sys.columns.is_nullable,\r\n   sys.columns.precision as PRECISION,\r\nsys.columns.collation_name\r\nfrom sys.columns \r\njoin \r\nsys.types on sys.columns.user_type_id = sys.types.user_type_id\r\nwhere object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Transaction))
         {
             var p = cmd.CreateParameter();
             p.ParameterName = "@tableName";
@@ -43,24 +30,25 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
             using (var r = cmd.ExecuteReader())
                 while (r.Read())
                 {
-                    bool isNullable = Convert.ToBoolean(r["is_nullable"]);
+                    var isNullable = Convert.ToBoolean(r["is_nullable"]);
 
                     //if it is a table valued function prefix the column name with the table valued function name
-                    string columnName = discoveredTable is DiscoveredTableValuedFunction
-                        ? discoveredTable.GetRuntimeName() + "." + r["COLUMN_NAME"]
+                    var columnName = discoveredTable is DiscoveredTableValuedFunction
+                        ? $"{discoveredTable.GetRuntimeName()}.{r["COLUMN_NAME"]}"
                         : r["COLUMN_NAME"].ToString();
 
-                    var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable);
-                    toAdd.IsAutoIncrement = Convert.ToBoolean(r["is_identity"]);
-
+                    var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
+                    {
+                        IsAutoIncrement = Convert.ToBoolean(r["is_identity"]),
+                        Collation = r["collation_name"] as string
+                    };
                     toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
-                    toAdd.Collation = r["collation_name"] as string;
                     toReturn.Add(toAdd);
                 }
         }
 
         if(!toReturn.Any())
-            throw new Exception("Could not find any columns in table " + discoveredTable);
+            throw new Exception($"Could not find any columns in table {discoveredTable}");
             
         //don't bother looking for pks if it is a table valued function
         if (discoveredTable is DiscoveredTableValuedFunction)
@@ -68,10 +56,8 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
             
         var pks = ListPrimaryKeys(connection, discoveredTable);
 
-        foreach (DiscoveredColumn c in toReturn)
-            if (pks.Any(pk=>pk.Equals(c.GetRuntimeName())))
-                c.IsPrimaryKey = true;
-
+        foreach (var c in toReturn.Where(c => pks.Any(pk=>pk.Equals(c.GetRuntimeName()))))
+            c.IsPrimaryKey = true;
 
         return toReturn.ToArray();
     }
@@ -88,7 +74,7 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
         var objectName = syntax.EnsureWrapped(table.GetRuntimeName());
 
         if (table.Schema != null)
-            return syntax.EnsureWrapped(table.Schema) + "." + objectName;
+            return $"{syntax.EnsureWrapped(table.Schema)}.{objectName}";
 
         return objectName;
     }
@@ -110,12 +96,13 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
                     connection.ChangeDatabase(tableToDrop.GetRuntimeName());
 
                 if(!connection.Database.ToLower().Equals(tableToDrop.Database.GetRuntimeName().ToLower()))
-                    throw new NotSupportedException("Cannot drop view "+tableToDrop +" because it exists in database "+ tableToDrop.Database.GetRuntimeName() +" while the current current database connection is pointed at database:" + connection.Database + " (use .ChangeDatabase on the connection first) - SQL Server does not support cross database view dropping");
+                    throw new NotSupportedException(
+                        $"Cannot drop view {tableToDrop} because it exists in database {tableToDrop.Database.GetRuntimeName()} while the current current database connection is pointed at database:{connection.Database} (use .ChangeDatabase on the connection first) - SQL Server does not support cross database view dropping");
 
-                cmd = new SqlCommand("DROP VIEW " + tableToDrop.GetWrappedName(), (SqlConnection)connection);
+                cmd = new SqlCommand($"DROP VIEW {tableToDrop.GetWrappedName()}", (SqlConnection)connection);
                 break;
             case TableType.Table:
-                cmd = new SqlCommand("DROP TABLE " + tableToDrop.GetFullyQualifiedName(), (SqlConnection)connection);
+                cmd = new SqlCommand($"DROP TABLE {tableToDrop.GetFullyQualifiedName()}", (SqlConnection)connection);
                 break;
             case TableType.TableValuedFunction :
                 DropFunction(connection,(DiscoveredTableValuedFunction) tableToDrop);
@@ -130,23 +117,23 @@ where object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Tran
 
     public override void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop)
     {
-        using(SqlCommand cmd = new SqlCommand($"DROP FUNCTION {functionToDrop.Schema??"dbo"}.{functionToDrop.GetRuntimeName()}", (SqlConnection)connection))
-            cmd.ExecuteNonQuery();
+        using var cmd = new SqlCommand($"DROP FUNCTION {functionToDrop.Schema??"dbo"}.{functionToDrop.GetRuntimeName()}", (SqlConnection)connection);
+        cmd.ExecuteNonQuery();
     }
 
     public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
     {
-        using(SqlCommand cmd = new SqlCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + " DROP column " + columnToDrop.GetWrappedName(), (SqlConnection)connection))
-            cmd.ExecuteNonQuery();
+        using var cmd = new SqlCommand(
+            $"ALTER TABLE {columnToDrop.Table.GetFullyQualifiedName()} DROP column {columnToDrop.GetWrappedName()}", (SqlConnection)connection);
+        cmd.ExecuteNonQuery();
     }
 
         
     public override DiscoveredParameter[] DiscoverTableValuedFunctionParameters(DbConnection connection,DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
     {
-        List<DiscoveredParameter> toReturn = new List<DiscoveredParameter>();
+        var toReturn = new List<DiscoveredParameter>();
 
-        string query =
-            @"select 
+        const string query = @"select 
 sys.parameters.name AS name,
 sys.types.name AS TYPE_NAME,
 sys.parameters.max_length AS LENGTH,
@@ -159,7 +146,7 @@ join
 sys.types on sys.parameters.user_type_id = sys.types.user_type_id
 where object_id = OBJECT_ID(@tableName)";
 
-        using (DbCommand cmd = discoveredTableValuedFunction.GetCommand(query, connection))
+        using (var cmd = discoveredTableValuedFunction.GetCommand(query, connection))
         {
             var p = cmd.CreateParameter();
             p.ParameterName = "@tableName";
@@ -168,15 +155,12 @@ where object_id = OBJECT_ID(@tableName)";
 
             cmd.Transaction = transaction;
 
-            using (var r = cmd.ExecuteReader())
-            {
-                while (r.Read())
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                toReturn.Add(new DiscoveredParameter(r["name"].ToString())
                 {
-                    DiscoveredParameter toAdd = new DiscoveredParameter(r["name"].ToString());
-                    toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r),null);
-                    toReturn.Add(toAdd);
-                }
-            }
+                    DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), null)
+                });
         }
             
         return toReturn.ToArray();
@@ -191,15 +175,13 @@ where object_id = OBJECT_ID(@tableName)";
     {
         try
         {
-            using (var connection = args.GetManagedConnection(table))
+            using var connection = args.GetManagedConnection(table);
+            var columnHelper = GetColumnHelper();
+            foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))
             {
-                var columnHelper = GetColumnHelper();
-                foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))
-                {
-                    var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
-                    using(var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction))
-                        args.ExecuteNonQuery(alterCmd);
-                }
+                var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
+                using var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
+                args.ExecuteNonQuery(alterCmd);
             }
         }
         catch (Exception e)
@@ -214,9 +196,9 @@ where object_id = OBJECT_ID(@tableName)";
     {
         var toReturn = new Dictionary<string,DiscoveredRelationship>();
 
-        string sql = "exec sp_fkeys @pktable_name = @table, @pktable_qualifier=@database, @pktable_owner=@schema";
+        const string sql = "exec sp_fkeys @pktable_name = @table, @pktable_qualifier=@database, @pktable_owner=@schema";
 
-        using (DbCommand cmd = table.GetCommand(sql, connection))
+        using (var cmd = table.GetCommand(sql, connection))
         {
             if(transaction != null)
                 cmd.Transaction = transaction.Transaction;
@@ -239,7 +221,7 @@ where object_id = OBJECT_ID(@tableName)";
             p.DbType = DbType.String;
             cmd.Parameters.Add(p);
 
-            using (DataTable dt = new DataTable())
+            using (var dt = new DataTable())
             {
                 var da = table.Database.Server.GetDataAdapter(cmd);
                 da.Fill(dt);
@@ -270,19 +252,16 @@ where object_id = OBJECT_ID(@tableName)";
                         var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
 
                         var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
-                        CascadeRule deleteRule = CascadeRule.Unknown;
-                            
 
-                        if(deleteRuleInt == 0)
-                            deleteRule = CascadeRule.Delete;
-                        else if(deleteRuleInt == 1)
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleInt == 2)
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleInt == 3)
-                            deleteRule = CascadeRule.SetDefault;
+                        var deleteRule = deleteRuleInt switch
+                        {
+                            0 => CascadeRule.Delete,
+                            1 => CascadeRule.NoAction,
+                            2 => CascadeRule.SetNull,
+                            3 => CascadeRule.SetDefault,
+                            _ => CascadeRule.Unknown
+                        };
 
-                            
                         /*
     https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-fkeys-transact-sql?view=sql-server-2017
                          
@@ -306,22 +285,21 @@ where object_id = OBJECT_ID(@tableName)";
 
     protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
     {
-        string oldName = discoveredTable.GetWrappedName();
+        var oldName = discoveredTable.GetWrappedName();
             
         var syntax = discoveredTable.GetQuerySyntaxHelper();
 
         if (!string.IsNullOrWhiteSpace(discoveredTable.Schema))
-            oldName = syntax.EnsureWrapped( discoveredTable.Schema) + "." + oldName;
+            oldName = $"{syntax.EnsureWrapped(discoveredTable.Schema)}.{oldName}";
 
-        return string.Format("exec sp_rename '{0}', '{1}'", syntax.Escape(oldName), syntax.Escape(newName));
+        return $"exec sp_rename '{syntax.Escape(oldName)}', '{syntax.Escape(newName)}'";
     }
 
     public override void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)
     {
         var syntax = discoveredTable.GetQuerySyntaxHelper();
 
-        string sql = 
-            @"DELETE f
+        const string sql = @"DELETE f
             FROM (
             SELECT	ROW_NUMBER() OVER (PARTITION BY {0} ORDER BY {0}) AS RowNum
             FROM {1}
@@ -329,37 +307,35 @@ where object_id = OBJECT_ID(@tableName)";
             ) as f
             where RowNum > 1";
             
-        string columnList = string.Join(",",
+        var columnList = string.Join(",",
             discoveredTable.DiscoverColumns().Select(c=>syntax.EnsureWrapped(c.GetRuntimeName())));
 
-        string sqlToExecute = string.Format(sql,columnList,discoveredTable.GetFullyQualifiedName());
+        var sqlToExecute = string.Format(sql,columnList,discoveredTable.GetFullyQualifiedName());
 
         var server = discoveredTable.Database.Server;
 
-        using (var con = args.GetManagedConnection(server))
-        {
-            using(var cmd = server.GetCommand(sqlToExecute, con))
-                args.ExecuteNonQuery(cmd);
-        }
+        using var con = args.GetManagedConnection(server);
+        using var cmd = server.GetCommand(sqlToExecute, con);
+        args.ExecuteNonQuery(cmd);
     }
 
 
     public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
     {
-        return "SELECT TOP " + topX + " * FROM " + table.GetFullyQualifiedName();
+        return $"SELECT TOP {topX} * FROM {table.GetFullyQualifiedName()}";
     }
         
     private string GetSQLType_FromSpColumnsResult(DbDataReader r)
     {
-        string columnType = r["TYPE_NAME"] as string;
-        string lengthQualifier = "";
+        var columnType = r["TYPE_NAME"] as string;
+        var lengthQualifier = "";
             
         if (HasPrecisionAndScale(columnType))
-            lengthQualifier = "(" + r["PRECISION"] + "," + r["SCALE"] + ")";
+            lengthQualifier = $"({r["PRECISION"]},{r["SCALE"]})";
         else
         if (RequiresLength(columnType))
         {
-            lengthQualifier = "(" + AdjustForUnicodeAndNegativeOne(columnType,Convert.ToInt32(r["LENGTH"])) + ")";
+            lengthQualifier = $"({AdjustForUnicodeAndNegativeOne(columnType, Convert.ToInt32(r["LENGTH"]))})";
         }
 
         if (columnType == "text")
@@ -382,9 +358,9 @@ where object_id = OBJECT_ID(@tableName)";
 
     private string[] ListPrimaryKeys(IManagedConnection con, DiscoveredTable table)
     {
-        List<string> toReturn = new List<string>();
+        var toReturn = new List<string>();
 
-        string query = @"SELECT i.name AS IndexName, 
+        const string query = @"SELECT i.name AS IndexName, 
 OBJECT_NAME(ic.OBJECT_ID) AS TableName, 
 COL_NAME(ic.OBJECT_ID,ic.column_id) AS ColumnName, 
 c.is_identity
@@ -396,7 +372,7 @@ AND i.index_id = ic.index_id
 WHERE (i.is_primary_key = 1) AND ic.OBJECT_ID = OBJECT_ID(@tableName)
 ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal";
 
-        using (DbCommand cmd = table.GetCommand(query, con.Connection))
+        using (var cmd = table.GetCommand(query, con.Connection))
         {
             var p = cmd.CreateParameter();
             p.ParameterName = "@tableName";
@@ -404,7 +380,7 @@ ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal";
             cmd.Parameters.Add(p);
 
             cmd.Transaction = con.Transaction;
-            using(DbDataReader r = cmd.ExecuteReader())
+            using(var r = cmd.ExecuteReader())
             {
                 while (r.Read())
                     toReturn.Add((string) r["ColumnName"]);

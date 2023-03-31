@@ -13,7 +13,7 @@ public static class StringExtensions
 
     public static string Replace(this string haystack, string needle, string replacement, RegexOptions options)
     {
-        string result = Regex.Replace(
+        var result = Regex.Replace(
             haystack,
             Regex.Escape(needle),
             replacement.Replace("$", "$$"),

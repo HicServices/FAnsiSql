@@ -10,6 +10,7 @@ namespace FAnsi.Implementations.MySql;
 
 public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
 {
+    public static readonly MySqlQuerySyntaxHelper Instance = new();
     public override int MaximumDatabaseLength => 64;
     public override int MaximumTableLength => 64;
     public override int MaximumColumnLength => 64;
@@ -20,34 +21,22 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "`";
 
-    public MySqlQuerySyntaxHelper() : base(new MySqlTypeTranslater(), new MySqlAggregateHelper(),new MySqlUpdateHelper(),DatabaseType.MySql)//no specific type translation required
+    private MySqlQuerySyntaxHelper() : base(new MySqlTypeTranslater(), new MySqlAggregateHelper(),new MySqlUpdateHelper(),DatabaseType.MySql)//no specific type translation required
     {
     }
 
-    public override bool SupportsEmbeddedParameters()
-    {
-        return true;
-    }
+    public override bool SupportsEmbeddedParameters() => true;
 
-    public override string EnsureWrappedImpl(string databaseOrTableName)
-    {
-        return $"`{GetRuntimeNameWithDoubledBackticks(databaseOrTableName)}`";
-    }
+    public override string EnsureWrappedImpl(string databaseOrTableName) => $"`{GetRuntimeNameWithDoubledBackticks(databaseOrTableName)}`";
 
     /// <summary>
     /// Returns the runtime name of the string with all backticks escaped (but resulting string is not wrapped in backticks itself)
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string GetRuntimeNameWithDoubledBackticks(string s)
-    {
-        return GetRuntimeName(s)?.Replace("`","``");
-    }
+    private string GetRuntimeNameWithDoubledBackticks(string s) => GetRuntimeName(s)?.Replace("`","``");
 
-    protected override string UnescapeWrappedNameBody(string name)
-    {
-        return name.Replace("``","`");
-    }
+    protected override string UnescapeWrappedNameBody(string name) => name.Replace("``","`");
 
     public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
     {
@@ -55,13 +44,10 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
         if (!string.IsNullOrWhiteSpace(schema))
             throw new NotSupportedException("Schema (e.g. .dbo. not supported by MySql)");
 
-        return  EnsureWrapped(databaseName) + DatabaseTableSeparator + EnsureWrapped(tableName);
+        return $"{EnsureWrapped(databaseName)}{DatabaseTableSeparator}{EnsureWrapped(tableName)}";
     }
 
-    public override TopXResponse HowDoWeAchieveTopX(int x)
-    {
-        return new TopXResponse($"LIMIT {x}",QueryComponent.Postfix);
-    }
+    public override TopXResponse HowDoWeAchieveTopX(int x) => new TopXResponse($"LIMIT {x}",QueryComponent.Postfix);
 
     public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
     {
@@ -95,9 +81,8 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
         return r.ToString();
     }
 
-    public override string GetScalarFunctionSql(MandatoryScalarFunctions function)
-    {
-        return function switch
+    public override string GetScalarFunctionSql(MandatoryScalarFunctions function) =>
+        function switch
         {
             MandatoryScalarFunctions.GetTodaysDate => //this works at least as of 5.7.19
                 "now()",
@@ -106,33 +91,28 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
             MandatoryScalarFunctions.Len => "LENGTH",
             _ => throw new ArgumentOutOfRangeException(nameof(function))
         };
-    }
 
-    public override string GetAutoIncrementKeywordIfAny()
-    {
-        return "AUTO_INCREMENT";
-    }
+    public override string GetAutoIncrementKeywordIfAny() => "AUTO_INCREMENT";
 
     public override Dictionary<string, string> GetSQLFunctionsDictionary()
     {
-        return new Dictionary<string, string>()
-        {
-            {"left", "LEFT ( string , length)"},
-            {"right", "RIGHT ( string , length )"},
-            {"upper", "UPPER ( string )"},
-            {"substring", "SUBSTR ( str ,start , length ) "},
-            {"dateadd", "DATE_ADD (date, INTERVAL value unit)"},
-            {"datediff", "DATEDIFF ( date1 , date2)  "},
-            {"getdate", "now()"},
-            {"now", "now()"},
-            {"cast", "CAST ( value AS type )"},
-            {"convert", "CONVERT ( value, type ) "},
-            {"case", "CASE WHEN x=y THEN 'something' WHEN x=z THEN 'something2' ELSE 'something3' END"}
-        };
+        return Functions;
     }
 
-    public override string HowDoWeAchieveMd5(string selectSql)
+    private static readonly Dictionary<string, string> Functions = new Dictionary<string, string>
     {
-        return $"md5({selectSql})";
-    }
+        {"left", "LEFT ( string , length)"},
+        {"right", "RIGHT ( string , length )"},
+        {"upper", "UPPER ( string )"},
+        {"substring", "SUBSTR ( str ,start , length ) "},
+        {"dateadd", "DATE_ADD (date, INTERVAL value unit)"},
+        {"datediff", "DATEDIFF ( date1 , date2)  "},
+        {"getdate", "now()"},
+        {"now", "now()"},
+        {"cast", "CAST ( value AS type )"},
+        {"convert", "CONVERT ( value, type ) "},
+        {"case", "CASE WHEN x=y THEN 'something' WHEN x=z THEN 'something2' ELSE 'something3' END"}
+    };
+
+    public override string HowDoWeAchieveMd5(string selectSql) => $"md5({selectSql})";
 }

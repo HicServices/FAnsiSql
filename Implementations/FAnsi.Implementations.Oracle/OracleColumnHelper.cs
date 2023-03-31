@@ -4,26 +4,29 @@ using FAnsi.Naming;
 
 namespace FAnsi.Implementations.Oracle;
 
-public class OracleColumnHelper : IDiscoveredColumnHelper
+public sealed class OracleColumnHelper : IDiscoveredColumnHelper
 {
+    public static readonly OracleColumnHelper Instance = new();
+    private OracleColumnHelper() {}
     public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table, IHasRuntimeName column, int topX, bool discardNulls)
     {
-        var syntax = new OracleQuerySyntaxHelper();
+        var syntax = OracleQuerySyntaxHelper.Instance;
 
-        string sql = "SELECT " + syntax.EnsureWrapped(column.GetRuntimeName()) + " FROM " + table.GetFullyQualifiedName();
+        var sql = new StringBuilder($"SELECT {syntax.EnsureWrapped(column.GetRuntimeName())} FROM {table.GetFullyQualifiedName()}");
 
         if (discardNulls)
-            sql += " WHERE " + syntax.EnsureWrapped(column.GetRuntimeName()) + " IS NOT NULL";
+            sql.Append($" WHERE {syntax.EnsureWrapped(column.GetRuntimeName())} IS NOT NULL");
 
-        sql += " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY";
-        return sql;
+        sql.Append($" OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY");
+        return sql.ToString();
     }
 
     public string GetAlterColumnToSql(DiscoveredColumn column, string newType, bool allowNulls)
     {
         var syntax = column.Table.Database.Server.GetQuerySyntaxHelper();
 
-        StringBuilder sb = new StringBuilder("ALTER TABLE " + column.Table.GetFullyQualifiedName() + " MODIFY " + syntax.EnsureWrapped(column.GetRuntimeName()) + " " + newType + " ");
+        var sb = new StringBuilder(
+            $"ALTER TABLE {column.Table.GetFullyQualifiedName()} MODIFY {syntax.EnsureWrapped(column.GetRuntimeName())} {newType} ");
 
         //If you are already null then Oracle will complain (https://www.techonthenet.com/oracle/errors/ora01451.php)
         if (allowNulls != column.AllowNulls)

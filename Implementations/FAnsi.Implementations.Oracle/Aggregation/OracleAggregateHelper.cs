@@ -5,105 +5,70 @@ using FAnsi.Discovery.QuerySyntax.Aggregation;
 
 namespace FAnsi.Implementations.Oracle.Aggregation;
 
-public class OracleAggregateHelper : AggregateHelper
+public sealed class OracleAggregateHelper : AggregateHelper
 {
-    protected override IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return new OracleQuerySyntaxHelper();
-    }
+    public static readonly OracleAggregateHelper Instance=new();
+    private OracleAggregateHelper() {}
+    protected override IQuerySyntaxHelper GetQuerySyntaxHelper() => OracleQuerySyntaxHelper.Instance;
 
-    public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
-    {
-        switch (increment)
+    public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql) =>
+        increment switch
         {
-            case AxisIncrement.Day:
-                return columnSql;
-            case AxisIncrement.Month:
-                return $"to_char({columnSql},'YYYY-MM')";
-            case AxisIncrement.Year:
-                return $"to_number(to_char({columnSql},'YYYY'))";
-            case AxisIncrement.Quarter:
-                return $"to_char({columnSql},'YYYY') || 'Q' || to_char({columnSql},'Q')";
-            default:
-                throw new ArgumentOutOfRangeException("increment");
-        }
-    }
+            AxisIncrement.Day => columnSql,
+            AxisIncrement.Month => $"to_char({columnSql},'YYYY-MM')",
+            AxisIncrement.Year => $"to_number(to_char({columnSql},'YYYY'))",
+            AxisIncrement.Quarter => $"to_char({columnSql},'YYYY') || 'Q' || to_char({columnSql},'Q')",
+            _ => throw new ArgumentOutOfRangeException(nameof(increment))
+        };
 
     private string GetDateAxisTableDeclaration(IQueryAxis axis)
     {
         //https://stackoverflow.com/questions/8374959/how-to-populate-calendar-table-in-oracle
 
         //expect the date to be either '2010-01-01' or a function that evaluates to a date e.g. CURRENT_TIMESTAMP
-        string startDateSql;
 
-        //is it a date in some format or other?
-        if(DateTime.TryParse(axis.StartDate.Trim('\'','"'),out DateTime start))
-            startDateSql = $"to_date('{start.ToString("yyyyMMdd")}','yyyymmdd')";
-        else
-            startDateSql = $"to_date(to_char({axis.StartDate}, 'YYYYMMDD'), 'yyyymmdd')";//assume its some Oracle specific syntax that results in a date
+        var startDateSql =
+            //is it a date in some format or other?
+            DateTime.TryParse(axis.StartDate.Trim('\'', '"'), out var start)
+                ? $"to_date('{start:yyyyMMdd}','yyyymmdd')"
+                : $"to_date(to_char({axis.StartDate}, 'YYYYMMDD'), 'yyyymmdd')"; //assume its some Oracle specific syntax that results in a date
 
-        string endDateSql;
-        if (DateTime.TryParse(axis.EndDate.Trim('\'', '"'), out DateTime end))
-            endDateSql = $"to_date('{end.ToString("yyyyMMdd")}','yyyymmdd')";
-        else
-            endDateSql = $"to_date(to_char({axis.EndDate}, 'YYYYMMDD'), 'yyyymmdd')";//assume its some Oracle specific syntax that results in a date e.g. CURRENT_TIMESTAMP
+        var endDateSql = DateTime.TryParse(axis.EndDate.Trim('\'', '"'), out var end)
+            ? $"to_date('{end:yyyyMMdd}','yyyymmdd')"
+            : $"to_date(to_char({axis.EndDate}, 'YYYYMMDD'), 'yyyymmdd')"; //assume its some Oracle specific syntax that results in a date e.g. CURRENT_TIMESTAMP
 
-        switch (axis.AxisIncrement)
+        return axis.AxisIncrement switch
         {
-                
-            case AxisIncrement.Year:
-                return
-                    string.Format(
-                        @"
+            AxisIncrement.Year => $@"
 with calendar as (
-        select add_months({0},12* (rownum - 1)) as dt
+        select add_months({startDateSql},12* (rownum - 1)) as dt
         from dual
         connect by rownum <= 1+
-floor(months_between({1}, {0}) /12)
+floor(months_between({endDateSql}, {startDateSql}) /12)
     )",
-                        startDateSql,
-                        endDateSql);
-
-            case AxisIncrement.Day:
-                return
-                    string.Format(
-                        @"
+            AxisIncrement.Day => $@"
 with calendar as (
-        select {0} + (rownum - 1) as dt
+        select {startDateSql} + (rownum - 1) as dt
         from dual
         connect by rownum <= 1+
-floor({1} - {0})
+floor({endDateSql} - {startDateSql})
     )",
-                        startDateSql,
-                        endDateSql);
-            case AxisIncrement.Month:
-                return 
-                    string.Format(
-                        @"
+            AxisIncrement.Month => $@"
 with calendar as (
-        select add_months({0},rownum - 1) as dt
+        select add_months({startDateSql},rownum - 1) as dt
         from dual
         connect by rownum <= 1+
-floor(months_between({1}, {0}))
+floor(months_between({endDateSql}, {startDateSql}))
     )",
-                        startDateSql,
-                        endDateSql);
-            case AxisIncrement.Quarter:
-
-                return
-                    string.Format(
-                        @"
+            AxisIncrement.Quarter => $@"
 with calendar as (
-        select add_months({0},3* (rownum - 1)) as dt
+        select add_months({startDateSql},3* (rownum - 1)) as dt
         from dual
         connect by rownum <= 1+
-floor(months_between({1}, {0}) /3)
+floor(months_between({endDateSql}, {startDateSql}) /3)
     )",
-                        startDateSql,
-                        endDateSql);
-            default:
-                throw new NotImplementedException();
-        }         
+            _ => throw new NotImplementedException()
+        };
     }
         
     protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
@@ -132,7 +97,7 @@ order by dt*/
 
         WrapAxisColumnWithDatePartFunction(query, axisColumnAlias);
 
-        string calendar = GetDateAxisTableDeclaration(query.Axis);
+        var calendar = GetDateAxisTableDeclaration(query.Axis);
 
         return string.Format(
             @"
@@ -157,7 +122,7 @@ ORDER BY
             GetDatePartOfColumn(query.Axis.AxisIncrement, "dt"),
             countAlias,
             //the entire query
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.SELECT && c.LocationToInsert <= QueryComponent.Having)),
+            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
             axisColumnAlias
 
         );

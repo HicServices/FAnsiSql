@@ -7,7 +7,7 @@ using System.IO;
 
 namespace FAnsiTests;
 
-class ImplementationManagerLoadTests
+internal class ImplementationManagerLoadTests
 {
     [Test]
     public void Test_LoadAssemblies_FromDirectory()

@@ -8,46 +8,35 @@ using TypeGuesser;
 
 namespace FAnsi.Implementations.Oracle;
 
-public class OracleTypeTranslater:TypeTranslater
+public sealed class OracleTypeTranslater:TypeTranslater
 {
-    private readonly Regex AlsoFloatingPointRegex = new Regex("^(NUMBER)|(DEC)",RegexOptions.IgnoreCase);
-    private readonly Regex AlsoByteArrayRegex = new Regex("(BFILE)|(BLOB)|(RAW)|(ROWID)",RegexOptions.IgnoreCase);
+    public static readonly OracleTypeTranslater Instance = new();
+    private static readonly Regex AlsoFloatingPointRegex = new("^(NUMBER)|(DEC)",RegexOptions.CultureInvariant|RegexOptions.IgnoreCase|RegexOptions.Compiled);
+    private static readonly Regex AlsoByteArrayRegex = new("(BFILE)|(BLOB)|(RAW)|(ROWID)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
         
     public const int ExtraLengthPerNonAsciiCharacter = 3;
 
     /// <summary>
     /// Oracle specific string types, these are all max length as returned by <see cref="GetLengthIfString"/>
     /// </summary>
-    private readonly Regex AlsoStringRegex = new Regex("^([N]?CLOB)|(LONG)", RegexOptions.IgnoreCase);
+    private static readonly Regex AlsoStringRegex = new("^([N]?CLOB)|(LONG)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    public OracleTypeTranslater(): base(4000, 4000)
-    {
-        DateRegex = new Regex("(date)|(timestamp)", RegexOptions.IgnoreCase);
-    }
-    protected override string GetStringDataTypeImpl(int maxExpectedStringWidth)
-    {
-        return "varchar2(" + maxExpectedStringWidth + ")";
-    }
+    private static readonly Regex OracleDateRegex =
+        new("(date)|(timestamp)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    protected override string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth)
+    private OracleTypeTranslater(): base(4000, 4000)
     {
-        return "nvarchar2(" + maxExpectedStringWidth + ")";
+        DateRegex = OracleDateRegex;
     }
+    protected override string GetStringDataTypeImpl(int maxExpectedStringWidth) => $"varchar2({maxExpectedStringWidth})";
 
-    public override string GetStringDataTypeWithUnlimitedWidth()
-    {
-        return "CLOB";
-    }
+    protected override string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth) => $"nvarchar2({maxExpectedStringWidth})";
 
-    public override string GetUnicodeStringDataTypeWithUnlimitedWidth()
-    {
-        return "NCLOB";
-    }
+    public override string GetStringDataTypeWithUnlimitedWidth() => "CLOB";
 
-    protected override string GetTimeDataType()
-    {
-        return "TIMESTAMP";
-    }
+    public override string GetUnicodeStringDataTypeWithUnlimitedWidth() => "NCLOB";
+
+    protected override string GetTimeDataType() => "TIMESTAMP";
 
     /// <summary>
     /// <para>Returns char(5).  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint
@@ -56,15 +45,9 @@ public class OracleTypeTranslater:TypeTranslater
     /// <para>See https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns</para>
     /// </summary>
     /// <returns></returns>
-    protected override string GetBoolDataType()
-    {
-        return "varchar2(5)";
-    }
+    protected override string GetBoolDataType() => "varchar2(5)";
 
-    protected override string GetBigIntDataType()
-    {
-        return "long";
-    }
+    protected override string GetBigIntDataType() => "long";
 
     /// <summary>
     /// <para>Returns False.  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint
@@ -74,59 +57,29 @@ public class OracleTypeTranslater:TypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    protected override bool IsBit(string sqlType)
-    {
-        return false;
-    }
+    protected override bool IsBit(string sqlType) => false;
 
     protected override bool IsString(string sqlType)
     {
-        if (sqlType.Contains("RAW",CompareOptions.IgnoreCase))
-            return false;
-
-        return base.IsString(sqlType) || AlsoStringRegex.IsMatch(sqlType);
+        return !sqlType.Contains("RAW", CompareOptions.OrdinalIgnoreCase) &&
+               (base.IsString(sqlType) || AlsoStringRegex.IsMatch(sqlType));
     }
 
-    protected override bool IsFloatingPoint(string sqlType)
-    {
-        return base.IsFloatingPoint(sqlType) || AlsoFloatingPointRegex.IsMatch(sqlType);
-    }
+    protected override bool IsFloatingPoint(string sqlType) => base.IsFloatingPoint(sqlType) || AlsoFloatingPointRegex.IsMatch(sqlType);
 
-    public override int GetLengthIfString(string sqlType)
-    {
-        if (AlsoStringRegex.IsMatch(sqlType))
-            return int.MaxValue;
+    public override int GetLengthIfString(string sqlType) => AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType);
 
-        return base.GetLengthIfString(sqlType);
-    }
-
-    protected override bool IsSmallInt(string sqlType)
-    {
+    protected override bool IsSmallInt(string sqlType) =>
         //yup you ask for one of these, you will get a NUMBER(38) https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm
-        if(sqlType.StartsWith("SMALLINT", StringComparison.CurrentCultureIgnoreCase))
-            return false;
+        !sqlType.StartsWith("SMALLINT", StringComparison.InvariantCultureIgnoreCase) && base.IsSmallInt(sqlType);
 
-        return base.IsSmallInt(sqlType);
-    }
-
-    protected override bool IsInt(string sqlType)
-    {
+    protected override bool IsInt(string sqlType) =>
         //yup you ask for one of these, you will get a NUMBER(38) https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm
-        if (sqlType.StartsWith("SMALLINT", StringComparison.CurrentCultureIgnoreCase))
-            return true;
+        sqlType.StartsWith("SMALLINT", StringComparison.CurrentCultureIgnoreCase) || base.IsInt(sqlType);
 
-        return base.IsInt(sqlType);
-    }
+    protected override bool IsByteArray(string sqlType) => base.IsByteArray(sqlType) || AlsoByteArrayRegex.IsMatch(sqlType);
 
-    protected override bool IsByteArray(string sqlType)
-    {
-        return base.IsByteArray(sqlType) || AlsoByteArrayRegex.IsMatch(sqlType);
-    }
-        
-    protected override string GetDateDateTimeDataType()
-    {
-        return "DATE";
-    }
+    protected override string GetDateDateTimeDataType() => "DATE";
 
     public override Guesser GetGuesserFor(DiscoveredColumn discoveredColumn)
     {

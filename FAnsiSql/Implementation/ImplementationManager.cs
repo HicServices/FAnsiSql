@@ -45,7 +45,7 @@ public class ImplementationManager
     /// </summary>
     public static void Load(DirectoryInfo currentDirectory=null)
     {
-        currentDirectory = currentDirectory ?? new DirectoryInfo(Environment.CurrentDirectory);
+        currentDirectory ??= new DirectoryInfo(Environment.CurrentDirectory);
 
         if(!currentDirectory.Exists)
             throw new Exception(string.Format(FAnsiStrings.ImplementationManager_Load_Directory___0__did_not_exist, currentDirectory));
@@ -61,9 +61,9 @@ public class ImplementationManager
     /// <param name="assemblies"></param>
     public static void Load(params Assembly[] assemblies)
     {
-        AggregateCatalog catalog = new AggregateCatalog();
+        var catalog = new AggregateCatalog();
 
-        foreach (Assembly assembly in assemblies)
+        foreach (var assembly in assemblies)
             catalog.Catalogs.Add(new AssemblyCatalog(assembly));
 
         Load(catalog);
@@ -71,25 +71,22 @@ public class ImplementationManager
 
     private static  void Load(ComposablePartCatalog catalog)
     {
-        if (_instance == null)
-            _instance = new ImplementationManager();
+        _instance ??= new ImplementationManager();
 
         //just because we load new implementations doesn't mean we should throw away the old ones
         var old = _instance.Implementations?.ToArray();
 
-        using (CompositionContainer container = new CompositionContainer(catalog))
-        {
-            //bring in the new ones
-            container.SatisfyImportsOnce(_instance);
+        using var container = new CompositionContainer(catalog);
+        //bring in the new ones
+        container.SatisfyImportsOnce(_instance);
 
-            //but also bring in any old ones that we don't have in the new load
-            if(old != null)
-                foreach(IImplementation o in old)
-                {
-                    if(_instance.Implementations.All(i=>i.GetType() != o.GetType()))
-                        _instance.Implementations.Add(o);
-                }
-        }
+        //but also bring in any old ones that we don't have in the new load
+        if(old != null)
+            foreach(var o in old)
+            {
+                if(_instance.Implementations.All(i=>i.GetType() != o.GetType()))
+                    _instance.Implementations.Add(o);
+            }
     }
 
     public static IImplementation GetImplementation(DatabaseType databaseType)
@@ -123,7 +120,7 @@ public class ImplementationManager
         if (_instance == null)
             Load();
             
-        var implementation = _instance.Implementations.FirstOrDefault(condition);
+        var implementation = _instance?.Implementations.FirstOrDefault(condition);
 
         if (implementation == null)
             throw new ImplementationNotFoundException(errorIfNotFound);
@@ -137,14 +134,8 @@ public class ImplementationManager
     /// <returns></returns>
     public static ReadOnlyCollection<IImplementation> GetImplementations()
     {
-        //If no implementations are loaded, load the current directory's dlls to look for implmentations
-        if (_instance == null)
-            return null;
-
-        if(_instance.Implementations == null)
-            return null;
-
-        return new ReadOnlyCollection<IImplementation>(_instance.Implementations);
+        //If no implementations are loaded, load the current directory's dlls to look for implementations
+        return _instance?.Implementations == null ? null : new ReadOnlyCollection<IImplementation>(_instance.Implementations);
     }
 
     /// <summary>

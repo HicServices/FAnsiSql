@@ -10,21 +10,18 @@ using TypeGuesser;
 
 namespace FAnsi.Implementations.Oracle;
 
-public class OracleDatabaseHelper : DiscoveredDatabaseHelper
+public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
 {
-    public override IDiscoveredTableHelper GetTableHelper()
-    {
-        return new OracleTableHelper();
-    }
+    public static readonly OracleDatabaseHelper Instance=new();
+    private OracleDatabaseHelper(){}
+    public override IDiscoveredTableHelper GetTableHelper() => OracleTableHelper.Instance;
 
     public override void DropDatabase(DiscoveredDatabase database)
     {
-        using(var con = (OracleConnection)database.Server.GetConnection())
-        {
-            con.Open();
-            using(var cmd = new OracleCommand("DROP USER \"" + database.GetRuntimeName() + "\" CASCADE ",con))
-                cmd.ExecuteNonQuery();
-        }
+        using var con = (OracleConnection)database.Server.GetConnection();
+        con.Open();
+        using var cmd = new OracleCommand($"DROP USER \"{database.GetRuntimeName()}\" CASCADE ",con);
+        cmd.ExecuteNonQuery();
     }
 
     public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
@@ -35,7 +32,7 @@ public class OracleDatabaseHelper : DiscoveredDatabaseHelper
     protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
     {
         if (col.IsAutoIncrement)
-            return string.Format("{0} NUMBER {1}",col.ColumnName, syntaxHelper.GetAutoIncrementKeywordIfAny());
+            return $"{col.ColumnName} NUMBER {syntaxHelper.GetAutoIncrementKeywordIfAny()}";
 
         return base.GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper);
     }
@@ -52,10 +49,10 @@ public class OracleDatabaseHelper : DiscoveredDatabaseHelper
 
     public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
     {
-        List<DiscoveredTable> tables = new List<DiscoveredTable>();
+        var tables = new List<DiscoveredTable>();
             
         //find all the tables
-        using(var cmd = new OracleCommand("SELECT table_name FROM all_tables where owner='" + database + "'", (OracleConnection) connection))
+        using(var cmd = new OracleCommand($"SELECT table_name FROM all_tables where owner='{database}'", (OracleConnection) connection))
         {
             cmd.Transaction = transaction as OracleTransaction;
 
@@ -69,17 +66,17 @@ public class OracleDatabaseHelper : DiscoveredDatabaseHelper
             
         //find all the views
         if(includeViews)
-            using(var cmd = new OracleCommand("SELECT view_name FROM all_views where owner='" + database + "'", (OracleConnection) connection))
-            {
-                cmd.Transaction = transaction as OracleTransaction;
-                var r = cmd.ExecuteReader();
+        {
+            using var cmd = new OracleCommand($"SELECT view_name FROM all_views where owner='{database}'", (OracleConnection) connection);
+            cmd.Transaction = transaction as OracleTransaction;
+            var r = cmd.ExecuteReader();
                 
-                while (r.Read())
-                    if(querySyntaxHelper.IsValidTableName((string)r["view_name"],out _))
-                        tables.Add(new DiscoveredTable(parent,r["view_name"].ToString(),querySyntaxHelper,null,TableType.View));
-            }
+            while (r.Read())
+                if(querySyntaxHelper.IsValidTableName((string)r["view_name"],out _))
+                    tables.Add(new DiscoveredTable(parent,r["view_name"].ToString(),querySyntaxHelper,null,TableType.View));
+        }
 
-            
+
         return tables.ToArray();
     }
 

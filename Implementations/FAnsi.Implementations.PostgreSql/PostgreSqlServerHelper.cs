@@ -10,8 +10,8 @@ namespace FAnsi.Implementations.PostgreSql;
 
 public class PostgreSqlServerHelper : DiscoveredServerHelper
 {
-
-    public PostgreSqlServerHelper() : base(DatabaseType.PostgreSql)
+    public static readonly PostgreSqlServerHelper Instance = new();
+    private PostgreSqlServerHelper() : base(DatabaseType.PostgreSql)
     {
     }
 
@@ -46,16 +46,11 @@ public class PostgreSqlServerHelper : DiscoveredServerHelper
         var b = (NpgsqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
         b.Database = null;
 
-        using(var con = new NpgsqlConnection(b.ConnectionString))
-        {
-            con.Open();
-            using(var cmd = GetCommand("CREATE DATABASE \"" + newDatabaseName.GetRuntimeName() + '"',con))
-            {
-
-                cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
-                cmd.ExecuteNonQuery();
-            }
-        }
+        using var con = new NpgsqlConnection(b.ConnectionString);
+        con.Open();
+        using var cmd = GetCommand($"CREATE DATABASE \"{newDatabaseName.GetRuntimeName()}\"",con);
+        cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
+        cmd.ExecuteNonQuery();
     }
 
     public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder)
@@ -75,41 +70,36 @@ public class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override Version GetVersion(DiscoveredServer server)
     {
-        using (var con = server.GetConnection())
-        {
-            con.Open();
-            using (var cmd = server.GetCommand("SHOW server_version",con))
-            {
-                using(var r = cmd.ExecuteReader())
-                    if(r.Read())
-                        return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
-                    else
-                        return null;
-            }
-        }
+        using var con = server.GetConnection();
+        con.Open();
+        using var cmd = server.GetCommand("SHOW server_version",con);
+        using var r = cmd.ExecuteReader();
+        if(r.Read())
+            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+        return null;
     }
 
 
     public override string[] ListDatabases(DbConnectionStringBuilder builder)
     {
         //create a copy so as not to corrupt the original
-        var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString);
-        b.Database = "postgres";
-        b.Timeout = 5;
-
-        using (var con = new NpgsqlConnection(b.ConnectionString))
+        var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString)
         {
-            con.Open();
-            return ListDatabases(con);
-        }
+            Database = "postgres",
+            Timeout = 5
+        };
+
+        using var con = new NpgsqlConnection(b.ConnectionString);
+        con.Open();
+        return ListDatabases(con);
     }
 
     public override string[] ListDatabases(DbConnection con)
     {
-        List<string> databases = new List<string>();
+        var databases = new List<string>();
 
         using(var cmd = GetCommand("SELECT datname FROM pg_database;", con))
-        using(DbDataReader r = cmd.ExecuteReader())
+        using(var r = cmd.ExecuteReader())
             while (r.Read())
                 databases.Add((string) r["datname"]);
 
@@ -134,7 +124,7 @@ public class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override DbParameter GetParameter(string parameterName)
     {
-        return new NpgsqlParameter(){ParameterName = parameterName};
+        return new NpgsqlParameter {ParameterName = parameterName};
     }
 
     public override DbConnection GetConnection(DbConnectionStringBuilder builder)
@@ -145,7 +135,7 @@ public class PostgreSqlServerHelper : DiscoveredServerHelper
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database,
         string username, string password)
     {
-        var toReturn = new NpgsqlConnectionStringBuilder()
+        var toReturn = new NpgsqlConnectionStringBuilder
         {
             Host = server
         };

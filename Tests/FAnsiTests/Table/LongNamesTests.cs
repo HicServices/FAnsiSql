@@ -6,27 +6,27 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-class LongNamesTests : DatabaseTests
+internal class LongNamesTests : DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_LongTableName_CreateAndReadBack(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
 
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
-        for (int i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumTableLength; i++)
+        for (var i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumTableLength; i++)
             sb.Append('a');
 
-        StringBuilder sb2 = new StringBuilder();
-        for (int i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumColumnLength; i++)
+        var sb2 = new StringBuilder();
+        for (var i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumColumnLength; i++)
             sb2.Append('b');
 
         //128 characters long
-        string tableName = sb.ToString();
-        string columnName = sb2.ToString();
+        var tableName = sb.ToString();
+        var columnName = sb2.ToString();
             
-        var tbl = db.CreateTable(tableName,new DatabaseColumnRequest[]{new DatabaseColumnRequest(columnName,new DatabaseTypeRequest(typeof(string),100))});
+        var tbl = db.CreateTable(tableName,new DatabaseColumnRequest[]{new(columnName,new DatabaseTypeRequest(typeof(string),100))});
 
         Assert.IsTrue(tbl.Exists());
         StringAssert.AreEqualIgnoringCase(tableName,tbl.GetRuntimeName());
@@ -43,9 +43,9 @@ class LongNamesTests : DatabaseTests
 
         var db = GetTestDatabase(dbType);
 
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
-        for (int i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumDatabaseLength; i++)
+        for (var i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumDatabaseLength; i++)
             sb.Append('a');
 
         var db2 = db.Server.ExpectDatabase(sb.ToString());    

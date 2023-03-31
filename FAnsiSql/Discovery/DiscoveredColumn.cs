@@ -136,7 +136,7 @@ public class DiscoveredColumn : IHasFullyQualifiedNameToo,ISupplementalColumnInf
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((DiscoveredColumn)obj);
     }
 
@@ -148,7 +148,7 @@ public class DiscoveredColumn : IHasFullyQualifiedNameToo,ISupplementalColumnInf
     {
         unchecked
         {
-            return ((_name != null ? _name.GetHashCode() : 0) * 397) ^ (Table != null ? Table.GetHashCode() : 0);
+            return ((_name?.GetHashCode() ?? 0) * 397) ^ (Table?.GetHashCode() ?? 0);
         }
     }
 

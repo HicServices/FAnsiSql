@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Runtime.InteropServices;
 using Microsoft.Data.SqlClient;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
@@ -9,22 +10,18 @@ using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public class MicrosoftSQLServerHelper : DiscoveredServerHelper
+public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 {
-    static MicrosoftSQLServerHelper()
+    public static readonly MicrosoftSQLServerHelper Instance = new();
+    private MicrosoftSQLServerHelper() : base(DatabaseType.MicrosoftSQLServer)
     {
-        //add any keywords that are required to make Oracle work properly here (at API level if it won't work period without it or SystemDefaultLow if it's just recommended)
     }
 
     //the name of the properties on DbConnectionStringBuilder that correspond to server and database
-    public MicrosoftSQLServerHelper() : base(DatabaseType.MicrosoftSQLServer)
-    {
-    }
+    protected override string ServerKeyName => "Data Source";
+    protected override string DatabaseKeyName => "Initial Catalog";
 
-    protected override string ServerKeyName { get { return "Data Source"; }}
-    protected override string DatabaseKeyName { get { return "Initial Catalog"; }}
-
-    protected override string ConnectionTimeoutKeyName { get { return "Connect Timeout";} }
+    protected override string ConnectionTimeoutKeyName => "Connect Timeout";
 
     #region Up Typing
     public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
@@ -59,7 +56,7 @@ public class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
     {
-        var toReturn = new SqlConnectionStringBuilder() { DataSource = server};
+        var toReturn = new SqlConnectionStringBuilder { DataSource = server};
         if (!string.IsNullOrWhiteSpace(username))
         {
             toReturn.UserID = username;
@@ -83,23 +80,23 @@ public class MicrosoftSQLServerHelper : DiscoveredServerHelper
     public override string[] ListDatabases(DbConnectionStringBuilder builder)
     {
         //create a copy so as not to corrupt the original
-        var b = new SqlConnectionStringBuilder(builder.ConnectionString);
-        b.InitialCatalog = "master";
-        b.ConnectTimeout = 5;
-
-        using (var con = new SqlConnection(b.ConnectionString))
+        var b = new SqlConnectionStringBuilder(builder.ConnectionString)
         {
-            con.Open();
-            return ListDatabases(con);
-        }
+            InitialCatalog = "master",
+            ConnectTimeout = 5
+        };
+
+        using var con = new SqlConnection(b.ConnectionString);
+        con.Open();
+        return ListDatabases(con);
     }
 
     public override string[] ListDatabases(DbConnection con)
     {
-        List<string> databases = new List<string>();
+        var databases = new List<string>();
 
         using(var cmd = GetCommand("select name [Database] from master..sysdatabases", con))
-        using (DbDataReader r = cmd.ExecuteReader())
+        using (var r = cmd.ExecuteReader())
             while (r.Read())
                 databases.Add((string) r["Database"]);
             
@@ -123,58 +120,53 @@ public class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
     public override IQuerySyntaxHelper GetQuerySyntaxHelper()
     {
-        return new MicrosoftQuerySyntaxHelper();
+        return MicrosoftQuerySyntaxHelper.Instance;
     }
 
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
-        var b = new SqlConnectionStringBuilder(builder.ConnectionString);
-        b.InitialCatalog = "master";
-
-        var syntax = new MicrosoftQuerySyntaxHelper();
-            
-
-        using (var con = new SqlConnection(b.ConnectionString))
+        var b = new SqlConnectionStringBuilder(builder.ConnectionString)
         {
-            con.Open();
-            using(SqlCommand cmd = new SqlCommand("CREATE DATABASE " + syntax.EnsureWrapped(newDatabaseName.GetRuntimeName()) , con))
+            InitialCatalog = "master"
+        };
+
+        var syntax = MicrosoftQuerySyntaxHelper.Instance;
+
+
+        using var con = new SqlConnection(b.ConnectionString);
+        con.Open();
+        using var cmd = new SqlCommand($"CREATE DATABASE {syntax.EnsureWrapped(newDatabaseName.GetRuntimeName())}", con)
             {
-                cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
-                cmd.ExecuteNonQuery();
-            }
-                    
-        }
+                CommandTimeout = CreateDatabaseTimeoutInSeconds
+            };
+        cmd.ExecuteNonQuery();
     }
 
     public override Dictionary<string,string> DescribeServer(DbConnectionStringBuilder builder)
     {
-        Dictionary<string,string> toReturn = new Dictionary<string, string>();
-          
-        using (SqlConnection con = new SqlConnection(builder.ConnectionString))
-        {
-            con.Open();
+        var toReturn = new Dictionary<string, string>();
+
+        using var con = new SqlConnection(builder.ConnectionString);
+        con.Open();
                 
-            //For more info you could run
-            //SELECT *  FROM sys.databases WHERE name = 'AdventureWorks2012';  but there might not be a database?
+        //For more info you could run
+        //SELECT *  FROM sys.databases WHERE name = 'AdventureWorks2012';  but there might not be a database?
 
-            try
-            {
-                using (DataTable dt = new DataTable())
-                {
-                    using(var cmd = new SqlCommand("EXEC master..xp_fixeddrives",con))
-                    using(var da = new SqlDataAdapter(cmd))
-                        da.Fill(dt);
+        try
+        {
+            using var dt = new DataTable();
+            using(var cmd = new SqlCommand("EXEC master..xp_fixeddrives",con))
+            using(var da = new SqlDataAdapter(cmd))
+                da.Fill(dt);
 
-                    foreach (DataRow row in dt.Rows)
-                        toReturn.Add("Free Space Drive" + row[0], "" + row[1]);
-                }
-            }
-            catch (Exception)
-            {
-                toReturn.Add("Free Space ", "Unknown");
-            }
+            foreach (DataRow row in dt.Rows)
+                toReturn.Add($"Free Space Drive{row[0]}", $"{row[1]}");
         }
-            
+        catch (Exception)
+        {
+            toReturn.Add("Free Space ", "Unknown");
+        }
+
 
         return toReturn;
     }
@@ -207,17 +199,12 @@ public class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
     public override Version GetVersion(DiscoveredServer server)
     {
-        using (var con = server.GetConnection())
-        {
-            con.Open();
-            using (var cmd = server.GetCommand("SELECT @@VERSION",con))
-            {
-                using(var r = cmd.ExecuteReader())
-                    if(r.Read())
-                        return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
-                    else
-                        return null;
-            }
-        }
+        using var con = server.GetConnection();
+        con.Open();
+        using var cmd = server.GetCommand("SELECT @@VERSION",con);
+        using var r = cmd.ExecuteReader();
+        if(r.Read())
+            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+        return null;
     }
 }

@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Query;
 
-class QuerySyntaxHelperDatabaseTests : DatabaseTests
+internal class QuerySyntaxHelperDatabaseTests : DatabaseTests
 {
         
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -13,21 +13,19 @@ class QuerySyntaxHelperDatabaseTests : DatabaseTests
     {
         var db = GetTestDatabase(dbType,false);
 
-        string sql = "SELECT " + db.Server.GetQuerySyntaxHelper().HowDoWeAchieveMd5("'fish'");
+        var sql = $"SELECT {db.Server.GetQuerySyntaxHelper().HowDoWeAchieveMd5("'fish'")}";
 
 
         //because Oracle :)
         if (dbType == DatabaseType.Oracle)
             sql += " FROM dual";
 
-        using (var con = db.Server.GetConnection())
-        {
-            con.Open();
+        using var con = db.Server.GetConnection();
+        con.Open();
 
-            var result = db.Server.GetCommand(sql, con).ExecuteScalar();
+        var result = db.Server.GetCommand(sql, con).ExecuteScalar();
 
-            StringAssert.AreEqualIgnoringCase("83E4A96AED96436C621B9809E258B309",result.ToString());
-        }
+        StringAssert.AreEqualIgnoringCase("83E4A96AED96436C621B9809E258B309",result?.ToString());
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -35,24 +33,20 @@ class QuerySyntaxHelperDatabaseTests : DatabaseTests
     {
         var db = GetTestDatabase(dbType,false);
 
-        using (DataTable dt = new DataTable())
-        {
-            dt.Columns.Add("f");
-            dt.Rows.Add("Troll Doll");
+        using var dt = new DataTable();
+        dt.Columns.Add("f");
+        dt.Rows.Add("Troll Doll");
 
-            var tbl = db.CreateTable("strlentesttable", dt);
+        var tbl = db.CreateTable("strlentesttable", dt);
 
-            var len = tbl.GetQuerySyntaxHelper().GetScalarFunctionSql(MandatoryScalarFunctions.Len);
+        var len = tbl.GetQuerySyntaxHelper().GetScalarFunctionSql(MandatoryScalarFunctions.Len);
 
-            using (var con = tbl.Database.Server.GetConnection())
-            {
-                con.Open();
+        using var con = tbl.Database.Server.GetConnection();
+        con.Open();
 
-                var sql = $"SELECT MAX({len}(f)) from {tbl.GetFullyQualifiedName()}";
+        var sql = $"SELECT MAX({len}(f)) from {tbl.GetFullyQualifiedName()}";
 
-                var cmd = tbl.Database.Server.GetCommand(sql, con);
-                Assert.AreEqual(10, cmd.ExecuteScalar());
-            }
-        }
+        var cmd = tbl.Database.Server.GetCommand(sql, con);
+        Assert.AreEqual(10, cmd.ExecuteScalar());
     }
 }

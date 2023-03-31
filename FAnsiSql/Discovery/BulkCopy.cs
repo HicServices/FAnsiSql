@@ -104,7 +104,7 @@ public abstract class BulkCopy:IBulkCopy
         var factory = new TypeDeciderFactory(Culture);
             
         //These are the problematic Types
-        Dictionary<Type, IDecideTypesForStrings> deciders = factory.Dictionary;
+        var deciders = factory.Dictionary;
             
         //for each column in the destination
         foreach(var kvp in dict)
@@ -118,7 +118,7 @@ public abstract class BulkCopy:IBulkCopy
                     continue;
 
                 //create a new column hard typed to DateTime
-                var newColumn = dt.Columns.Add(kvp.Key.ColumnName + "_" + Guid.NewGuid().ToString(),dataType);
+                var newColumn = dt.Columns.Add($"{kvp.Key.ColumnName}_{Guid.NewGuid()}",dataType);
 
                 var decider = deciders[dataType];
                     
@@ -174,9 +174,9 @@ public abstract class BulkCopy:IBulkCopy
     /// <returns></returns>
     protected Dictionary<DataColumn, DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns, out DiscoveredColumn[] unmatchedColumnsInDestination)
     {
-        Dictionary<DataColumn, DiscoveredColumn> mapping = new Dictionary<DataColumn, DiscoveredColumn>();
+        var mapping = new Dictionary<DataColumn, DiscoveredColumn>();
 
-        foreach (DataColumn colInSource in inputColumns)
+        foreach (var colInSource in inputColumns)
         {
             var match = TargetTableColumns.SingleOrDefault(c => c.GetRuntimeName().Equals(colInSource.ColumnName, StringComparison.CurrentCultureIgnoreCase));
 
@@ -206,7 +206,6 @@ public abstract class BulkCopy:IBulkCopy
     /// <returns></returns>
     protected Dictionary<DataColumn,DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns)
     {
-        DiscoveredColumn[] whoCares;
-        return GetMapping(inputColumns, out whoCares);
+        return GetMapping(inputColumns, out _);
     }
 }

@@ -7,8 +7,9 @@ using FAnsi.Implementations.Oracle.Update;
 
 namespace FAnsi.Implementations.Oracle;
 
-public class OracleQuerySyntaxHelper : QuerySyntaxHelper
+public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
 {
+    public static readonly OracleQuerySyntaxHelper Instance=new();
     public override int MaximumDatabaseLength => 128;
     public override int MaximumTableLength => 128;
     public override int MaximumColumnLength => 128;
@@ -18,24 +19,19 @@ public class OracleQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "\"";
 
-    public OracleQuerySyntaxHelper() : base(new OracleTypeTranslater(), new OracleAggregateHelper(),new OracleUpdateHelper(),DatabaseType.Oracle)//no custom translater
+    private OracleQuerySyntaxHelper() : base(OracleTypeTranslater.Instance, OracleAggregateHelper.Instance,OracleUpdateHelper.Instance,DatabaseType.Oracle)//no custom translater
     {
     }
 
-    public override char ParameterSymbol
-    {
-        get { return ':'; }
-    }
+    public override char ParameterSymbol => ':';
 
     public override string GetRuntimeName(string s)
     {
         var answer = base.GetRuntimeName(s);
 
-        if (string.IsNullOrWhiteSpace(answer))
-            return s;
-            
-        //upper it because oracle loves uppercase stuff
-        return answer.Trim('"').ToUpper();
+        return string.IsNullOrWhiteSpace(answer) ? s :
+            //upper it because oracle loves uppercase stuff
+            answer.Trim('"').ToUpper();
     }
 
     public override bool SupportsEmbeddedParameters()
@@ -45,7 +41,7 @@ public class OracleQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string EnsureWrappedImpl(string databaseOrTableName)
     {
-        return '"' + GetRuntimeName(databaseOrTableName) + '"';
+        return $"\"{GetRuntimeName(databaseOrTableName)}\"";
     }
     public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
     {
@@ -53,16 +49,16 @@ public class OracleQuerySyntaxHelper : QuerySyntaxHelper
         if (!string.IsNullOrWhiteSpace(schema))
             throw new NotSupportedException("Schema (e.g. .dbo. not supported by Oracle)");
 
-        return '"' + GetRuntimeName(databaseName) + '"' + DatabaseTableSeparator + '"' + GetRuntimeName(tableName) + '"';
+        return $"\"{GetRuntimeName(databaseName)}\"{DatabaseTableSeparator}\"{GetRuntimeName(tableName)}\"";
     }
 
     public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false)
     {
-        return EnsureFullyQualified(databaseName,schema,tableName) + ".\"" +  GetRuntimeName(columnName) + "\"";
+        return $"{EnsureFullyQualified(databaseName, schema, tableName)}.\"{GetRuntimeName(columnName)}\"";
     }
     public override TopXResponse HowDoWeAchieveTopX(int x)
     {
-        return new TopXResponse("OFFSET 0 ROWS FETCH NEXT " + x + " ROWS ONLY", QueryComponent.Postfix);
+        return new TopXResponse($"OFFSET 0 ROWS FETCH NEXT {x} ROWS ONLY", QueryComponent.Postfix);
     }
 
     public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
@@ -75,20 +71,14 @@ public class OracleQuerySyntaxHelper : QuerySyntaxHelper
         return ReservedWords;
     }
 
-    public override string GetScalarFunctionSql(MandatoryScalarFunctions function)
-    {
-        switch (function)
+    public override string GetScalarFunctionSql(MandatoryScalarFunctions function) =>
+        function switch
         {
-            case MandatoryScalarFunctions.GetTodaysDate:
-                return "CURRENT_TIMESTAMP";
-            case MandatoryScalarFunctions.GetGuid:
-                return "SYS_GUID()";
-            case MandatoryScalarFunctions.Len:
-                return "LENGTH";
-            default:
-                throw new ArgumentOutOfRangeException("function");
-        }
-    }
+            MandatoryScalarFunctions.GetTodaysDate => "CURRENT_TIMESTAMP",
+            MandatoryScalarFunctions.GetGuid => "SYS_GUID()",
+            MandatoryScalarFunctions.Len => "LENGTH",
+            _ => throw new ArgumentOutOfRangeException(nameof(function))
+        };
 
     /// <summary>
     /// Works in Oracle 12c+ only https://oracle-base.com/articles/12c/identity-columns-in-oracle-12cr1
@@ -107,7 +97,7 @@ public class OracleQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string HowDoWeAchieveMd5(string selectSql)
     {
-        return "RAWTOHEX(standard_hash("+selectSql+", 'MD5'))";
+        return $"RAWTOHEX(standard_hash({selectSql}, 'MD5'))";
     }
 
     protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
@@ -116,7 +106,7 @@ public class OracleQuerySyntaxHelper : QuerySyntaxHelper
         return Convert.ToDateTime(timeSpan.ToString());
     }
 
-    static readonly HashSet<string> ReservedWords = new HashSet<string>( new []
+    private static readonly HashSet<string> ReservedWords = new( new []
     {
             
         "ACCESS",

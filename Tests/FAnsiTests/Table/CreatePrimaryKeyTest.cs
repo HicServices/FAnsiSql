@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-class CreatePrimaryKeyTest: DatabaseTests
+internal class CreatePrimaryKeyTest: DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBasicCase_KeysCreated(DatabaseType databaseType)
@@ -70,10 +70,10 @@ class CreatePrimaryKeyTest: DatabaseTests
         Assert.IsTrue(colB.AllowNulls);
         Assert.IsFalse(colB.IsPrimaryKey);
 
-        var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(new []{colA,colB}));
-        Assert.IsTrue(ex.Message.Contains("Failed to create primary key on table"));
-        Assert.IsNotInstanceOf(typeof(AggregateException), ex.InnerException);
-        Assert.IsInstanceOf<DbException>(ex.InnerException);
+        var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(colA, colB));
+        Assert.IsTrue(ex?.Message.Contains("Failed to create primary key on table"));
+        Assert.IsNotInstanceOf(typeof(AggregateException), ex?.InnerException);
+        Assert.IsInstanceOf<DbException>(ex?.InnerException);
 
         colA = tbl.DiscoverColumn("A");
         colB = tbl.DiscoverColumn("B");

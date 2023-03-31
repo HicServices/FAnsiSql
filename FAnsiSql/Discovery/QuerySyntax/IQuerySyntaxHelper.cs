@@ -231,5 +231,5 @@ public enum MandatoryScalarFunctions
     /// <summary>
     /// A scalar function which must take a single argument (column name) and return the length of values in it
     /// </summary>
-    Len,
+    Len
 }

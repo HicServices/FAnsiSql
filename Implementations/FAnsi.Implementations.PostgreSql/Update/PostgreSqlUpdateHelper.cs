@@ -12,10 +12,10 @@ public class PostgreSqlUpdateHelper : UpdateHelper
     protected override string BuildUpdateImpl(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
     {
         //https://stackoverflow.com/a/7869611
-        string joinSql = string.Join(" AND ",
+        var joinSql = string.Join(" AND ",
             lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text));
 
-        string whereSql = string.Join(" AND ",
+        var whereSql = string.Join(" AND ",
             lines.Where(l => l.LocationToInsert == QueryComponent.WHERE).Select(c => c.Text));
 
         return string.Format(
@@ -30,7 +30,7 @@ WHERE
 {5}
 ",
 
-            string.Join(", " + Environment.NewLine ,lines.Where(l=>l.LocationToInsert == QueryComponent.SET)
+            string.Join($", {Environment.NewLine}",lines.Where(l=>l.LocationToInsert == QueryComponent.SET)
                 .Select(c => 
                     //seems like you cant specify the table alias in the SET section of the query
                     c.Text.Replace("t1.",""))),
@@ -38,7 +38,7 @@ WHERE
             table2.GetFullyQualifiedName(),
             joinSql,
             !string.IsNullOrWhiteSpace(whereSql) ? "AND" :"",
-            !string.IsNullOrWhiteSpace(whereSql) ? "(" + whereSql + ")":""
+            !string.IsNullOrWhiteSpace(whereSql) ? $"({whereSql})" :""
         );
 
     }

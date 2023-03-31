@@ -15,7 +15,7 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
         string database, bool includeViews, DbTransaction transaction = null)
     {
 
-        string sqlTables = @"SELECT
+        const string sqlTables = @"SELECT
                 *
                 FROM
             pg_catalog.pg_tables
@@ -24,7 +24,7 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             AND schemaname != 'information_schema';";
 
             
-        string sqlViews = @"SELECT
+        const string sqlViews = @"SELECT
                 *
                 FROM
             pg_catalog.pg_views
@@ -32,7 +32,7 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             schemaname != 'pg_catalog'
             AND schemaname != 'information_schema';";
 
-        List<DiscoveredTable> tables = new List<DiscoveredTable>();
+        var tables = new List<DiscoveredTable>();
 
         using (var cmd = new NpgsqlCommand(sqlTables, (NpgsqlConnection) connection))
         {
@@ -42,30 +42,29 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
                 while (r.Read())
                 {
                     //its a system table
-                    string schema = r["schemaname"] as string;
+                    var schema = r["schemaname"] as string;
                     
                     if(querySyntaxHelper.IsValidTableName((string)r["tablename"], out _))
-                        tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema, TableType.Table));
+                        tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema));
                 }
         }
             
         if (includeViews)
-            using(var cmd = new NpgsqlCommand(sqlViews, (NpgsqlConnection)connection))
-            {
-                    
-                cmd.Transaction = transaction as NpgsqlTransaction;
+        {
+            using var cmd = new NpgsqlCommand(sqlViews, (NpgsqlConnection)connection);
+            cmd.Transaction = transaction as NpgsqlTransaction;
 
-                using (var r = cmd.ExecuteReader())
-                    while (r.Read())
-                    {
-                        //its a system table
-                        string schema = r["schemaname"] as string;
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                //its a system table
+                var schema = r["schemaname"] as string;
                     
-                        if(querySyntaxHelper.IsValidTableName((string)r["viewname"], out _))
-                            tables.Add(new DiscoveredTable(parent, (string)r["viewname"], querySyntaxHelper, schema, TableType.View));
-                    }
+                if(querySyntaxHelper.IsValidTableName((string)r["viewname"], out _))
+                    tables.Add(new DiscoveredTable(parent, (string)r["viewname"], querySyntaxHelper, schema, TableType.View));
             }
-            
+        }
+
         return tables.ToArray();
     }
 
@@ -106,7 +105,7 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
                       ,con))
                 cmd.ExecuteNonQuery();
                 
-            using(var cmd = new NpgsqlCommand("DROP DATABASE \"" + database.GetRuntimeName() +"\"",con))
+            using(var cmd = new NpgsqlCommand($"DROP DATABASE \"{database.GetRuntimeName()}\"",con))
                 cmd.ExecuteNonQuery();
         }
             
@@ -123,14 +122,8 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
     {
         //Collations generally have to be in quotes (unless maybe they are very weird user generated ones?)
 
-        return string.Format("{0} {1} {2} {3} {4} {5}",
-            syntaxHelper.EnsureWrapped(col.ColumnName),
-            datatype,
-            col.Default != MandatoryScalarFunctions.None ? "default " + syntaxHelper.GetScalarFunctionSql(col.Default) : "",
-            string.IsNullOrWhiteSpace(col.Collation) ? "" : "COLLATE " + '"' + col.Collation.Trim('"') + '"',
-            col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL",
-            col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : ""
-        );
+        return
+            $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} {(string.IsNullOrWhiteSpace(col.Collation) ? "" : $"COLLATE \"{col.Collation.Trim('"')}\"")} {(col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
     }
 
     public override DirectoryInfo Detach(DiscoveredDatabase database)
@@ -145,16 +138,14 @@ public class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
 
     public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
     {
-        using (var con = discoveredDatabase.Server.GetConnection())
-        {
-            con.Open();
+        using var con = discoveredDatabase.Server.GetConnection();
+        con.Open();
 
-            var syntax = discoveredDatabase.Server.GetQuerySyntaxHelper();
+        var syntax = discoveredDatabase.Server.GetQuerySyntaxHelper();
                 
-            string sql = $@"create schema if not exists {syntax.EnsureWrapped(name)}";
+        var sql = $@"create schema if not exists {syntax.EnsureWrapped(name)}";
 
-            using(var cmd = discoveredDatabase.Server.GetCommand(sql, con))
-                cmd.ExecuteNonQuery();
-        }
+        using var cmd = discoveredDatabase.Server.GetCommand(sql, con);
+        cmd.ExecuteNonQuery();
     }
 }

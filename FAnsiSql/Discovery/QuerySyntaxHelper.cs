@@ -29,13 +29,13 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public abstract int MaximumColumnLength { get; }
         
     /// <inheritdoc/>
-    public virtual char[] IllegalNameChars { get; } = new []{'.','(',')'};
+    public virtual char[] IllegalNameChars { get; } = {'.','(',')'};
 
     /// <summary>
     /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
     /// </summary>
     /// <returns></returns>
-    protected static Regex ParameterNamesRegex = new Regex("([@:][A-Za-z0-9_]*)\\s?", RegexOptions.IgnoreCase);
+    protected static Regex ParameterNamesRegex = new("([@:][A-Za-z0-9_]*)\\s?", RegexOptions.IgnoreCase);
 
     /// <summary>
     /// Symbols (for all database types) which denote wrapped entity names e.g. [dbo].[mytable] contains qualifiers '[' and ']'
@@ -50,15 +50,15 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     public ITypeTranslater TypeTranslater { get; private set; }
         
-    private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = new Dictionary<CultureInfo, TypeDeciderFactory>();
+    private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = new();
 
     public IAggregateHelper AggregateHelper { get; private set; }
     public IUpdateHelper UpdateHelper { get; set; }
     public DatabaseType DatabaseType { get; private set; }
 
-    public virtual char ParameterSymbol { get { return '@'; } }
+    public virtual char ParameterSymbol => '@';
 
-        
+
     /// <summary>
     /// Returns a regex that picks up alias specifications in SELECT sql (e.g. "mytbl.mycol as fish").  This only has to match when the
     /// " AS " qualifier is used explicitly.  The capture groups of this Regex must match <see cref="SplitLineIntoSelectSQLAndAlias"/>
@@ -83,13 +83,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         return " AS ";
     }
         
-    public string AliasPrefix
-    {
-        get
-        {
-            return GetAliasConst();
-        }
-    }
+    public string AliasPrefix => GetAliasConst();
 
     /// <summary>
     /// Lists the names of all parameters required by the supplied whereSql e.g. @bob = 'bob' would return "@bob" 
@@ -99,7 +93,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public static HashSet<string> GetAllParameterNamesFromQuery(string query)
     {
         //Only look at the start of the string or following an equals or whitespace and stop at word boundaries
-        var regex = new Regex(@"(?:^|[\s+\-*/\\=(,])+" + ParameterNamesRegex + @"\b");
+        var regex = new Regex($@"(?:^|[\s+\-*/\\=(,])+{ParameterNamesRegex}\b");
 
         var toReturn = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -113,11 +107,10 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         return toReturn;
     }
 
-    /// <inheritdoc />
     public static string GetParameterNameFromDeclarationSQL(string parameterSQL)
     {
         if (!ParameterNamesRegex.IsMatch(parameterSQL))
-            throw new Exception("ParameterSQL does not match regex pattern:" + ParameterNamesRegex);
+            throw new Exception($"ParameterSQL does not match regex pattern:{ParameterNamesRegex}");
 
         return ParameterNamesRegex.Match(parameterSQL).Value.Trim();
     }
@@ -142,17 +135,18 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
             return s;
 
         //if it is an aliased entity e.g. AS fish then we should return fish (this is the case for table valued functions and not much else)
-        if (SplitLineIntoSelectSQLAndAlias(s.Trim(), out _, out string alias))
+        if (SplitLineIntoSelectSQLAndAlias(s.Trim(), out _, out var alias))
             return alias;
 
         //it doesn't have an alias, e.g. it's `MyDatabase`.`mytable` or something
 
         //if it's "count(1)" or something then that's a problem!
-        if (s.IndexOfAny(new char[]{'(',')' }) != -1)
-            throw new RuntimeNameException("Could not determine runtime name for Sql:'" + s + "'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
+        if (s.IndexOfAny(new[]{'(',')' }) != -1)
+            throw new RuntimeNameException(
+                $"Could not determine runtime name for Sql:'{s}'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
 
         //Last symbol with no whitespace
-        var lastWord = s.Substring(s.LastIndexOf(".") + 1)?.Trim();
+        var lastWord = s[(s.LastIndexOf(".", StringComparison.Ordinal) + 1)..].Trim();
 
         if(string.IsNullOrWhiteSpace(lastWord) || lastWord.Length<2)
             return lastWord;
@@ -213,18 +207,12 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public virtual string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false)
     {
         if (isTableValuedFunction)
-            return GetRuntimeName(tableName) + "." + GetRuntimeName(columnName);//table valued functions do not support database name being in the column level selection list area of sql queries
+            return $"{GetRuntimeName(tableName)}.{GetRuntimeName(columnName)}";//table valued functions do not support database name being in the column level selection list area of sql queries
 
-        return EnsureFullyQualified(databaseName, schema, tableName) + "." + EnsureWrapped(GetRuntimeName(columnName));
+        return $"{EnsureFullyQualified(databaseName, schema, tableName)}.{EnsureWrapped(GetRuntimeName(columnName))}";
     }
 
-    public virtual string Escape(string sql)
-    {
-        if (string.IsNullOrWhiteSpace(sql))
-            return sql;
-
-        return sql.Replace("'", "''");
-    }
+    public virtual string Escape(string sql) => string.IsNullOrWhiteSpace(sql) ? sql : sql.Replace("'", "''");
     public abstract TopXResponse HowDoWeAchieveTopX(int x);
 
     public virtual string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request)
@@ -253,23 +241,23 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         var matches = GetAliasRegex().Matches(lineToSplit);
 
-        if (matches.Count >1)
-            throw new SyntaxErrorException(string.Format(FAnsiStrings.QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_,matches.Count,lineToSplit));
-
-        if (matches.Count == 0)
+        switch (matches.Count)
         {
-            selectSQL = lineToSplit;
-            alias = null;
-            return false;
+            case > 1:
+                throw new SyntaxErrorException(string.Format(FAnsiStrings.QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_,matches.Count,lineToSplit));
+            case 0:
+                selectSQL = lineToSplit;
+                alias = null;
+                return false;
         }
 
         //match is an unwrapped alias
-        string unqualifiedAlias = matches[0].Groups[2].Value;
-        string qualifiedAlias = matches[0].Groups[4].Value;
+        var unqualifiedAlias = matches[0].Groups[2].Value;
+        var qualifiedAlias = matches[0].Groups[4].Value;
 
         alias = string.IsNullOrWhiteSpace(unqualifiedAlias) ? qualifiedAlias : unqualifiedAlias;
         alias = alias.Trim();
-        selectSQL = lineToSplit.Substring(0, matches[0].Index).Trim();
+        selectSQL = lineToSplit[..matches[0].Index].Trim();
         return true;
     }
 
@@ -289,7 +277,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
                     .QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_and_closing_parentheses_must_match,
                 nameof(lineToSplit));
 
-        int firstBracket = lineToSplit.IndexOf('(');
+        var firstBracket = lineToSplit.IndexOf('(');
 
         if (firstBracket == -1)
             throw new ArgumentException(
@@ -297,16 +285,14 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
                     .QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_contain_at_least_one_pair_of_parentheses,
                 nameof(lineToSplit));
 
-        method = lineToSplit.Substring(0, firstBracket).Trim();
+        method = lineToSplit[..firstBracket].Trim();
 
-        int lastBracket = lineToSplit.LastIndexOf(')');
+        var lastBracket = lineToSplit.LastIndexOf(')');
 
-        int length = lastBracket - (firstBracket + 1);
+        var length = lastBracket - (firstBracket + 1);
 
-        if (length == 0)
-            contents = ""; //it's something like count()
-        else
-            contents = lineToSplit.Substring(firstBracket + 1, length).Trim();
+        contents = length == 0 ? "" : //it's something like count()
+            lineToSplit.Substring(firstBracket + 1, length).Trim();
     }
 
     public static string MakeHeaderNameSensible(string header)
@@ -316,14 +302,14 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         //replace anything that isn't a digit, letter or underscore with emptiness (except spaces - these will go but first...)
         //also accept anything above ASCII 256
-        Regex r = new Regex("[^A-Za-z0-9_ \u0101-\uFFFF]");
+        var r = new Regex("[^A-Za-z0-9_ \u0101-\uFFFF]");
 
-        string adjustedHeader = r.Replace(header, "");
+        var adjustedHeader = r.Replace(header, "");
 
-        StringBuilder sb = new StringBuilder(adjustedHeader);
+        var sb = new StringBuilder(adjustedHeader);
 
         //Camel case after spaces
-        for (int i = 0; i < sb.Length; i++)
+        for (var i = 0; i < sb.Length; i++)
         {
             //if we are looking at a space
             if (sb[i] == ' ')
@@ -336,7 +322,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         //if it starts with a digit (illegal) put an underscore before it
         if (Regex.IsMatch(adjustedHeader, "^[0-9]"))
-            adjustedHeader = "_" + adjustedHeader;
+            adjustedHeader = $"_{adjustedHeader}";
 
         return adjustedHeader;
     }
@@ -346,12 +332,12 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         potentiallyDodgyName = GetRuntimeName(potentiallyDodgyName);
 
         //replace anything that isn't a digit, letter or underscore with underscores
-        Regex r = new Regex("[^A-Za-z0-9_]");
-        string adjustedHeader = r.Replace(potentiallyDodgyName, "_");
+        var r = new Regex("[^A-Za-z0-9_]");
+        var adjustedHeader = r.Replace(potentiallyDodgyName, "_");
 
         //if it starts with a digit (illegal) put an underscore before it
         if (Regex.IsMatch(adjustedHeader, "^[0-9]"))
-            adjustedHeader = "_" + adjustedHeader;
+            adjustedHeader = $"_{adjustedHeader}";
 
         return adjustedHeader;
     }
@@ -361,8 +347,8 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     public bool IsBasicallyNull(object value)
     {
-        if (value is string)
-            return string.IsNullOrWhiteSpace((string)value);
+        if (value is string stringValue)
+            return string.IsNullOrWhiteSpace(stringValue);
 
         return value == null || value == DBNull.Value;
     }
@@ -388,8 +374,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     {
         try
         {
-            if(culture == null)
-                culture = CultureInfo.CurrentCulture;
+            culture ??= CultureInfo.InvariantCulture;
                 
             if(!factories.ContainsKey(culture))
                 factories.Add(culture,new TypeDeciderFactory(culture));
@@ -434,17 +419,17 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     public void ValidateDatabaseName(string databaseName)
     {
-        if(!IsValidDatabaseName(databaseName,out string reason))
+        if(!IsValidDatabaseName(databaseName,out var reason))
             throw new RuntimeNameException(reason);
     }
     public void ValidateTableName(string tableName)
     {
-        if(!IsValidTableName(tableName,out string reason))
+        if(!IsValidTableName(tableName,out var reason))
             throw new RuntimeNameException(reason);
     }
     public void ValidateColumnName(string columnName)
     {
-        if(!IsValidColumnName(columnName,out string reason))
+        if(!IsValidColumnName(columnName,out var reason))
             throw new RuntimeNameException(reason);
     }
 
@@ -485,7 +470,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         if(candidate.Length > maximumLengthAllowed)
             return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__supports_maximum_length_of__3__,
-                objectType, candidate.Substring(0, maximumLengthAllowed), DatabaseType, maximumLengthAllowed);
+                objectType, candidate[..maximumLengthAllowed], DatabaseType, maximumLengthAllowed);
 
         if(candidate.IndexOfAny(IllegalNameChars) != -1)
             return string.Format(
@@ -540,7 +525,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((QuerySyntaxHelper)obj);
     }
 
@@ -558,17 +543,17 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
                        
 
         //sensible parameter names have no spaces or symbols!
-        Regex sensibleParameterNamesInclude = new Regex(@"^\w*$");
+        var sensibleParameterNamesInclude = new Regex(@"^\w*$");
 
-        for (int i = 0; i < columns.Length; i++)
+        for (var i = 0; i < columns.Length; i++)
         {
-            T c = columns[i];
+            var c = columns[i];
             var columnName = toStringFunc(c);
                 
             if(!sensibleParameterNamesInclude.IsMatch(columnName)) //if column name is "_:_" or something
-                toReturn.Add(c,ParameterSymbol + "p"+i);
+                toReturn.Add(c, $"{ParameterSymbol}p{i}");
             else
-                toReturn.Add(c,ParameterSymbol + (reservedKeywords.Contains(columnName)?columnName +"1":columnName)); //if column is reserved keyword or normal name
+                toReturn.Add(c,ParameterSymbol + (reservedKeywords.Contains(columnName)? $"{columnName}1" :columnName)); //if column is reserved keyword or normal name
         }
 
         return toReturn;

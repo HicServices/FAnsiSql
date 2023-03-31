@@ -38,7 +38,7 @@ public class PostgreSqlSyntaxHelper : QuerySyntaxHelper
 
     public override string EnsureWrappedImpl(string databaseOrTableName)
     {
-        return "\"" + GetRuntimeNameWithDoubledDoubleQuotes(databaseOrTableName) + "\"";
+        return $"\"{GetRuntimeNameWithDoubledDoubleQuotes(databaseOrTableName)}\"";
     }
 
     /// <summary>
@@ -70,15 +70,15 @@ public class PostgreSqlSyntaxHelper : QuerySyntaxHelper
         bool isTableValuedFunction = false)
     {
         if (isTableValuedFunction)
-            return EnsureWrapped(tableName) + "." + EnsureWrapped(GetRuntimeName(columnName));//table valued functions do not support database name being in the column level selection list area of sql queries
+            return $"{EnsureWrapped(tableName)}.{EnsureWrapped(GetRuntimeName(columnName))}";//table valued functions do not support database name being in the column level selection list area of sql queries
 
-        return EnsureFullyQualified(databaseName, schema, tableName) + ".\"" + GetRuntimeName(columnName) + '"';
+        return $"{EnsureFullyQualified(databaseName, schema, tableName)}.\"{GetRuntimeName(columnName)}\"";
     }
 
 
     public override TopXResponse HowDoWeAchieveTopX(int x)
     {
-        return new TopXResponse("fetch first " + x + " rows only", QueryComponent.Postfix);
+        return new TopXResponse($"fetch first {x} rows only", QueryComponent.Postfix);
     }
 
     public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
@@ -86,20 +86,15 @@ public class PostgreSqlSyntaxHelper : QuerySyntaxHelper
         throw new NotSupportedException();
     }
 
-    public override string GetScalarFunctionSql(MandatoryScalarFunctions function)
-    {
-        switch (function)
+    public override string GetScalarFunctionSql(MandatoryScalarFunctions function) =>
+        function switch
         {
-            case MandatoryScalarFunctions.GetTodaysDate:
-                return "now()";
-            case MandatoryScalarFunctions.GetGuid:
-                return "gen_random_uuid()"; //requires pgcrypto e.g. CREATE EXTENSION pgcrypto;
-            case MandatoryScalarFunctions.Len:
-                return "LENGTH";
-            default:
-                throw new ArgumentOutOfRangeException("function");
-        }
-    }
+            MandatoryScalarFunctions.GetTodaysDate => "now()",
+            MandatoryScalarFunctions.GetGuid => "gen_random_uuid()" //requires pgcrypto e.g. CREATE EXTENSION pgcrypto;
+            ,
+            MandatoryScalarFunctions.Len => "LENGTH",
+            _ => throw new ArgumentOutOfRangeException(nameof(function))
+        };
 
     public override string GetAutoIncrementKeywordIfAny()
     {

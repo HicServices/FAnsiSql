@@ -20,7 +20,7 @@ SET
     {0}
 WHERE
 {4}",
-            string.Join(", " + Environment.NewLine ,lines.Where(l=>l.LocationToInsert == QueryComponent.SET).Select(c => c.Text)),
+            string.Join($", {Environment.NewLine}",lines.Where(l=>l.LocationToInsert == QueryComponent.SET).Select(c => c.Text)),
             table1.GetFullyQualifiedName(),
             table2.GetFullyQualifiedName(),
             string.Join(" AND ", lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text)),

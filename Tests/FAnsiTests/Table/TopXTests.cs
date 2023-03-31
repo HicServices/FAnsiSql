@@ -7,7 +7,7 @@ using FAnsi.Discovery;
 
 namespace FAnsiTests.Table;
 
-class TopXTests :DatabaseTests
+internal class TopXTests :DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void Test_TopX_OrderBy(DatabaseType type,bool asc)
@@ -15,7 +15,7 @@ class TopXTests :DatabaseTests
         var db = GetTestDatabase(type);
 
         DiscoveredTable tbl;
-        using (DataTable dt = new DataTable())
+        using (var dt = new DataTable())
         {
             dt.Columns.Add("F");
             dt.Columns.Add("X");
@@ -29,24 +29,17 @@ class TopXTests :DatabaseTests
         }
             
         var topx = tbl.GetQuerySyntaxHelper().HowDoWeAchieveTopX(1);
-            
-        string sql;
 
         var f = tbl.GetQuerySyntaxHelper().EnsureWrapped("F");
 
-        switch(topx.Location)
+        var sql = topx.Location switch
         {
-            case QueryComponent.SELECT:
-                sql= $"SELECT {topx.SQL} {f} FROM {tbl.GetFullyQualifiedName()} ORDER BY {f} {(asc ? "ASC" : "DESC")}";
-                break;
-
-            case QueryComponent.Postfix:
-                sql =
-                    $"SELECT {f} FROM {tbl.GetFullyQualifiedName()} ORDER BY {f} {(asc ? "ASC " : "DESC ")}{topx.SQL}";
-                break;
-            default: throw new ArgumentOutOfRangeException("Did not expect this location");
-
-        }
+            QueryComponent.SELECT =>
+                $"SELECT {topx.SQL} {f} FROM {tbl.GetFullyQualifiedName()} ORDER BY {f} {(asc ? "ASC" : "DESC")}",
+            QueryComponent.Postfix =>
+                $"SELECT {f} FROM {tbl.GetFullyQualifiedName()} ORDER BY {f} {(asc ? "ASC " : "DESC ")}{topx.SQL}",
+            _ => throw new ArgumentOutOfRangeException("Did not expect this location")
+        };
 
         using(var con = db.Server.GetConnection())
         {

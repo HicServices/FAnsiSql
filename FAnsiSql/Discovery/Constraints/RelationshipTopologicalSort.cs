@@ -14,9 +14,9 @@ public class RelationshipTopologicalSort
     /// <summary>
     /// The dependency order from least dependent (isolated tables and parent tables) to most (child tables then grandchild tables).
     /// </summary>
-    public IReadOnlyList<DiscoveredTable> Order { get { return new ReadOnlyCollection<DiscoveredTable>(_sortedList); } }
-        
-    readonly List<DiscoveredTable> _sortedList = new List<DiscoveredTable>();
+    public IReadOnlyList<DiscoveredTable> Order => new ReadOnlyCollection<DiscoveredTable>(_sortedList);
+
+    private readonly List<DiscoveredTable> _sortedList;
 
     /// <summary>
     /// <para>Connects to the database and discovers relationships between <paramref name="tables"/> then generates a sort order of dependency in which
@@ -30,17 +30,13 @@ public class RelationshipTopologicalSort
     /// <exception cref="Exceptions.CircularDependencyException"></exception>
     public RelationshipTopologicalSort(IEnumerable<DiscoveredTable> tables)
     {
-        HashSet<DiscoveredTable> nodes = new HashSet<DiscoveredTable>(tables);
-        HashSet<Tuple<DiscoveredTable, DiscoveredTable>> edges = new HashSet<Tuple<DiscoveredTable, DiscoveredTable>>();
+        var nodes = new HashSet<DiscoveredTable>(tables);
+        var edges = new HashSet<Tuple<DiscoveredTable, DiscoveredTable>>();
 
-        foreach (var table in nodes)
-        {
-            //find all foreign keys which involve tables in the set
-            var relevantRelationships = table.DiscoverRelationships().Where(r=>nodes.Contains(r.ForeignKeyTable));
-
-            foreach (DiscoveredRelationship relationship in relevantRelationships)
-                edges.Add(Tuple.Create(relationship.PrimaryKeyTable, relationship.ForeignKeyTable));
-        }
+        foreach (var relationship in nodes
+                     .Select(table => table.DiscoverRelationships().Where(r => nodes.Contains(r.ForeignKeyTable)))
+                     .SelectMany(relevantRelationships => relevantRelationships))
+            edges.Add(Tuple.Create(relationship.PrimaryKeyTable, relationship.ForeignKeyTable));
 
         _sortedList = TopologicalSort(nodes, edges);
     }
@@ -53,7 +49,7 @@ public class RelationshipTopologicalSort
     /// <param name="nodes">All nodes of directed acyclic graph.</param>
     /// <param name="edges">All edges of directed acyclic graph.</param>
     /// <returns>Sorted node in topological order.</returns>
-    List<T> TopologicalSort<T>(HashSet<T> nodes, HashSet<Tuple<T, T>> edges) where T : IEquatable<T>
+    private List<T> TopologicalSort<T>(HashSet<T> nodes, HashSet<Tuple<T, T>> edges) where T : IEquatable<T>
     {
         // Empty list that will contain the sorted elements
         var L = new List<T>();

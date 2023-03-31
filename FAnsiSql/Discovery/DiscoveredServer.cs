@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading;
 using FAnsi.Connections;
 using FAnsi.Discovery.QuerySyntax;
@@ -32,29 +33,23 @@ public class DiscoveredServer : IMightNotExist
     /// <summary>
     /// Returns <see cref="FAnsi.DatabaseType"/> (indicates what DBMS the <see cref="DiscoveredServer"/> is pointed at).
     /// </summary>
-    public DatabaseType DatabaseType { get { return Helper.DatabaseType; }}
+    public DatabaseType DatabaseType => Helper.DatabaseType;
 
     /// <summary>
     /// The server's name as specified in <cref name="Builder"/> e.g. localhost\sqlexpress
     /// </summary>
-    public string Name
-    {
-        get
-        {
-            return Helper.GetServerName(Builder);
-        }
-    }
+    public string Name => Helper.GetServerName(Builder);
 
     /// <summary>
     /// Returns the username portion of <cref name="Builder"/> if specified
     /// </summary>
-    public string ExplicitUsernameIfAny { get { return Helper.GetExplicitUsernameIfAny(Builder); } }
+    public string ExplicitUsernameIfAny => Helper.GetExplicitUsernameIfAny(Builder);
 
     /// <summary>
     /// Returns the password portion of <cref name="Builder"/> if specified
     /// </summary>
-    public string ExplicitPasswordIfAny { get { return Helper.GetExplicitPasswordIfAny(Builder); } }
-        
+    public string ExplicitPasswordIfAny => Helper.GetExplicitPasswordIfAny(Builder);
+
     /// <summary>
     /// <para>Creates a new server pointed at the <paramref name="builder"/> server. </para>
     /// 
@@ -64,7 +59,7 @@ public class DiscoveredServer : IMightNotExist
     /// <exception cref="ImplementationNotFoundException"></exception>
     public DiscoveredServer(DbConnectionStringBuilder builder)
     {
-        Helper = ImplementationManager.GetImplementation(builder).GetServerHelper();;
+        Helper = ImplementationManager.GetImplementation(builder).GetServerHelper();
 
         //give helper a chance to mutilate the builder if he wants (also gives us a new copy of the builder incase anyone external modifies the old reference)
         Builder = Helper.GetConnectionStringBuilder(builder.ConnectionString);
@@ -166,7 +161,7 @@ public class DiscoveredServer : IMightNotExist
     /// <returns></returns>
     public DbParameter AddParameterWithValueToCommand(string parameterName, DbCommand command, object valueForParameter)
     {
-        DbParameter dbParameter = GetParameter(parameterName);
+        var dbParameter = GetParameter(parameterName);
         dbParameter.Value = valueForParameter;
         command.Parameters.Add(dbParameter);
         return dbParameter;
@@ -198,26 +193,24 @@ public class DiscoveredServer : IMightNotExist
     /// <exception cref="AggregateException"></exception>
     public void TestConnection(int timeoutInMillis = 3000)
     {
-        using (var con = Helper.GetConnection(Builder))
+        using var con = Helper.GetConnection(Builder);
+        using(var tokenSource = new CancellationTokenSource(timeoutInMillis))
+        using (var openTask = con.OpenAsync(tokenSource.Token))
         {
-            using(var tokenSource = new CancellationTokenSource(timeoutInMillis))
-            using (var openTask = con.OpenAsync(tokenSource.Token))
+            try
             {
-                try
-                {
-                    openTask.Wait();
-                }
-                catch (AggregateException e)
-                {
-                    if (openTask.IsCanceled)
-                        throw new TimeoutException(string.Format(FAnsiStrings.DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,Name, timeoutInMillis), e);
-
-                    throw;
-                }
+                openTask.Wait();
             }
+            catch (AggregateException e)
+            {
+                if (openTask.IsCanceled)
+                    throw new TimeoutException(string.Format(FAnsiStrings.DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,Name, timeoutInMillis), e);
 
-            con.Close();
+                throw;
+            }
         }
+
+        con.Close();
     }
 
     /// <summary>
@@ -239,16 +232,8 @@ public class DiscoveredServer : IMightNotExist
     /// Connects to the server and returns a list of databases found as <see cref="DiscoveredDatabase"/> objects
     /// </summary>
     /// <returns></returns>
-    public DiscoveredDatabase[] DiscoverDatabases()
-    {
-        var toreturn = new List<DiscoveredDatabase>();
-
-        foreach (string database in Helper.ListDatabases(Builder))
-            toreturn.Add(new DiscoveredDatabase(this, database,Helper.GetQuerySyntaxHelper()));
-            
-
-        return toreturn.ToArray();
-    }
+    public DiscoveredDatabase[] DiscoverDatabases() => Helper.ListDatabases(Builder)
+        .Select(database => new DiscoveredDatabase(this, database, Helper.GetQuerySyntaxHelper())).ToArray();
 
     /// <summary>
     /// <para>Returns true/false based on <see cref="TestConnection"/>.  This method will use the default timeout of <see cref="TestConnection"/> (e.g. 3 seconds).</para>
@@ -306,10 +291,7 @@ public class DiscoveredServer : IMightNotExist
             return ExpectDatabase(dbName);
 
         //no (e.g. Oracle or no default database specified in connection string)
-        if(_currentDatabase != null) //has user called ChangeDatabase
-            return _currentDatabase; //yes use that one
-        else
-            return null; //no change database call and no database in connection string
+        return _currentDatabase; //yes use that one
     }
         
     /// <summary>
@@ -356,7 +338,7 @@ public class DiscoveredServer : IMightNotExist
     public DiscoveredDatabase CreateDatabase(string newDatabaseName)
     {
         //the database we will create - it's ok DiscoveredDatabase is IMightNotExist
-        DiscoveredDatabase db = ExpectDatabase(newDatabaseName);
+        var db = ExpectDatabase(newDatabaseName);
 
         Helper.CreateDatabase(Builder, db);
             
@@ -430,7 +412,7 @@ public class DiscoveredServer : IMightNotExist
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((DiscoveredServer)obj);
     }
 

@@ -1,11 +1,10 @@
-﻿using FAnsi;
-using FAnsi.Discovery;
-using FAnsiTests;
-using NUnit.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
+using FAnsi;
+using FAnsi.Discovery;
+using NUnit.Framework;
 
-namespace Rdmp.Core.Tests.DataLoad.Engine.Integration;
+namespace FAnsiTests.Table;
 
 public class BigIntTests : DatabaseTests
 {

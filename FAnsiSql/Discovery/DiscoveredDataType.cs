@@ -23,7 +23,7 @@ public class DiscoveredDataType
     /// <summary>
     /// All values read from the database record retrieved when assembling the data type (E.g. the cells of the sys.columns record)
     /// </summary>
-    public Dictionary<string, object> ProprietaryDatatype = new Dictionary<string, object>();
+    public Dictionary<string, object> ProprietaryDatatype = new();
 
     /// <summary>
     /// API constructor, instead use <see cref="DiscoveredTable.DiscoverColumns"/> instead.
@@ -36,7 +36,7 @@ public class DiscoveredDataType
         SQLType = sqlType;
         Column = column;
 
-        for (int i = 0; i < r.FieldCount; i++)
+        for (var i = 0; i < r.FieldCount; i++)
             ProprietaryDatatype.Add(r.GetName(i), r.GetValue(i));
     }
 
@@ -90,7 +90,7 @@ public class DiscoveredDataType
     /// <exception cref="AlterFailedException"></exception>
     public void Resize(int newSize, IManagedTransaction managedTransaction = null)
     {
-        int toReplace = GetLengthIfString();
+        var toReplace = GetLengthIfString();
             
         if(newSize == toReplace)
             return;
@@ -116,7 +116,7 @@ public class DiscoveredDataType
     /// <exception cref="AlterFailedException"></exception>
     public void Resize(int numberOfDigitsBeforeDecimalPoint, int numberOfDigitsAfterDecimalPoint, IManagedTransaction managedTransaction = null)
     {
-        DecimalSize toReplace = GetDecimalSize();
+        var toReplace = GetDecimalSize();
 
         if (toReplace == null || toReplace.IsEmpty)
             throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_DataType_cannot_be_resized_to_decimal_because_it_is_of_data_type__0_, SQLType));
@@ -151,14 +151,12 @@ public class DiscoveredDataType
         var server = Column.Table.Database.Server;
         using (var connection = server.GetManagedConnection(managedTransaction))
         {
-            string sql = Column.Helper.GetAlterColumnToSql(Column, newType, Column.AllowNulls);
+            var sql = Column.Helper.GetAlterColumnToSql(Column, newType, Column.AllowNulls);
             try
             {
-                using(var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction))
-                {
-                    cmd.CommandTimeout = altertimeoutInSeconds;
-                    cmd.ExecuteNonQuery();
-                }
+                using var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
+                cmd.CommandTimeout = altertimeoutInSeconds;
+                cmd.ExecuteNonQuery();
             }
             catch (Exception e)
             {
@@ -185,7 +183,7 @@ public class DiscoveredDataType
     /// <returns></returns>
     public override int GetHashCode()
     {
-        return (SQLType != null ? SQLType.GetHashCode() : 0);
+        return SQLType != null ? SQLType.GetHashCode() : 0;
     }
 
     /// <summary>
@@ -196,7 +194,7 @@ public class DiscoveredDataType
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((DiscoveredDataType)obj);
     }
 

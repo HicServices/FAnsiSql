@@ -7,8 +7,10 @@ using FAnsi.Discovery.QuerySyntax.Update;
 
 namespace FAnsi.Implementations.Oracle.Update;
 
-public class OracleUpdateHelper : UpdateHelper
+public sealed class OracleUpdateHelper : UpdateHelper
 {
+    public static readonly OracleUpdateHelper Instance = new();
+    private OracleUpdateHelper() {}
     protected override string BuildUpdateImpl(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
     {
             
@@ -38,7 +40,7 @@ WHEN MATCHED THEN UPDATE SET
     {0}
 WHERE
 {4}",
-            string.Join(", " + Environment.NewLine, lines.Where(l => l.LocationToInsert == QueryComponent.SET).Select(c => c.Text)),
+            string.Join($", {Environment.NewLine}", lines.Where(l => l.LocationToInsert == QueryComponent.SET).Select(c => c.Text)),
             table1.GetFullyQualifiedName(),
             table2.GetFullyQualifiedName(),
             string.Join(" AND ", lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text)),

@@ -22,7 +22,7 @@ namespace FAnsiTests.TypeTranslation;
 /// </summary>
 public class TypeTranslaterTests : DatabaseTests
 {
-    readonly Dictionary<DatabaseType,ITypeTranslater> _translaters = new Dictionary<DatabaseType, ITypeTranslater>();
+    private readonly Dictionary<DatabaseType,ITypeTranslater> _translaters = new();
         
     [OneTimeSetUp]
     public void SetupDatabases()
@@ -47,7 +47,7 @@ public class TypeTranslaterTests : DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "varchar(10)")]
     public void Test_CSharpToDbType_String10(DatabaseType type,string expectedType)
     {
-        var cSharpType = new DatabaseTypeRequest(typeof (string), 10, null);
+        var cSharpType = new DatabaseTypeRequest(typeof (string), 10);
 
         Assert.AreEqual(expectedType,_translaters[type].GetSQLDBTypeForCSharpType(cSharpType));}
 
@@ -57,7 +57,7 @@ public class TypeTranslaterTests : DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "text")]
     public void Test_CSharpToDbType_StringMax(DatabaseType type,string expectedType)
     {
-        var cSharpType = new DatabaseTypeRequest(typeof(string), 10000000, null);
+        var cSharpType = new DatabaseTypeRequest(typeof(string), 10000000);
             
         //Does a request for a max length string give the expected data type?
         Assert.AreEqual(expectedType,_translaters[type].GetSQLDBTypeForCSharpType(cSharpType));

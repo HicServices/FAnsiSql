@@ -20,7 +20,7 @@ namespace FAnsiTests;
 [NonParallelizable]
 public class DatabaseTests
 {
-    protected Dictionary<DatabaseType,string> TestConnectionStrings = new Dictionary<DatabaseType, string>();
+    protected Dictionary<DatabaseType,string> TestConnectionStrings = new();
 
     protected bool AllowDatabaseCreation;
     private string _testScratchDatabase;
@@ -46,35 +46,34 @@ public class DatabaseTests
 
             var root = doc.Element("TestDatabases");
             if(root == null)
-                throw new Exception("Missing element 'TestDatabases' in " + TestFilename);
+                throw new Exception($"Missing element 'TestDatabases' in {TestFilename}");
 
             var settings = root.Element("Settings");
 
             if (settings == null)
-                throw new Exception("Missing element 'Settings' in " + TestFilename);
+                throw new Exception($"Missing element 'Settings' in {TestFilename}");
 
             var e = settings.Element("AllowDatabaseCreation");
             if (e == null)
-                throw new Exception("Missing element 'AllowDatabaseCreation' in " + TestFilename);
+                throw new Exception($"Missing element 'AllowDatabaseCreation' in {TestFilename}");
 
             AllowDatabaseCreation = Convert.ToBoolean(e.Value);
 
             e = settings.Element("TestScratchDatabase");
             if (e == null)
-                throw new Exception("Missing element 'TestScratchDatabase' in " + TestFilename);
+                throw new Exception($"Missing element 'TestScratchDatabase' in {TestFilename}");
 
             _testScratchDatabase = e.Value;
             
-            foreach (XElement element in root.Elements("TestDatabase"))
+            foreach (var element in root.Elements("TestDatabase"))
             {
-                var type = element.Element("DatabaseType").Value;
-                DatabaseType databaseType;
+                var type = element.Element("DatabaseType")?.Value;
 
-                if(!DatabaseType.TryParse(type, out databaseType))
-                    throw new Exception("Could not parse DatabaseType " + type);
+                if(!Enum.TryParse(type, out DatabaseType databaseType))
+                    throw new Exception($"Could not parse DatabaseType {type}");
 
          
-                var constr = element.Element("ConnectionString").Value;
+                var constr = element.Element("ConnectionString")?.Value;
                 
                 TestConnectionStrings.Add(databaseType,constr);
             }
@@ -109,7 +108,8 @@ public class DatabaseTests
                 db.Create();
             else
             {
-                Assert.Inconclusive("Database " + _testScratchDatabase + " did not exist on server " + server + " and AllowDatabaseCreation was false in " + TestFilename);
+                Assert.Inconclusive(
+                    $"Database {_testScratchDatabase} did not exist on server {server} and AllowDatabaseCreation was false in {TestFilename}");
             }
         else
         {
@@ -152,15 +152,15 @@ public class DatabaseTests
             return true;
 
         //if they are null but basically the same
-        var oIsNull = o == null || o == DBNull.Value || o.ToString().Equals("0");
-        var o2IsNull = o2 == null || o2 == DBNull.Value || o2.ToString().Equals("0");
+        var oIsNull = o == null || o == DBNull.Value || o?.ToString()?.Equals("0")==true;
+        var o2IsNull = o2 == null || o2 == DBNull.Value || o2?.ToString()?.Equals("0")==true;
 
         if (oIsNull || o2IsNull)
             return oIsNull == o2IsNull;
 
         //they are not null so tostring them deals with int vs long etc that DbDataAdapters can be a bit flaky on
         if (handleSlashRSlashN)
-            return string.Equals(o.ToString().Replace("\r", "").Replace("\n", ""), o2.ToString().Replace("\r", "").Replace("\n", ""));
+            return string.Equals(o?.ToString()?.Replace("\r", "").Replace("\n", ""), o2?.ToString()?.Replace("\r", "").Replace("\n", ""));
 
         return string.Equals(o.ToString(), o2.ToString());
     }
@@ -172,11 +172,11 @@ public class DatabaseTests
 
         foreach (DataRow row1 in dt1.Rows)
         {
-            bool match = false;
+            var match = false;
 
             foreach (DataRow row2 in dt2.Rows)
             {
-                bool rowMatch = true;
+                var rowMatch = true;
                 foreach (DataColumn column in dt1.Columns)
                 {
                     if (!AreBasicallyEquals(row1[column.ColumnName], row2[column.ColumnName]))

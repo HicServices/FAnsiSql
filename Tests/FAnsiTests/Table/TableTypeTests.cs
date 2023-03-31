@@ -49,7 +49,7 @@ FROM {1}",
         }
 
         //if we expect it to be a table
-        var view = tbl.Database.ExpectTable("MyView",null);
+        var view = tbl.Database.ExpectTable("MyView");
         Assert.IsFalse(view.Exists()); //we should be wrong
 
         //if we expect it to be a view
@@ -65,7 +65,7 @@ FROM {1}",
         Assert.IsFalse(view.Exists());
 
         var ex = Assert.Throws<NotSupportedException>(()=>view.Rename("Lolz"));
-        Assert.AreEqual("Rename is not supported for TableType View", ex.Message);
+        Assert.AreEqual("Rename is not supported for TableType View", ex?.Message);
 
     }
 }

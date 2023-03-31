@@ -9,7 +9,7 @@ public abstract class UpdateHelper:IUpdateHelper
     /// <summary>
     /// You only have to support CustomLines that fulfil this role in the query i.e. no parameter support etc
     /// </summary>
-    protected QueryComponent[] permissableLocations = new[] {QueryComponent.SET, QueryComponent.JoinInfoJoin, QueryComponent.WHERE};
+    protected QueryComponent[] permissableLocations = {QueryComponent.SET, QueryComponent.JoinInfoJoin, QueryComponent.WHERE};
 
     public string BuildUpdate(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
     {

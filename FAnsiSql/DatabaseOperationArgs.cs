@@ -26,7 +26,7 @@ public class DatabaseOperationArgs
     /// <summary>
     /// Optional, if provided all commands interacting with these args should cancel if the command was cancelled
     /// </summary>
-    public CancellationToken CancellationToken =  default(CancellationToken);
+    public CancellationToken CancellationToken;
 
     public DatabaseOperationArgs()
     {
@@ -48,7 +48,7 @@ public class DatabaseOperationArgs
     /// <exception cref="OperationCanceledException"></exception>
     public int ExecuteNonQuery(DbCommand cmd)
     {
-        return Execute<int>(cmd, ()=>cmd.ExecuteNonQueryAsync(CancellationToken));
+        return Execute(cmd, ()=>cmd.ExecuteNonQueryAsync(CancellationToken));
     }
     /// <summary>
     /// Sets the timeout and cancellation on <paramref name="cmd"/> then runs <see cref="DbCommand.ExecuteScalar()"/> with the
@@ -59,7 +59,7 @@ public class DatabaseOperationArgs
     /// <exception cref="OperationCanceledException"></exception>
     public object ExecuteScalar(DbCommand cmd)
     {
-        return Execute<object>(cmd, ()=>cmd.ExecuteScalarAsync(CancellationToken));
+        return Execute(cmd, ()=>cmd.ExecuteScalarAsync(CancellationToken));
     }
 
     private T Execute<T>(DbCommand cmd, Func<Task<T>> method)

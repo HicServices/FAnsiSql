@@ -18,7 +18,7 @@ public class ConnectionStringKeywordAccumulator
     /// </summary>
     public DatabaseType DatabaseType { get; private set; }
 
-    private readonly Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>> _keywords = new Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>>(StringComparer.CurrentCultureIgnoreCase);
+    private readonly Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>> _keywords = new(StringComparer.CurrentCultureIgnoreCase);
     private readonly DbConnectionStringBuilder _builder;
 
     /// <summary>
@@ -90,7 +90,7 @@ public class ConnectionStringKeywordAccumulator
         if (_builder.Keys != null)
             foreach (var current in _keywords)
             {
-                int keysBefore = _builder.Keys.Count;
+                var keysBefore = _builder.Keys.Count;
 
                 _builder.Add(current.Key, current.Value.Item1);
 

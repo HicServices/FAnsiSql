@@ -36,48 +36,48 @@ public class MySqlBulkCopy : BulkCopy
     public override int UploadImpl(DataTable dt)
     {
         var matchedColumns = GetMapping(dt.Columns.Cast<DataColumn>());
-        int affected = 0;
+        var affected = 0;
 
-        using (var cmd = new MySqlCommand("", (MySqlConnection) Connection.Connection,
-                   (MySqlTransaction) Connection.Transaction))
+        using var cmd = new MySqlCommand("", (MySqlConnection) Connection.Connection,
+            (MySqlTransaction) Connection.Transaction);
+        if (BulkInsertBatchTimeoutInSeconds != 0)
+            cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
+
+        var commandPrefix =
+            $"INSERT INTO {TargetTable.GetFullyQualifiedName()}({string.Join(",", matchedColumns.Values.Select(c =>
+                $"`{c.GetRuntimeName()}`"))}) VALUES ";
+
+        var sb = new StringBuilder();
+                
+                
+        var row = 0;
+
+        foreach(DataRow dr in dt.Rows)
         {
-            if (BulkInsertBatchTimeoutInSeconds != 0)
-                cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
+            sb.Append('(');
 
-            string commandPrefix = string.Format("INSERT INTO {0}({1}) VALUES ", TargetTable.GetFullyQualifiedName(),string.Join(",", matchedColumns.Values.Select(c => "`" + c.GetRuntimeName() + "`")));
-
-            StringBuilder sb = new StringBuilder();
+            var dr1 = dr;
                 
-                
-            int row = 0;
+            sb.Append(string.Join(",",matchedColumns.Keys.Select(k => ConstructIndividualValue(matchedColumns[k].DataType.SQLType,dr1[k]))));
 
-            foreach(DataRow dr in dt.Rows)
-            {
-                sb.Append('(');
+            sb.AppendLine("),");
+            row++;
 
-                DataRow dr1 = dr;
-                
-                sb.Append(string.Join(",",matchedColumns.Keys.Select(k => ConstructIndividualValue(matchedColumns[k].DataType.SQLType,dr1[k]))));
-
-                sb.AppendLine("),");
-                row++;
-
-                //don't let command get too long
-                if (row % BulkInsertRowsPerNetworkPacket == 0)
-                {
-                    cmd.CommandText = commandPrefix + sb.ToString().TrimEnd(',', '\r', '\n');
-                    affected += cmd.ExecuteNonQuery();
-                    sb.Clear();
-                }
-            }
-
-            //send final batch
-            if(sb.Length > 0)
+            //don't let command get too long
+            if (row % BulkInsertRowsPerNetworkPacket == 0)
             {
                 cmd.CommandText = commandPrefix + sb.ToString().TrimEnd(',', '\r', '\n');
                 affected += cmd.ExecuteNonQuery();
                 sb.Clear();
             }
+        }
+
+        //send final batch
+        if(sb.Length > 0)
+        {
+            cmd.CommandText = commandPrefix + sb.ToString().TrimEnd(',', '\r', '\n');
+            affected += cmd.ExecuteNonQuery();
+            sb.Clear();
         }
 
         return affected;
@@ -90,17 +90,14 @@ public class MySqlBulkCopy : BulkCopy
         dataType = Regex.Replace(dataType,"\\(.*\\)", "").Trim();
 
         if(value is DateTime valueDateTime)
-            switch(dataType)
+            switch (dataType)
             {
                 case "DATE":
-                    return String.Format("'{0:yyyy-MM-dd}'", valueDateTime);
-                case "TIMESTAMP":
-                case "DATETIME":
-                    return String.Format("'{0:yyyy-MM-dd HH:mm:ss}'", valueDateTime);
+                    return $"'{valueDateTime:yyyy-MM-dd}'";
+                case "TIMESTAMP" or "DATETIME":
+                    return $"'{valueDateTime:yyyy-MM-dd HH:mm:ss}'";
                 case "TIME":
-                    return String.Format("'{0:HH:mm:ss}'", valueDateTime);
-                default :
-                    break;
+                    return $"'{valueDateTime:HH:mm:ss}'";
             }
 
         if(value == null || value == DBNull.Value)
@@ -111,53 +108,38 @@ public class MySqlBulkCopy : BulkCopy
 
     private string ConstructIndividualValue(string dataType, string value)
     {
-        switch (dataType)
+        return dataType switch
         {
-            case "BIT":
-                return value;
-
+            "BIT" => value,
             //Numbers
-            case "INT":
-            case "TINYINT":
-            case "SMALLINT":
-            case "MEDIUMINT":
-            case "BIGINT":
-            case "FLOAT":
-            case "DOUBLE":
-            case "DECIMAL":
-                return string.Format("{0}", value);
-                
+            "INT" => $"{value}",
+            "TINYINT" => $"{value}",
+            "SMALLINT" => $"{value}",
+            "MEDIUMINT" => $"{value}",
+            "BIGINT" => $"{value}",
+            "FLOAT" => $"{value}",
+            "DOUBLE" => $"{value}",
+            "DECIMAL" => $"{value}",
             //Text
-            case "CHAR":
-            case "VARCHAR":
-            case "BLOB":
-            case "TEXT":
-            case "TINYBLOB":
-            case "TINYTEXT":
-            case "MEDIUMBLOB":
-            case "MEDIUMTEXT":
-            case "LONGBLOB":
-            case "LONGTEXT":
-            case "ENUM":
-                return string.Format("'{0}'", MySqlHelper.EscapeString(value));
-                
+            "CHAR" => $"'{MySqlHelper.EscapeString(value)}'",
+            "VARCHAR" => $"'{MySqlHelper.EscapeString(value)}'",
+            "BLOB" => $"'{MySqlHelper.EscapeString(value)}'",
+            "TEXT" => $"'{MySqlHelper.EscapeString(value)}'",
+            "TINYBLOB" => $"'{MySqlHelper.EscapeString(value)}'",
+            "TINYTEXT" => $"'{MySqlHelper.EscapeString(value)}'",
+            "MEDIUMBLOB" => $"'{MySqlHelper.EscapeString(value)}'",
+            "MEDIUMTEXT" => $"'{MySqlHelper.EscapeString(value)}'",
+            "LONGBLOB" => $"'{MySqlHelper.EscapeString(value)}'",
+            "LONGTEXT" => $"'{MySqlHelper.EscapeString(value)}'",
+            "ENUM" => $"'{MySqlHelper.EscapeString(value)}'",
             //Dates/times
-            case "DATE":
-                return String.Format("'{0:yyyy-MM-dd}'", (DateTime)DateTimeDecider.Parse(value));
-            case "TIMESTAMP":
-            case "DATETIME":
-                return String.Format("'{0:yyyy-MM-dd HH:mm:ss}'", (DateTime)DateTimeDecider.Parse(value));
-            case "TIME":
-                return String.Format("'{0:HH:mm:ss}'", (DateTime)DateTimeDecider.Parse(value));
-            case "YEAR2":
-                return String.Format("'{0:yy}'", value);
-            case "YEAR4":
-                return String.Format("'{0:yyyy}'", value);
-
-            //Unknown
-            default:
-                // we don't understand the format. to safegaurd the code, just enclose with ''
-                return string.Format("'{0}'", MySqlHelper.EscapeString(value));
-        }
+            "DATE" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd}'",
+            "TIMESTAMP" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
+            "DATETIME" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
+            "TIME" => $"'{(DateTime)DateTimeDecider.Parse(value):HH:mm:ss}'",
+            "YEAR2" => $"'{value:yy}'",
+            "YEAR4" => $"'{value:yyyy}'",
+            _ => $"'{MySqlHelper.EscapeString(value)}'"
+        };
     }
 }

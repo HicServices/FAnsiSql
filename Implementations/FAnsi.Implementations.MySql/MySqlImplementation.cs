@@ -12,18 +12,9 @@ public class MySqlImplementation : Implementation<MySqlConnectionStringBuilder>
     {
     }
 
-    public override IDiscoveredServerHelper GetServerHelper()
-    {
-        return new MySqlServerHelper();
-    }
+    public override IDiscoveredServerHelper GetServerHelper() => MySqlServerHelper.Instance;
 
-    public override bool IsFor(DbConnection connection)
-    {
-        return connection is MySqlConnection;
-    }
+    public override bool IsFor(DbConnection connection) => connection is MySqlConnection;
 
-    public override IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return new MySqlQuerySyntaxHelper();
-    }
+    public override IQuerySyntaxHelper GetQuerySyntaxHelper() => MySqlQuerySyntaxHelper.Instance;
 }

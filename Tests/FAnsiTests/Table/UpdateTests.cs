@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
@@ -9,12 +8,12 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-class UpdateTests :DatabaseTests
+internal class UpdateTests :DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_UpdateTableFromJoin(DatabaseType dbType)
     {
-        DiscoveredDatabase db = GetTestDatabase(dbType);
+        var db = GetTestDatabase(dbType);
 
         DiscoveredTable tbl1;
         DiscoveredTable tbl2;
@@ -45,7 +44,7 @@ class UpdateTests :DatabaseTests
 
         var updateHelper = syntaxHelper.UpdateHelper;
             
-        List<CustomLine> queryLines = new List<CustomLine>();
+        var queryLines = new List<CustomLine>();
 
         var highScore = syntaxHelper.EnsureWrapped("HighScore");
         var score = syntaxHelper.EnsureWrapped("Score");
@@ -55,15 +54,15 @@ class UpdateTests :DatabaseTests
         queryLines.Add(new CustomLine($"t1.{highScore} < t2.{score} OR t1.{highScore} is null",QueryComponent.WHERE));
         queryLines.Add(new CustomLine($"t1.{name} = t2.{name}",QueryComponent.JoinInfoJoin));
 
-        string sql = updateHelper.BuildUpdate(tbl1, tbl2, queryLines);
+        var sql = updateHelper.BuildUpdate(tbl1, tbl2, queryLines);
 
         TestContext.WriteLine($"UPDATE Sql:{sql}");
 
         using var con = db.Server.GetConnection();
         con.Open();
 
-        DbCommand cmd = db.Server.GetCommand(sql, con);
-        int affectedRows = cmd.ExecuteNonQuery();
+        var cmd = db.Server.GetCommand(sql, con);
+        var affectedRows = cmd.ExecuteNonQuery();
 
         Assert.AreEqual(1,affectedRows);
 

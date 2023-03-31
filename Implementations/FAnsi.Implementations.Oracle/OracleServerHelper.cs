@@ -8,22 +8,19 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Implementations.Oracle;
 
-public class OracleServerHelper : DiscoveredServerHelper
+public sealed class OracleServerHelper : DiscoveredServerHelper
 {
-    static OracleServerHelper()
-    {
-        //add any keywords that are required to make Oracle work properly here (at API level if it won't work period without it or SystemDefaultLow if it's just recommended)
-    }
-
-    public OracleServerHelper() : base(DatabaseType.Oracle)
+    public static readonly OracleServerHelper Instance=new();
+    private OracleServerHelper() : base(DatabaseType.Oracle)
     {
     }
 
-    protected override string ServerKeyName { get { return "DATA SOURCE"; } }
-    protected override string DatabaseKeyName { get { return "USER ID"; } }//ok is this really what oracle does?
+    protected override string ServerKeyName => "DATA SOURCE";
+    protected override string DatabaseKeyName => "USER ID"; //ok is this really what oracle does?
 
 
-    protected override string  ConnectionTimeoutKeyName { get { return "Connection Timeout"; } }
+    protected override string  ConnectionTimeoutKeyName => "Connection Timeout";
+
     #region Up Typing
     public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
     {
@@ -58,7 +55,7 @@ public class OracleServerHelper : DiscoveredServerHelper
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
     {
-        var toReturn = new OracleConnectionStringBuilder() {DataSource = server};
+        var toReturn = new OracleConnectionStringBuilder {DataSource = server};
 
         if (string.IsNullOrWhiteSpace(username))
             toReturn.UserID = "/";
@@ -77,101 +74,74 @@ public class OracleServerHelper : DiscoveredServerHelper
         return builder;
     }
 
-    public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)
-    {
-        return builder;
-    }
+    public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder) => builder;
 
-    public override IDiscoveredDatabaseHelper GetDatabaseHelper()
-    {
-        return new OracleDatabaseHelper();
-    }
+    public override IDiscoveredDatabaseHelper GetDatabaseHelper() => OracleDatabaseHelper.Instance;
 
-    public override IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return new OracleQuerySyntaxHelper();
-    }
+    public override IQuerySyntaxHelper GetQuerySyntaxHelper() => OracleQuerySyntaxHelper.Instance;
 
-    public override string GetCurrentDatabase(DbConnectionStringBuilder builder)
-    {
+    public override string GetCurrentDatabase(DbConnectionStringBuilder builder) =>
         //Oracle does not persist database as a connection string (only server).
-        return null;
-    }
+        null;
 
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
-        using(var con = new OracleConnection(builder.ConnectionString))
+        using var con = new OracleConnection(builder.ConnectionString);
+        con.Open();
+        //create a new user with a random password!!! - go oracle this makes perfect sense database=user!
+        using(var cmd = new OracleCommand(
+                  $"CREATE USER \"{newDatabaseName.GetRuntimeName()}\" IDENTIFIED BY pwd{Guid.NewGuid().ToString().Replace("-", "")[..27]}" //oracle only allows 30 character passwords
+                  , con))
         {
-            con.Open();
-            //create a new user with a random password!!! - go oracle this makes perfect sense database=user!
-            using(var cmd = new OracleCommand("CREATE USER \"" + newDatabaseName.GetRuntimeName() + "\" IDENTIFIED BY pwd" +
-                                              Guid.NewGuid().ToString().Replace("-", "").Substring(0, 27) //oracle only allows 30 character passwords
-                      , con))
-            {
-                cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
-                cmd.ExecuteNonQuery();
-            }
+            cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
+            cmd.ExecuteNonQuery();
+        }
                     
 
-            using(var cmd = new OracleCommand("ALTER USER \"" + newDatabaseName.GetRuntimeName() + "\" quota unlimited on system", con))
-            {
-                cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
-                cmd.ExecuteNonQuery();
-            }
+        using(var cmd = new OracleCommand(
+                  $"ALTER USER \"{newDatabaseName.GetRuntimeName()}\" quota unlimited on system", con))
+        {
+            cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
+            cmd.ExecuteNonQuery();
+        }
 
 
-            using(var cmd = new OracleCommand("ALTER USER \"" + newDatabaseName.GetRuntimeName() + "\" quota unlimited on users", con))
-            {
-                cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
-                cmd.ExecuteNonQuery();
-            }
+        using(var cmd = new OracleCommand(
+                  $"ALTER USER \"{newDatabaseName.GetRuntimeName()}\" quota unlimited on users", con))
+        {
+            cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
+            cmd.ExecuteNonQuery();
         }
     }
 
-    public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder)
-    {
-        throw new NotImplementedException();
-    }
-        
-    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder)
-    {
-        return ((OracleConnectionStringBuilder) builder).UserID;
-    }
+    public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder) => throw new NotImplementedException();
 
-    public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder)
-    {
-        return ((OracleConnectionStringBuilder)builder).Password;
-    }
+    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((OracleConnectionStringBuilder) builder).UserID;
+
+    public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((OracleConnectionStringBuilder)builder).Password;
 
     public override Version GetVersion(DiscoveredServer server)
     {
-        using (var con = server.GetConnection())
-        {
-            con.Open();
-            using (var cmd = server.GetCommand("SELECT * FROM v$version WHERE BANNER like 'Oracle Database%'",con))
-            {
-                using(var r = cmd.ExecuteReader())
-                    if(r.Read())
-                        return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
-                    else
-                        return null;
-            }
-        }
+        using var con = server.GetConnection();
+        con.Open();
+        using var cmd = server.GetCommand("SELECT * FROM v$version WHERE BANNER like 'Oracle Database%'",con);
+        using var r = cmd.ExecuteReader();
+        if(r.Read())
+            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+        return null;
     }
 
     public override string[] ListDatabases(DbConnectionStringBuilder builder)
     {
         //todo do we have to edit the builder in here incase it is pointed at nothing?
-        using (var con = new OracleConnection(builder.ConnectionString))
-        {
-            con.Open();
-            return ListDatabases(con);
-        }
+        using var con = new OracleConnection(builder.ConnectionString);
+        con.Open();
+        return ListDatabases(con);
     }
 
     public override string[] ListDatabases(DbConnection con)
     {
-        List<string> databases = new List<string>();
+        var databases = new List<string>();
 
         using(var cmd = GetCommand("select * from all_users", con)) //already comes as single column called Database
         using (var r = cmd.ExecuteReader())

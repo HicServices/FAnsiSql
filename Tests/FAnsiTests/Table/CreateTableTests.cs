@@ -12,7 +12,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-class CreateTableTests:DatabaseTests
+internal class CreateTableTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateSimpleTable_Exists(DatabaseType type)
@@ -137,7 +137,7 @@ class CreateTableTests:DatabaseTests
                 Assert.AreEqual("character varying(5)",dbType);
                 break;
             default:
-                throw new ArgumentOutOfRangeException("type");
+                throw new ArgumentOutOfRangeException(nameof(type));
         }
 
 
@@ -149,14 +149,14 @@ class CreateTableTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_PrimaryKey_FromDataTable(DatabaseType databaseType)
     {
-        DiscoveredDatabase database = GetTestDatabase(databaseType);
+        var database = GetTestDatabase(databaseType);
 
         var dt = new DataTable();
         dt.Columns.Add("Name");
         dt.PrimaryKey = new[] { dt.Columns[0] };
         dt.Rows.Add("Frank");
 
-        DiscoveredTable table = database.CreateTable("PkTable", dt);
+        var table = database.CreateTable("PkTable", dt);
 
         Assert.IsTrue(table.DiscoverColumn("Name").IsPrimaryKey);
     }
@@ -170,7 +170,7 @@ class CreateTableTests:DatabaseTests
             "PkTable",
             new DatabaseColumnRequest[]
             {
-                new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10))
+                new("Name",new DatabaseTypeRequest(typeof(string),10))
                 {
                     IsPrimaryKey = true
                 }
@@ -205,7 +205,7 @@ class CreateTableTests:DatabaseTests
     public void CreateTable_BoolStrings(DatabaseType type)
     {
         var db = GetTestDatabase(type);
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.TableName = "MyTable";
         dt.Columns.Add("MyBoolCol");
         dt.Rows.Add("true");
@@ -273,8 +273,8 @@ class CreateTableTests:DatabaseTests
     [Test]
     public void Test_OracleBit_IsActuallyString()
     {
-        DiscoveredDatabase db = GetTestDatabase(DatabaseType.Oracle);
-        DiscoveredTable table = db.CreateTable("MyTable",
+        var db = GetTestDatabase(DatabaseType.Oracle);
+        var table = db.CreateTable("MyTable",
             new[]
             {
                 new DatabaseColumnRequest("MyCol", new DatabaseTypeRequest(typeof(bool)))
@@ -301,7 +301,7 @@ class CreateTableTests:DatabaseTests
     {
         var db = GetTestDatabase(type);
 
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("Yay");
         dt.Rows.Add(testString); 
 
@@ -329,7 +329,7 @@ class CreateTableTests:DatabaseTests
     {
         var db = GetTestDatabase(dbType);
 
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("微笑");
         dt.Rows.Add("50");     
 
@@ -343,13 +343,11 @@ class CreateTableTests:DatabaseTests
         var col = table.DiscoverColumn("微笑");
         Assert.AreEqual("微笑", col.GetRuntimeName());
 
-        table.Insert(new Dictionary<string, object>()
-            {{ "微笑","10" } });
+        table.Insert(new Dictionary<string, object> {{ "微笑","10" } });
             
         Assert.AreEqual(2, table.GetRowCount());
 
-        table.Insert(new Dictionary<DiscoveredColumn, object>()
-            {{ col,"11" } });
+        table.Insert(new Dictionary<DiscoveredColumn, object> {{ col,"11" } });
 
         Assert.AreEqual(3,table.GetRowCount());
 
@@ -371,7 +369,7 @@ class CreateTableTests:DatabaseTests
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("Hb");
         dt.Rows.Add("T");
         dt.Rows.Add("F");
@@ -392,7 +390,7 @@ class CreateTableTests:DatabaseTests
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("Hb");
         dt.Rows.Add("T");
         dt.Rows.Add("F");
@@ -417,22 +415,22 @@ class CreateTableTests:DatabaseTests
     [Test]
     public void Test_DataTableClone_ExtendedProperties()
     {
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("C1");
 
         //the default Type for a DataColumn is string
         Assert.AreEqual(typeof(string),dt.Columns[0].DataType);
 
-        dt.Columns["C1"].ExtendedProperties.Add("ff",true);
+        dt.Columns["C1"]?.ExtendedProperties.Add("ff",true);
 
         var dt2 = dt.Clone();
-        Assert.IsTrue(dt2.Columns["C1"].ExtendedProperties.ContainsKey("ff"));
+        Assert.IsTrue(dt2.Columns["C1"]?.ExtendedProperties.ContainsKey("ff"));
     }
 
     [Test]
     public void Test_GetDoNotRetype_OnlyStringColumns()
     {
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("C1",typeof(int));
         
         dt.SetDoNotReType(true);
@@ -454,14 +452,14 @@ class CreateTableTests:DatabaseTests
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("Hb",typeof(object));
         dt.Rows.Add("T");
         dt.Rows.Add("F");
 
         var ex = Assert.Throws<NotSupportedException>(()=>db.CreateTable("T1", dt));
 
-        StringAssert.Contains("System.Object",ex.Message);
+        StringAssert.Contains("System.Object",ex?.Message);
 
     }
         
@@ -475,12 +473,12 @@ class CreateTableTests:DatabaseTests
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
-        DataTable dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Hb");
         dt.Rows.Add("T");
         dt.Rows.Add("F");
 
-        bool initialDefault = GuessSettingsFactory.Defaults.CharCanBeBoolean;
+        var initialDefault = GuessSettingsFactory.Defaults.CharCanBeBoolean;
 
         try
         {
@@ -539,7 +537,7 @@ class CreateTableTests:DatabaseTests
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("Hb");
         dt.Rows.Add("T");
         dt.Rows.Add("F");
@@ -563,7 +561,7 @@ class CreateTableTests:DatabaseTests
     {
         //Values like 013020 would normally be treated as string data (due to leading zero) but maybe the user wants it to be a date?
         var db = GetTestDatabase(dbType);
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("DateCol");
         dt.Rows.Add("013020");
             
@@ -572,7 +570,7 @@ class CreateTableTests:DatabaseTests
         Assert.IsFalse(args.GuessSettings == GuessSettingsFactory.Defaults,"Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
 
         //change the args settings to treat this date format
-        args.GuessSettings.ExplicitDateFormats = useCustomDate ? new string[]{"MMddyy" } :null;
+        args.GuessSettings.ExplicitDateFormats = useCustomDate ? new[]{"MMddyy" } :null;
             
         var tbl = db.CreateTable(args);
         var col = tbl.DiscoverColumn("DateCol");
@@ -580,7 +578,7 @@ class CreateTableTests:DatabaseTests
         Assert.AreEqual(useCustomDate ? typeof(DateTime): typeof(string),col.DataType.GetCSharpDataType());
 
         var dtDown = tbl.GetDataTable();
-        Assert.AreEqual(useCustomDate? new DateTime(2020,01,30): (object)"013020" ,dtDown.Rows[0][0]);
+        Assert.AreEqual(useCustomDate? new DateTime(2020,01,30): "013020" ,dtDown.Rows[0][0]);
     }
     [Test]
     public void GuessSettings_CopyProperties()

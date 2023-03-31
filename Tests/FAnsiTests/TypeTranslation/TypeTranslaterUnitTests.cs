@@ -7,11 +7,11 @@ using NUnit.Framework;
 
 namespace FAnsiTests.TypeTranslation;
 
-class TypeTranslaterUnitTests
+internal class TypeTranslaterUnitTests
 {
     /// <summary>
     /// IsSupportedType is a support check for FAnsi not the DBMS.  This test shows that FAnsi's view of 'what is a string' is pretty
-    /// broad.  We don't want to bind <see cref="IsSupportedSQLDBType"/> to DBMS / API since that would be too brittle.
+    /// broad.  We don't want to bind <see cref="FAnsi.Discovery.TypeTranslation.IsSupportedSQLDBType"/> to DBMS / API since that would be too brittle.
     /// </summary>
     /// <param name="dbType"></param>
     /// <param name="sqlDbType"></param>

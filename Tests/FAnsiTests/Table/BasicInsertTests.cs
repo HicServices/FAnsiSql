@@ -6,7 +6,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-class BasicInsertTests:DatabaseTests
+internal class BasicInsertTests:DatabaseTests
 {
     [TestCase(DatabaseType.MicrosoftSQLServer,"Dave")]
     [TestCase(DatabaseType.MySql,"Dave")]
@@ -38,7 +38,7 @@ class BasicInsertTests:DatabaseTests
             
         var nameCol = tbl.DiscoverColumn("Name");
 
-        tbl.Insert(new Dictionary<DiscoveredColumn, object>()
+        tbl.Insert(new Dictionary<DiscoveredColumn, object>
         {
             {nameCol,value}
         });
@@ -56,14 +56,14 @@ class BasicInsertTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, 1.5)]
     public void CreateTableAndInsertAValue_StringOverload(DatabaseType type, object value)
     {
-        var db = GetTestDatabase(type,true);
+        var db = GetTestDatabase(type);
         var tbl = db.CreateTable("InsertTable",
             new[]
             {
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(value.GetType(),100,new DecimalSize(5,5)))
             });
 
-        tbl.Insert(new Dictionary<string, object>()
+        tbl.Insert(new Dictionary<string, object>
         {
             {"Name",value}
         });
@@ -78,7 +78,7 @@ class BasicInsertTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTableAndInsertAValue_ReturnsIdentity(DatabaseType type)
     {
-        var db = GetTestDatabase(type,true);
+        var db = GetTestDatabase(type);
         var tbl = db.CreateTable("InsertTable",
             new[]
             {
@@ -88,7 +88,7 @@ class BasicInsertTests:DatabaseTests
 
         var nameCol = tbl.DiscoverColumn("Name");
 
-        int result = tbl.Insert(new Dictionary<DiscoveredColumn, object>()
+        var result = tbl.Insert(new Dictionary<DiscoveredColumn, object>
         {
             {nameCol,"fish"}
         });
@@ -96,7 +96,7 @@ class BasicInsertTests:DatabaseTests
         Assert.AreEqual(1,result);
 
 
-        result = tbl.Insert(new Dictionary<DiscoveredColumn, object>()
+        result = tbl.Insert(new Dictionary<DiscoveredColumn, object>
         {
             {nameCol,"fish"}
         });

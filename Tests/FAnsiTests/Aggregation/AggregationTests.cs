@@ -8,10 +8,10 @@ using System.Linq;
 
 namespace FAnsiTests.Aggregation;
 
-class AggregationTests:DatabaseTests
+internal class AggregationTests:DatabaseTests
 {
-    protected readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = new Dictionary<DatabaseType, DiscoveredTable>();
-    protected readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = new Dictionary<DatabaseType, DiscoveredTable>();
+    protected readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = new();
+    protected readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = new();
 
     [OneTimeSetUp]
     public void Setup()
@@ -25,7 +25,7 @@ class AggregationTests:DatabaseTests
     {
         try
         {
-            using DataTable dt = new DataTable();
+            using var dt = new DataTable();
             dt.TableName = name;
 
             dt.Columns.Add("EventDate");
@@ -97,7 +97,7 @@ class AggregationTests:DatabaseTests
     /// <returns></returns>
     protected bool IsMatch(DataRow r, object[] cells)
     {
-        for(int i = 0 ; i<cells.Length ;i++)
+        for(var i = 0 ; i<cells.Length ;i++)
         {
             var a = r[i];
             var b = cells[i] ?? DBNull.Value; //null means dbnull
@@ -128,36 +128,36 @@ class AggregationTests:DatabaseTests
     protected void ConsoleWriteTable(DataTable dt)
     {
         TestContext.WriteLine($"--- DebugTable({dt.TableName}) ---");
-        int zeilen = dt.Rows.Count;
-        int spalten = dt.Columns.Count;
+        var zeilen = dt.Rows.Count;
+        var spalten = dt.Columns.Count;
 
         // Header
-        for (int i = 0; i < dt.Columns.Count; i++)
+        for (var i = 0; i < dt.Columns.Count; i++)
         {
-            string s = dt.Columns[i].ToString();
+            var s = dt.Columns[i].ToString();
             TestContext.Write($"{s,-20} | ");
         }
         TestContext.Write(Environment.NewLine);
-        for (int i = 0; i < dt.Columns.Count; i++)
+        for (var i = 0; i < dt.Columns.Count; i++)
         {
             TestContext.Write("---------------------|-");
         }
         TestContext.Write(Environment.NewLine);
 
         // Data
-        for (int i = 0; i < zeilen; i++)
+        for (var i = 0; i < zeilen; i++)
         {
-            DataRow row = dt.Rows[i];
+            var row = dt.Rows[i];
             //TestContext.WriteLine("{0} {1} ", row[0], row[1]);
-            for (int j = 0; j < spalten; j++)
+            for (var j = 0; j < spalten; j++)
             {
-                string s = row[j].ToString();
-                if (s.Length > 20) s = $"{s[..17]}...";
+                var s = row[j].ToString();
+                if (s?.Length > 20) s = $"{s[..17]}...";
                 TestContext.Write($"{s,-20} | ");
             }
             TestContext.Write(Environment.NewLine);
         }
-        for (int i = 0; i < dt.Columns.Count; i++)
+        for (var i = 0; i < dt.Columns.Count; i++)
         {
             TestContext.Write("---------------------|-");
         }

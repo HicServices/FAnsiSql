@@ -19,7 +19,7 @@ public class ManagedTransaction : IManagedTransaction
         Transaction = transaction;
     }
 
-    private bool closed = false;
+    private bool closed;
 
     /// <summary>
     /// Attempts to rollback the DbTransaction (swallowing any Exception) and closes/disposes the DbConnection
@@ -36,7 +36,7 @@ public class ManagedTransaction : IManagedTransaction
         }
         catch (Exception e)
         {
-            Trace.WriteLine("Transaction rollback failed during AbandonAndCloseConnection" + e.Message);
+            Trace.WriteLine($"Transaction rollback failed during AbandonAndCloseConnection{e.Message}");
         }
         finally
         {

@@ -12,12 +12,12 @@ public class PostgreSqlColumnHelper : IDiscoveredColumnHelper
     {
         var syntax = new PostgreSqlSyntaxHelper();
 
-        string sql = "SELECT " + syntax.EnsureWrapped(column.GetRuntimeName()) + " FROM " + table.GetFullyQualifiedName();
+        var sql = $"SELECT {syntax.EnsureWrapped(column.GetRuntimeName())} FROM {table.GetFullyQualifiedName()}";
 
         if (discardNulls)
-            sql += " WHERE " + syntax.EnsureWrapped(column.GetRuntimeName()) + " IS NOT NULL";
+            sql += $" WHERE {syntax.EnsureWrapped(column.GetRuntimeName())} IS NOT NULL";
 
-        sql += " fetch first " + topX + " rows only";
+        sql += $" fetch first {topX} rows only";
         return sql;
     }
 
@@ -25,7 +25,7 @@ public class PostgreSqlColumnHelper : IDiscoveredColumnHelper
     {
         var syntax = column.Table.Database.Server.GetQuerySyntaxHelper();
 
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         sb.AppendLine(
             $@"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {syntax.EnsureWrapped(column.GetRuntimeName())} TYPE {newType};");
 

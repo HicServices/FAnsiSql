@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Query;
 
-class QuerySyntaxHelperTests
+internal class QuerySyntaxHelperTests
 {
         
 
@@ -73,7 +73,7 @@ class QuerySyntaxHelperTests
 
         var currentName = runtime;
 
-        for(int i=0;i<10;i++)
+        for(var i=0;i<10;i++)
         {
             if(i%2 ==0 )
             {
@@ -97,8 +97,8 @@ class QuerySyntaxHelperTests
     {
         var syntax = new QuerySyntaxHelperFactory().Create(dbType);
 
-        string once = syntax.EnsureWrapped("ff");
-        string twice = syntax.EnsureWrapped(once);
+        var once = syntax.EnsureWrapped("ff");
+        var twice = syntax.EnsureWrapped(once);
 
         Assert.AreEqual(once,twice);
     }
@@ -110,7 +110,7 @@ class QuerySyntaxHelperTests
 
         var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
         var ex = Assert.Throws<RuntimeNameException>(()=>syntaxHelper.GetRuntimeName("count(*)"));
-        StringAssert.Contains("Could not determine runtime name for Sql:'count(*)'.  It had brackets and no alias.",ex.Message);
+        StringAssert.Contains("Could not determine runtime name for Sql:'count(*)'.  It had brackets and no alias.",ex?.Message);
 
         Assert.Throws<RuntimeNameException>(()=>syntaxHelper.GetRuntimeName("dbo.GetMyCoolThing(\"Magic Fun Times\")"));
 
@@ -149,13 +149,11 @@ class QuerySyntaxHelperTests
     {
         ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
 
-        foreach (DatabaseType t in new []{DatabaseType.Oracle,DatabaseType.MySql,DatabaseType.MicrosoftSQLServer})
+        foreach (var t in new []{DatabaseType.Oracle,DatabaseType.MySql,DatabaseType.MicrosoftSQLServer})
         {
             var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
 
-            string selectSQL;
-            string alias;
-            Assert.AreEqual(expectedAlias != null,syntaxHelper.SplitLineIntoSelectSQLAndAlias(line, out selectSQL, out alias));
+            Assert.AreEqual(expectedAlias != null,syntaxHelper.SplitLineIntoSelectSQLAndAlias(line, out var selectSQL, out var alias));
             Assert.AreEqual(expectedSelectSql,selectSQL);
             Assert.AreEqual(expectedAlias,alias);
         }   
@@ -169,13 +167,12 @@ class QuerySyntaxHelperTests
             
 
         if (!(syntaxHelper.AliasPrefix.StartsWith(" ") && syntaxHelper.AliasPrefix.EndsWith(" ")))
-            Assert.Fail("GetAliasConst method on Type " + this.GetType().Name + " returned a value that was not bounded by whitespace ' '.  GetAliasConst must start and end with a space e.g. ' AS '");
+            Assert.Fail(
+                $"GetAliasConst method on Type {GetType().Name} returned a value that was not bounded by whitespace ' '.  GetAliasConst must start and end with a space e.g. ' AS '");
 
-        var testString = "col " + syntaxHelper.AliasPrefix + " bob";
+        var testString = $"col {syntaxHelper.AliasPrefix} bob";
 
-        string selectSQL;
-        string alias;
-        syntaxHelper.SplitLineIntoSelectSQLAndAlias(testString, out selectSQL, out alias);
+        syntaxHelper.SplitLineIntoSelectSQLAndAlias(testString, out var selectSQL, out var alias);
             
         Assert.AreEqual("col",selectSQL);
         Assert.AreEqual("bob",alias);

@@ -4,12 +4,12 @@ using NUnit.Framework;
 
 namespace FAnsiTests;
 
-class ExtensionsTests
+internal class ExtensionsTests
 {
     [Test]
     public void Test_SetDoNotReType_RepeatCalls()
     {
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
 
         Assert.DoesNotThrow(()=>dt.SetDoNotReType(true));
 

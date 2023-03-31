@@ -11,7 +11,7 @@ public class MySqlAggregateHelper : AggregateHelper
     {
         //if the axis is days then there are likely to be thousands of them but if we start adding thousands of years
         //mysql date falls over with overflow exceptions
-        string thousands =
+        var thousands =
             axis.AxisIncrement == AxisIncrement.Day ? 
                 @"JOIN 
 (SELECT 0 thousands
@@ -20,7 +20,7 @@ UNION ALL SELECT  4000 UNION ALL SELECT  5000 UNION ALL SELECT  6000
 UNION ALL SELECT  7000 UNION ALL SELECT  8000 UNION ALL SELECT  9000
 ) thousands" : "";
 
-        string plusThousands = axis.AxisIncrement == AxisIncrement.Day ? "+ thousands":"";
+        var plusThousands = axis.AxisIncrement == AxisIncrement.Day ? "+ thousands":"";
 
         //QueryComponent.JoinInfoJoin
         return 
@@ -75,10 +75,7 @@ delete from dateAxis where dt > @endDate;";
     }
 
 
-    protected override IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return new MySqlQuerySyntaxHelper();
-    }
+    protected override IQuerySyntaxHelper GetQuerySyntaxHelper() => MySqlQuerySyntaxHelper.Instance;
 
     protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
     {
@@ -113,7 +110,7 @@ ORDER BY
             countAlias,
                 
             //the entire query
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.SELECT && c.LocationToInsert <= QueryComponent.Having)),
+            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
             axisColumnAlias
         ).Trim();
 
@@ -121,8 +118,8 @@ ORDER BY
         
     protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query)
     {
-        string axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
-        string part1 = GetPivotPart1(query);
+        var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
+        var part1 = GetPivotPart1(query);
             
         return string.Format(@"
 {0}
@@ -168,15 +165,15 @@ DEALLOCATE PREPARE stmt;",
             query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement,axisColumnWithoutAlias)),
 
             //the order by (should be count so that heavy populated columns come first)
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert <= QueryComponent.WHERE).Select(x=> query.SyntaxHelper.Escape(x.Text)))
+            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.FROM and <= QueryComponent.WHERE).Select(x=> query.SyntaxHelper.Escape(x.Text)))
         );
     }
         
     protected override string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn)
     {
-        string part1 = GetPivotPart1(query);
+        var part1 = GetPivotPart1(query);
             
-        string joinAlias = nonPivotColumn.GetAliasFromText(query.SyntaxHelper);
+        var joinAlias = nonPivotColumn.GetAliasFromText(query.SyntaxHelper);
 
         return string.Format(@"
 {0}
@@ -206,7 +203,7 @@ DEALLOCATE PREPARE stmt;",
             nonPivotColumn,
 
             //everything inclusive of FROM but stopping before GROUP BY 
-            query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert >= QueryComponent.FROM && c.LocationToInsert < QueryComponent.GroupBy))),
+            query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.FROM and < QueryComponent.GroupBy))),
                 
             joinAlias,
 
@@ -218,26 +215,23 @@ DEALLOCATE PREPARE stmt;",
     /// <summary>
     /// Returns the section of the PIVOT which identifies unique values.  For MySql this is done by assembling a massive CASE statement.
     /// </summary>
-    /// <param name="lines"></param>
-    /// <param name="syntaxHelper"></param>
+    /// <param name="query"></param>
     /// <returns></returns>
     private static string GetPivotPart1(AggregateCustomLineCollection query)
     {
-        string pivotSqlWithoutAlias = query.PivotSelect.GetTextWithoutAlias(query.SyntaxHelper);
+        var pivotSqlWithoutAlias = query.PivotSelect.GetTextWithoutAlias(query.SyntaxHelper);
 
-        string countSqlWithoutAlias = query.CountSelect.GetTextWithoutAlias(query.SyntaxHelper);
+        var countSqlWithoutAlias = query.CountSelect.GetTextWithoutAlias(query.SyntaxHelper);
 
-        string aggregateMethod;
-        string aggregateParameter;
-        query.SyntaxHelper.SplitLineIntoOuterMostMethodAndContents(countSqlWithoutAlias, out aggregateMethod,
-            out aggregateParameter);
+        query.SyntaxHelper.SplitLineIntoOuterMostMethodAndContents(countSqlWithoutAlias, out var aggregateMethod,
+            out var aggregateParameter);
 
         if (aggregateParameter.Equals("*"))
             aggregateParameter = "1";
 
             
         //if there is an axis we must ensure we only pull pivot values where the values appear in that axis range
-        string whereDateColumnNotNull = "";
+        var whereDateColumnNotNull = "";
             
         if(query.AxisSelect != null)
         {
@@ -248,7 +242,7 @@ DEALLOCATE PREPARE stmt;",
         }
 
         //work out how to order the pivot columns
-        string orderBy = $"{countSqlWithoutAlias} desc"; //default, order by the count(*) / sum(*) etc column desc
+        var orderBy = $"{countSqlWithoutAlias} desc"; //default, order by the count(*) / sum(*) etc column desc
 
         //theres an explicit topX so order by it verbatim instead
         var topXOrderByLine =
@@ -259,9 +253,9 @@ DEALLOCATE PREPARE stmt;",
         //if theres a topX limit postfix line (See MySqlQuerySyntaxHelper.HowDoWeAchieveTopX) add that too
         var topXLimitLine =
             query.Lines.SingleOrDefault(c => c.LocationToInsert == QueryComponent.Postfix && c.Role == CustomLineRole.TopX);
-        string topXLimitSqlIfAny = topXLimitLine != null ? topXLimitLine.Text : "";
+        var topXLimitSqlIfAny = topXLimitLine != null ? topXLimitLine.Text : "";
 
-        string havingSqlIfAny = string.Join(Environment.NewLine,
+        var havingSqlIfAny = string.Join(Environment.NewLine,
             query.Lines.Where(l => l.LocationToInsert == QueryComponent.Having).Select(l => l.Text));
 
         return string.Format(@"
@@ -311,7 +305,7 @@ pivotValues;
             //the from including all table joins and where but no calendar table join
             string.Join(Environment.NewLine,
                 query.Lines.Where(l =>
-                    l.LocationToInsert >= QueryComponent.FROM && l.LocationToInsert <= QueryComponent.WHERE &&
+                    l.LocationToInsert is >= QueryComponent.FROM and <= QueryComponent.WHERE &&
                     l.Role != CustomLineRole.Axis)),
             whereDateColumnNotNull,
             topXLimitSqlIfAny,

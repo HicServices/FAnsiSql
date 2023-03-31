@@ -11,7 +11,8 @@ namespace FAnsi.Implementations.MicrosoftSQL;
 /// <inheritdoc/>
 public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 {
-    public MicrosoftQuerySyntaxHelper() : base(new MicrosoftSQLTypeTranslater(),new MicrosoftSQLAggregateHelper(),new MicrosoftSQLUpdateHelper(),DatabaseType.MicrosoftSQLServer)
+    public static readonly MicrosoftQuerySyntaxHelper Instance=new();
+    private MicrosoftQuerySyntaxHelper() : base(MicrosoftSQLTypeTranslater.Instance,new MicrosoftSQLAggregateHelper(),new MicrosoftSQLUpdateHelper(),DatabaseType.MicrosoftSQLServer)
     {
     }
 
@@ -29,37 +30,30 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 
     public override TopXResponse HowDoWeAchieveTopX(int x)
     {
-        return new TopXResponse("TOP " + x, QueryComponent.SELECT);
+        return new TopXResponse($"TOP {x}", QueryComponent.SELECT);
     }
 
     public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
     {
-        return "DECLARE " + proposedNewParameterName + " AS " + sqlType + ";";
+        return $"DECLARE {proposedNewParameterName} AS {sqlType};";
     }
 
-    public override string GetScalarFunctionSql(MandatoryScalarFunctions function)
-    {
-        switch (function)
+    public override string GetScalarFunctionSql(MandatoryScalarFunctions function) =>
+        function switch
         {
-            case MandatoryScalarFunctions.GetTodaysDate:
-                return "GETDATE()";
-            case MandatoryScalarFunctions.GetGuid:
-                return "newid()";
-            case MandatoryScalarFunctions.Len:
-                return "LEN";
-            default:
-                throw new ArgumentOutOfRangeException("function");
-        }
-    }
+            MandatoryScalarFunctions.GetTodaysDate => "GETDATE()",
+            MandatoryScalarFunctions.GetGuid => "newid()",
+            MandatoryScalarFunctions.Len => "LEN",
+            _ => throw new ArgumentOutOfRangeException(nameof(function))
+        };
 
     public override string GetAutoIncrementKeywordIfAny()
     {
         return "IDENTITY(1,1)";
     }
 
-    public override Dictionary<string, string> GetSQLFunctionsDictionary()
-    {
-        return new Dictionary<string, string>()
+    public override Dictionary<string, string> GetSQLFunctionsDictionary() =>
+        new Dictionary<string, string>
         {
             { "left", "LEFT ( character_expression , integer_expression )" },
             { "right", "RIGHT ( character_expression , integer_expression )" },
@@ -72,15 +66,12 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
             { "convert","CONVERT ( data_type [ ( length ) ] , expression [ , style ] ) "},
             { "case","CASE WHEN x=y THEN 'something' WHEN x=z THEN 'something2' ELSE 'something3' END"}
         };
-    }
 
     public override bool IsTimeout(Exception exception)
     {
-        var sqlE = exception as SqlException;
-
-        if (sqlE != null)
+        if (exception is SqlException sqlE)
         {
-            if (sqlE.Number == -2 || sqlE.Number == 11 || sqlE.Number == 1205)
+            if (sqlE.Number is -2 or 11 or 1205)
                 return true;
 
             //yup, I've seen this behaviour from Sql Server.  ExceptionMessage of " " and .Number of 
@@ -93,7 +84,7 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string HowDoWeAchieveMd5(string selectSql)
     {
-        return "CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary," + selectSql + ")),2)";
+        return $"CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary,{selectSql})),2)";
     }
 
     public override string GetDefaultSchemaIfAny()
@@ -108,7 +99,7 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
         
     public override string EnsureWrappedImpl(string databaseOrTableName)
     {
-        return "[" + GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName) + "]";
+        return $"[{GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName)}]";
     }
 
         

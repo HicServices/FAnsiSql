@@ -12,22 +12,24 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Implementations.Oracle;
 
-public class OracleTableHelper : DiscoveredTableHelper
+public sealed class OracleTableHelper : DiscoveredTableHelper
 {
+    public static readonly OracleTableHelper Instance=new();
+    private OracleTableHelper() {}
 
     public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
     {
-        return "SELECT * FROM " + table.GetFullyQualifiedName() + " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY";
+        return $"SELECT * FROM {table.GetFullyQualifiedName()} OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY";
     }
 
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
         var server = discoveredTable.Database.Server;
 
-        List<DiscoveredColumn> columns = new List<DiscoveredColumn>();
+        var columns = new List<DiscoveredColumn>();
         var tableName = discoveredTable.GetRuntimeName();
 
-        using (DbCommand cmd = server.Helper.GetCommand(@"SELECT *
+        using (var cmd = server.Helper.GetCommand(@"SELECT *
 FROM   all_tab_cols
 WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
 ", connection.Connection))
@@ -45,8 +47,7 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
             using (var r = cmd.ExecuteReader())
             {
                 if (!r.HasRows)
-                    throw new Exception("Could not find any columns for table " + tableName +
-                                        " in database " + database);
+                    throw new Exception($"Could not find any columns for table {tableName} in database {database}");
 
                 while (r.Read())
                 {
@@ -118,29 +119,27 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
     }
 
 
-    public override IDiscoveredColumnHelper GetColumnHelper()
-    {
-        return new OracleColumnHelper();
-    }
-        
+    public override IDiscoveredColumnHelper GetColumnHelper() => OracleColumnHelper.Instance;
+
     public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
-    { 
-        using(var cmd = new OracleCommand("ALTER TABLE " + columnToDrop.Table.GetFullyQualifiedName() + "  DROP COLUMN " + columnToDrop.GetRuntimeName(), (OracleConnection)connection))
-            cmd.ExecuteNonQuery();
+    {
+        using var cmd = new OracleCommand(
+            $"ALTER TABLE {columnToDrop.Table.GetFullyQualifiedName()}  DROP COLUMN {columnToDrop.GetRuntimeName()}", (OracleConnection)connection);
+        cmd.ExecuteNonQuery();
     }
         
     private string GetBasicTypeFromOracleType(DbDataReader r)
     {
         int? precision = null;
         int? scale = null;
-        int? data_length = null; //in bytes
+        int? dataLength = null; //in bytes
 
         if (r["DATA_SCALE"] != DBNull.Value)
             scale = Convert.ToInt32(r["DATA_SCALE"]);
         if (r["DATA_PRECISION"] != DBNull.Value)
             precision = Convert.ToInt32(r["DATA_PRECISION"]);
         if(r["DATA_LENGTH"] != DBNull.Value)
-            data_length = Convert.ToInt32(r["DATA_LENGTH"]);
+            dataLength = Convert.ToInt32(r["DATA_LENGTH"]);
 
         switch (r["DATA_TYPE"] as string)
         {
@@ -148,19 +147,12 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             case "NUMBER":
                 if (scale == 0 && precision == null)
                     return "int";
-                else if (precision != null && scale != null)
+                if (precision != null && scale != null)
                     return "decimal";
-                else
-                {
-                    if (data_length == null)
-                        throw new Exception(
-                            string.Format(
-                                "Found Oracle NUMBER datatype with scale {0} and precision {1}, did not know what datatype to use to represent it",
-                                scale != null ? scale.ToString() : "DBNull.Value",
-                                precision != null ? precision.ToString() : "DBNull.Value"));
-                    else
-                        return "double";
-                }
+                if (dataLength == null)
+                    throw new Exception(
+                        $"Found Oracle NUMBER datatype with scale {(scale != null ? scale.ToString() : "DBNull.Value")} and precision {(precision != null ? precision.ToString() : "DBNull.Value")}, did not know what datatype to use to represent it");
+                return "double";
             case "FLOAT":
                 return "double";
             default:
@@ -170,15 +162,15 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
 
     private string GetSQLType_From_all_tab_cols_Result(DbDataReader r)
     {
-        string columnType = GetBasicTypeFromOracleType(r);
+        var columnType = GetBasicTypeFromOracleType(r);
 
-        string lengthQualifier = "";
+        var lengthQualifier = "";
             
         if (HasPrecisionAndScale(columnType))
-            lengthQualifier = "(" + r["DATA_PRECISION"] + "," + r["DATA_SCALE"] + ")";
+            lengthQualifier = $"({r["DATA_PRECISION"]},{r["DATA_SCALE"]})";
         else
         if (RequiresLength(columnType))
-            lengthQualifier = "(" + r["DATA_LENGTH"] + ")";
+            lengthQualifier = $"({r["DATA_LENGTH"]})";
 
         return columnType + lengthQualifier;
     }
@@ -212,9 +204,10 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
 
         cmd.Parameters.Add(p);
 
-        cmd.CommandText += " RETURNING " + autoIncrement + " INTO :identityOut;";
+        cmd.CommandText += $" RETURNING {autoIncrement} INTO :identityOut;";
 
-        cmd.CommandText = "BEGIN " +Environment.NewLine + cmd.CommandText + Environment.NewLine + "COMMIT;" + Environment.NewLine + "END;";
+        cmd.CommandText =
+            $"BEGIN {Environment.NewLine}{cmd.CommandText}{Environment.NewLine}COMMIT;{Environment.NewLine}END;";
 
         cmd.ExecuteNonQuery();
             
@@ -225,9 +218,9 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
     public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
         IManagedTransaction transaction = null)
     {
-        Dictionary<string, DiscoveredRelationship> toReturn = new Dictionary<string, DiscoveredRelationship>();
+        var toReturn = new Dictionary<string, DiscoveredRelationship>();
 
-        string sql = @"
+        const string sql = @"
 SELECT DISTINCT a.table_name
      , a.column_name
      , a.constraint_name
@@ -284,18 +277,15 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
                         //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
                         var deleteRuleString = r["delete_rule"].ToString();
 
-                        CascadeRule deleteRule = CascadeRule.Unknown;
-
-                        if (deleteRuleString == "CASCADE")
-                            deleteRule = CascadeRule.Delete;
-                        else if (deleteRuleString == "NO ACTION")
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleString == "RESTRICT")
-                            deleteRule = CascadeRule.NoAction;
-                        else if (deleteRuleString == "SET NULL")
-                            deleteRule = CascadeRule.SetNull;
-                        else if (deleteRuleString == "SET DEFAULT")
-                            deleteRule = CascadeRule.SetDefault;
+                        var deleteRule = deleteRuleString switch
+                        {
+                            "CASCADE" => CascadeRule.Delete,
+                            "NO ACTION" => CascadeRule.NoAction,
+                            "RESTRICT" => CascadeRule.NoAction,
+                            "SET NULL" => CascadeRule.SetNull,
+                            "SET DEFAULT" => CascadeRule.SetDefault,
+                            _ => CascadeRule.Unknown
+                        };
 
                         current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
                         toReturn.Add(current.Name, current);
@@ -311,25 +301,24 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
 
     public override void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt)
     {
-        using (var con = args.GetManagedConnection(table))
-        {
-            ((OracleConnection)con.Connection).PurgeStatementCache();
+        using var con = args.GetManagedConnection(table);
+        ((OracleConnection)con.Connection).PurgeStatementCache();
 
-            var cols = table.DiscoverColumns();
+        var cols = table.DiscoverColumns();
 
-            //apparently * doesn't fly with Oracle DataAdapter
-            string sql = "SELECT " + string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray()) + " FROM " + table.GetFullyQualifiedName() + " OFFSET 0 ROWS FETCH NEXT "+topX+" ROWS ONLY" ;
+        //apparently * doesn't fly with Oracle DataAdapter
+        var sql =
+            $"SELECT {string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray())} FROM {table.GetFullyQualifiedName()} OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY";
 
-            using(var cmd = table.Database.Server.GetCommand(sql, con))
-            using(var da = table.Database.Server.GetDataAdapter(cmd))
-                args.Fill(da,cmd, dt);
-        }
+        using var cmd = table.Database.Server.GetCommand(sql, con);
+        using var da = table.Database.Server.GetDataAdapter(cmd);
+        args.Fill(da,cmd, dt);
     }
 
 
     protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
     {
-        return string.Format(@"alter table {0} rename to {1}", discoveredTable.GetFullyQualifiedName(),newName);
+        return $@"alter table {discoveredTable.GetFullyQualifiedName()} rename to {newName}";
     }
 
     public override bool RequiresLength(string columnType)

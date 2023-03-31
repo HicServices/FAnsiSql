@@ -31,10 +31,10 @@ public class DiscoveredTableValuedFunction : DiscoveredTable
     public override string GetFullyQualifiedName()
     {
         //This is pretty inefficient that we have to go discover these in order to tell you how to invoke the table!
-        string parameters = string.Join(",", DiscoverParameters().Select(p => p.ParameterName));
+        var parameters = string.Join(",", DiscoverParameters().Select(p => p.ParameterName));
 
         //Note that we do not give the parameters values, the client must decide appropriate values and put them in correspondingly named variables
-        return Database.GetRuntimeName() + ".." + GetRuntimeName() + "(" + parameters + ")";
+        return $"{Database.GetRuntimeName()}..{GetRuntimeName()}({parameters})";
     }
         
     public override string ToString()
@@ -44,13 +44,13 @@ public class DiscoveredTableValuedFunction : DiscoveredTable
 
     public override void Drop()
     {
-        using (var connection = Database.Server.GetManagedConnection())
-            Helper.DropFunction(connection.Connection, this);
+        using var connection = Database.Server.GetManagedConnection();
+        Helper.DropFunction(connection.Connection, this);
     }
 
     public DiscoveredParameter[] DiscoverParameters(ManagedTransaction transaction = null)
     {
-        using (var connection = Database.Server.GetManagedConnection(transaction))
-            return Helper.DiscoverTableValuedFunctionParameters(connection.Connection, this, connection.Transaction);
+        using var connection = Database.Server.GetManagedConnection(transaction);
+        return Helper.DiscoverTableValuedFunctionParameters(connection.Connection, this, connection.Transaction);
     }
 }

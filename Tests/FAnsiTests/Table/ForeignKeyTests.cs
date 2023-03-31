@@ -8,7 +8,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-class ForeignKeyTests:DatabaseTests
+internal class ForeignKeyTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void TestForeignKey_OneColumnKey(DatabaseType dbType, bool cascade)
@@ -33,7 +33,7 @@ class ForeignKeyTests:DatabaseTests
         {
             requested_fkCol,
             new DatabaseColumnRequest("SomeNumber", "int")
-        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>()
+        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {requested_fkCol,discovered_pkCol}
             
@@ -41,7 +41,7 @@ class ForeignKeyTests:DatabaseTests
 
         var discovered_fkCol = childTable.DiscoverColumn("Parent_Id");
             
-        DiscoveredRelationship[] relationships = parentTable.DiscoverRelationships();
+        var relationships = parentTable.DiscoverRelationships();
 
         Assert.AreEqual(1,relationships.Length);
             
@@ -97,9 +97,9 @@ class ForeignKeyTests:DatabaseTests
         var childTable = db.CreateTable("Child2", new[]
         {
             requested_fkCol1,
-            requested_fkCol2,
-                
-        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>()
+            requested_fkCol2
+
+        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {requested_fkCol1,discovered_pkCol1},
             {requested_fkCol2,discovered_pkCol2}
@@ -109,7 +109,7 @@ class ForeignKeyTests:DatabaseTests
         var discovered_fkCol1 = childTable.DiscoverColumn("Parent_Id1");
         var discovered_fkCol2 = childTable.DiscoverColumn("Parent_Id2");
 
-        DiscoveredRelationship[] relationships = parentTable.DiscoverRelationships();
+        var relationships = parentTable.DiscoverRelationships();
 
         Assert.AreEqual(1, relationships.Length);
 
@@ -140,17 +140,17 @@ class ForeignKeyTests:DatabaseTests
 
         var t2 = db.CreateTable("T2", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("c2", new DatabaseTypeRequest(typeof(int)))
+            new("c2", new DatabaseTypeRequest(typeof(int)))
         });
 
         var t3 = db.CreateTable("T3", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("c3", new DatabaseTypeRequest(typeof(int)))
+            new("c3", new DatabaseTypeRequest(typeof(int)))
         });
             
         var t1 = db.CreateTable("T1", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            new("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
         });
 
         var c1 = t1.DiscoverColumns().Single();
@@ -162,12 +162,10 @@ class ForeignKeyTests:DatabaseTests
 
         if (useTransaction)
         {
-            using (var con = t1.Database.Server.BeginNewTransactedConnection())
-            {
-                constraint1 = t1.AddForeignKey(c2,c1,true,null,new DatabaseOperationArgs(){TransactionIfAny = con.ManagedTransaction});
-                constraint2 = t1.AddForeignKey(c3,c1,true,"FK_Lol",new DatabaseOperationArgs(){TransactionIfAny = con.ManagedTransaction});
-                con.ManagedTransaction.CommitAndCloseConnection();
-            }
+            using var con = t1.Database.Server.BeginNewTransactedConnection();
+            constraint1 = t1.AddForeignKey(c2,c1,true,null,new DatabaseOperationArgs {TransactionIfAny = con.ManagedTransaction});
+            constraint2 = t1.AddForeignKey(c3,c1,true,"FK_Lol",new DatabaseOperationArgs {TransactionIfAny = con.ManagedTransaction});
+            con.ManagedTransaction.CommitAndCloseConnection();
         }
         else
         {
@@ -184,7 +182,7 @@ class ForeignKeyTests:DatabaseTests
         StringAssert.AreEqualIgnoringCase("FK_T2_T1",constraint1.Name);
         StringAssert.AreEqualIgnoringCase("FK_Lol",constraint2.Name);
 
-        var sort2 = new RelationshipTopologicalSort(new DiscoveredTable[] { t1,t2,t3 });
+        var sort2 = new RelationshipTopologicalSort(new[] { t1,t2,t3 });
             
             
         Assert.Contains(t1, sort2.Order.ToList());
@@ -206,17 +204,17 @@ class ForeignKeyTests:DatabaseTests
             
         var t1 = db.CreateTable("T1", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            new("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
         });
 
         var t2 = db.CreateTable("T2", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("c2", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            new("c2", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
         });
 
         var t3 = db.CreateTable("T3", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("c3", new DatabaseTypeRequest(typeof(int)))
+            new("c3", new DatabaseTypeRequest(typeof(int)))
         });
 
         var c1 = t1.DiscoverColumns().Single();
@@ -229,7 +227,7 @@ class ForeignKeyTests:DatabaseTests
         Assert.IsNotNull(constraint1);
         Assert.IsNotNull(constraint2);
 
-        var sort2 = new RelationshipTopologicalSort(new DiscoveredTable[] { t1,t2,t3 });
+        var sort2 = new RelationshipTopologicalSort(new[] { t1,t2,t3 });
             
         Assert.Contains(t1, sort2.Order.ToList());
         Assert.Contains(t2, sort2.Order.ToList());
@@ -245,10 +243,10 @@ class ForeignKeyTests:DatabaseTests
         var robbers = db.CreateTable("Robbers", new[] { new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100)) });
         var lawyers = db.CreateTable("Lawyers", new[] { new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100)) });
 
-        var sort = new RelationshipTopologicalSort(new DiscoveredTable[] {cops});
+        var sort = new RelationshipTopologicalSort(new[] {cops});
         Assert.AreEqual(cops,sort.Order.Single());
             
-        var sort2 = new RelationshipTopologicalSort(new DiscoveredTable[] { cops,robbers,lawyers });
+        var sort2 = new RelationshipTopologicalSort(new[] { cops,robbers,lawyers });
         Assert.AreEqual(cops, sort2.Order[0]);
         Assert.AreEqual(robbers, sort2.Order[1]);
         Assert.AreEqual(lawyers, sort2.Order[2]);

@@ -13,41 +13,31 @@ namespace FAnsi.Implementations.MySql;
 public class MySqlDatabaseHelper : DiscoveredDatabaseHelper
 {
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null)
-    {
-        return Enumerable.Empty<DiscoveredTableValuedFunction>();
-    }
+        DbConnection connection, string database, DbTransaction transaction = null) =>
+        Enumerable.Empty<DiscoveredTableValuedFunction>();
 
-    public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
-    {
-        throw new NotImplementedException();
-    }
+    public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database) => throw new NotImplementedException();
 
-    public override IDiscoveredTableHelper GetTableHelper()
-    {
-        return new MySqlTableHelper();
-    }
+    public override IDiscoveredTableHelper GetTableHelper() => MySqlTableHelper.Instance;
 
     public override void DropDatabase(DiscoveredDatabase database)
     {
-        using (var con = (MySqlConnection) database.Server.GetConnection())
-        {
-            con.Open();
-            using(MySqlCommand cmd = new MySqlCommand("DROP DATABASE `" + database.GetRuntimeName() +"`",con))
-                cmd.ExecuteNonQuery();
-        }
+        using var con = (MySqlConnection) database.Server.GetConnection();
+        con.Open();
+        using var cmd = new MySqlCommand($"DROP DATABASE `{database.GetRuntimeName()}`",con);
+        cmd.ExecuteNonQuery();
     }
 
     public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
     {
         var mysqlBuilder = (MySqlConnectionStringBuilder) builder;
 
-        var toReturn = new Dictionary<string, string>();
-        toReturn.Add("UserID", mysqlBuilder.UserID);
-        toReturn.Add("Server", mysqlBuilder.Server);
-        toReturn.Add("Database", mysqlBuilder.Database);
-
-        return toReturn;
+        return new Dictionary<string, string>
+        {
+            { "UserID", mysqlBuilder.UserID },
+            { "Server", mysqlBuilder.Server },
+            { "Database", mysqlBuilder.Database }
+        };
     }
 
     protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
@@ -58,15 +48,8 @@ public class MySqlDatabaseHelper : DiscoveredDatabaseHelper
 
         //MySql unicode is not a data type it's a character set/collation only
 
-        return string.Format("{0} {1} {2} {3} {4} {5} {6}",
-            syntaxHelper.EnsureWrapped(col.ColumnName),
-            datatype,
-            "CHARACTER SET utf8mb4",
-            col.Default != MandatoryScalarFunctions.None ? "default " + syntaxHelper.GetScalarFunctionSql(col.Default) : "",
-            "COLLATE " + (col.Collation  ?? "utf8mb4_bin"),
-            col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL",
-            col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : ""
-        );
+        return
+            $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} CHARACTER SET utf8mb4 {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} COLLATE {col.Collation ?? "utf8mb4_bin"} {(col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
     }
 
     public override DirectoryInfo Detach(DiscoveredDatabase database)
@@ -89,16 +72,16 @@ public class MySqlDatabaseHelper : DiscoveredDatabaseHelper
         if (connection.State == ConnectionState.Closed)
             throw new InvalidOperationException("Expected connection to be open");
 
-        List<DiscoveredTable> tables = new List<DiscoveredTable>();
+        var tables = new List<DiscoveredTable>();
 
-        using (var cmd = new MySqlCommand("SHOW FULL TABLES in `" + database + "`", (MySqlConnection) connection))
+        using (var cmd = new MySqlCommand($"SHOW FULL TABLES in `{database}`", (MySqlConnection) connection))
         {
             cmd.Transaction = transaction as MySqlTransaction;
 
             var r = cmd.ExecuteReader();
             while (r.Read())
             {
-                bool isView = (string)r[1] == "VIEW";
+                var isView = (string)r[1] == "VIEW";
 
                 //if we are skipping views
                 if(isView && !includeViews)
