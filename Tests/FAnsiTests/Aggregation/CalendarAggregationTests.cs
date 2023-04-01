@@ -193,17 +193,14 @@ internal class CalendarAggregationTests:AggregationTests
         con.Open();
 
         var da = svr.GetDataAdapter(sql, con);
-        var dt = new DataTable();
+        using var dt = new DataTable();
         da.Fill(dt);
-
-        ConsoleWriteTable(dt);
 
         Assert.AreEqual(3288, dt.Rows.Count); // 109 months between 2001 and 2010 (inclusive)
 
         AssertHasRow(dt, new DateTime(2001,1,1), 4);
         AssertHasRow(dt, new DateTime(2001, 1, 2), 1);
         AssertHasRow(dt, new DateTime(2001, 1, 3), null);
-        dt.Dispose();
     }
 
 

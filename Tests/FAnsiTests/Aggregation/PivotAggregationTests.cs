@@ -43,7 +43,7 @@ internal class PivotAggregationTests:AggregationTests
 
         var cmd = svr.GetCommand(sql, con);
         var da = svr.GetDataAdapter(cmd);
-        var dt = new DataTable();
+        using var dt = new DataTable();
         da.Fill(dt);
 
         Assert.AreEqual(9, dt.Columns.Count);

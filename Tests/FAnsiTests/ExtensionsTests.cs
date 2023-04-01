@@ -9,7 +9,7 @@ internal class ExtensionsTests
     [Test]
     public void Test_SetDoNotReType_RepeatCalls()
     {
-        var dt = new DataTable();
+        using var dt = new DataTable();
 
         Assert.DoesNotThrow(()=>dt.SetDoNotReType(true));
 

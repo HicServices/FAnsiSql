@@ -204,7 +204,7 @@ internal class BadNamesTests : DatabaseTests
     {
         var tbl = SetupBadNamesTable(dbType);
             
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add(BadColumnName);
         dt.Columns.Add(BadColumnName2);
             
@@ -215,10 +215,7 @@ internal class BadNamesTests : DatabaseTests
             insert.Upload(dt);
         }
             
-        dt.Dispose();
-
         Assert.AreEqual(1,dt.Rows.Count);
-
         tbl.Drop();
     }
 

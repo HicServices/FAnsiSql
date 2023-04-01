@@ -31,7 +31,7 @@ public class BigIntTests : DatabaseTests
             
         Assert.AreEqual(0,tbl.GetRowCount());
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Col1");
         dt.Rows.Add(9223372036854775807L);
 
@@ -43,7 +43,5 @@ public class BigIntTests : DatabaseTests
         Assert.AreEqual(1,tbl.GetRowCount());
         Assert.AreEqual(9223372036854775807L,tbl.GetDataTable().Rows[0][0]);
         tbl.Drop();
-            
-        dt.Dispose();
     }
 }

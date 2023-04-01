@@ -53,7 +53,7 @@ internal class CalendarWithPivotAggregationTests:AggregationTests
             con.Open();
 
             var da = svr.GetDataAdapter(sql, con);
-            var dt = new DataTable();
+            using var dt = new DataTable();
             da.Fill(dt);
 
             //pivot columns should ordered by sum of pivot values (T has the highest followed by E...)

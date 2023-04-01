@@ -390,7 +390,7 @@ internal class CreateTableTests:DatabaseTests
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Hb");
         dt.Rows.Add("T");
         dt.Rows.Add("F");
@@ -415,7 +415,7 @@ internal class CreateTableTests:DatabaseTests
     [Test]
     public void Test_DataTableClone_ExtendedProperties()
     {
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("C1");
 
         //the default Type for a DataColumn is string
@@ -430,7 +430,7 @@ internal class CreateTableTests:DatabaseTests
     [Test]
     public void Test_GetDoNotRetype_OnlyStringColumns()
     {
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("C1",typeof(int));
         
         dt.SetDoNotReType(true);

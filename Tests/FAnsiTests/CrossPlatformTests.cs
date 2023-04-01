@@ -44,7 +44,7 @@ public class CrossPlatformTests:DatabaseTests
             
         using (var blk = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyDate");
             dt.Rows.Add(input);
 
@@ -78,7 +78,7 @@ public class CrossPlatformTests:DatabaseTests
         //then bulk insert, both need to work
         using (var blk = tbl.BeginBulkInsert(cultureInfo))
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyDate");
             dt.Rows.Add(input);
 
@@ -114,7 +114,7 @@ public class CrossPlatformTests:DatabaseTests
         //then bulk insert, both need to work
         using (var blk = tbl.BeginBulkInsert(new CultureInfo(culture)))
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyDate");
             dt.Rows.Add(input);
 
@@ -149,7 +149,7 @@ public class CrossPlatformTests:DatabaseTests
 
         using (var blk = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyTime");
             dt.Rows.Add(input);
 
@@ -222,7 +222,7 @@ public class CrossPlatformTests:DatabaseTests
 
         using (var blk = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyTime");
             dt.Rows.Add(input);
 
@@ -329,7 +329,7 @@ public class CrossPlatformTests:DatabaseTests
         {
             using (var intoParent = tblParent.BeginBulkInsert())
             {
-                var dt = new DataTable();
+                using var dt = new DataTable();
                 dt.Columns.Add("ID");
                 dt.Columns.Add("Name");
 
@@ -407,7 +407,7 @@ public class CrossPlatformTests:DatabaseTests
 
         using (var intoParent = tblParent.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("ID1");
             dt.Columns.Add("ID2");
             dt.Columns.Add("Name");
@@ -617,7 +617,7 @@ public class CrossPlatformTests:DatabaseTests
             new DatabaseColumnRequest(dodgyNames?",,,,":"Field3",new DatabaseTypeRequest(typeof(int)))
         });
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Field1");
         dt.Columns.Add("Field2");
         dt.Columns.Add(dodgyNames?",,,,":"Field3");
@@ -753,7 +753,7 @@ public class CrossPlatformTests:DatabaseTests
                 new DatabaseColumnRequest("Field3",new DatabaseTypeRequest(typeof(int))){AllowNulls=false}
             });
 
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("Field1");
             dt.Columns.Add("Field2");
             dt.Columns.Add("Field3");
@@ -906,7 +906,7 @@ public class CrossPlatformTests:DatabaseTests
 
         });
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Name");
         dt.Rows.Add("Frank");
 
@@ -944,7 +944,7 @@ public class CrossPlatformTests:DatabaseTests
             
         using (var insert = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("Name");
             dt.Rows.Add("Hi");
 
@@ -1037,7 +1037,7 @@ public class CrossPlatformTests:DatabaseTests
         }
 
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
 
         dt.Columns.Add("id");
         dt.Columns.Add("mydate");
