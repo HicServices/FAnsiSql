@@ -178,15 +178,9 @@ WHERE
                 foreach(DataRow r in dt.Rows)
                 {
                     var fkName = r["CONSTRAINT_NAME"].ToString();
-                        
-                    DiscoveredRelationship current;
 
                     //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
-                    {
-                        current = toReturn[fkName];
-                    }
-                    else
+                    if (!toReturn.TryGetValue(fkName, out var current))
                     {
                         var pkDb = r["REFERENCED_TABLE_SCHEMA"].ToString();
                         var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
@@ -200,24 +194,15 @@ WHERE
                         //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
                         var deleteRuleString = r["DELETE_RULE"].ToString();
 
-                        var deleteRule = CascadeRule.Unknown;
-                            
-                        switch (deleteRuleString)
+                        var deleteRule = deleteRuleString switch
                         {
-                            case "CASCADE":
-                                deleteRule = CascadeRule.Delete;
-                                break;
-                            case "NO ACTION":
-                            case "RESTRICT":
-                                deleteRule = CascadeRule.NoAction;
-                                break;
-                            case "SET NULL":
-                                deleteRule = CascadeRule.SetNull;
-                                break;
-                            case "SET DEFAULT":
-                                deleteRule = CascadeRule.SetDefault;
-                                break;
-                        }
+                            "CASCADE" => CascadeRule.Delete,
+                            "NO ACTION" => CascadeRule.NoAction,
+                            "RESTRICT" => CascadeRule.NoAction,
+                            "SET NULL" => CascadeRule.SetNull,
+                            "SET DEFAULT" => CascadeRule.SetDefault,
+                            _ => CascadeRule.Unknown
+                        };
 
                         current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
                         toReturn.Add(current.Name,current);

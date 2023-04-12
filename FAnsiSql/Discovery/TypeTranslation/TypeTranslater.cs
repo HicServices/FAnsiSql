@@ -73,11 +73,7 @@ public abstract class TypeTranslater:ITypeTranslater
             t == typeof(decimal?))
             return GetFloatingPointDataType(request.Size);
 
-        if (t == typeof(string))
-            if(request.Unicode)
-                return GetUnicodeStringDataType(request.Width);
-            else
-                return GetStringDataType(request.Width);
+        if (t == typeof(string)) return request.Unicode ? GetUnicodeStringDataType(request.Width) : GetStringDataType(request.Width);
 
         if (t == typeof(DateTime) || t == typeof(DateTime?))
             return GetDateDateTimeDataType();

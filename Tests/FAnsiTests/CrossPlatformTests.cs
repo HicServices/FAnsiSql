@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using Microsoft.Data.SqlClient;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -569,7 +568,7 @@ public class CrossPlatformTests:DatabaseTests
         if (type == DatabaseType.MicrosoftSQLServer)
             fieldsToAlter.Remove("Field1"); 
 
-        foreach (var fieldName in new string[]{})
+        foreach (var fieldName in fieldsToAlter)
         {
 
             //ALTER TABLE, ALTER COLUMN of date type each of these to be now varchar(10)s
@@ -1305,32 +1304,11 @@ public class CrossPlatformTests:DatabaseTests
     public void DateTimeTypeDeciderPerformance()
     {
         var d = new DateTimeTypeDecider(new CultureInfo("en-gb"));
-            
-        var sw = Stopwatch.StartNew();
-
         var dt = new DateTime(2019,5,22,8,59,36);
 
-        foreach(var f in DateTimeTypeDecider.DateFormatsDM)
-        {
-            var val = dt.ToString(f);
-            TestContext.WriteLine(val);
-                
-            d.Parse(val);
-        }
-                
+        foreach(var f in DateTimeTypeDecider.DateFormatsDM) d.Parse(dt.ToString(f));
+        foreach(var f in DateTimeTypeDecider.TimeFormats) d.Parse(dt.ToString(f));
 
-        foreach(var f in DateTimeTypeDecider.TimeFormats)
-        {
-            var t = dt.ToString(f);
-            TestContext.WriteLine(t); 
-            d.Parse(t);
-        }
-
-        for(var i = 0 ; i < 1000;i++)
-            Assert.AreEqual(new DateTime(1993,2,28,5,36,27),d.Parse("28/2/1993 5:36:27 AM"));
-
-        //12s
-        sw.Stop();
-        TestContext.WriteLine($"{sw.ElapsedMilliseconds} ms");
+        Assert.AreEqual(new DateTime(1993,2,28,5,36,27),d.Parse("28/2/1993 5:36:27 AM"));
     }
 }

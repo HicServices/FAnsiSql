@@ -71,8 +71,8 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     protected virtual void EnforceKeywords(DbConnectionStringBuilder builder)
     {
         //if we have any keywords to enforce
-        if (ConnectionStringKeywordAccumulators.ContainsKey(DatabaseType))
-            ConnectionStringKeywordAccumulators[DatabaseType].EnforceOptions(builder);
+        if (ConnectionStringKeywordAccumulators.TryGetValue(DatabaseType, out var accumulator))
+            accumulator.EnforceOptions(builder);
     }
     protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString, string database, string username, string password);
     protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString);
@@ -166,7 +166,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     public abstract string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
     public abstract Version GetVersion(DiscoveredServer server);
 
-    private Regex rVagueVersion = new(@"\d+\.\d+(\.\d+)?(\.\d+)?");
+    private readonly Regex rVagueVersion = new(@"\d+\.\d+(\.\d+)?(\.\d+)?",RegexOptions.Compiled|RegexOptions.CultureInvariant);
 
     /// <summary>
     /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
@@ -187,11 +187,9 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
             return result;
 
         var m = rVagueVersion.Match(versionString);
-        if (m.Success)
-            return Version.Parse(m.Value);
-
-        //whatever the string was it didn't even remotely resemble a Version
-        return null;
+        return m.Success ? Version.Parse(m.Value) :
+            //whatever the string was it didn't even remotely resemble a Version
+            null;
     }
 
     protected DiscoveredServerHelper(DatabaseType databaseType)

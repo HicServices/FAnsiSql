@@ -82,11 +82,7 @@ public class ImplementationManager
 
         //but also bring in any old ones that we don't have in the new load
         if(old != null)
-            foreach(var o in old)
-            {
-                if(_instance.Implementations.All(i=>i.GetType() != o.GetType()))
-                    _instance.Implementations.Add(o);
-            }
+            _instance.Implementations.AddRange(old.Where(o => _instance.Implementations.All(i=>i.GetType()!=o.GetType())));
     }
 
     public static IImplementation GetImplementation(DatabaseType databaseType)

@@ -25,38 +25,33 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
             throw new InvalidOperationException("Expected connection to be open");
 
         var tables = new List<DiscoveredTable>();
-            
 
-        using (var cmd = new SqlCommand($"use {querySyntaxHelper.EnsureWrapped(database)}; EXEC sp_tables", (SqlConnection) connection))
+
+        using var cmd = new SqlCommand($"use {querySyntaxHelper.EnsureWrapped(database)}; EXEC sp_tables", (SqlConnection) connection);
+        cmd.Transaction = transaction as SqlTransaction;
+
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
         {
-            cmd.Transaction = transaction as SqlTransaction;
+            //its a system table
+            var schema = r["TABLE_OWNER"] as string;
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                {
-                    //its a system table
-                    var schema = r["TABLE_OWNER"] as string;
+            if (schema is
+                //it's a system table
+                "sys" or "INFORMATION_SCHEMA") continue;
 
-                    switch (schema)
-                    {
-                        //it's a system table
-                        case "sys":
-                        case "INFORMATION_SCHEMA":
-                            continue;
-                    }
+            //add views if we are including them
+            if (includeViews && r["TABLE_TYPE"].Equals("VIEW") &&
+                querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
+                tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema,
+                    TableType.View));
 
-                    //add views if we are including them
-                    if (includeViews && r["TABLE_TYPE"].Equals("VIEW"))
-                        if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
-                            tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema, TableType.View));
-
-                    //add tables
-                    if (!r["TABLE_TYPE"].Equals("TABLE")) continue;
-                    if(querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
-                        tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema));
-                }
+            //add tables
+            if (r["TABLE_TYPE"].Equals("TABLE") &&
+                querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
+                tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema));
         }
-            
+
         return tables.ToArray();
     }
 

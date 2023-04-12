@@ -15,9 +15,16 @@ namespace FAnsiTests;
 /// Tests to confirm that the dependencies in csproj files (NuGet packages) match those in the .nuspec files and that packages.md 
 /// lists the correct versions (in documentation)
 /// </summary>
-internal class NuspecIsCorrectTests
+internal partial class NuspecIsCorrectTests
 {
-    private static string[] Analyzers = { "SecurityCodeScan" };
+    private static readonly string[] Analyzers = { "SecurityCodeScan" };
+    //<PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+    [GeneratedRegex(@"<PackageReference\s+Include=""(.*)""\s+Version=""([^""]*)""", RegexOptions.IgnoreCase)]
+    private static partial Regex RPackageRef();
+
+    //<dependency id="CsvHelper" version="12.1.2" />
+    [GeneratedRegex(@"<dependency\s+id=""(.*)""\s+version=""([^""]*)""", RegexOptions.IgnoreCase)]
+    private static partial Regex RDependencyRef();
 
     [TestCase("../../../../../FAnsiSql/FAnsi.csproj", "../../../../../NuGet/FAnsi.NuGet.nuspec", "../../../../../Packages.md")]
     [TestCase("../../../../../Implementations/FAnsi.Implementations.MicrosoftSQL/FAnsi.Implementations.MicrosoftSQL.csproj", "../../../../../NuGet/FAnsi.NuGet.nuspec", "../../../../../Packages.md")]
@@ -41,14 +48,9 @@ internal class NuspecIsCorrectTests
         if (packagesMarkdown != null && !File.Exists(packagesMarkdown))
             Assert.Fail("Could not find file {0}", packagesMarkdown);
 
-        //<PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-        var rPackageRef = new Regex(@"<PackageReference\s+Include=""(.*)""\s+Version=""([^""]*)""", RegexOptions.IgnoreCase);
-
-        //<dependency id="CsvHelper" version="12.1.2" />
-        var rDependencyRef = new Regex(@"<dependency\s+id=""(.*)""\s+version=""([^""]*)""", RegexOptions.IgnoreCase);
 
         //For each dependency listed in the csproj
-        foreach (Match p in rPackageRef.Matches(File.ReadAllText(csproj)))
+        foreach (Match p in RPackageRef().Matches(File.ReadAllText(csproj)))
         {
             var package = p.Groups[1].Value;
             var version = p.Groups[2].Value;
@@ -59,16 +61,14 @@ internal class NuspecIsCorrectTests
             if (!Analyzers.Contains(package) && nuspec != null)
             {
                 //make sure it appears in the nuspec
-                foreach (Match d in rDependencyRef.Matches(File.ReadAllText(nuspec)))
+                foreach (Match d in RDependencyRef().Matches(File.ReadAllText(nuspec)))
                 {
                     var packageDependency = d.Groups[1].Value;
                     var versionDependency = d.Groups[2].Value;
 
-                    if (packageDependency.Equals(package))
-                    {
-                        Assert.AreEqual(version, versionDependency, "Package {0} is version {1} in {2} but version {3} in {4}", package, version, csproj, versionDependency, nuspec);
-                        found = true;
-                    }
+                    if (!packageDependency.Equals(package)) continue;
+                    Assert.AreEqual(version, versionDependency, "Package {0} is version {1} in {2} but version {3} in {4}", package, version, csproj, versionDependency, nuspec);
+                    found = true;
                 }
 
                 if (!found)
@@ -78,34 +78,22 @@ internal class NuspecIsCorrectTests
 
 
             //And make sure it appears in the packages.md file
-            if (packagesMarkdown != null)
+            if (packagesMarkdown == null) continue;
+            found = false;
+            foreach (var line in File.ReadLines(packagesMarkdown).Where(line=> Regex.IsMatch(line, $@"[\s[]{Regex.Escape(package)}[\s\]]", RegexOptions.IgnoreCase)))
             {
-                found = false;
-                foreach (var line in File.ReadAllLines(packagesMarkdown))
-                {
-                    if (Regex.IsMatch(line, $@"[\s[]{Regex.Escape(package)}[\s\]]", RegexOptions.IgnoreCase))
-                    {
-                        var count = new Regex(Regex.Escape(version)).Matches(line).Count;
-
-                        Assert.AreEqual(2, count, "Markdown file {0} did not contain 2 instances of the version {1} for package {2} in {3}", packagesMarkdown, version, package, csproj);
-                        found = true;
-                    }
-                }
-
-                if (!found)
-                    Assert.Fail("Package {0} in {1} is not documented in {2}. Recommended line is:\r\n{3}", package, csproj, packagesMarkdown,
-                        BuildRecommendedMarkdownLine(package, version));
+                    var count = new Regex(Regex.Escape(version)).Matches(line).Count;
+                    Assert.AreEqual(2, count, "Markdown file {0} did not contain 2 instances of the version {1} for package {2} in {3}", packagesMarkdown, version, package, csproj);
+                    found = true;
             }
+
+            if (!found)
+                Assert.Fail("Package {0} in {1} is not documented in {2}. Recommended line is:\r\n{3}", package, csproj, packagesMarkdown,
+                    BuildRecommendedMarkdownLine(package, version));
         }
     }
 
-    private object BuildRecommendedDependencyLine(string package, string version)
-    {
-        return $"<dependency id=\"{package}\" version=\"{version}\" />";
-    }
+    private static string BuildRecommendedDependencyLine(string package, string version) => $"<dependency id=\"{package}\" version=\"{version}\" />";
 
-    private object BuildRecommendedMarkdownLine(string package, string version)
-    {
-        return string.Format("| {0} | [GitHub]() | [{1}](https://www.nuget.org/packages/{0}/{1}) | | | |", package, version);
-    }
+    private static string BuildRecommendedMarkdownLine(string package, string version) => $"| {package} | [GitHub]() | [{version}](https://www.nuget.org/packages/{package}/{version}) | | | |";
 }

@@ -71,14 +71,8 @@ internal class OracleBulkCopy : BulkCopy
                 if (val == null || val == DBNull.Value)
                     val = null;
                 else if (dateColumns.Contains(col))
-                {
-                    if(val is string s)
-                        val = (DateTime)DateTimeDecider.Parse(s);
-                    else
-                        val = Convert.ToDateTime(dataRow[col]);
-                }
-                            
-                        
+                    val = val is string s ? (DateTime)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
+
                 values[col].Add(val);
             }
         }

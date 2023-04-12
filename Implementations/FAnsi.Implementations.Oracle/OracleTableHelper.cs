@@ -255,14 +255,8 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
                 {
                     var fkName = r["constraint_name"].ToString();
 
-                    DiscoveredRelationship current;
-
                     //could be a 2+ columns foreign key?
-                    if (toReturn.ContainsKey(fkName))
-                    {
-                        current = toReturn[fkName];
-                    }
-                    else
+                    if (!toReturn.TryGetValue(fkName, out var current))
                     {
 
                         var pkDb = r["r_owner"].ToString();

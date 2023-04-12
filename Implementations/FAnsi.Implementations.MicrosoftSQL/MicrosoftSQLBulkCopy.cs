@@ -15,11 +15,13 @@ namespace FAnsi.Implementations.MicrosoftSQL;
 
 public class MicrosoftSQLBulkCopy : BulkCopy
 {
-    private readonly SqlBulkCopy _bulkcopy;
+    private readonly SqlBulkCopy _bulkCopy;
+    private static readonly Regex ColumnLevelComplaint = new("bcp client for colid (\\d+)",RegexOptions.Compiled|RegexOptions.CultureInvariant);
+
 
     public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
     {
-        _bulkcopy = new SqlBulkCopy((SqlConnection)connection.Connection, SqlBulkCopyOptions.KeepIdentity, (SqlTransaction)connection.Transaction)
+        _bulkCopy = new SqlBulkCopy((SqlConnection)connection.Connection, SqlBulkCopyOptions.KeepIdentity, (SqlTransaction)connection.Transaction)
         {
             BulkCopyTimeout = 50000,
             DestinationTableName = targetTable.GetFullyQualifiedName()
@@ -28,24 +30,20 @@ public class MicrosoftSQLBulkCopy : BulkCopy
 
     public override int UploadImpl(DataTable dt)
     {
-        _bulkcopy.BulkCopyTimeout = Timeout;
+        _bulkCopy.BulkCopyTimeout = Timeout;
 
-        _bulkcopy.ColumnMappings.Clear();
-
-        foreach (var kvp in GetMapping(dt.Columns.Cast<DataColumn>()))
-            _bulkcopy.ColumnMappings.Add(kvp.Key.ColumnName, kvp.Value.GetRuntimeName());
+        _bulkCopy.ColumnMappings.Clear();
+        foreach (var (key, value) in GetMapping(dt.Columns.Cast<DataColumn>()))
+            _bulkCopy.ColumnMappings.Add(key.Ordinal, value.GetRuntimeName());
             
-        return BulkInsertWithBetterErrorMessages(_bulkcopy, dt, TargetTable.Database.Server);
+        return BulkInsertWithBetterErrorMessages(_bulkCopy, dt, TargetTable.Database.Server);
     }
 
-    public int BulkInsertWithBetterErrorMessages(SqlBulkCopy insert, DataTable dt, DiscoveredServer serverForLineByLineInvestigation)
+    private int BulkInsertWithBetterErrorMessages(SqlBulkCopy insert, DataTable dt, DiscoveredServer serverForLineByLineInvestigation)
     {
         var rowsWritten = 0;
-
         EmptyStringsToNulls(dt);
-
         InspectDataTableForFloats(dt);
-
         ConvertStringTypesToHardTypes(dt);
 
         try
@@ -59,30 +57,30 @@ public class MicrosoftSQLBulkCopy : BulkCopy
         catch (Exception e)
         {
             //user does not want to replay the load one line at a time to get more specific error messages
-            if (serverForLineByLineInvestigation == null)
-            {
-                if(BcpColIdToString(insert,e as SqlException, out var result1, out _))
-                    throw new Exception(string.Format(SR.MicrosoftSQLBulkCopy_BulkInsertWithBetterErrorMessages_Failed_to_bulk_insert__0_, result1),e);  //but we can still give him a better message than "bcp colid 1 was bad"!
-            }
-            else
+            if (serverForLineByLineInvestigation != null)
             {
                 Exception better;
                 try
                 {
                     //we can attempt line by line insert to find the bad row
-                    better = AttemptLineByLineInsert(e,insert,dt,serverForLineByLineInvestigation);
+                    better = AttemptLineByLineInsert(e, insert, dt, serverForLineByLineInvestigation);
                 }
                 catch (Exception exception)
                 {
-                    throw new AggregateException(SR.MicrosoftSQLBulkCopy_BulkInsertWithBetterErrorMessages_Failed_to_bulk_insert_batch__line_by_line_investigation_also_failed___InnerException_0__is_the_original_Exception__InnerException_1__is_the_line_by_line_failure,e, exception);
+                    throw new AggregateException(
+                        SR
+                            .MicrosoftSQLBulkCopy_BulkInsertWithBetterErrorMessages_Failed_to_bulk_insert_batch__line_by_line_investigation_also_failed___InnerException_0__is_the_original_Exception__InnerException_1__is_the_line_by_line_failure,
+                        e, exception);
                 }
-
                 throw better;
             }
-                    
 
+            if (BcpColIdToString(insert, e as SqlException, out var result1, out _))
+                throw new Exception(
+                    string.Format(
+                        SR.MicrosoftSQLBulkCopy_BulkInsertWithBetterErrorMessages_Failed_to_bulk_insert__0_,
+                        result1), e); //but we can still give him a better message than "bcp colid 1 was bad"!
             throw;
-                
         }
     }
 
@@ -127,15 +125,18 @@ public class MicrosoftSQLBulkCopy : BulkCopy
                 {
                     if (BcpColIdToString(investigationOneLineAtATime,exception as SqlException,out var result, out var badMapping))
                     {
-                        if (dt.Columns.Contains(badMapping.SourceColumn))
-                        {
-                            var sourceValue = dr[badMapping.SourceColumn];
-                            var destColumn = TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
+                        if (!dt.Columns.Contains(badMapping.SourceColumn))
+                            return new Exception(
+                                string.Format(
+                                    SR
+                                        .MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_,
+                                    line, result), e);
+                        var sourceValue = dr[badMapping.SourceColumn];
+                        var destColumn = TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
 
-                            if(destColumn != null)
-                                return new FileLoadException(
-                                    string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0__the_complaint_was_about_source_column____1____which_had_value____2____destination_data_type_was____3____4__5_, line, badMapping.SourceColumn, sourceValue, destColumn.DataType, Environment.NewLine, result), exception);
-                        }
+                        if(destColumn != null)
+                            return new FileLoadException(
+                                string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0__the_complaint_was_about_source_column____1____which_had_value____2____destination_data_type_was____3____4__5_, line, badMapping.SourceColumn, sourceValue, destColumn.DataType, Environment.NewLine, result), exception);
 
                         return new Exception(string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_, line, result), e);
                     }
@@ -163,54 +164,45 @@ public class MicrosoftSQLBulkCopy : BulkCopy
     /// <returns></returns>
     private bool BcpColIdToString(SqlBulkCopy insert, SqlException ex, out string newMessage, out SqlBulkCopyColumnMapping badMapping)
     {
-        if (ex == null)
+        var match = ColumnLevelComplaint.Match(ex?.Message ?? "");
+        if (ex == null || !match.Success)
         {
             newMessage = null;
             badMapping = null;
             return false;
         }
 
-        var columnLevelComplaint = new Regex("bcp client for colid (\\d+)");
-        var match = columnLevelComplaint.Match(ex.Message);
-            
-        if (match.Success)
+        //it counts from 1 not 0.  Also it isn't an index into insert.ColumnMappings.  It's an index into a private field!
+        var columnItHates = Convert.ToInt32(match.Groups[1].Value) -1;
+
+        try
         {
-            //it counts from 1 not 0.  Also it isn't an index into insert.ColumnMappings.  It's an index into a private field!
-            var columnItHates = Convert.ToInt32(match.Groups[1].Value) -1;
+            var fi = typeof(SqlBulkCopy).GetField("_sortedColumnMappings", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new NullReferenceException();
+            var sortedColumns = fi.GetValue(insert);
+            var items = (object[])sortedColumns?.GetType().GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(sortedColumns) ?? throw new NullReferenceException();
 
-            try
-            {
-                var fi = typeof(SqlBulkCopy).GetField("_sortedColumnMappings", BindingFlags.NonPublic | BindingFlags.Instance);
-                var sortedColumns = fi?.GetValue(insert);
-                var items = (object[])sortedColumns?.GetType().GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(sortedColumns);
+            var itemData = items[columnItHates].GetType().GetField("_metadata", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new NullReferenceException();
+            var metadata = itemData.GetValue(items[columnItHates]) ?? throw new NullReferenceException();
+                
+            var destinationColumn = (string)metadata.GetType().GetField("column", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata) ?? throw new NullReferenceException();
+                
+            var length = metadata.GetType().GetField("length", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata);
 
-                var itemdata = items?[columnItHates].GetType().GetField("_metadata", BindingFlags.NonPublic | BindingFlags.Instance);
-                var metadata = itemdata?.GetValue(items[columnItHates]);
+            badMapping = insert.ColumnMappings.Cast<SqlBulkCopyColumnMapping>()
+                .SingleOrDefault(m => string.Equals(m.DestinationColumn , destinationColumn, StringComparison.CurrentCultureIgnoreCase));
                 
-                var destinationColumn = (string)metadata?.GetType().GetField("column", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata);
+            newMessage = ex.Message.Insert(match.Index + match.Length,
+                $"(Source Column <<{badMapping?.SourceColumn??"unknown"}>> Dest Column <<{destinationColumn}>> which has MaxLength of {length})");
                 
-                var length = metadata?.GetType().GetField("length", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata);
-
-                badMapping = insert.ColumnMappings.Cast<SqlBulkCopyColumnMapping>()
-                    .SingleOrDefault(m => string.Equals(m.DestinationColumn , destinationColumn, StringComparison.CurrentCultureIgnoreCase));
-                
-                newMessage = ex.Message.Insert(match.Index + match.Length,
-                    $"(Source Column <<{badMapping?.SourceColumn??"unknown"}>> Dest Column <<{destinationColumn}>> which has MaxLength of {length})");
-                
-                return true;
-            }
-            catch (Exception)
-            {
-                //private fields in SqlBulkCopy have changed name?
-                newMessage = ex.Message;
-                badMapping = null;
-                return false;
-            }
+            return true;
         }
-            
-        newMessage = ex.Message;
-        badMapping = null;
-        return false;
+        catch (Exception)
+        {
+            //private fields in SqlBulkCopy have changed name?
+            newMessage = ex.Message;
+            badMapping = null;
+            return false;
+        }
     }
 
     private static void EmptyStringsToNulls(DataTable dt)
@@ -229,7 +221,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
     }
 
     [Pure]
-    public string ExceptionToListOfInnerMessages(Exception e, bool includeStackTrace = false)
+    private static string ExceptionToListOfInnerMessages(Exception e, bool includeStackTrace = false)
     {
         var message = new StringBuilder(e.Message);
         if (includeStackTrace)
@@ -257,28 +249,22 @@ public class MicrosoftSQLBulkCopy : BulkCopy
     private void InspectDataTableForFloats(DataTable dt)
     {
         //are there any float or float? columns
-        var floatColumns = dt.Columns.Cast<DataColumn>()
-            .Where(
-                c => c.DataType == typeof(float) || c.DataType == typeof(float?)).ToArray();
-
-        if (floatColumns.Any())
+        var floatColumnNames = dt.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(float) || c.DataType == typeof(float?)).Select(c=>c.ColumnName).ToArray();
+        if (floatColumnNames.Length!=0)
             throw new NotSupportedException(
-                $"Found float column(s) in data table, SQLServer does not support floats in bulk insert, instead you should use doubles otherwise you will end up with the value 0.85 turning into :0.850000023841858 in your database.  Float column(s) were:{string.Join(",", floatColumns.Select(c => c.ColumnName).ToArray())}");
+                $"Found float column(s) in data table, SQLServer does not support floats in bulk insert, instead you should use doubles otherwise you will end up with the value 0.85 turning into :0.850000023841858 in your database.  Float column(s) were:{string.Join(",", floatColumnNames)}");
 
         //are there any object columns
-        var objectColumns = dt.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(object)).ToArray();
+        var objectColumns = dt.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(object)).Select(col=>col.Ordinal).ToArray();
 
         //do any of the object columns have floats or float? in them?
         for (var i = 0; i < Math.Min(100, dt.Rows.Count); i++)
-            foreach (var c in objectColumns)
-            {
-                var value = dt.Rows[i][c.ColumnName];
-
-                var underlyingType = value.GetType();
-
-                if (underlyingType == typeof(float) || underlyingType == typeof(float?))
-                    throw new NotSupportedException(
-                        $"Found float value {value} in data table, SQLServer does not support floats in bulk insert, instead you should use doubles otherwise you will end up with the value 0.85 turning into :0.850000023841858 in your database");
-            }
+        {
+            var bad = objectColumns.Select(c => dt.Rows[i][c])
+                .FirstOrDefault(t => t is float);
+            if (bad != null)
+                throw new NotSupportedException(
+                $"Found float value {bad} in data table, SQLServer does not support floats in bulk insert, instead you should use doubles otherwise you will end up with the value 0.85 turning into :0.850000023841858 in your database");
+        }
     }
 }

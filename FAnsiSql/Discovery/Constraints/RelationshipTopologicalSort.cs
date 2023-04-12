@@ -55,7 +55,7 @@ public class RelationshipTopologicalSort
         var l = new List<T>();
 
         // Set of all nodes with no incoming edges
-        var s = new HashSet<T>(nodes.Where(n => edges.All(e => e.Item2.Equals(n) == false)));
+        var s = new HashSet<T>(nodes.Where(n => edges.All(e => !e.Item2.Equals(n))));
 
         // while S is non-empty do
         while (s.Any())
@@ -77,7 +77,7 @@ public class RelationshipTopologicalSort
                 edges.Remove(e);
 
                 // if m has no other incoming edges then
-                if (edges.All(me => me.Item2.Equals(m) == false))
+                if (edges.All(me => !me.Item2.Equals(m)))
                 {
                     // insert m into S
                     s.Add(m);

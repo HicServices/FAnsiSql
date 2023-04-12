@@ -213,14 +213,8 @@ order by c.constraint_name, x.ordinal_position";
             {
                 var fkName = r["constraint_name"].ToString();
 
-                DiscoveredRelationship current;
-
                 //could be a 2+ columns foreign key?
-                if (toReturn.ContainsKey(fkName))
-                {
-                    current = toReturn[fkName];
-                }
-                else
+                if (!toReturn.TryGetValue(fkName, out var current))
                 {
                     var pkDb = table.Database.GetRuntimeName();
                     var pkSchema = r["table_schema"].ToString();
@@ -232,18 +226,16 @@ order by c.constraint_name, x.ordinal_position";
                     var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
                     var fktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(fkTableName,fkSchema);
 
-                    var deleteRule = CascadeRule.Unknown;
-
                     var deleteRuleString = r["delete_rule"].ToString();
 
-                    deleteRule = deleteRuleString switch
+                    var deleteRule = deleteRuleString switch
                     {
                         "CASCADE" => CascadeRule.Delete,
                         "NO ACTION" => CascadeRule.NoAction,
                         "RESTRICT" => CascadeRule.NoAction,
                         "SET NULL" => CascadeRule.SetNull,
                         "SET DEFAULT" => CascadeRule.SetDefault,
-                        _ => deleteRule
+                        _ => CascadeRule.Unknown
                     };
 
                     current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);

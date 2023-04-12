@@ -58,7 +58,6 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     public virtual char ParameterSymbol => '@';
 
-
     /// <summary>
     /// Returns a regex that picks up alias specifications in SELECT sql (e.g. "mytbl.mycol as fish").  This only has to match when the
     /// " AS " qualifier is used explicitly.  The capture groups of this Regex must match <see cref="SplitLineIntoSelectSQLAndAlias"/>
@@ -312,10 +311,9 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         for (var i = 0; i < sb.Length; i++)
         {
             //if we are looking at a space
-            if (sb[i] == ' ')
-                if (i + 1 < sb.Length) //and there is another character 
-                    if (sb[i + 1] >= 'a' && sb[i + 1] <= 'z') //and that character is a lower case letter
-                        sb[i + 1] = char.ToUpper(sb[i + 1]);
+            if (sb[i] == ' ' && i + 1 < sb.Length && sb[i + 1] >= 'a' && sb[i + 1] <= 'z') //and there is another character 
+                //and that character is a lower case letter
+                sb[i + 1] = char.ToUpper(sb[i + 1]);
         }
 
         adjustedHeader = sb.ToString().Replace(" ", "");

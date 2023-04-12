@@ -351,7 +351,7 @@ internal class CreateTableTests:DatabaseTests
 
         Assert.AreEqual(3,table.GetRowCount());
 
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("微笑");
         dt2.Rows.Add(23);
 

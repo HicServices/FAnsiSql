@@ -10,8 +10,8 @@ namespace FAnsiTests.Aggregation;
 
 internal class AggregationTests:DatabaseTests
 {
-    protected readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = new();
-    protected readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = new();
+    private readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = new();
+    private readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = new();
 
     [OneTimeSetUp]
     public void Setup()
@@ -25,8 +25,10 @@ internal class AggregationTests:DatabaseTests
     {
         try
         {
-            using var dt = new DataTable();
-            dt.TableName = name;
+            using var dt = new DataTable
+            {
+                TableName = name
+            };
 
             dt.Columns.Add("EventDate");
             dt.Columns.Add("Category");
@@ -86,7 +88,7 @@ internal class AggregationTests:DatabaseTests
 
     protected void AssertHasRow(DataTable dt, params object[] cells)
     {
-        Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r=>IsMatch(r,cells)),"Did not find expected row:" + string.Join("|",cells));
+        Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r=>IsMatch(r,cells)),"Did not find expected row:{0}", string.Join("|",cells));
     }
 
     /// <summary>
@@ -95,7 +97,7 @@ internal class AggregationTests:DatabaseTests
     /// <param name="r"></param>
     /// <param name="cells"></param>
     /// <returns></returns>
-    protected bool IsMatch(DataRow r, object[] cells)
+    private static bool IsMatch(DataRow r, object[] cells)
     {
         for(var i = 0 ; i<cells.Length ;i++)
         {
@@ -125,8 +127,9 @@ internal class AggregationTests:DatabaseTests
     }
 
 
-    protected void ConsoleWriteTable(DataTable dt)
+    protected void ConsoleWriteTable(DataTable _)
     {
+        /*
         TestContext.WriteLine($"--- DebugTable({dt.TableName}) ---");
         var zeilen = dt.Rows.Count;
         var spalten = dt.Columns.Count;
@@ -162,6 +165,7 @@ internal class AggregationTests:DatabaseTests
             TestContext.Write("---------------------|-");
         }
         TestContext.Write(Environment.NewLine);
+    */
     }
 
     protected DiscoveredTable GetTestTable(DatabaseType type, bool easy = false)
