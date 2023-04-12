@@ -20,12 +20,7 @@ internal class TypeTranslaterUnitTests
     [TestCase(DatabaseType.MicrosoftSQLServer, "monkeychar7", true)]
     public void Test_IsSupportedType(DatabaseType dbType,string sqlDbType,bool expectedOutcome)
     {
-        ImplementationManager.Load<OracleImplementation>();
-        ImplementationManager.Load<MicrosoftSQLImplementation>();
-        ImplementationManager.Load<MySqlImplementation>();
-
         var tt = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper().TypeTranslater;
-
         Assert.AreEqual(expectedOutcome,tt.IsSupportedSQLDBType(sqlDbType),$"Unexpected result for IsSupportedSQLDBType with {dbType}.  Input was '{sqlDbType}' expected {expectedOutcome}");
     }
 }

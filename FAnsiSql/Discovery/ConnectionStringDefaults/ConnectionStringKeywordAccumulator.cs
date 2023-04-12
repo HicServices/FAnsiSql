@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using FAnsi.Implementation;
+using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Discovery.ConnectionStringDefaults;
 
@@ -80,7 +81,13 @@ public class ConnectionStringKeywordAccumulator
         {
             //Make sure it is supported by the connection string builder
             _builder.Add(keyword, value);
-        }catch(NotSupportedException ex)
+        }
+        catch (OracleException ex)
+        {
+            //don't output the value since that could be a password
+            throw new ArgumentException(string.Format(FAnsiStrings.ConnectionStringKeyword_ValueNotSupported, keyword), ex);
+        }
+        catch (NotSupportedException ex)
         {
             //don't output the value since that could be a password
             throw new ArgumentException(string.Format(FAnsiStrings.ConnectionStringKeyword_ValueNotSupported, keyword),ex);

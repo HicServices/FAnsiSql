@@ -16,4 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\FAnsiSql\FAnsi.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Aggregation\" />
+    <Folder Include="Update\" />
+  </ItemGroup>
 </Project>

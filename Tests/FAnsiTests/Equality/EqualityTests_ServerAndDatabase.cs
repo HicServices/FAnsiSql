@@ -1,9 +1,5 @@
 ﻿using FAnsi;
 using FAnsi.Discovery;
-using FAnsi.Implementation;
-using FAnsi.Implementations.MicrosoftSQL;
-using FAnsi.Implementations.MySql;
-using FAnsi.Implementations.Oracle;
 using NUnit.Framework;
 
 namespace FAnsiTests.Equality;
@@ -13,11 +9,6 @@ internal class EqualityTests_ServerAndDatabase
     [OneTimeSetUp]
     public void SetUp()
     {
-        ImplementationManager.Load(
-            typeof(MicrosoftSQLImplementation).Assembly,
-            typeof(OracleImplementation).Assembly,
-            typeof(MySqlImplementation).Assembly
-        );
     }
 
     [TestCase("Server=fish fish fish", DatabaseType.MicrosoftSQLServer,"Server=fish fish fish", DatabaseType.MicrosoftSQLServer)]
@@ -25,12 +16,6 @@ internal class EqualityTests_ServerAndDatabase
     [TestCase(null, DatabaseType.MicrosoftSQLServer, "", DatabaseType.MicrosoftSQLServer)]
     public void EqualityTest_DiscoveredServer_AreEqual(string constr1, DatabaseType type1,string constr2, DatabaseType type2)
     {
-        ImplementationManager.Load(
-            typeof(MicrosoftSQLImplementation).Assembly,
-            typeof(OracleImplementation).Assembly,
-            typeof(MySqlImplementation).Assembly
-        );
-
         var s1 = new DiscoveredServer(constr1, type1);
         var s2 = new DiscoveredServer(constr2, type2);
             

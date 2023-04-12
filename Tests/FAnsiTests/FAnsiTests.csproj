@@ -27,9 +27,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FAnsiSql\FAnsi.csproj" />
-    <ProjectReference Include="..\..\Implementations\FAnsi.Implementations.MicrosoftSQL\FAnsi.Implementations.MicrosoftSQL.csproj" />
-    <ProjectReference Include="..\..\Implementations\FAnsi.Implementations.MySql\FAnsi.Implementations.MySql.csproj" />
-    <ProjectReference Include="..\..\Implementations\FAnsi.Implementations.Oracle\FAnsi.Implementations.Oracle.csproj" />
-    <ProjectReference Include="..\..\Implementations\FAnsi.Implementations.PostgreSql\FAnsi.Implementations.PostgreSql.csproj" />
   </ItemGroup>
 </Project>

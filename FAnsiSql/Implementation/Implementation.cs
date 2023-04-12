@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.Composition;
-using System.Data.Common;
+﻿using System.Data.Common;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 
 namespace FAnsi.Implementation;
 
-[InheritedExport(typeof(IImplementation))]
 public abstract class Implementation<T> : IImplementation where T:DbConnectionStringBuilder,new()
 {
     private readonly DatabaseType _databaseType;

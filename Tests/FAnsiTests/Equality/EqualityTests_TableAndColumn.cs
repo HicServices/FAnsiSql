@@ -13,11 +13,6 @@ internal class EqualityTests_TableAndColumn
     [OneTimeSetUp]
     public void SetUp()
     {
-        ImplementationManager.Load(
-            typeof(MicrosoftSQLImplementation).Assembly,
-            typeof(OracleImplementation).Assembly,
-            typeof(MySqlImplementation).Assembly
-        );
     }
 
     [TestCase("MyTable",null,"MyTable",null)]

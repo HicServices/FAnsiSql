@@ -32,12 +32,6 @@ public class DatabaseTests
     {
         try
         {
-            ImplementationManager.Load(
-                typeof(MicrosoftSQLServerHelper).Assembly,
-                typeof(OracleServerHelper).Assembly,
-                typeof(MySqlServerHelper).Assembly,
-                typeof(PostgreSqlServerHelper).Assembly);
-
             var file = Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilename);
             
             Assert.IsTrue(File.Exists(file),"Could not find " + TestFilename);

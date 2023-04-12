@@ -21,7 +21,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="HIC.TypeGuesser" Version="1.0.3" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    <PackageReference Include="MySqlConnector" Version="2.2.5" />
+    <PackageReference Include="Npgsql" Version="7.0.2" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.101" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="FAnsiStrings.Designer.cs">
@@ -29,11 +32,25 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>FAnsiStrings.resx</DependentUpon>
     </Compile>
+    <Compile Update="SR.Designer.cs">
+      <DependentUpon>SR.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="FAnsiStrings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>FAnsiStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="SR.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>SR.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Aggregation\" />
+    <Folder Include="Update\" />
   </ItemGroup>
 </Project>

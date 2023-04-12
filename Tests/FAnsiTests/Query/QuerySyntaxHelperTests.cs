@@ -43,10 +43,7 @@ internal class QuerySyntaxHelperTests
     [TestCase(DatabaseType.PostgreSql,"mycol","\"mydb\".\"mytbl\".\"mycol\"")]        
     public void SyntaxHelperTest_GetRuntimeName(DatabaseType dbType,  string expected, string forInput)
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
-
         var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
-
         Assert.AreEqual(expected,syntaxHelper.GetRuntimeName(forInput));
     }
 
@@ -65,9 +62,7 @@ internal class QuerySyntaxHelperTests
     public void SyntaxHelperTest_GetRuntimeName_MultipleCalls(DatabaseType dbType,  string runtime, string wrapped)
     {
         // NOTE: Oracle does not support such shenanigans https://docs.oracle.com/cd/B19306_01/server.102/b14200/sql_elements008.htm
-        // "neither quoted nor nonquoted identifiers can contain double quotation marks or the null character (\0)."
-
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
+        // "neither quoted nor unquoted identifiers can contain double quotation marks or the null character (\0)."
 
         var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
 
@@ -106,8 +101,6 @@ internal class QuerySyntaxHelperTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void SyntaxHelperTest_GetRuntimeName_Impossible(DatabaseType t)
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
-
         var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
         var ex = Assert.Throws<RuntimeNameException>(()=>syntaxHelper.GetRuntimeName("count(*)"));
         StringAssert.Contains("Could not determine runtime name for Sql:'count(*)'.  It had brackets and no alias.",ex?.Message);
@@ -121,8 +114,6 @@ internal class QuerySyntaxHelperTests
     [Test]
     public void SyntaxHelperTest_GetRuntimeName_Oracle()
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
-
         var syntaxHelper = ImplementationManager.GetImplementation(DatabaseType.Oracle).GetQuerySyntaxHelper();
         Assert.AreEqual("FRANK",syntaxHelper.GetRuntimeName("count(*) as Frank"));
         Assert.AreEqual("FRANK",syntaxHelper.GetRuntimeName("count(cast(1 as int)) as Frank"));
@@ -147,8 +138,6 @@ internal class QuerySyntaxHelperTests
     [TestCase("CAST([dave] as int)","CAST([dave] as int)",null)]
     public void SyntaxHelperTest_SplitLineIntoSelectSQLAndAlias(string line, string expectedSelectSql, string expectedAlias)
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
-
         foreach (var t in new []{DatabaseType.Oracle,DatabaseType.MySql,DatabaseType.MicrosoftSQLServer})
         {
             var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
@@ -162,9 +151,7 @@ internal class QuerySyntaxHelperTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_GetAlias(DatabaseType t)
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
         var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
-            
 
         if (!(syntaxHelper.AliasPrefix.StartsWith(" ") && syntaxHelper.AliasPrefix.EndsWith(" ")))
             Assert.Fail(
@@ -181,7 +168,6 @@ internal class QuerySyntaxHelperTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_NameValidation(DatabaseType dbType)
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
         var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
 
         Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName(null));
@@ -205,7 +191,6 @@ internal class QuerySyntaxHelperTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_GetFullyQualifiedName(DatabaseType dbType)
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
         var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
 
         var name = syntaxHelper.EnsureFullyQualified("mydb", null, "Troll", ",,,");
@@ -233,7 +218,6 @@ internal class QuerySyntaxHelperTests
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void Test_GetFullyQualifiedName_WhitespaceSchema(DatabaseType dbType)
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
         var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
 
         foreach(var emptySchemaExpression in new [] { null,"", " ", "\t"})
@@ -265,7 +249,6 @@ internal class QuerySyntaxHelperTests
     [Test]
     public void Test_GetFullyQualifiedName_BacktickMySql()
     {
-        ImplementationManager.Load(new DirectoryInfo(TestContext.CurrentContext.TestDirectory));
         var syntaxHelper = ImplementationManager.GetImplementation(DatabaseType.MySql).GetQuerySyntaxHelper();
 
         //when names have backticks the correct response is to double back tick them

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
@@ -10,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
+using Microsoft.Data.SqlClient;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 

@@ -21,9 +21,6 @@ internal class TestExamples : DatabaseTests
         dt.Rows.Add("Frank \"The Boss\" Spagetti","1920-01-01");
         dt.Rows.Add("Pete Mudarillo","22-May-1910");
 
-        //Load the DBMS implementation(s) you need
-        ImplementationManager.Load<MicrosoftSQLImplementation>();
-
         //Get Management object for the database
         var server = new DiscoveredServer(
             @"server=localhost\sqlexpress;Trusted_Connection=True;", DatabaseType.MicrosoftSQLServer);
@@ -51,14 +48,7 @@ internal class TestExamples : DatabaseTests
     [Ignore("Test only works when the hard coded connection strings pass,  this test is used to build clear examples in the documentation")]
     public void Example_TableCreation()
     {
-        //Load implementation assemblies that are relevant to your application
-        ImplementationManager.Load(
-            typeof(MicrosoftSQLImplementation).Assembly,
-            typeof(FAnsi.Implementations.Oracle.OracleImplementation).Assembly,
-            typeof(FAnsi.Implementations.MySql.MySqlImplementation).Assembly);
-
-        //Create some test data
-        var dt = new DataTable();
+        using var dt = new DataTable();
 
         dt.Columns.Add("Name");
         dt.Columns.Add("DateOfBirth");
