@@ -481,9 +481,12 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
 
         foreach (var k in toInsert.Keys)
         {
-            var match = cols.SingleOrDefault(c => c.GetRuntimeName().Equals(k, StringComparison.InvariantCultureIgnoreCase));
-            if(match == null)
-                throw new ColumnMappingException(string.Format(FAnsiStrings.DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__, k,_table));
+            var match =
+                cols.SingleOrDefault(c => c.GetRuntimeName().Equals(k, StringComparison.InvariantCultureIgnoreCase)) ??
+                throw new ColumnMappingException(string.Format(
+                    FAnsiStrings
+                        .DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__, k,
+                    _table));
 
             foundColumns.Add(match,toInsert[k]);
         }

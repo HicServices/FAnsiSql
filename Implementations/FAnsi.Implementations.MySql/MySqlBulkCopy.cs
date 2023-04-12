@@ -19,16 +19,6 @@ public class MySqlBulkCopy : BulkCopy
 
     public static int BulkInsertBatchTimeoutInSeconds = 0;
 
-    /// <summary>
-    /// The number of rows to send in each INSERT statement to the server
-    /// 
-    /// <para>Inserting into MySql without using 'LOAD DATA IN FILE' means using extended INSERT.  This takes the form INSERT INTO Tbl(a,b,c) Values (1,2,3),(4,5,6),(7,8,9) etc.
-    /// If you send too many rows at once then MySql complains due to network packet size (See https://dev.mysql.com/doc/refman/5.5/en/packet-too-large.html).
-    /// </para>
-    /// 
-    /// </summary>
-    public static int BulkInsertRowsPerNetworkPacket = 500;
-
     public MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture) : base(targetTable, connection,culture)
     {
     }
@@ -138,8 +128,8 @@ public class MySqlBulkCopy : BulkCopy
             "TIMESTAMP" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
             "DATETIME" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
             "TIME" => $"'{(DateTime)DateTimeDecider.Parse(value):HH:mm:ss}'",
-            "YEAR2" => $"'{value:yy}'",
-            "YEAR4" => $"'{value:yyyy}'",
+            "YEAR2" => $"'{(DateTime)DateTimeDecider.Parse(value):yy}'",
+            "YEAR4" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy}'",
             _ => $"'{MySqlHelper.EscapeString(value)}'"
         };
     }

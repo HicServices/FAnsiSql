@@ -27,24 +27,24 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
             p.Value = GetObjectName(discoveredTable);
             cmd.Parameters.Add(p);
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var isNullable = Convert.ToBoolean(r["is_nullable"]);
+
+                //if it is a table valued function prefix the column name with the table valued function name
+                var columnName = discoveredTable is DiscoveredTableValuedFunction
+                    ? $"{discoveredTable.GetRuntimeName()}.{r["COLUMN_NAME"]}"
+                    : r["COLUMN_NAME"].ToString();
+
+                var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
                 {
-                    var isNullable = Convert.ToBoolean(r["is_nullable"]);
-
-                    //if it is a table valued function prefix the column name with the table valued function name
-                    var columnName = discoveredTable is DiscoveredTableValuedFunction
-                        ? $"{discoveredTable.GetRuntimeName()}.{r["COLUMN_NAME"]}"
-                        : r["COLUMN_NAME"].ToString();
-
-                    var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
-                    {
-                        IsAutoIncrement = Convert.ToBoolean(r["is_identity"]),
-                        Collation = r["collation_name"] as string
-                    };
-                    toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
-                    toReturn.Add(toAdd);
-                }
+                    IsAutoIncrement = Convert.ToBoolean(r["is_identity"]),
+                    Collation = r["collation_name"] as string
+                };
+                toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
+                toReturn.Add(toAdd);
+            }
         }
 
         if(!toReturn.Any())
@@ -221,42 +221,41 @@ where object_id = OBJECT_ID(@tableName)";
             p.DbType = DbType.String;
             cmd.Parameters.Add(p);
 
-            using (var dt = new DataTable())
-            {
-                var da = table.Database.Server.GetDataAdapter(cmd);
-                da.Fill(dt);
+            using var dt = new DataTable();
+            var da = table.Database.Server.GetDataAdapter(cmd);
+            da.Fill(dt);
                     
-                foreach(DataRow r in dt.Rows)
+            foreach(DataRow r in dt.Rows)
+            {
+                var fkName = r["FK_NAME"].ToString();
+
+                //could be a 2+ columns foreign key?
+                if (!toReturn.TryGetValue(fkName, out var current))
                 {
-                    var fkName = r["FK_NAME"].ToString();
+                    var pkdb = r["PKTABLE_QUALIFIER"].ToString();
+                    var pkschema = r["PKTABLE_OWNER"].ToString();
+                    var pktableName = r["PKTABLE_NAME"].ToString();
 
-                    //could be a 2+ columns foreign key?
-                    if (!toReturn.TryGetValue(fkName, out var current))
+                    var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
+
+                    var fkdb = r["FKTABLE_QUALIFIER"].ToString();
+                    var fkschema = r["FKTABLE_OWNER"].ToString();
+                    var fktableName = r["FKTABLE_NAME"].ToString();
+
+                    var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
+
+                    var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
+
+                    var deleteRule = deleteRuleInt switch
                     {
-                        var pkdb = r["PKTABLE_QUALIFIER"].ToString();
-                        var pkschema = r["PKTABLE_OWNER"].ToString();
-                        var pktableName = r["PKTABLE_NAME"].ToString();
+                        0 => CascadeRule.Delete,
+                        1 => CascadeRule.NoAction,
+                        2 => CascadeRule.SetNull,
+                        3 => CascadeRule.SetDefault,
+                        _ => CascadeRule.Unknown
+                    };
 
-                        var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
-
-                        var fkdb = r["FKTABLE_QUALIFIER"].ToString();
-                        var fkschema = r["FKTABLE_OWNER"].ToString();
-                        var fktableName = r["FKTABLE_NAME"].ToString();
-
-                        var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
-
-                        var deleteRuleInt = Convert.ToInt32(r["DELETE_RULE"]);
-
-                        var deleteRule = deleteRuleInt switch
-                        {
-                            0 => CascadeRule.Delete,
-                            1 => CascadeRule.NoAction,
-                            2 => CascadeRule.SetNull,
-                            3 => CascadeRule.SetDefault,
-                            _ => CascadeRule.Unknown
-                        };
-
-                        /*
+                    /*
     https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-fkeys-transact-sql?view=sql-server-2017
                          
     0=CASCADE changes to foreign key.
@@ -264,12 +263,11 @@ where object_id = OBJECT_ID(@tableName)";
     2 = set null
     3 = set default*/
 
-                        current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                        toReturn.Add(current.Name,current);
-                    }
-
-                    current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
+                    current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                    toReturn.Add(current.Name,current);
                 }
+
+                current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
             }
         }
             
@@ -374,13 +372,11 @@ ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal";
             cmd.Parameters.Add(p);
 
             cmd.Transaction = con.Transaction;
-            using(var r = cmd.ExecuteReader())
-            {
-                while (r.Read())
-                    toReturn.Add((string) r["ColumnName"]);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                toReturn.Add((string) r["ColumnName"]);
 
-                r.Close();
-            }
+            r.Close();
         }
 
             

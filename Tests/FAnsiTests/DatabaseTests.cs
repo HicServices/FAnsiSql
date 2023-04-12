@@ -44,9 +44,7 @@ public class DatabaseTests
 
             var doc = XDocument.Load(file);
 
-            var root = doc.Element("TestDatabases");
-            if(root == null)
-                throw new Exception($"Missing element 'TestDatabases' in {TestFilename}");
+            var root = doc.Element("TestDatabases")??throw new Exception($"Missing element 'TestDatabases' in {TestFilename}");
 
             var settings = root.Element("Settings") ??
                            throw new Exception($"Missing element 'Settings' in {TestFilename}");
@@ -168,23 +166,8 @@ public class DatabaseTests
 
         foreach (DataRow row1 in dt1.Rows)
         {
-            var match = false;
-
-            foreach (DataRow row2 in dt2.Rows)
-            {
-                var rowMatch = true;
-                foreach (DataColumn column in dt1.Columns)
-                {
-                    if (!AreBasicallyEquals(row1[column.ColumnName], row2[column.ColumnName]))
-                        rowMatch = false;
-                }
-
-                if (rowMatch)
-                    match = true;
-            }
-
-            Assert.IsTrue(match, "Couldn't find match for row:" + string.Join(",", row1.ItemArray));
-
+            var match = dt2.Rows.Cast<DataRow>().Any(row2=> dt1.Columns.Cast<DataColumn>().All(c => AreBasicallyEquals(row1[c.ColumnName], row2[c.ColumnName])));
+            Assert.IsTrue(match, "Couldn't find match for row:{0}", string.Join(",", row1.ItemArray));
         }
 
     }

@@ -22,7 +22,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
     public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
     {
         var options=SqlBulkCopyOptions.KeepIdentity|SqlBulkCopyOptions.TableLock;
-        if (connection.Transaction != null)
+        if (connection.Transaction == null)
             options |= SqlBulkCopyOptions.UseInternalTransaction;
         _bulkCopy = new SqlBulkCopy((SqlConnection)connection.Connection, options, (SqlTransaction)connection.Transaction)
         {

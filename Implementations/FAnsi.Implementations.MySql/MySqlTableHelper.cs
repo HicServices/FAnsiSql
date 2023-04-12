@@ -48,31 +48,29 @@ WHERE table_schema = @db
             };
             cmd.Parameters.Add(p);
 
-            using(var r = cmd.ExecuteReader())
+            using var r = cmd.ExecuteReader();
+            if (!r.HasRows)
+                throw new Exception($"Could not find any columns for table {tableName} in database {database}");
+
+            while (r.Read())
             {
-                if (!r.HasRows)
-                    throw new Exception($"Could not find any columns for table {tableName} in database {database}");
+                var toAdd = new DiscoveredColumn(discoveredTable, (string) r["COLUMN_NAME"],YesNoToBool(r["IS_NULLABLE"]));
 
-                while (r.Read())
-                {
-                    var toAdd = new DiscoveredColumn(discoveredTable, (string) r["COLUMN_NAME"],YesNoToBool(r["IS_NULLABLE"]));
-
-                    if (r["COLUMN_KEY"].Equals("PRI"))
-                        toAdd.IsPrimaryKey = true;
+                if (r["COLUMN_KEY"].Equals("PRI"))
+                    toAdd.IsPrimaryKey = true;
                     
-                    toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
-                    toAdd.Collation = r["COLLATION_NAME"] as string;
+                toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
+                toAdd.Collation = r["COLLATION_NAME"] as string;
 
-                    //todo the only way to know if something in MySql is unicode is by r["character_set_name"] 
+                //todo the only way to know if something in MySql is unicode is by r["character_set_name"] 
 
 
-                    toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
-                    columns.Add(toAdd);
+                toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
+                columns.Add(toAdd);
 
-                }
-
-                r.Close();
             }
+
+            r.Close();
         }
             
 
@@ -170,46 +168,44 @@ WHERE
             };
             cmd.Parameters.Add(p);
 
-            using (var dt = new DataTable())
+            using var dt = new DataTable();
+            var da = table.Database.Server.GetDataAdapter(cmd);
+            da.Fill(dt);
+
+            foreach(DataRow r in dt.Rows)
             {
-                var da = table.Database.Server.GetDataAdapter(cmd);
-                da.Fill(dt);
+                var fkName = r["CONSTRAINT_NAME"].ToString();
 
-                foreach(DataRow r in dt.Rows)
+                //could be a 2+ columns foreign key?
+                if (!toReturn.TryGetValue(fkName, out var current))
                 {
-                    var fkName = r["CONSTRAINT_NAME"].ToString();
+                    var pkDb = r["REFERENCED_TABLE_SCHEMA"].ToString();
+                    var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
 
-                    //could be a 2+ columns foreign key?
-                    if (!toReturn.TryGetValue(fkName, out var current))
+                    var fkDb = r["TABLE_SCHEMA"].ToString();
+                    var fkTableName =  r["TABLE_NAME"].ToString();
+
+                    var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
+                    var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
+
+                    //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
+                    var deleteRuleString = r["DELETE_RULE"].ToString();
+
+                    var deleteRule = deleteRuleString switch
                     {
-                        var pkDb = r["REFERENCED_TABLE_SCHEMA"].ToString();
-                        var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
+                        "CASCADE" => CascadeRule.Delete,
+                        "NO ACTION" => CascadeRule.NoAction,
+                        "RESTRICT" => CascadeRule.NoAction,
+                        "SET NULL" => CascadeRule.SetNull,
+                        "SET DEFAULT" => CascadeRule.SetDefault,
+                        _ => CascadeRule.Unknown
+                    };
 
-                        var fkDb = r["TABLE_SCHEMA"].ToString();
-                        var fkTableName =  r["TABLE_NAME"].ToString();
-
-                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
-                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
-
-                        //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
-                        var deleteRuleString = r["DELETE_RULE"].ToString();
-
-                        var deleteRule = deleteRuleString switch
-                        {
-                            "CASCADE" => CascadeRule.Delete,
-                            "NO ACTION" => CascadeRule.NoAction,
-                            "RESTRICT" => CascadeRule.NoAction,
-                            "SET NULL" => CascadeRule.SetNull,
-                            "SET DEFAULT" => CascadeRule.SetDefault,
-                            _ => CascadeRule.Unknown
-                        };
-
-                        current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                        toReturn.Add(current.Name,current);
-                    }
-
-                    current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
+                    current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
+                    toReturn.Add(current.Name,current);
                 }
+
+                current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
             }
         }
             

@@ -609,10 +609,10 @@ internal class BulkInsertTest : DatabaseTests
         var c2 = Math.Round((decimal) result.Rows[1][0], 9);
 
         //make sure they are basically what we are expecting (at the 9 decimal place point)
-        if (!(Math.Abs(-0.0000410235 - (double)c1) < 0.000000001))
+        if (Math.Abs(-0.0000410235 - (double)c1) >= 0.000000001)
             Assert.Fail();
 
-        if (!(Math.Abs(-0.0000410235 - (double)c2) < 0.000000001))
+        if (Math.Abs(-0.0000410235 - (double)c2) >= 0.000000001)
             Assert.Fail();
     }
 

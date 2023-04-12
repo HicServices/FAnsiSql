@@ -29,8 +29,8 @@ public class DiscoveredDataType
     /// API constructor, instead use <see cref="DiscoveredTable.DiscoverColumns"/> instead.
     /// </summary>
     /// <param name="r">All the values in r will be copied into the Dictionary property of this class called ProprietaryDatatype</param>
-    /// <param name="sqlType">Your infered SQL data type for it e.g. varchar(50)</param>
-    /// <param name="column">The column it belongs to, can be null e.g. if your datatype belongs to a DiscoveredParameter instead</param>
+    /// <param name="sqlType">Your inferred SQL data type for it e.g. varchar(50)</param>
+    /// <param name="column">The column it belongs to, can be null e.g. if your data type belongs to a DiscoveredParameter instead</param>
     public DiscoveredDataType(DbDataReader r, string sqlType, DiscoveredColumn column)
     {
         SQLType = sqlType;

@@ -36,26 +36,24 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
         {
             cmd.Transaction = connection.Transaction;
 
-            DbParameter p = new OracleParameter("table_name", OracleDbType.Varchar2);
-            p.Value = tableName;
-            cmd.Parameters.Add(p);
-
-            DbParameter p2 = new OracleParameter("owner", OracleDbType.Varchar2);
-            p2.Value = database;
-            cmd.Parameters.Add(p2);
-
-            using (var r = cmd.ExecuteReader())
+            cmd.Parameters.Add(new OracleParameter("table_name", OracleDbType.Varchar2)
             {
-                if (!r.HasRows)
-                    throw new Exception($"Could not find any columns for table {tableName} in database {database}");
+                Value = tableName
+            });
+            cmd.Parameters.Add(new OracleParameter("owner", OracleDbType.Varchar2)
+            {
+                Value = database
+            });
 
-                while (r.Read())
-                {
-                    var toAdd = new DiscoveredColumn(discoveredTable, (string)r["COLUMN_NAME"], r["NULLABLE"].ToString() != "N") { Format = r["CHARACTER_SET_NAME"] as string };
-                    toAdd.DataType = new DiscoveredDataType(r, GetSQLType_From_all_tab_cols_Result(r), toAdd);
-                    columns.Add(toAdd);
-                }
+            using var r = cmd.ExecuteReader();
+            if (!r.HasRows)
+                throw new Exception($"Could not find any columns for table {tableName} in database {database}");
 
+            while (r.Read())
+            {
+                var toAdd = new DiscoveredColumn(discoveredTable, (string)r["COLUMN_NAME"], r["NULLABLE"].ToString() != "N") { Format = r["CHARACTER_SET_NAME"] as string };
+                toAdd.DataType = new DiscoveredDataType(r, GetSQLType_From_all_tab_cols_Result(r), toAdd);
+                columns.Add(toAdd);
             }
         }
                 
@@ -67,23 +65,21 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
                    (OracleConnection) connection.Connection))
         {
             cmd.Transaction = (OracleTransaction) connection.Transaction;
-
-            var p = new OracleParameter("table_name", OracleDbType.Varchar2);
-            p.Value = tableName;
-            cmd.Parameters.Add(p);
-
-            var p2 = new OracleParameter("owner", OracleDbType.Varchar2);
-            p2.Value = database;
-            cmd.Parameters.Add(p2);
-
-            using (var r = cmd.ExecuteReader())
+            cmd.Parameters.Add(new OracleParameter("table_name", OracleDbType.Varchar2)
             {
-                while (r.Read())
-                {
-                    var colName = r["column_name"].ToString();
-                    var match = columns.Single(c => c.GetRuntimeName().Equals(colName, StringComparison.CurrentCultureIgnoreCase));
-                    match.IsAutoIncrement = true;
-                }
+                Value = tableName
+            });
+            cmd.Parameters.Add(new OracleParameter("owner", OracleDbType.Varchar2)
+            {
+                Value = database
+            });
+
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var colName = r["column_name"].ToString();
+                var match = columns.Single(c => c.GetRuntimeName().Equals(colName, StringComparison.CurrentCultureIgnoreCase));
+                match.IsAutoIncrement = true;
             }
         }
 
@@ -98,20 +94,18 @@ AND cons.owner = cols.owner
 ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connection))
         {
             cmd.Transaction = (OracleTransaction) connection.Transaction;
-
-            var p = new OracleParameter("table_name",OracleDbType.Varchar2);
-            p.Value = tableName;
-            cmd.Parameters.Add(p);
-                
-            var p2 = new OracleParameter("owner", OracleDbType.Varchar2);
-            p2.Value = database;
-            cmd.Parameters.Add(p2);
-
-            using (var r = cmd.ExecuteReader())
+            cmd.Parameters.Add(new OracleParameter("table_name", OracleDbType.Varchar2)
             {
-                while (r.Read())
-                    columns.Single(c => c.GetRuntimeName().Equals(r["COLUMN_NAME"])).IsPrimaryKey = true;//mark all primary keys as primary
-            }
+                Value = tableName
+            });
+            cmd.Parameters.Add(new OracleParameter("owner", OracleDbType.Varchar2)
+            {
+                Value = database
+            });
+
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                columns.Single(c => c.GetRuntimeName().Equals(r["COLUMN_NAME"])).IsPrimaryKey = true;//mark all primary keys as primary
         }
             
 
@@ -241,52 +235,51 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
 
         using (var cmd = new OracleCommand(sql, (OracleConnection) connection))
         {
-            var p = new OracleParameter(":DatabaseName", OracleDbType.Varchar2);
-            p.Value = table.Database.GetRuntimeName();
-            cmd.Parameters.Add(p);
-
-            p = new OracleParameter(":TableName", OracleDbType.Varchar2);
-            p.Value = table.GetRuntimeName();
-            cmd.Parameters.Add(p);
-                
-            using (var r = cmd.ExecuteReader())
+            cmd.Parameters.Add(new OracleParameter(":DatabaseName", OracleDbType.Varchar2)
             {
-                while (r.Read())
+                Value = table.Database.GetRuntimeName()
+            });
+            cmd.Parameters.Add(new OracleParameter(":TableName", OracleDbType.Varchar2)
+            {
+                Value = table.GetRuntimeName()
+            });
+
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var fkName = r["constraint_name"].ToString();
+
+                //could be a 2+ columns foreign key?
+                if (!toReturn.TryGetValue(fkName, out var current))
                 {
-                    var fkName = r["constraint_name"].ToString();
 
-                    //could be a 2+ columns foreign key?
-                    if (!toReturn.TryGetValue(fkName, out var current))
+                    var pkDb = r["r_owner"].ToString();
+                    var pkTableName = r["r_table_name"].ToString();
+
+                    var fkDb = r["owner"].ToString();
+                    var fkTableName = r["table_name"].ToString();
+
+                    var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
+                    var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
+
+                    //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
+                    var deleteRuleString = r["delete_rule"].ToString();
+
+                    var deleteRule = deleteRuleString switch
                     {
+                        "CASCADE" => CascadeRule.Delete,
+                        "NO ACTION" => CascadeRule.NoAction,
+                        "RESTRICT" => CascadeRule.NoAction,
+                        "SET NULL" => CascadeRule.SetNull,
+                        "SET DEFAULT" => CascadeRule.SetDefault,
+                        _ => CascadeRule.Unknown
+                    };
 
-                        var pkDb = r["r_owner"].ToString();
-                        var pkTableName = r["r_table_name"].ToString();
-
-                        var fkDb = r["owner"].ToString();
-                        var fkTableName = r["table_name"].ToString();
-
-                        var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
-                        var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
-
-                        //https://dev.mysql.com/doc/refman/8.0/en/referential-constraints-table.html
-                        var deleteRuleString = r["delete_rule"].ToString();
-
-                        var deleteRule = deleteRuleString switch
-                        {
-                            "CASCADE" => CascadeRule.Delete,
-                            "NO ACTION" => CascadeRule.NoAction,
-                            "RESTRICT" => CascadeRule.NoAction,
-                            "SET NULL" => CascadeRule.SetNull,
-                            "SET DEFAULT" => CascadeRule.SetDefault,
-                            _ => CascadeRule.Unknown
-                        };
-
-                        current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
-                        toReturn.Add(current.Name, current);
-                    }
-
-                    current.AddKeys(r["r_column_name"].ToString(), r["column_name"].ToString(), transaction);
+                    current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                    toReturn.Add(current.Name, current);
                 }
+
+                current.AddKeys(r["r_column_name"].ToString(), r["column_name"].ToString(), transaction);
             }
         }
             

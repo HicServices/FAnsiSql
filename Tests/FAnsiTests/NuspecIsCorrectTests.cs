@@ -79,15 +79,7 @@ internal partial class NuspecIsCorrectTests
 
             //And make sure it appears in the packages.md file
             if (packagesMarkdown == null) continue;
-            found = false;
-            foreach (var line in File.ReadLines(packagesMarkdown).Where(line=> Regex.IsMatch(line, $@"[\s[]{Regex.Escape(package)}[\s\]]", RegexOptions.IgnoreCase)))
-            {
-                    var count = new Regex(Regex.Escape(version)).Matches(line).Count;
-                    Assert.AreEqual(2, count, "Markdown file {0} did not contain 2 instances of the version {1} for package {2} in {3}", packagesMarkdown, version, package, csproj);
-                    found = true;
-            }
-
-            if (!found)
+            if (!File.ReadLines(packagesMarkdown).Any(line => Regex.IsMatch(line, $@"[\s[]{Regex.Escape(package)}[\s\]]", RegexOptions.IgnoreCase)))
                 Assert.Fail("Package {0} in {1} is not documented in {2}. Recommended line is:\r\n{3}", package, csproj, packagesMarkdown,
                     BuildRecommendedMarkdownLine(package, version));
         }

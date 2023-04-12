@@ -65,16 +65,16 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         {
             cmd.Transaction = transaction;
 
-            using (var r = cmd.ExecuteReader())
-                while (r.Read())
-                {
-                    var schema = r["schema_name"] as string;
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var schema = r["schema_name"] as string;
 
-                    if (string.Equals("dbo", schema))
-                        schema = null;
-                    functionsToReturn.Add(new DiscoveredTableValuedFunction(parent, r["name"].ToString(), querySyntaxHelper,schema));
+                if (string.Equals("dbo", schema))
+                    schema = null;
+                functionsToReturn.Add(new DiscoveredTableValuedFunction(parent, r["name"].ToString(), querySyntaxHelper,schema));
 
-                }
+            }
         }
             
 
@@ -178,7 +178,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
     public override DirectoryInfo Detach(DiscoveredDatabase database)
     {
-        const string GetDefaultSQLServerDatabaseDirectory = @"SELECT LEFT(physical_name,LEN(physical_name)-CHARINDEX('\',REVERSE(physical_name))+1) 
+        const string getDefaultSqlServerDatabaseDirectory = @"SELECT LEFT(physical_name,LEN(physical_name)-CHARINDEX('\',REVERSE(physical_name))+1) 
                         FROM sys.master_files mf   
                         INNER JOIN sys.[databases] d   
                         ON mf.[database_id] = d.[database_id]   
@@ -193,43 +193,29 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         // set in simple recovery and truncate all logs!
         var sql =
             $"ALTER DATABASE {databaseToDetach} SET RECOVERY SIMPLE; {Environment.NewLine}DBCC SHRINKFILE ({databaseToDetach}, 1)";
-        using (var con = (SqlConnection)server.GetConnection())
-        {
-            con.Open();
-            using(var cmd = new SqlCommand(sql, con))
-                cmd.ExecuteNonQuery();
-        }
+        using var con = (SqlConnection)server.GetConnection();
+        con.Open();
+        using (var cmd = new SqlCommand(sql, con))
+            cmd.ExecuteNonQuery();
 
         // other operations must be done on master
         server.ChangeDatabase("master");
             
         // set single user before detaching
         sql = $"ALTER DATABASE {databaseToDetach} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
-        using (var con = (SqlConnection)server.GetConnection())
-        {
-            con.Open();
-            using(var cmd = new SqlCommand(sql, con))
-                cmd.ExecuteNonQuery();
-        }
+        using (var cmd = new SqlCommand(sql, con))
+            cmd.ExecuteNonQuery();
 
         var dbLiteralName = database.Server.GetQuerySyntaxHelper().Escape(database.GetRuntimeName());
 
         // detach!
         sql = $@"EXEC sys.sp_detach_db '{dbLiteralName}';";
-        using (var con = (SqlConnection)server.GetConnection())
-        {
-            con.Open();
-            using(var cmd = new SqlCommand(sql, con))
-                cmd.ExecuteNonQuery();
-        }
+        using(var cmd = new SqlCommand(sql, con))
+            cmd.ExecuteNonQuery();
 
         // get data-files path from SQL Server
-        using (var connection = (SqlConnection)server.GetConnection())
-        {
-            connection.Open();
-            using(var cmd = new SqlCommand(GetDefaultSQLServerDatabaseDirectory, connection))
-                dataFolder = (string)cmd.ExecuteScalar();
-        }
+        using(var cmd = new SqlCommand(getDefaultSqlServerDatabaseDirectory, con))
+            dataFolder = (string)cmd.ExecuteScalar();
 
         return dataFolder == null ? null : new DirectoryInfo(dataFolder);
     }
