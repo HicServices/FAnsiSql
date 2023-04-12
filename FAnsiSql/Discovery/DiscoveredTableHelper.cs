@@ -102,14 +102,11 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             colRequest.AllowNulls = colRequest.AllowNulls && !colRequest.IsAutoIncrement;
 
             //if there is a collation
-            if (!string.IsNullOrWhiteSpace(c.Collation))
+            if (!string.IsNullOrWhiteSpace(c.Collation) && (toCreateTable == null || !isToDifferentDatabaseType))
             {
                 //if the script is to be run on a database of the same type
-                if (toCreateTable == null || !isToDifferentDatabaseType)
-                {
-                    //then specify that the column should use the live collation
-                    colRequest.Collation = c.Collation;
-                }
+                //then specify that the column should use the live collation
+                colRequest.Collation = c.Collation;
             }
 
             columns.Add(colRequest);

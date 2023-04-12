@@ -21,7 +21,10 @@ public class MicrosoftSQLBulkCopy : BulkCopy
 
     public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
     {
-        _bulkCopy = new SqlBulkCopy((SqlConnection)connection.Connection, SqlBulkCopyOptions.KeepIdentity, (SqlTransaction)connection.Transaction)
+        var options=SqlBulkCopyOptions.KeepIdentity|SqlBulkCopyOptions.TableLock;
+        if (connection.Transaction != null)
+            options |= SqlBulkCopyOptions.UseInternalTransaction;
+        _bulkCopy = new SqlBulkCopy((SqlConnection)connection.Connection, options, (SqlTransaction)connection.Transaction)
         {
             BulkCopyTimeout = 50000,
             DestinationTableName = targetTable.GetFullyQualifiedName()
@@ -34,7 +37,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
 
         _bulkCopy.ColumnMappings.Clear();
         foreach (var (key, value) in GetMapping(dt.Columns.Cast<DataColumn>()))
-            _bulkCopy.ColumnMappings.Add(key.Ordinal, value.GetRuntimeName());
+            _bulkCopy.ColumnMappings.Add(key.ColumnName, value.GetRuntimeName());
             
         return BulkInsertWithBetterErrorMessages(_bulkCopy, dt, TargetTable.Database.Server);
     }
@@ -246,7 +249,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
         return message.ToString();
     }
 
-    private void InspectDataTableForFloats(DataTable dt)
+    private static void InspectDataTableForFloats(DataTable dt)
     {
         //are there any float or float? columns
         var floatColumnNames = dt.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(float) || c.DataType == typeof(float?)).Select(c=>c.ColumnName).ToArray();

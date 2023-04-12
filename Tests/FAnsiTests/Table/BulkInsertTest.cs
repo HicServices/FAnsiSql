@@ -683,18 +683,8 @@ internal class BulkInsertTest : DatabaseTests
 
         using var bulk = tbl.BeginBulkInsert();
         bulk.Timeout = 30;
-                
-        Exception ex = null;
-        try 
-        {
-            bulk.Upload(dt);
-        }
-        catch(Exception e)
-        {
-            ex = e;
-        }
 
-        Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
+        var ex=Assert.Catch(() => bulk.Upload(dt), "Expected upload to fail because value on row 2 is too long");
 
         switch (type)
         {

@@ -35,11 +35,15 @@ public class MySqlBulkCopy : BulkCopy
 
     public override int UploadImpl(DataTable dt)
     {
+        var ourTrans = Connection.Transaction==null?Connection.Connection.BeginTransaction(IsolationLevel.ReadUncommitted):null;
         var matchedColumns = GetMapping(dt.Columns.Cast<DataColumn>());
         var affected = 0;
 
+        int maxPacket;
+        using (var packetQ = new MySqlCommand("select @@max_allowed_packet", (MySqlConnection)Connection.Connection,(MySqlTransaction)(Connection.Transaction ?? ourTrans)))
+            maxPacket = Convert.ToInt32(packetQ.ExecuteScalar());
         using var cmd = new MySqlCommand("", (MySqlConnection) Connection.Connection,
-            (MySqlTransaction) Connection.Transaction);
+            (MySqlTransaction)(Connection.Transaction ?? ourTrans));
         if (BulkInsertBatchTimeoutInSeconds != 0)
             cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
 
@@ -47,39 +51,36 @@ public class MySqlBulkCopy : BulkCopy
             $"INSERT INTO {TargetTable.GetFullyQualifiedName()}({string.Join(",", matchedColumns.Values.Select(c =>
                 $"`{c.GetRuntimeName()}`"))}) VALUES ";
 
-        var sb = new StringBuilder();
-                
-                
-        var row = 0;
+        var sb = new StringBuilder(commandPrefix,1<<22);
 
+        var matches = matchedColumns.Keys.Select(column => (matchedColumns[column].DataType.SQLType, column.Ordinal)).ToArray();
         foreach(DataRow dr in dt.Rows)
         {
             sb.Append('(');
 
             var dr1 = dr;
-                
-            sb.Append(string.Join(",",matchedColumns.Keys.Select(k => ConstructIndividualValue(matchedColumns[k].DataType.SQLType,dr1[k]))));
+
+            sb.AppendJoin(',', matches.Select(m => ConstructIndividualValue(m.SQLType, dr1[m.Ordinal])));
 
             sb.AppendLine("),");
-            row++;
 
             //don't let command get too long
-            if (row % BulkInsertRowsPerNetworkPacket == 0)
-            {
-                cmd.CommandText = commandPrefix + sb.ToString().TrimEnd(',', '\r', '\n');
-                affected += cmd.ExecuteNonQuery();
-                sb.Clear();
-            }
+            if (sb.Length*2<maxPacket) continue;
+            cmd.CommandText = sb.ToString().TrimEnd(',', '\r', '\n');
+            affected += cmd.ExecuteNonQuery();
+            sb.Clear();
+            sb.Append(commandPrefix);
         }
 
         //send final batch
-        if(sb.Length > 0)
+        if(sb.Length > commandPrefix.Length)
         {
-            cmd.CommandText = commandPrefix + sb.ToString().TrimEnd(',', '\r', '\n');
+            cmd.CommandText = sb.ToString().TrimEnd(',', '\r', '\n');
             affected += cmd.ExecuteNonQuery();
             sb.Clear();
         }
 
+        ourTrans?.Commit();
         return affected;
             
     }
