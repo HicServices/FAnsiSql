@@ -107,27 +107,25 @@ public class DatabaseTests
             }
         else
         {
-            if (cleanDatabase)
+            if (!cleanDatabase) return db;
+            IEnumerable<DiscoveredTable> deleteTableOrder;
+
+            try
             {
-                IEnumerable<DiscoveredTable> deleteTableOrder;
-
-                try
-                {
-                    //delete in reverse dependency order to avoid foreign key constraint issues preventing deleting
-                    var tree = new RelationshipTopologicalSort(db.DiscoverTables(true));
-                    deleteTableOrder = tree.Order.Reverse();
-                }
-                catch (Exception)
-                {
-                    deleteTableOrder = db.DiscoverTables(true);
-                }
-
-                foreach (var t in deleteTableOrder)
-                    t.Drop();
-
-                foreach (var func in db.DiscoverTableValuedFunctions())
-                    func.Drop();
+                //delete in reverse dependency order to avoid foreign key constraint issues preventing deleting
+                var tree = new RelationshipTopologicalSort(db.DiscoverTables(true));
+                deleteTableOrder = tree.Order.Reverse();
             }
+            catch (FAnsi.Exceptions.CircularDependencyException)
+            {
+                deleteTableOrder = db.DiscoverTables(true);
+            }
+
+            foreach (var t in deleteTableOrder)
+                t.Drop();
+
+            foreach (var func in db.DiscoverTableValuedFunctions())
+                func.Drop();
         }
 
         return db;

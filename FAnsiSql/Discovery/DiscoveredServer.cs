@@ -28,7 +28,7 @@ public class DiscoveredServer : IMightNotExist
     /// <summary>
     /// Stateless helper class with DBMS specific implementation of the logic required by <see cref="DiscoveredServer"/>.
     /// </summary>
-    public IDiscoveredServerHelper Helper { get; set; }
+    public IDiscoveredServerHelper Helper { get; }
 
     /// <summary>
     /// Returns <see cref="FAnsi.DatabaseType"/> (indicates what DBMS the <see cref="DiscoveredServer"/> is pointed at).
@@ -61,7 +61,7 @@ public class DiscoveredServer : IMightNotExist
     {
         Helper = ImplementationManager.GetImplementation(builder).GetServerHelper();
 
-        //give helper a chance to mutilate the builder if he wants (also gives us a new copy of the builder incase anyone external modifies the old reference)
+        //give helper a chance to mutilate the builder if he wants (also gives us a new copy of the builder in case anyone external modifies the old reference)
         Builder = Helper.GetConnectionStringBuilder(builder.ConnectionString);
     }
 
@@ -255,7 +255,11 @@ public class DiscoveredServer : IMightNotExist
             TestConnection();
             return true;
         }
-        catch (Exception)
+        catch (AggregateException)
+        {
+            return false;
+        }
+        catch (TimeoutException)
         {
             return false;
         }

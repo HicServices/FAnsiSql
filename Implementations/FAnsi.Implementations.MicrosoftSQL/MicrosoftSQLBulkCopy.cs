@@ -199,7 +199,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
                 
             return true;
         }
-        catch (Exception)
+        catch (NullReferenceException)
         {
             //private fields in SqlBulkCopy have changed name?
             newMessage = ex.Message;

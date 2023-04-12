@@ -141,9 +141,9 @@ public class DiscoveredDataType
     /// </summary>
     /// <param name="newType">The data type you want to change to e.g. "varchar(max)"</param>
     /// <param name="managedTransaction"></param>
-    /// <param name="altertimeoutInSeconds">The time to wait before giving up on the command (See <see cref="DbCommand.CommandTimeout"/></param>
+    /// <param name="alterTimeoutInSeconds">The time to wait before giving up on the command (See <see cref="DbCommand.CommandTimeout"/></param>
     /// <exception cref="AlterFailedException"></exception>
-    public void AlterTypeTo(string newType, IManagedTransaction managedTransaction = null,int altertimeoutInSeconds = 500)
+    public void AlterTypeTo(string newType, IManagedTransaction managedTransaction = null,int alterTimeoutInSeconds = 500)
     {
         if(Column == null)
             throw new NotSupportedException(FAnsiStrings.DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_reference_to_a_Column_to_which_it_belongs);
@@ -155,7 +155,7 @@ public class DiscoveredDataType
             try
             {
                 using var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
-                cmd.CommandTimeout = altertimeoutInSeconds;
+                cmd.CommandTimeout = alterTimeoutInSeconds;
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
