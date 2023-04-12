@@ -84,6 +84,9 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         
     public string AliasPrefix => GetAliasConst();
 
+    //Only look at the start of the string or following an equals or white space and stop at word boundaries
+    private static readonly Regex ParameterNameRegex = new ($@"(?:^|[\s+\-*/\\=(,])+{ParameterNamesRegex}\b");
+
     /// <summary>
     /// Lists the names of all parameters required by the supplied whereSql e.g. @bob = 'bob' would return "@bob" 
     /// </summary>
@@ -91,18 +94,10 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// <returns>parameter names that are required by the SQL</returns>
     public static HashSet<string> GetAllParameterNamesFromQuery(string query)
     {
-        //Only look at the start of the string or following an equals or whitespace and stop at word boundaries
-        var regex = new Regex($@"(?:^|[\s+\-*/\\=(,])+{ParameterNamesRegex}\b");
-
-        var toReturn = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-
         if (string.IsNullOrWhiteSpace(query))
-            return toReturn;
+            return new HashSet<string>();
 
-        foreach (Match match in regex.Matches(query))
-            if (!toReturn.Contains(match.Value.Trim())) //dont add duplicates
-                toReturn.Add(match.Groups[1].Value.Trim());
-
+        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Cast<Match>().Select(match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
         return toReturn;
     }
 
@@ -152,10 +147,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         //trim off any brackets e.g. return "My Table" for "[My Table]"
         if(lastWord.StartsWith(OpenQualifier) && lastWord.EndsWith(CloseQualifier))
-        {
-            return UnescapeWrappedNameBody(lastWord.Substring(1,lastWord.Length -2));
-        }
-                
+            return UnescapeWrappedNameBody(lastWord[1..^1]);
 
         return lastWord;
     }
