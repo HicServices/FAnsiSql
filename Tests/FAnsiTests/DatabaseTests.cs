@@ -32,6 +32,11 @@ public class DatabaseTests
     {
         try
         {
+            ImplementationManager.Load<OracleImplementation>();
+            ImplementationManager.Load<MicrosoftSQLImplementation>();
+            ImplementationManager.Load<MySqlImplementation>();
+            ImplementationManager.Load<PostgreSqlImplementation>();
+
             var file = Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilename);
             
             Assert.IsTrue(File.Exists(file),"Could not find " + TestFilename);

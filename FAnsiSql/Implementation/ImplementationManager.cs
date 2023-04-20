@@ -27,22 +27,18 @@ public class ImplementationManager
 
     private ImplementationManager()
     {
-        _implementations = new List<IImplementation>
-        {
-            new MySqlImplementation(),
-            new MicrosoftSQLImplementation(),
-            new PostgreSqlImplementation(),
-            new OracleImplementation(),
-        };
+        _implementations = new List<IImplementation>();
     }
 
     /// <summary>
     /// loads all implementations in the assembly hosting the <typeparamref name="T"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [Obsolete("MEF is dead")]
-    public static void Load<T>() where T:IImplementation
+    public static void Load<T>() where T:IImplementation,new()
     {
+        var loading = new T();
+        if (!Instance._implementations.Contains(loading))
+            Instance._implementations.Add(loading);
     }
 
     /// <summary>
@@ -96,9 +92,9 @@ public class ImplementationManager
     /// <summary>
     /// Clears all currently loaded <see cref="IImplementation"/>
     /// </summary>
-    [Obsolete("MEF is dead")]
     public static void Clear()
     {
+        Instance._implementations.Clear();
     }
 
     [Obsolete("MEF is dead")]
