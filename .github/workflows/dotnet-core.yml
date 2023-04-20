@@ -63,6 +63,6 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref }}
-        file: *.nupkg
+        file: '*.nupkg'
         file_glob: true
         overwrite: true
