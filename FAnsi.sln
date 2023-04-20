@@ -9,10 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FAnsiTests", "Tests\FAnsiTe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6E411B20-D0CB-4F5E-9BDC-4910373C9812}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{3907AA0E-080C-4464-9795-C6FCECFE0336}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FAnsi.NuGet", "NuGet\FAnsi.NuGet.csproj", "{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{02B6EB8B-3CAA-4DE8-9220-0E353730ABAA}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
@@ -41,17 +37,12 @@ Global
 		{84C476DB-FD9F-4A39-86C3-D7510167F75D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84C476DB-FD9F-4A39-86C3-D7510167F75D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84C476DB-FD9F-4A39-86C3-D7510167F75D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{84C476DB-FD9F-4A39-86C3-D7510167F75D} = {6E411B20-D0CB-4F5E-9BDC-4910373C9812}
-		{9AE67B4E-7AE0-4CCB-BD4E-CA70D6EC8658} = {3907AA0E-080C-4464-9795-C6FCECFE0336}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {995D3A83-EB2E-4635-87E7-9A7865A05EF0}

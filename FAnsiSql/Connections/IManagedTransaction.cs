@@ -19,7 +19,7 @@ public interface IManagedTransaction
     DbTransaction Transaction { get; }
 
     /// <summary>
-    /// Calls <see cref="DbTransaction.Rollback"/> and closes/disposes the <see cref="Connection"/>
+    /// Calls <see cref="DbTransaction.Rollback()"/> and closes/disposes the <see cref="Connection"/>
     /// </summary>
     void AbandonAndCloseConnection();
 

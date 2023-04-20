@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ...
+## [3.1.0] - 2023-04-21
+
+- Now targeting .Net 6
+- Single assembly build, more single-file and AOT friendly
 
 ## [3.0.1] - 2022-10-28
 
@@ -337,7 +341,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/3.0.1...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/3.1.0...develop
+[3.1.0]: https://github.com/HicServices/FAnsiSql/compare/3.0.1...3.1.0
 [3.0.1]: https://github.com/HicServices/FAnsiSql/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/HicServices/FAnsiSql/compare/2.0.5...3.0.0
 [2.0.5]: https://github.com/HicServices/FAnsiSql/compare/2.0.4...2.0.5

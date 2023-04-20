@@ -1,5 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <id>HIC.FAnsiSql</id>
+    <PackageId>HIC.FAnsiSql</PackageId>
+    <version>0.0.7</version>
+    <title>HIC.FAnsiSql</title>
+    <authors>Health Informatics Centre - University of Dundee</authors>
+    <owners>Health Informatics Centre - University of Dundee</owners>
+    <PackageProjectUrl>https://github.com/HicServices/FAnsiSql</PackageProjectUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</description>
+    <copyright>Copyright 2019</copyright>
+    <PackageTags>Ansi,SQL</PackageTags>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyTitle>HIC.FAnsiSql</AssemblyTitle>
     <Company>Health Informatics Centre, University of Dundee</Company>
