@@ -2,17 +2,16 @@
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 
-namespace FAnsi.Implementation
+namespace FAnsi.Implementation;
+
+public interface IImplementation
 {
-    public interface IImplementation
-    {
-        DbConnectionStringBuilder GetBuilder();
-        IDiscoveredServerHelper GetServerHelper();
+    DbConnectionStringBuilder GetBuilder();
+    IDiscoveredServerHelper GetServerHelper();
 
-        bool IsFor(DatabaseType databaseType);
-        bool IsFor(DbConnectionStringBuilder builder);
-        bool IsFor(DbConnection connection);
+    bool IsFor(DatabaseType databaseType);
+    bool IsFor(DbConnectionStringBuilder builder);
+    bool IsFor(DbConnection connection);
 
-        IQuerySyntaxHelper GetQuerySyntaxHelper();
-    }
+    IQuerySyntaxHelper GetQuerySyntaxHelper();
 }

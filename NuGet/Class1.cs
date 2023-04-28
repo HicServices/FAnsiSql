@@ -1,6 +1,5 @@
-﻿namespace NuGet
+﻿namespace NuGet;
+
+public class Class1
 {
-    public class Class1
-    {
-    }
 }
