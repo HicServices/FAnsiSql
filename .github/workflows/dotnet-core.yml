@@ -13,6 +13,12 @@ jobs:
 
     runs-on: ubuntu-20.04
     services:
+      oracle:
+        image: oracleinanutshell/oracle-xe-11g
+        env:
+          ORACLE_DISABLE_ASYNCH_IO: true
+        ports:
+          - 1521:1521
       postgres:
         image: postgres:latest
         env:
@@ -43,6 +49,7 @@ jobs:
       run: |
         sed -i'' -e 's|</TestDatabases>|<TestDatabase><DatabaseType>PostgreSql</DatabaseType><ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432</ConnectionString></TestDatabase></TestDatabases>|' Tests/FAnsiTests/TestDatabases.xml
         sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=true/' Tests/FAnsiTests/TestDatabases.xml
+        sed -i'' -e 's/<TestDatabases>/<TestDatabases><TestDatabase><DatabaseType>Oracle</DatabaseType><ConnectionString>Data Source=localhost:1521/xe;User Id=sys;Password=oracle;DBA Privilege=SYSDBA</ConnectionString></TestDatabase>' Tests/FansiTests/TestDatabases.xml
         sudo systemctl start mysql.service
     - name: Test
       run: dotnet test --logger "console;verbosity=minimal" --nologo
