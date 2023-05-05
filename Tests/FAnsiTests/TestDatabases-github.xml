@@ -14,7 +14,7 @@
   </TestDatabase>
   <TestDatabase>
     <DatabaseType>Oracle</DatabaseType>
-    <ConnectionString>Data Source=localhost:1521/xe;User Id=sys;Password=oracle;DBA Privilege=SYSDBA</ConnectionString>
+    <ConnectionString>Data Source=localhost:1521/xe?serverTimezone=America/Chicago;User Id=sys;Password=oracle;DBA Privilege=SYSDBA</ConnectionString>
   </TestDatabase>
   <TestDatabase>
     <DatabaseType>PostgreSql</DatabaseType>
