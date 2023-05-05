@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyTitle>FAnsi.Implementations.Oracle</AssemblyTitle>
@@ -11,7 +11,7 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.101" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.180" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FAnsiSql\FAnsi.csproj" />
