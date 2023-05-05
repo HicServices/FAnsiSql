@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <id>HIC.FAnsiSql</id>
     <PackageId>HIC.FAnsiSql</PackageId>
@@ -34,7 +34,7 @@
   <ItemGroup>
     <PackageReference Include="HIC.TypeGuesser" Version="1.0.3" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
-    <PackageReference Include="MySqlConnector" Version="2.2.5" />
+    <PackageReference Include="MySqlConnector" Version="2.2.6" />
     <PackageReference Include="Npgsql" Version="7.0.2" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.101" />
   </ItemGroup>
