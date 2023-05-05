@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<TestDatabases>
+  <Settings>
+    <AllowDatabaseCreation>True</AllowDatabaseCreation>
+    <TestScratchDatabase>FAnsiTests</TestScratchDatabase>
+  </Settings>
+  <TestDatabase>
+    <DatabaseType>MicrosoftSQLServer</DatabaseType>
+    <ConnectionString>Data Source=localhost;Encrypt=true;TrustServerCertificate=true;Integrated Security=false;User ID=sa;Password=YourStrong!Passw0rd;</ConnectionString>
+  </TestDatabase>
+  <TestDatabase>
+    <DatabaseType>MySql</DatabaseType>
+    <ConnectionString>server=127.0.0.1;Uid=root;Pwd=root;AllowPublicKeyRetrieval=True;ConvertZeroDateTime=true</ConnectionString>
+  </TestDatabase>
+  <TestDatabase>
+    <DatabaseType>Oracle</DatabaseType>
+    <ConnectionString>Data Source=localhost:1521/xe;User Id=sys;Password=oracle;DBA Privilege=SYSDBA</ConnectionString>
+  </TestDatabase>
+  <TestDatabase>
+    <DatabaseType>PostgreSql</DatabaseType>
+    <ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432</ConnectionString>
+  </TestDatabase>
+</TestDatabases>

@@ -47,9 +47,7 @@ jobs:
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: MySQL
       run: |
-        sed -i'' -e 's|</TestDatabases>|<TestDatabase><DatabaseType>PostgreSql</DatabaseType><ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432</ConnectionString></TestDatabase></TestDatabases>|' Tests/FAnsiTests/TestDatabases.xml
-        sed -i'' -e 's/Pwd=;SslMode=None/Pwd=root;AllowPublicKeyRetrieval=true/' Tests/FAnsiTests/TestDatabases.xml
-        sed -i'' -e 's/<TestDatabases>/<TestDatabases><TestDatabase><DatabaseType>Oracle</DatabaseType><ConnectionString>Data Source=localhost:1521/xe;User Id=sys;Password=oracle;DBA Privilege=SYSDBA</ConnectionString></TestDatabase>' Tests/FansiTests/TestDatabases.xml
+        mv Tests/FAnsiTests/TestDatabases{-github,}.xml
         sudo systemctl start mysql.service
     - name: Test
       run: dotnet test --logger "console;verbosity=minimal" --nologo
