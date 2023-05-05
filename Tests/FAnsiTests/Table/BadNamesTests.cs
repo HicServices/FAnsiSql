@@ -11,14 +11,15 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-class BadNamesTests : DatabaseTests
+internal class BadNamesTests : DatabaseTests
 {
     /// <summary>
     /// It would be a bad idea to name your column this but if you really wanted to...
     /// </summary>
-    const string BadColumnName = "Da'   ][\",,;ve";
-    const string BadTableName = "Fi ; ][\"'`sh";
-    const string BadColumnName2 = "Frrrrr ##' ank";
+    private const string BadColumnName = "Da'   ][\",,;ve";
+
+    private const string BadTableName = "Fi ; ][\"'`sh";
+    private const string BadColumnName2 = "Frrrrr ##' ank";
     private DiscoveredTable SetupBadNamesTable(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
@@ -72,7 +73,7 @@ class BadNamesTests : DatabaseTests
         var col = tbl.DiscoverColumn(BadColumnName);
         Assert.AreEqual(100,col.DataType.GetLengthIfString());
 
-        string varcharType = tbl.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof(string),10));
+        var varcharType = tbl.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof(string),10));
             
         // Can we ALTER it's datatype
         Assert.AreEqual(100,col.DataType.GetLengthIfString());
@@ -148,7 +149,7 @@ class BadNamesTests : DatabaseTests
         tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,"ff" } });
         tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,DBNull.Value } });
             
-        string topx = tbl.GetTopXSql(2);
+        var topx = tbl.GetTopXSql(2);
 
         var svr = tbl.Database.Server;
         using(var con = svr.GetConnection())
@@ -177,12 +178,12 @@ class BadNamesTests : DatabaseTests
             new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int))) 
         });
 
-        DiscoveredColumn pk = tbl1.DiscoverColumns().Single(c=>c.IsPrimaryKey);
+        var pk = tbl1.DiscoverColumns().Single(c=>c.IsPrimaryKey);
         DatabaseColumnRequest fk;
 
-        var tbl2 = db.CreateTable(new CreateTableArgs(db,BadTableName+"2",null)
+        var tbl2 = db.CreateTable(new CreateTableArgs(db, $"{BadTableName}2",null)
         {
-            ExplicitColumnDefinitions = new []{fk = new DatabaseColumnRequest(BadColumnName+"2",new DatabaseTypeRequest(typeof(string),100)) }, 
+            ExplicitColumnDefinitions = new []{fk = new DatabaseColumnRequest($"{BadColumnName}2",new DatabaseTypeRequest(typeof(string),100)) }, 
             ForeignKeyPairs = new Dictionary<DatabaseColumnRequest, DiscoveredColumn> {{fk, pk} }
         });
 
@@ -192,7 +193,7 @@ class BadNamesTests : DatabaseTests
         Assert.AreEqual(tbl2,r.ForeignKeyTable);
 
         Assert.AreEqual(pk, r.Keys.Single().Key);
-        Assert.AreEqual(tbl2.DiscoverColumn(BadColumnName +"2"), r.Keys.Single().Value);
+        Assert.AreEqual(tbl2.DiscoverColumn($"{BadColumnName}2"), r.Keys.Single().Value);
                 
         tbl2.Drop();
         tbl1.Drop();
@@ -203,21 +204,18 @@ class BadNamesTests : DatabaseTests
     {
         var tbl = SetupBadNamesTable(dbType);
             
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add(BadColumnName);
         dt.Columns.Add(BadColumnName2);
             
-        dt.Rows.Add (new object[]{ "fff",5});
+        dt.Rows.Add ("fff", 5);
 
         using(var insert = tbl.BeginBulkInsert())
         {
             insert.Upload(dt);
         }
             
-        dt.Dispose();
-
         Assert.AreEqual(1,dt.Rows.Count);
-
         tbl.Drop();
     }
 

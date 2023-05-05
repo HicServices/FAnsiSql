@@ -23,20 +23,20 @@ public class DiscoveredDataType
     /// <summary>
     /// All values read from the database record retrieved when assembling the data type (E.g. the cells of the sys.columns record)
     /// </summary>
-    public Dictionary<string, object> ProprietaryDatatype = new Dictionary<string, object>();
+    public Dictionary<string, object> ProprietaryDatatype = new();
 
     /// <summary>
     /// API constructor, instead use <see cref="DiscoveredTable.DiscoverColumns"/> instead.
     /// </summary>
     /// <param name="r">All the values in r will be copied into the Dictionary property of this class called ProprietaryDatatype</param>
-    /// <param name="sqlType">Your infered SQL data type for it e.g. varchar(50)</param>
-    /// <param name="column">The column it belongs to, can be null e.g. if your datatype belongs to a DiscoveredParameter instead</param>
+    /// <param name="sqlType">Your inferred SQL data type for it e.g. varchar(50)</param>
+    /// <param name="column">The column it belongs to, can be null e.g. if your data type belongs to a DiscoveredParameter instead</param>
     public DiscoveredDataType(DbDataReader r, string sqlType, DiscoveredColumn column)
     {
         SQLType = sqlType;
         Column = column;
 
-        for (int i = 0; i < r.FieldCount; i++)
+        for (var i = 0; i < r.FieldCount; i++)
             ProprietaryDatatype.Add(r.GetName(i), r.GetValue(i));
     }
 
@@ -90,7 +90,7 @@ public class DiscoveredDataType
     /// <exception cref="AlterFailedException"></exception>
     public void Resize(int newSize, IManagedTransaction managedTransaction = null)
     {
-        int toReplace = GetLengthIfString();
+        var toReplace = GetLengthIfString();
             
         if(newSize == toReplace)
             return;
@@ -116,7 +116,7 @@ public class DiscoveredDataType
     /// <exception cref="AlterFailedException"></exception>
     public void Resize(int numberOfDigitsBeforeDecimalPoint, int numberOfDigitsAfterDecimalPoint, IManagedTransaction managedTransaction = null)
     {
-        DecimalSize toReplace = GetDecimalSize();
+        var toReplace = GetDecimalSize();
 
         if (toReplace == null || toReplace.IsEmpty)
             throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_DataType_cannot_be_resized_to_decimal_because_it_is_of_data_type__0_, SQLType));
@@ -141,9 +141,9 @@ public class DiscoveredDataType
     /// </summary>
     /// <param name="newType">The data type you want to change to e.g. "varchar(max)"</param>
     /// <param name="managedTransaction"></param>
-    /// <param name="altertimeoutInSeconds">The time to wait before giving up on the command (See <see cref="DbCommand.CommandTimeout"/></param>
+    /// <param name="alterTimeoutInSeconds">The time to wait before giving up on the command (See <see cref="DbCommand.CommandTimeout"/></param>
     /// <exception cref="AlterFailedException"></exception>
-    public void AlterTypeTo(string newType, IManagedTransaction managedTransaction = null,int altertimeoutInSeconds = 500)
+    public void AlterTypeTo(string newType, IManagedTransaction managedTransaction = null,int alterTimeoutInSeconds = 500)
     {
         if(Column == null)
             throw new NotSupportedException(FAnsiStrings.DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_reference_to_a_Column_to_which_it_belongs);
@@ -151,14 +151,12 @@ public class DiscoveredDataType
         var server = Column.Table.Database.Server;
         using (var connection = server.GetManagedConnection(managedTransaction))
         {
-            string sql = Column.Helper.GetAlterColumnToSql(Column, newType, Column.AllowNulls);
+            var sql = Column.Helper.GetAlterColumnToSql(Column, newType, Column.AllowNulls);
             try
             {
-                using(var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction))
-                {
-                    cmd.CommandTimeout = altertimeoutInSeconds;
-                    cmd.ExecuteNonQuery();
-                }
+                using var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
+                cmd.CommandTimeout = alterTimeoutInSeconds;
+                cmd.ExecuteNonQuery();
             }
             catch (Exception e)
             {
@@ -185,7 +183,7 @@ public class DiscoveredDataType
     /// <returns></returns>
     public override int GetHashCode()
     {
-        return (SQLType != null ? SQLType.GetHashCode() : 0);
+        return SQLType != null ? SQLType.GetHashCode() : 0;
     }
 
     /// <summary>
@@ -196,7 +194,7 @@ public class DiscoveredDataType
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((DiscoveredDataType)obj);
     }
 

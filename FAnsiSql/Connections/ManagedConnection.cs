@@ -27,7 +27,7 @@ public class ManagedConnection : IManagedConnection
 
         //if there is a transaction, also store the transaction
         ManagedTransaction = managedTransaction;
-        Transaction = managedTransaction != null ? managedTransaction.Transaction : null;
+        Transaction = managedTransaction?.Transaction;
 
         //if there isn't a transaction then we opened a new connection so we had better remember to close it again
         if(managedTransaction == null)

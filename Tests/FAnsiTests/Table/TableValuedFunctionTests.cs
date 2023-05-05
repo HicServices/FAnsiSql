@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-class TableValuedFunctionTests:DatabaseTests
+internal class TableValuedFunctionTests:DatabaseTests
 {
     [TestCase("dbo")]
     [TestCase("Omg")]
@@ -25,7 +25,7 @@ IF NOT EXISTS ( SELECT  *
 EXEC('CREATE SCHEMA  {schema}')", con).ExecuteNonQuery();
 
 
-            string sql = $@"CREATE FUNCTION {schema}.MyAwesomeFunction
+            var sql = $@"CREATE FUNCTION {schema}.MyAwesomeFunction
 (	
 	-- Add the parameters for the function here
 	@startNumber int ,

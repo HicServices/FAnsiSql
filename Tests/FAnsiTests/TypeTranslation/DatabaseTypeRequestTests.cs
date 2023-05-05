@@ -3,15 +3,15 @@ using TypeGuesser;
 
 namespace FAnsiTests.TypeTranslation;
 
-class DatabaseTypeRequestTests
+internal class DatabaseTypeRequestTests
 {
     [Test]
     public void Test_Max_WithUnicode()
     {
             
         var max = DatabaseTypeRequest.Max(
-            new DatabaseTypeRequest(typeof(string), 1, null){Unicode = true},
-            new DatabaseTypeRequest(typeof(string), 2, null)
+            new DatabaseTypeRequest(typeof(string), 1){Unicode = true},
+            new DatabaseTypeRequest(typeof(string), 2)
         );
 
         Assert.AreEqual(2,max.Width);

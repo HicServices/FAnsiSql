@@ -8,7 +8,7 @@ using System.Data;
 
 namespace FAnsiTests.Aggregation;
 
-class CalendarWithPivotAggregationTests:AggregationTests
+internal class CalendarWithPivotAggregationTests:AggregationTests
 {
     [TestCase(DatabaseType.MicrosoftSQLServer,true)]
     [TestCase(DatabaseType.MySql,true)]
@@ -39,7 +39,7 @@ class CalendarWithPivotAggregationTests:AggregationTests
                 new("Category", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot }
             };
 
-            var axis = new QueryAxis()
+            var axis = new QueryAxis
             {
                 StartDate = "'2001-01-01'",
                 EndDate = "'2010-01-01'",
@@ -53,7 +53,7 @@ class CalendarWithPivotAggregationTests:AggregationTests
             con.Open();
 
             var da = svr.GetDataAdapter(sql, con);
-            DataTable dt = new DataTable();
+            using var dt = new DataTable();
             da.Fill(dt);
 
             //pivot columns should ordered by sum of pivot values (T has the highest followed by E...)
@@ -120,7 +120,7 @@ class CalendarWithPivotAggregationTests:AggregationTests
         }
         catch (Exception)
         {
-            TestContext.Error.WriteLine($"SQL triggering error was: '{(sql ?? "None defined")}'");
+            TestContext.Error.WriteLine($"SQL triggering error was: '{sql ?? "None defined"}'");
             throw;
         }
     }

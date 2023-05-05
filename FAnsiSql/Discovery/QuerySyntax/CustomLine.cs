@@ -43,7 +43,7 @@ public class CustomLine
     /// <returns></returns>
     public string GetTextWithoutAlias(IQuerySyntaxHelper syntaxHelper)
     {
-        syntaxHelper.SplitLineIntoSelectSQLAndAlias(Text, out string withoutAlias, out _);
+        syntaxHelper.SplitLineIntoSelectSQLAndAlias(Text, out var withoutAlias, out _);
         return withoutAlias;
     }
 
@@ -54,7 +54,7 @@ public class CustomLine
     /// <returns></returns>
     public string GetAliasFromText(IQuerySyntaxHelper syntaxHelper)
     {
-        syntaxHelper.SplitLineIntoSelectSQLAndAlias(Text, out string _, out string alias);
+        syntaxHelper.SplitLineIntoSelectSQLAndAlias(Text, out _, out var alias);
         return string.IsNullOrWhiteSpace(alias) ? null : alias;
     }
 }

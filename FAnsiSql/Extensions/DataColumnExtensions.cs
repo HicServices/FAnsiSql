@@ -37,9 +37,7 @@ public static class DataColumnExtensions
     {
         return     
             dc.DataType == typeof(string) &&
-            dc.ExtendedProperties.ContainsKey(DoNotReTypeExtendedProperty) &&
-            dc.ExtendedProperties[DoNotReTypeExtendedProperty] is bool b
-            && b;
+            dc.ExtendedProperties[DoNotReTypeExtendedProperty] is true;
     }
 
 }

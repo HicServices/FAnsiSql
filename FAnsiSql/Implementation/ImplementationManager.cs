@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using FAnsi.Exceptions;
+using FAnsi.Implementations.MicrosoftSQL;
+using FAnsi.Implementations.MySql;
+using FAnsi.Implementations.Oracle;
+using FAnsi.Implementations.PostgreSql;
 
 namespace FAnsi.Implementation;
 
@@ -17,80 +18,37 @@ namespace FAnsi.Implementation;
 /// </summary>
 public class ImplementationManager
 {
-    private static ImplementationManager _instance;
+    private static readonly ImplementationManager Instance=new();
 
     /// <summary>
     /// Collection of all the currently loaded API <see cref="IImplementation"/>.  Normally you only want 1 implementation per DBMS.
-    /// <para>Populated by MEF during calls to <see cref="Load{T}"/>.</para>
     /// </summary>
-    [ImportMany]
-    public List<IImplementation> Implementations;
+    private readonly List<IImplementation> _implementations;
 
     private ImplementationManager()
     {
-
+        _implementations = new List<IImplementation>();
     }
 
     /// <summary>
     /// loads all implementations in the assembly hosting the <typeparamref name="T"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static void Load<T>() where T:IImplementation
+    public static void Load<T>() where T:IImplementation,new()
     {
-        Load(typeof(T).Assembly);
+        var loading = new T();
+        if (!Instance._implementations.Contains(loading))
+            Instance._implementations.Add(loading);
     }
 
     /// <summary>
     /// Loads all implementations found in currently loaded assemblies (in the current domain)
     /// </summary>
+    [Obsolete("MEF is dead")]
     public static void Load(DirectoryInfo currentDirectory=null)
     {
-        currentDirectory = currentDirectory ?? new DirectoryInfo(Environment.CurrentDirectory);
-
-        if(!currentDirectory.Exists)
-            throw new Exception(string.Format(FAnsiStrings.ImplementationManager_Load_Directory___0__did_not_exist, currentDirectory));
-
-        var catalog = new DirectoryCatalog(currentDirectory.FullName,"*FAnsi*");
-                        
-        Load(catalog);
     }
 
-    /// <summary>
-    /// Loads all implementations found in the provided assemblies
-    /// </summary>
-    /// <param name="assemblies"></param>
-    public static void Load(params Assembly[] assemblies)
-    {
-        AggregateCatalog catalog = new AggregateCatalog();
-
-        foreach (Assembly assembly in assemblies)
-            catalog.Catalogs.Add(new AssemblyCatalog(assembly));
-
-        Load(catalog);
-    }
-
-    private static  void Load(ComposablePartCatalog catalog)
-    {
-        if (_instance == null)
-            _instance = new ImplementationManager();
-
-        //just because we load new implementations doesn't mean we should throw away the old ones
-        var old = _instance.Implementations?.ToArray();
-
-        using (CompositionContainer container = new CompositionContainer(catalog))
-        {
-            //bring in the new ones
-            container.SatisfyImportsOnce(_instance);
-
-            //but also bring in any old ones that we don't have in the new load
-            if(old != null)
-                foreach(IImplementation o in old)
-                {
-                    if(_instance.Implementations.All(i=>i.GetType() != o.GetType()))
-                        _instance.Implementations.Add(o);
-                }
-        }
-    }
 
     public static IImplementation GetImplementation(DatabaseType databaseType)
     {
@@ -119,16 +77,7 @@ public class ImplementationManager
     }
     private static IImplementation GetImplementation(Func<IImplementation,bool> condition, string errorIfNotFound)
     {
-        //If no implementations are loaded, load the current directory's dlls to look for implmentations
-        if (_instance == null)
-            Load();
-            
-        var implementation = _instance.Implementations.FirstOrDefault(condition);
-
-        if (implementation == null)
-            throw new ImplementationNotFoundException(errorIfNotFound);
-
-        return implementation;
+        return Instance?._implementations.FirstOrDefault(condition)??throw new ImplementationNotFoundException(errorIfNotFound);
     }
 
     /// <summary>
@@ -137,14 +86,7 @@ public class ImplementationManager
     /// <returns></returns>
     public static ReadOnlyCollection<IImplementation> GetImplementations()
     {
-        //If no implementations are loaded, load the current directory's dlls to look for implmentations
-        if (_instance == null)
-            return null;
-
-        if(_instance.Implementations == null)
-            return null;
-
-        return new ReadOnlyCollection<IImplementation>(_instance.Implementations);
+        return Instance._implementations.AsReadOnly();
     }
 
     /// <summary>
@@ -152,6 +94,11 @@ public class ImplementationManager
     /// </summary>
     public static void Clear()
     {
-        _instance = null;
+        Instance._implementations.Clear();
+    }
+
+    [Obsolete("MEF is dead")]
+    public static void Load(params Assembly[] _)
+    {
     }
 }

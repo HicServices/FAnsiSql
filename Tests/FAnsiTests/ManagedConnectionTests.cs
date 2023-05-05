@@ -1,12 +1,11 @@
 ﻿using System.Data;
 using FAnsi;
 using FAnsi.Connections;
-using FAnsi.Discovery;
 using NUnit.Framework;
 
 namespace FAnsiTests;
 
-class ManagedConnectionTests:DatabaseTests
+internal class ManagedConnectionTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_GetConnection_NotOpenAtStart(DatabaseType dbType)
@@ -74,13 +73,13 @@ class ManagedConnectionTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_GetManagedConnection_OngoingTransaction(DatabaseType dbType)
     {
-        DiscoveredDatabase db = GetTestDatabase(dbType);
+        var db = GetTestDatabase(dbType);
             
         IManagedConnection ongoingCon;
         //pretend that there is an ongoing transaction already
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
         {
-            IManagedTransaction ongoingTrans = ongoingCon.ManagedTransaction;
+            var ongoingTrans = ongoingCon.ManagedTransaction;
             
             //BeginNewTransactedConnection should open itself
             Assert.AreEqual(ConnectionState.Open,ongoingCon.Connection.State);
@@ -109,16 +108,17 @@ class ManagedConnectionTests:DatabaseTests
     /// <see cref="IManagedTransaction.AbandonAndCloseConnection"/> instead of relying on the outermost using finally 
     /// </summary>
     /// <param name="dbType"></param>
+    /// <param name="commit">Whether to commit</param>
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void Test_GetManagedConnection_OngoingTransaction_WithCommitRollback(DatabaseType dbType,bool commit)
     {
-        DiscoveredDatabase db = GetTestDatabase(dbType);
+        var db = GetTestDatabase(dbType);
             
         IManagedConnection ongoingCon;
         //pretend that there is an ongoing transaction already
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
         {
-            IManagedTransaction ongoingTrans = ongoingCon.ManagedTransaction;
+            var ongoingTrans = ongoingCon.ManagedTransaction;
             
             //BeginNewTransactedConnection should open itself
             Assert.AreEqual(ConnectionState.Open,ongoingCon.Connection.State);
@@ -153,7 +153,7 @@ class ManagedConnectionTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_ManagedTransaction_MultipleCancel(DatabaseType dbType)
     {
-        DiscoveredDatabase db = GetTestDatabase(dbType);
+        var db = GetTestDatabase(dbType);
             
         IManagedConnection ongoingCon;
         //pretend that there is an ongoing transaction already

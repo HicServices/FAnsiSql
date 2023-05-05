@@ -18,9 +18,9 @@ internal class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_Basic(DatabaseType type)
     {
-        DiscoveredDatabase db = GetTestDatabase(type);
+        var db = GetTestDatabase(type);
 
-        DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+        var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
@@ -30,36 +30,32 @@ internal class BulkInsertTest : DatabaseTests
         //There are no rows in the table yet
         Assert.AreEqual(0, tbl.GetRowCount());
 
-        using (var dt = new DataTable())
-        {
-            dt.Columns.Add("Name");
-            dt.Columns.Add("Age");
-            dt.Rows.Add("Dave", 50);
-            dt.Rows.Add("Jamie", 60);
+        using var dt = new DataTable();
+        dt.Columns.Add("Name");
+        dt.Columns.Add("Age");
+        dt.Rows.Add("Dave", 50);
+        dt.Rows.Add("Jamie", 60);
 
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
-                bulk.Upload(dt);
+        using var bulk = tbl.BeginBulkInsert();
+        bulk.Timeout = 30;
+        bulk.Upload(dt);
 
-                Assert.AreEqual(2, tbl.GetRowCount());
+        Assert.AreEqual(2, tbl.GetRowCount());
 
-                dt.Rows.Clear();
-                dt.Rows.Add("Frank", 100);
+        dt.Rows.Clear();
+        dt.Rows.Add("Frank", 100);
 
-                bulk.Upload(dt);
+        bulk.Upload(dt);
 
-                Assert.AreEqual(3, tbl.GetRowCount());
-            }
-        }
+        Assert.AreEqual(3, tbl.GetRowCount());
     }
 
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void TestBulkInsert_SpacedOutNames(DatabaseType type)
     {
-        DiscoveredDatabase db = GetTestDatabase(type);
+        var db = GetTestDatabase(type);
 
-        DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+        var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
                 new DatabaseColumnRequest("Na me", new DatabaseTypeRequest(typeof(string), 10)),
@@ -76,23 +72,21 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("Dave", 50);
             dt.Rows.Add("Jamie", 60);
 
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
-                bulk.Upload(dt);
+            using var bulk = tbl.BeginBulkInsert();
+            bulk.Timeout = 30;
+            bulk.Upload(dt);
 
-                Assert.AreEqual(2, tbl.GetRowCount());
+            Assert.AreEqual(2, tbl.GetRowCount());
 
-                dt.Rows.Clear();
-                dt.Rows.Add("Frank", 100);
+            dt.Rows.Clear();
+            dt.Rows.Add("Frank", 100);
 
-                bulk.Upload(dt);
+            bulk.Upload(dt);
 
-                Assert.AreEqual(3, tbl.GetRowCount());
-            }
+            Assert.AreEqual(3, tbl.GetRowCount());
         }
 
-        tbl.Insert(new Dictionary<string, object>()
+        tbl.Insert(new Dictionary<string, object>
         {
             {"Na me", "George"},
             {"A ge", "300"}
@@ -104,9 +98,9 @@ internal class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_ColumnOrdinals(DatabaseType type)
     {
-        DiscoveredDatabase db = GetTestDatabase(type);
+        var db = GetTestDatabase(type);
 
-        DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+        var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
@@ -116,36 +110,34 @@ internal class BulkInsertTest : DatabaseTests
         //There are no rows in the table yet
         Assert.AreEqual(0, tbl.GetRowCount());
 
-        using (var dt = new DataTable())
+        using var dt = new DataTable();
+        dt.Columns.Add("Age");
+        dt.Columns.Add("Name");
+        dt.Rows.Add( "50","David");
+        dt.Rows.Add("60","Jamie");
+
+        Assert.AreEqual("Age",dt.Columns[0].ColumnName);
+        Assert.AreEqual(typeof(string),dt.Columns[0].DataType);
+
+        using (var bulk = tbl.BeginBulkInsert())
         {
-            dt.Columns.Add("Age");
-            dt.Columns.Add("Name");
-            dt.Rows.Add( "50","David");
-            dt.Rows.Add("60","Jamie");
+            bulk.Timeout = 30;
+            bulk.Upload(dt);
 
-            Assert.AreEqual("Age",dt.Columns[0].ColumnName);
-            Assert.AreEqual(typeof(string),dt.Columns[0].DataType);
-
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
-                bulk.Upload(dt);
-
-                Assert.AreEqual(2, tbl.GetRowCount());
-            }
-
-            //columns should not be reordered
-            Assert.AreEqual("Age",dt.Columns[0].ColumnName);
-            Assert.AreEqual(typeof(int),dt.Columns[0].DataType); //but the data type was changed by HardTyping it
+            Assert.AreEqual(2, tbl.GetRowCount());
         }
+
+        //columns should not be reordered
+        Assert.AreEqual("Age",dt.Columns[0].ColumnName);
+        Assert.AreEqual(typeof(int),dt.Columns[0].DataType); //but the data type was changed by HardTyping it
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_Transaction(DatabaseType type)
     {
-        DiscoveredDatabase db = GetTestDatabase(type);
+        var db = GetTestDatabase(type);
 
-        DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+        var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
@@ -162,27 +154,25 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("Dave", 50);
             dt.Rows.Add("Jamie", 60);
 
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using var transaction = tbl.Database.Server.BeginNewTransactedConnection();
+            using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
             {
-                using (IBulkCopy bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
-                {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                bulk.Timeout = 30;
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                //inside transaction the count is 2
+                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frank", 100);
+                dt.Rows.Clear();
+                dt.Rows.Add("Frank", 100);
 
-                    bulk.Upload(dt);
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
-                }
-
-                transaction.ManagedTransaction.CommitAndCloseConnection();
+                //inside transaction the count is 3
+                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
             }
+
+            transaction.ManagedTransaction.CommitAndCloseConnection();
         }
 
         //Transaction was committed final row count should be 3
@@ -211,27 +201,25 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("Dave", 50);
             dt.Rows.Add("Jamie", 60);
 
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using var transaction = tbl.Database.Server.BeginNewTransactedConnection();
+            using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
             {
-                using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
-                {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                bulk.Timeout = 30;
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                //inside transaction the count is 2
+                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frank", 100);
+                dt.Rows.Clear();
+                dt.Rows.Add("Frank", 100);
 
-                    bulk.Upload(dt);
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
-                }
-
-                transaction.ManagedTransaction.AbandonAndCloseConnection();
+                //inside transaction the count is 3
+                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
             }
+
+            transaction.ManagedTransaction.AbandonAndCloseConnection();
         }
 
         //We abandoned transaction so final rowcount should be 0
@@ -260,35 +248,33 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("Dave", 50);
             dt.Rows.Add("Jamie", 60);
 
-            using (var transaction = tbl.Database.Server.BeginNewTransactedConnection())
+            using var transaction = tbl.Database.Server.BeginNewTransactedConnection();
+            using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
             {
-                using (var bulk = tbl.BeginBulkInsert(transaction.ManagedTransaction))
-                {
-                    bulk.Timeout = 30;
-                    bulk.Upload(dt);
+                bulk.Timeout = 30;
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 2
-                    Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                //inside transaction the count is 2
+                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
 
-                    //New row is too long for the data type
-                    dt.Rows.Clear();
-                    dt.Rows.Add("Frankyyyyyyyyyyyyyyyyyyyyyy", 100);
+                //New row is too long for the data type
+                dt.Rows.Clear();
+                dt.Rows.Add("Frankyyyyyyyyyyyyyyyyyyyyyy", 100);
 
-                    //So alter the data type to handle up to string lengths of 100
-                    //Find the column
-                    DiscoveredColumn col = tbl.DiscoverColumn("Name", transaction.ManagedTransaction);
+                //So alter the data type to handle up to string lengths of 100
+                //Find the column
+                var col = tbl.DiscoverColumn("Name", transaction.ManagedTransaction);
 
-                    //Make it bigger
-                    col.DataType.Resize(100, transaction.ManagedTransaction);
+                //Make it bigger
+                col.DataType.Resize(100, transaction.ManagedTransaction);
 
-                    bulk.Upload(dt);
+                bulk.Upload(dt);
 
-                    //inside transaction the count is 3
-                    Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
-                }
-
-                transaction.ManagedTransaction.CommitAndCloseConnection();
+                //inside transaction the count is 3
+                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
             }
+
+            transaction.ManagedTransaction.CommitAndCloseConnection();
         }
             
         //We abandoned transaction so final rowcount should be 0
@@ -298,7 +284,7 @@ internal class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void BulkInsert_MixedCase(DatabaseType type)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("Test", new[]
         {
@@ -306,7 +292,7 @@ internal class BulkInsertTest : DatabaseTests
             new DatabaseColumnRequest("Frank", new DatabaseTypeRequest(typeof (string), 100))
         });
 
-        using (DataTable dt = new DataTable())
+        using (var dt = new DataTable())
         {
             //note that the column order here is reversed i.e. the DataTable column order doesn't match the database (intended)
             dt.Columns.Add("BoB");
@@ -314,45 +300,42 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("no", "yes");
             dt.Rows.Add("no", "no");
 
-            using (var blk = tbl.BeginBulkInsert())
-                blk.Upload(dt);
-
+            using var blk = tbl.BeginBulkInsert();
+            blk.Upload(dt);
         }
-                
-        using(var result = tbl.GetDataTable())
-            Assert.AreEqual(2, result.Rows.Count); //2 rows inserted
+
+        using var result = tbl.GetDataTable();
+        Assert.AreEqual(2, result.Rows.Count); //2 rows inserted
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void UnmatchedColumnsBulkInsertTest_UsesDefaultValues_Passes(DatabaseType type)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
             },
-            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
+            new("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
             {
                 Default = MandatoryScalarFunctions.GetTodaysDate
             },
-            new DatabaseColumnRequest("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false},
+            new("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false}
         });
 
-        using (DataTable dt = new DataTable())
+        using (var dt = new DataTable())
         {
             //note that the column order here is reversed i.e. the DataTable column order doesn't match the database (intended)
             dt.Columns.Add("peter");
             dt.Columns.Add("bob");
             dt.Rows.Add("no", "yes");
 
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                blk.Upload(dt);
-            }
+            using var blk = tbl.BeginBulkInsert();
+            blk.Upload(dt);
         }
                 
 
@@ -360,7 +343,7 @@ internal class BulkInsertTest : DatabaseTests
         Assert.AreEqual(3, result.Columns.Count);
         Assert.AreEqual("yes", result.Rows[0]["bob"]);
         Assert.NotNull(result.Rows[0]["frank"]);
-        Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString().Length, 5); //should be a date
+        Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString()?.Length, 5); //should be a date
         Assert.AreEqual("no", result.Rows[0]["peter"]);
 
         tbl.Drop();
@@ -377,73 +360,73 @@ internal class BulkInsertTest : DatabaseTests
     {
         const int numberOfRowsPerBatch = 100010;
 
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 AllowNulls = false
             },
-            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
+            new("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
             {
                 Default = MandatoryScalarFunctions.GetTodaysDate
             },
-            new DatabaseColumnRequest("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false},
+            new("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false},
 
-            new DatabaseColumnRequest("Column0", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column1", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column2", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column3", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column4", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column5", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column6", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column7", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column8", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column9", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column0", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column1", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column2", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column3", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column4", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column5", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column6", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column7", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column8", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column9", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
 
-            new DatabaseColumnRequest("Column10", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column11", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column12", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column13", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column14", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column15", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column16", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column17", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column18", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column19", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column10", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column11", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column12", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column13", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column14", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column15", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column16", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column17", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column18", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column19", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
 
-            new DatabaseColumnRequest("Column20", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column21", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column22", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column23", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column24", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column25", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column26", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column27", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column28", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new DatabaseColumnRequest("Column29", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column20", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column21", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column22", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column23", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column24", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column25", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column26", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column27", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column28", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new("Column29", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false}
 
         });
 
-        using (DataTable dt = new DataTable())
+        using (var dt = new DataTable())
         {
             //note that the column order here is reversed i.e. the DataTable column order doesn't match the database (intended)
             dt.Columns.Add("peter");
             dt.Columns.Add("bob");
 
-            for (int i = 0; i < 30; i++)
+            for (var i = 0; i < 30; i++)
             {
                 dt.Columns.Add($"Column{i}");
             }
 
 
 
-            for (int i = 0; i < numberOfRowsPerBatch; i++)
+            for (var i = 0; i < numberOfRowsPerBatch; i++)
                 dt.Rows.Add("no", Guid.NewGuid().ToString(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
                     17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29);
 
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
 
             using (var blk = tbl.BeginBulkInsert())
@@ -455,7 +438,7 @@ internal class BulkInsertTest : DatabaseTests
 
             dt.Rows.Clear();
 
-            for (int i = 0; i < numberOfRowsPerBatch; i++)
+            for (var i = 0; i < numberOfRowsPerBatch; i++)
                 dt.Rows.Add("no", Guid.NewGuid().ToString(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
                     17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29);
 
@@ -476,7 +459,7 @@ internal class BulkInsertTest : DatabaseTests
         Assert.AreEqual(numberOfRowsPerBatch*2, result.Rows.Count);
         Assert.NotNull(result.Rows[0]["bob"]);
         Assert.NotNull(result.Rows[0]["frank"]);
-        Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString().Length, 5); //should be a date
+        Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString()?.Length, 5); //should be a date
         Assert.AreEqual("no", result.Rows[0]["peter"]);
             
         //while we have a ton of data in there lets test some cancellation operations
@@ -507,7 +490,7 @@ internal class BulkInsertTest : DatabaseTests
             using var cts = new CancellationTokenSource(300);
             //GetDataTable should have been cancelled at the database level
             Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,cts.Token,50000)));
-            tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default(CancellationToken),50000));
+            tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default,50000));
         }
 
             
@@ -527,60 +510,54 @@ internal class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void NullPrimaryKey_ThrowsException(DatabaseType type)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
             }
         });
 
-        using (DataTable dt = new DataTable())
-        {
-            dt.Columns.Add("bob");
-            dt.Rows.Add(DBNull.Value);
+        using var dt = new DataTable();
+        dt.Columns.Add("bob");
+        dt.Rows.Add(DBNull.Value);
 
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                Assert.Throws(Is.InstanceOf<Exception>(), () => blk.Upload(dt));
-            }
-        }
+        using var blk = tbl.BeginBulkInsert();
+        Assert.Throws(Is.InstanceOf<Exception>(), () => blk.Upload(dt));
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void AutoIncrementPrimaryKey_Passes(DatabaseType type)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (int), 100))
+            new("bob", new DatabaseTypeRequest(typeof (int), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false,
                 IsAutoIncrement = true
             },
-            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (string), 100))
+            new("frank", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
             }
         });
 
-        using (DataTable dt = new DataTable())
+        using (var dt = new DataTable())
         {
             dt.Columns.Add("frank");
             dt.Rows.Add("fish");
             dt.Rows.Add("fish");
             dt.Rows.Add("tank");
 
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                Assert.AreEqual(3, blk.Upload(dt));
-            }
+            using var blk = tbl.BeginBulkInsert();
+            Assert.AreEqual(3, blk.Upload(dt));
         }
             
 
@@ -598,29 +575,27 @@ internal class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_ScientificNotation(DatabaseType type)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
         {
-            new DatabaseColumnRequest("num", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(1,10)))
+            new("num", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(1,10)))
             {
-                AllowNulls = false,
+                AllowNulls = false
             }
         });
 
-        using (DataTable dt = new DataTable())
+        using (var dt = new DataTable())
         {
             dt.Columns.Add("num");
             dt.Rows.Add("-4.10235746055587E-05"); //-0.0000410235746055587  <- this is what the number is
             //-0.0000410235           <- this is what goes into db since we only asked for 10 digits after decimal place
-            using (var blk = tbl.BeginBulkInsert())
-            {
-                Assert.AreEqual(1, blk.Upload(dt));
-            }
+            using var blk = tbl.BeginBulkInsert();
+            Assert.AreEqual(1, blk.Upload(dt));
         }
             
 
-        tbl.Insert(new Dictionary<string, object>() {{"num", "-4.10235746055587E-05"}});
+        tbl.Insert(new Dictionary<string, object> {{"num", "-4.10235746055587E-05"}});
 
         //the numbers read from the database should be pretty much exactly -0.0000410235 but Decimals are always a pain so...
         var result = tbl.GetDataTable();
@@ -634,16 +609,11 @@ internal class BulkInsertTest : DatabaseTests
         var c2 = Math.Round((decimal) result.Rows[1][0], 9);
 
         //make sure they are basically what we are expecting (at the 9 decimal place point)
-        if (Math.Abs(-0.0000410235 - (double) c1) < 0.000000001)
-            Assert.Pass();
-        else 
+        if (Math.Abs(-0.0000410235 - (double)c1) >= 0.000000001)
             Assert.Fail();
 
-        if(Math.Abs(-0.0000410235 - (double) c2) < 0.000000001)
-            Assert.Pass();
-        else
+        if (Math.Abs(-0.0000410235 - (double)c2) >= 0.000000001)
             Assert.Fail();
-
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -653,7 +623,7 @@ internal class BulkInsertTest : DatabaseTests
 
         DiscoveredTable table;
 
-        using (DataTable dt = new DataTable())
+        using (var dt = new DataTable())
         {
             dt.Columns.Add("Yay");
             dt.Rows.Add("乗 12345");
@@ -661,17 +631,16 @@ internal class BulkInsertTest : DatabaseTests
             table = db.CreateTable("GoGo", dt);
         }
             
-        using (DataTable dt2 = new DataTable())
+        using (var dt2 = new DataTable())
         {
             dt2.Columns.Add("yay");
             dt2.Rows.Add("你好");
 
-            using (var insert = table.BeginBulkInsert())
-                insert.Upload(dt2);
-
+            using var insert = table.BeginBulkInsert();
+            insert.Upload(dt2);
         }
             
-        table.Insert(new Dictionary<string, object>() {{"Yay", "مرحبا"}});
+        table.Insert(new Dictionary<string, object> {{"Yay", "مرحبا"}});
             
         //now check that it all worked!
 
@@ -688,9 +657,9 @@ internal class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_SchemaTooNarrow_StringError(DatabaseType type)
     {
-        DiscoveredDatabase db = GetTestDatabase(type);
+        var db = GetTestDatabase(type);
 
-        DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+        var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
                 new DatabaseColumnRequest("Id", new DatabaseTypeRequest(typeof (int))){IsAutoIncrement = true, IsPrimaryKey = true},
@@ -701,55 +670,41 @@ internal class BulkInsertTest : DatabaseTests
         //There are no rows in the table yet
         Assert.AreEqual(0, tbl.GetRowCount());
 
-        using(var dt = new DataTable())
+        using var dt = new DataTable();
+        dt.Columns.Add("age");
+        dt.Columns.Add("name");
+
+        dt.Rows.Add(60,"Jamie");
+        dt.Rows.Add(30,"Frank");
+        dt.Rows.Add(11,"Toad");
+        dt.Rows.Add(50, new string('A', 11));    
+        dt.Rows.Add(100,"King");
+        dt.Rows.Add(10,"Frog");
+
+        using var bulk = tbl.BeginBulkInsert();
+        bulk.Timeout = 30;
+
+        var ex=Assert.Catch(() => bulk.Upload(dt), "Expected upload to fail because value on row 2 is too long");
+
+        switch (type)
         {
-            dt.Columns.Add("age");
-            dt.Columns.Add("name");
+            case DatabaseType.MicrosoftSQLServer:
+                StringAssert.Contains("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>",ex.Message);
+                break;
+            case DatabaseType.MySql:
+                Assert.AreEqual("Data too long for column 'Name' at row 4",ex.Message);
+                break;
+            case DatabaseType.Oracle:
+                StringAssert.Contains("NAME",ex.Message);
+                StringAssert.Contains("maximum: 10",ex.Message);
+                StringAssert.Contains("actual: 11",ex.Message);
 
-            dt.Rows.Add(60,"Jamie");
-            dt.Rows.Add(30,"Frank");
-            dt.Rows.Add(11,"Toad");
-            dt.Rows.Add(50, new string('A', 11));    
-            dt.Rows.Add(100,"King");
-            dt.Rows.Add(10,"Frog"); 
-                
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
-                
-                Exception ex = null;
-                try 
-                {
-                    bulk.Upload(dt);
-                }
-                catch(Exception e)
-                {
-                    ex = e;
-                }
-
-                Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
-
-                switch (type)
-                {
-                    case DatabaseType.MicrosoftSQLServer:
-                        StringAssert.Contains("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>",ex.Message);
-                        break;
-                    case DatabaseType.MySql:
-                        Assert.AreEqual("Data too long for column 'Name' at row 4",ex.Message);
-                        break;
-                    case DatabaseType.Oracle:
-                        StringAssert.Contains("NAME",ex.Message);
-                        StringAssert.Contains("maximum: 10",ex.Message);
-                        StringAssert.Contains("actual: 11",ex.Message);
-
-                        break;
-                    case DatabaseType.PostgreSql:
-                        StringAssert.Contains("value too long for type character varying(10)",ex.Message);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
-                }
-            }
+                break;
+            case DatabaseType.PostgreSql:
+                StringAssert.Contains("value too long for type character varying(10)",ex.Message);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
 
@@ -757,11 +712,11 @@ internal class BulkInsertTest : DatabaseTests
     public void TestBulkInsert_ExplicitDateTimeFormats(DatabaseType type)
     {
             
-        DiscoveredDatabase db = GetTestDatabase(type);
-        DiscoveredTable tbl = db.CreateTable("MyDateTestTable",
+        var db = GetTestDatabase(type);
+        var tbl = db.CreateTable("MyDateTestTable",
             new[]
             {
-                new DatabaseColumnRequest("MyDate", new DatabaseTypeRequest(typeof (DateTime))){AllowNulls=false },
+                new DatabaseColumnRequest("MyDate", new DatabaseTypeRequest(typeof (DateTime))){AllowNulls=false }
             });
 
         //There are no rows in the table yet
@@ -772,12 +727,10 @@ internal class BulkInsertTest : DatabaseTests
             dt.Columns.Add("MyDate");
             dt.Rows.Add("20011230");
 
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
-                bulk.DateTimeDecider.Settings.ExplicitDateFormats = new []{"yyyyMMdd" };
-                bulk.Upload(dt);
-            }
+            using var bulk = tbl.BeginBulkInsert();
+            bulk.Timeout = 30;
+            bulk.DateTimeDecider.Settings.ExplicitDateFormats = new []{"yyyyMMdd" };
+            bulk.Upload(dt);
         }
             
         var dtDown = tbl.GetDataTable();
@@ -787,9 +740,9 @@ internal class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_SchemaTooNarrow_DecimalError(DatabaseType type)
     {
-        DiscoveredDatabase db = GetTestDatabase(type);
+        var db = GetTestDatabase(type);
             
-        DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+        var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
                 new DatabaseColumnRequest("Id", new DatabaseTypeRequest(typeof (int))){IsAutoIncrement = true, IsPrimaryKey = true},
@@ -801,65 +754,60 @@ internal class BulkInsertTest : DatabaseTests
         //There are no rows in the table yet
         Assert.AreEqual(0, tbl.GetRowCount());
 
-        using (var dt = new DataTable())
-        {
-            dt.Columns.Add("age");
-            dt.Columns.Add("name");
-            dt.Columns.Add("score");
+        using var dt = new DataTable();
+        dt.Columns.Add("age");
+        dt.Columns.Add("name");
+        dt.Columns.Add("score");
 
-            dt.Rows.Add(60,"Jamie",1.2);
-            dt.Rows.Add(30,"Frank",1.3);
-            dt.Rows.Add(11,"Toad",111111111.11); //bad data 
-            dt.Rows.Add(100,"King");
-            dt.Rows.Add(10,"Frog");        
+        dt.Rows.Add(60,"Jamie",1.2);
+        dt.Rows.Add(30,"Frank",1.3);
+        dt.Rows.Add(11,"Toad",111111111.11); //bad data 
+        dt.Rows.Add(100,"King");
+        dt.Rows.Add(10,"Frog");
 
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
+        using var bulk = tbl.BeginBulkInsert();
+        bulk.Timeout = 30;
                 
-                Exception ex = null;
-                try 
-                {
-                    bulk.Upload(dt);
-                }
-                catch(Exception e)
-                {
-                    ex = e;
-                }
-
-                Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
-
-                switch (type)
-                {
-                    case DatabaseType.MicrosoftSQLServer:
-                        StringAssert.Contains("Failed to load data row 3 the following values were rejected by the database",ex.Message);
-                        StringAssert.Contains("Parameter value '111111111.1' is out of range",ex.Message);
-                        break;
-                    case DatabaseType.MySql:
-                        Assert.AreEqual("Out of range value for column 'Score' at row 3",ex.Message);
-                        break;
-                    case DatabaseType.Oracle:
-                        StringAssert.Contains("value larger than specified precision allowed for this column",ex.Message);
-
-                        break;
-                    case DatabaseType.PostgreSql:
-                        StringAssert.Contains("numeric field overflow",ex.Message);
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
-                }
-            }
+        Exception ex = null;
+        try 
+        {
+            bulk.Upload(dt);
         }
-            
+        catch(Exception e)
+        {
+            ex = e;
+        }
+
+        Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
+
+        switch (type)
+        {
+            case DatabaseType.MicrosoftSQLServer:
+                StringAssert.Contains("Failed to load data row 3 the following values were rejected by the database",ex.Message);
+                StringAssert.Contains("Parameter value '111111111.1' is out of range",ex.Message);
+                break;
+            case DatabaseType.MySql:
+                Assert.AreEqual("Out of range value for column 'Score' at row 3",ex.Message);
+                break;
+            case DatabaseType.Oracle:
+                StringAssert.Contains("value larger than specified precision allowed for this column",ex.Message);
+
+                break;
+            case DatabaseType.PostgreSql:
+                StringAssert.Contains("numeric field overflow",ex.Message);
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_BadDecimalFormat_DecimalError(DatabaseType type)
     {
-        DiscoveredDatabase db = GetTestDatabase(type);
+        var db = GetTestDatabase(type);
             
-        DiscoveredTable tbl = db.CreateTable("MyBulkInsertTest",
+        var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
                 new DatabaseColumnRequest("Id", new DatabaseTypeRequest(typeof (int))){IsAutoIncrement = true, IsPrimaryKey = true},
@@ -871,39 +819,34 @@ internal class BulkInsertTest : DatabaseTests
         //There are no rows in the table yet
         Assert.AreEqual(0, tbl.GetRowCount());
 
-        using (var dt = new DataTable())
-        {
-            dt.Columns.Add("age");
-            dt.Columns.Add("name");
-            dt.Columns.Add("score");
+        using var dt = new DataTable();
+        dt.Columns.Add("age");
+        dt.Columns.Add("name");
+        dt.Columns.Add("score");
 
-            dt.Rows.Add(60,"Jamie",1.2);
-            dt.Rows.Add(30,"Frank",1.3);
-            dt.Rows.Add(11,"Toad","."); //bad data 
-            dt.Rows.Add(100,"King");
-            dt.Rows.Add(10,"Frog");        
+        dt.Rows.Add(60,"Jamie",1.2);
+        dt.Rows.Add(30,"Frank",1.3);
+        dt.Rows.Add(11,"Toad","."); //bad data 
+        dt.Rows.Add(100,"King");
+        dt.Rows.Add(10,"Frog");
 
-            using (IBulkCopy bulk = tbl.BeginBulkInsert())
-            {
-                bulk.Timeout = 30;
+        using var bulk = tbl.BeginBulkInsert();
+        bulk.Timeout = 30;
                 
-                Exception ex = null;
-                try 
-                {
-                    bulk.Upload(dt);
-                }
-                catch(Exception e)
-                {
-                    ex = e;
-                }
-
-                Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is bad");
-
-                Assert.AreEqual("Failed to parse value '.' in column 'score'",ex.Message);
-                Assert.IsNotNull(ex.InnerException,"Expected parse error to be an inner exception");
-                StringAssert.Contains("Could not parse string value '.' with Decider Type:DecimalTypeDecider",ex.InnerException.Message);
-            }
+        Exception ex = null;
+        try 
+        {
+            bulk.Upload(dt);
         }
-            
+        catch(Exception e)
+        {
+            ex = e;
+        }
+
+        Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is bad");
+
+        Assert.AreEqual("Failed to parse value '.' in column 'score'",ex.Message);
+        Assert.IsNotNull(ex.InnerException,"Expected parse error to be an inner exception");
+        StringAssert.Contains("Could not parse string value '.' with Decider Type:DecimalTypeDecider",ex.InnerException.Message);
     }
 }

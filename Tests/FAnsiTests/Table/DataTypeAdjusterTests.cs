@@ -7,7 +7,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-class DataTypeAdjusterTests:DatabaseTests
+internal class DataTypeAdjusterTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_WithAdjuster(DatabaseType type)

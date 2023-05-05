@@ -8,35 +8,35 @@ namespace FAnsi.Discovery.TypeTranslation;
 /// <inheritdoc cref="ITypeTranslater"/>
 public abstract class TypeTranslater:ITypeTranslater
 {
-    protected const string StringSizeRegexPattern = @"\(([0-9]+)\)";
-    protected const string DecimalsBeforeAndAfterPattern = @"\(([0-9]+),([0-9]+)\)";
+    private const string StringSizeRegexPattern = @"\(([0-9]+)\)";
+    private const string DecimalsBeforeAndAfterPattern = @"\(([0-9]+),([0-9]+)\)";
 
     //Take special note of the use or absence of ^ in the regex to do Contains or StartsWith
     //Ideally dont use $ (end of string) since databases can stick extraneous stuff on the end in many cases
 
-    protected Regex BitRegex = new Regex("^(bit)|(bool)|(boolean)",RegexOptions.IgnoreCase);
-    protected Regex ByteRegex = new Regex("^tinyint", RegexOptions.IgnoreCase);
-    protected Regex SmallIntRegex = new Regex("^smallint", RegexOptions.IgnoreCase);
-    protected Regex IntRegex = new Regex("^(int)|(integer)",RegexOptions.IgnoreCase);
-    protected Regex LongRegex = new Regex("^bigint", RegexOptions.IgnoreCase);
-    protected Regex DateRegex = new Regex("date", RegexOptions.IgnoreCase);
-    protected Regex TimeRegex = new Regex("^time$", RegexOptions.IgnoreCase);
-    protected Regex StringRegex = new Regex("(char)|(text)|(xml)",RegexOptions.IgnoreCase);
-    protected Regex ByteArrayRegex = new Regex("(binary)|(blob)",RegexOptions.IgnoreCase);
-    protected Regex FloatingPointRegex = new Regex("^(float)|(decimal)|(numeric)|(real)|(money)|(smallmoney)|(double)", RegexOptions.IgnoreCase);
-    protected Regex GuidRegex = new Regex("^uniqueidentifier",RegexOptions.IgnoreCase);
+    private static readonly Regex BitRegex = new("^(bit)|(bool)|(boolean)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    protected Regex ByteRegex = new("^tinyint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    protected Regex SmallIntRegex = new("^smallint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    protected Regex IntRegex = new("^(int)|(integer)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    protected Regex LongRegex = new("^bigint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    protected Regex DateRegex;
+    protected Regex TimeRegex = new("^time$", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex StringRegex = new("(char)|(text)|(xml)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex ByteArrayRegex = new("(binary)|(blob)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex FloatingPointRegex = new("^(float)|(decimal)|(numeric)|(real)|(money)|(smallmoney)|(double)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex GuidRegex = new("^uniqueidentifier",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
 
     /// <summary>
     /// The maximum number of characters to declare explicitly in the char type (e.g. varchar(500)) before instead declaring the text/varchar(max) etc type
     /// appropriate to the database engine being targeted
     /// </summary>
-    protected int MaxStringWidthBeforeMax = 8000;
+    private readonly int MaxStringWidthBeforeMax;
 
     /// <summary>
     /// The size to declare string fields when the API user has neglected to supply a length.  This should be high, if you want to avoid lots of extra long columns
     /// use <see cref="Guesser"/> to determine the required length/type at runtime.
     /// </summary>
-    protected int StringWidthWhenNotSupplied = 4000;
+    private readonly int StringWidthWhenNotSupplied;
         
     /// <summary>
     /// 
@@ -59,10 +59,10 @@ public abstract class TypeTranslater:ITypeTranslater
         if (t == typeof(byte))
             return GetByteDataType();
             
-        if (t == typeof(short) || t == typeof(Int16) || t == typeof(ushort) || t == typeof(short?) || t == typeof(ushort?))
+        if (t == typeof(short) || t == typeof(short) || t == typeof(ushort) || t == typeof(short?) || t == typeof(ushort?))
             return GetSmallIntDataType();
 
-        if (t == typeof(int) || t == typeof(Int32)  || t == typeof(uint) || t == typeof(int?) || t == typeof(uint?))
+        if (t == typeof(int) || t == typeof(int)  || t == typeof(uint) || t == typeof(int?) || t == typeof(uint?))
             return GetIntDataType();
             
         if (t == typeof (long) || t == typeof(ulong) || t == typeof(long?) || t == typeof(ulong?))
@@ -73,11 +73,7 @@ public abstract class TypeTranslater:ITypeTranslater
             t == typeof(decimal?))
             return GetFloatingPointDataType(request.Size);
 
-        if (t == typeof(string))
-            if(request.Unicode)
-                return GetUnicodeStringDataType(request.Width);
-            else
-                return GetStringDataType(request.Width);
+        if (t == typeof(string)) return request.Unicode ? GetUnicodeStringDataType(request.Width) : GetStringDataType(request.Width);
 
         if (t == typeof(DateTime) || t == typeof(DateTime?))
             return GetDateDateTimeDataType();
@@ -94,22 +90,22 @@ public abstract class TypeTranslater:ITypeTranslater
         throw new TypeNotMappedException(string.Format(FAnsiStrings.TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__, t.Name, GetType().Name));
     }
         
-    protected virtual string GetByteArrayDataType()
+    protected string GetByteArrayDataType()
     {
         return "varbinary(max)";
     }
 
-    protected virtual string GetByteDataType()
+    protected string GetByteDataType()
     {
         return "tinyint";
     }
 
-    protected virtual string GetFloatingPointDataType(DecimalSize decimalSize)
+    protected string GetFloatingPointDataType(DecimalSize decimalSize)
     {
         if (decimalSize == null || decimalSize.IsEmpty)
             return "decimal(20,10)";
 
-        return "decimal(" + decimalSize.Precision + "," + decimalSize.Scale + ")";
+        return $"decimal({decimalSize.Precision},{decimalSize.Scale})";
     }
 
     protected virtual string GetDateDateTimeDataType()
@@ -130,7 +126,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
     protected virtual string GetStringDataTypeImpl(int maxExpectedStringWidth)
     {
-        return "varchar(" + maxExpectedStringWidth + ")";
+        return $"varchar({maxExpectedStringWidth})";
     }
 
     public abstract string GetStringDataTypeWithUnlimitedWidth();
@@ -149,7 +145,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
     protected virtual string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth)
     {
-        return "nvarchar(" + maxExpectedStringWidth + ")";
+        return $"nvarchar({maxExpectedStringWidth})";
     }
 
     public abstract string GetUnicodeStringDataTypeWithUnlimitedWidth();
@@ -164,12 +160,12 @@ public abstract class TypeTranslater:ITypeTranslater
         return "bit";
     }
 
-    protected virtual string GetSmallIntDataType()
+    protected string GetSmallIntDataType()
     {
         return "smallint";
     }
 
-    protected virtual string GetIntDataType()
+    protected string GetIntDataType()
     {
         return "int";
     }
@@ -179,7 +175,7 @@ public abstract class TypeTranslater:ITypeTranslater
         return "bigint";
     }
 
-    protected virtual string GetGuidDataType()
+    protected string GetGuidDataType()
     {
         return "uniqueidentifier";
     }
@@ -187,15 +183,11 @@ public abstract class TypeTranslater:ITypeTranslater
     /// <inheritdoc/>
     public Type GetCSharpTypeForSQLDBType(string sqlType)
     {
-        Type result = TryGetCSharpTypeForSQLDBType(sqlType);
-
-        if (result == null)
+        return TryGetCSharpTypeForSQLDBType(sqlType) ??
             throw new TypeNotMappedException(string.Format(
                 FAnsiStrings
                     .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
                 sqlType, GetType().Name));
-
-        return result;
     }
 
     /// <inheritdoc/>
@@ -292,7 +284,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
         var digits = GetDigitsBeforeAndAfterDecimalPointIfDecimal(sqlType);
 
-        int lengthIfString = GetLengthIfString(sqlType);
+        var lengthIfString = GetLengthIfString(sqlType);
 
         //lengthIfString should still be populated even for digits etc because it might be that we have to fallback from "1.2" which is decimal(2,1) to varchar(3) if we see "F" appearing
         if (digits != null)
@@ -318,7 +310,7 @@ public abstract class TypeTranslater:ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    public virtual bool IsUnicode(string sqlType)
+    public bool IsUnicode(string sqlType)
     {
         return sqlType != null && sqlType.StartsWith("n",StringComparison.CurrentCultureIgnoreCase);
     }
@@ -340,7 +332,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
         if (sqlType.ToLower().Contains("char"))
         {
-            Match match = Regex.Match(sqlType, StringSizeRegexPattern);
+            var match = Regex.Match(sqlType, StringSizeRegexPattern);
             if (match.Success)
                 return int.Parse(match.Groups[1].Value);
         }
@@ -353,12 +345,12 @@ public abstract class TypeTranslater:ITypeTranslater
         if (string.IsNullOrWhiteSpace(sqlType))
             return null;
 
-        Match match = Regex.Match(sqlType, DecimalsBeforeAndAfterPattern);
+        var match = Regex.Match(sqlType, DecimalsBeforeAndAfterPattern);
 
         if (match.Success)
         {
-            int precision = int.Parse(match.Groups[1].Value);
-            int scale = int.Parse(match.Groups[2].Value);
+            var precision = int.Parse(match.Groups[1].Value);
+            var scale = int.Parse(match.Groups[2].Value);
 
             return new DecimalSize(precision - scale, scale);
 
@@ -370,7 +362,7 @@ public abstract class TypeTranslater:ITypeTranslater
     public string TranslateSQLDBType(string sqlType, ITypeTranslater destinationTypeTranslater)
     {
         //e.g. data_type is datetime2 (i.e. Sql Server), this returns System.DateTime
-        DatabaseTypeRequest requested = GetDataTypeRequestForSQLDBType(sqlType);
+        var requested = GetDataTypeRequestForSQLDBType(sqlType);
 
         //this then returns datetime (e.g. mysql)
         return destinationTypeTranslater.GetSQLDBTypeForCSharpType(requested);
@@ -384,7 +376,7 @@ public abstract class TypeTranslater:ITypeTranslater
     /// currently loaded data.
     /// </summary>
     /// <returns></returns>
-    protected virtual int GetStringLengthForTimeSpan()
+    protected int GetStringLengthForTimeSpan()
     {
         /*
          * 
@@ -415,7 +407,7 @@ select LEN(dt) from omgTimes
     /// currently loaded data.
     /// </summary>
     /// <returns></returns>
-    protected virtual int GetStringLengthForDateTime()
+    protected int GetStringLengthForDateTime()
     {
         /*
          To determine this you can run the following SQL:
@@ -440,7 +432,7 @@ select LEN(dt) from omgdates
     {
         return BitRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsByte(string sqlType)
+    protected bool IsByte(string sqlType)
     {
         return ByteRegex.IsMatch(sqlType);
     }
@@ -452,15 +444,15 @@ select LEN(dt) from omgdates
     {
         return IntRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsLong(string sqlType)
+    protected bool IsLong(string sqlType)
     {
         return LongRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsDate(string sqlType)
+    protected bool IsDate(string sqlType)
     {
         return DateRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsTime(string sqlType)
+    protected bool IsTime(string sqlType)
     {
         return TimeRegex.IsMatch(sqlType);
     }
@@ -476,7 +468,7 @@ select LEN(dt) from omgdates
     {
         return FloatingPointRegex.IsMatch(sqlType);
     }
-    protected virtual bool IsGuid(string sqlType)
+    protected bool IsGuid(string sqlType)
     {
         return GuidRegex.IsMatch(sqlType);
     }

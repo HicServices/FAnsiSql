@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.ConnectionStringDefaults;
@@ -14,13 +13,12 @@ namespace FAnsiTests.Server;
 
 public class ConnectionStringKeywordAccumulatorTests
 {
-    private readonly Dictionary<DatabaseType, IDiscoveredServerHelper> helpers = new Dictionary
-        <DatabaseType, IDiscoveredServerHelper>()
+    private readonly Dictionary<DatabaseType, IDiscoveredServerHelper> _helpers = new()
         {
-            {DatabaseType.MicrosoftSQLServer, new MicrosoftSQLServerHelper()},
-            {DatabaseType.MySql, new MySqlServerHelper()},
-            {DatabaseType.Oracle, new OracleServerHelper()},
-            {DatabaseType.PostgreSql, new PostgreSqlServerHelper()},
+            {DatabaseType.MicrosoftSQLServer, MicrosoftSQLServerHelper.Instance},
+            {DatabaseType.MySql, MySqlServerHelper.Instance},
+            {DatabaseType.Oracle, OracleServerHelper.Instance},
+            {DatabaseType.PostgreSql, PostgreSqlServerHelper.Instance}
         };
 
     [Test]
@@ -29,7 +27,7 @@ public class ConnectionStringKeywordAccumulatorTests
         var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MySql);
         acc.AddOrUpdateKeyword("Auto Enlist", "false", ConnectionStringKeywordPriority.SystemDefaultLow);
             
-        DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb","frank","kangaro");
+        var connectionStringBuilder = _helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb","frank","kangaro");
 
         StringAssert.DoesNotContain("auto enlist",connectionStringBuilder.ConnectionString);
 
@@ -45,7 +43,7 @@ public class ConnectionStringKeywordAccumulatorTests
         var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MicrosoftSQLServer);
         acc.AddOrUpdateKeyword("Pooling", "false", ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-        DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
+        var connectionStringBuilder = _helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
         StringAssert.DoesNotContain("pooling", connectionStringBuilder.ConnectionString);
 
@@ -69,18 +67,18 @@ public class ConnectionStringKeywordAccumulatorTests
         var acc = new ConnectionStringKeywordAccumulator(databaseType);
         acc.AddOrUpdateKeyword(key1,value1, ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-        DbConnectionStringBuilder connectionStringBuilder = helpers[databaseType].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
+        var connectionStringBuilder = _helpers[databaseType].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        StringAssert.Contains(key1 + "=" + value1, connectionStringBuilder.ConnectionString);
+        StringAssert.Contains($"{key1}={value1}", connectionStringBuilder.ConnectionString);
             
         //attempt override with low priority setting it to true but also use the alias
         acc.AddOrUpdateKeyword(equivalentKey,value2,ConnectionStringKeywordPriority.SystemDefaultLow);
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        StringAssert.Contains(key1 + "=" + value1, connectionStringBuilder.ConnectionString, "ConnectionStringKeywordAccumulator did not realise that keywords are equivalent");
+        StringAssert.Contains($"{key1}={value1}", connectionStringBuilder.ConnectionString, "ConnectionStringKeywordAccumulator did not realise that keywords are equivalent");
     }
     [TestCase(ConnectionStringKeywordPriority.SystemDefaultHigh)] //same as current (still results in override)
     [TestCase(ConnectionStringKeywordPriority.ApiRule)]
@@ -89,7 +87,7 @@ public class ConnectionStringKeywordAccumulatorTests
         var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MicrosoftSQLServer);
         acc.AddOrUpdateKeyword("Pooling", "false", ConnectionStringKeywordPriority.SystemDefaultHigh);
 
-        DbConnectionStringBuilder connectionStringBuilder = helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
+        var connectionStringBuilder = _helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
         StringAssert.DoesNotContain("pooling", connectionStringBuilder.ConnectionString);
 
@@ -113,6 +111,6 @@ public class ConnectionStringKeywordAccumulatorTests
           
         var ex = Assert.Throws<ArgumentException>(()=>acc.AddOrUpdateKeyword("FLIBBLE", "false", ConnectionStringKeywordPriority.SystemDefaultLow));
 
-        StringAssert.Contains("FLIBBLE",ex.Message);
+        StringAssert.Contains("FLIBBLE",ex?.Message);
     }
 }

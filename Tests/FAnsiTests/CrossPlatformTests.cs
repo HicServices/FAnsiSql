@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using Microsoft.Data.SqlClient;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -22,7 +21,7 @@ public class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestTableCreation_NullTableName(DatabaseType type)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
         Assert.Throws<ArgumentNullException>(()=>db.CreateTable("", new DataTable()));
     }
 
@@ -37,14 +36,14 @@ public class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql,"2007-01-01 00:00:00")]
     public void DateColumnTests_NoTime(DatabaseType type, object input)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
         var tbl = db.CreateTable("MyTable",new []{new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))});
 
-        tbl.Insert(new Dictionary<string, object>() { { "MyDate", input } });
+        tbl.Insert(new Dictionary<string, object> { { "MyDate", input } });
             
         using (var blk = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyDate");
             dt.Rows.Add(input);
 
@@ -67,18 +66,18 @@ public class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql,"28/2/1993 5:36:27 AM","en-GB")]
     public void DateColumnTests_UkUsFormat_Explicit(DatabaseType type, object input, string culture)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
         var tbl = db.CreateTable("MyTable",new []{new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))});
 
         var cultureInfo = new CultureInfo (culture);
 
         //basic insert
-        tbl.Insert(new Dictionary<string, object>() { { "MyDate", input } },cultureInfo);
+        tbl.Insert(new Dictionary<string, object> { { "MyDate", input } },cultureInfo);
             
         //then bulk insert, both need to work
         using (var blk = tbl.BeginBulkInsert(cultureInfo))
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyDate");
             dt.Rows.Add(input);
 
@@ -105,7 +104,7 @@ public class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "2/28/1993 5:36:27 AM","en-US")]
     public void DateColumnTests_PrimaryKeyColumn(DatabaseType type, object input, string culture)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
         var tbl = db.CreateTable("MyTable",new []{
             new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))
                 {IsPrimaryKey = true }
@@ -114,12 +113,12 @@ public class CrossPlatformTests:DatabaseTests
         //then bulk insert, both need to work
         using (var blk = tbl.BeginBulkInsert(new CultureInfo(culture)))
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyDate");
             dt.Rows.Add(input);
 
             //this is the novel thing we are testing
-            dt.PrimaryKey = new DataColumn[]{ dt.Columns[0]};
+            dt.PrimaryKey = new[]{ dt.Columns[0]};
             blk.Upload(dt);
 
             Assert.AreEqual(1,dt.PrimaryKey.Length);
@@ -142,14 +141,14 @@ public class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "00:00")]
     public void DateColumnTests_TimeOnly_Midnight(DatabaseType type, object input)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
         var tbl = db.CreateTable("MyTable", new[] { new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan))) });
 
-        tbl.Insert(new Dictionary<string, object>() { { "MyTime", input } });
+        tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
         using (var blk = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyTime");
             dt.Rows.Add(input);
 
@@ -159,13 +158,12 @@ public class CrossPlatformTests:DatabaseTests
         var result = tbl.GetDataTable();
         var expectedTime = new TimeSpan(0,0,0,0);
 
-        object[] resultTimeSpans = null;
-
-        //Oracle is a bit special it only stores whole dates then has server side settings about how much to return (like a format string)
-        if(type == DatabaseType.Oracle)
-            resultTimeSpans = new DateTime[] {(DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0]}.Select(dt=>dt.TimeOfDay).Cast<object>().ToArray();
-        else
-            resultTimeSpans = new[] {result.Rows[0][0], result.Rows[1][0]};
+        var resultTimeSpans =
+            //Oracle is a bit special it only stores whole dates then has server side settings about how much to return (like a format string)
+            type == DatabaseType.Oracle
+            ? new[] { (DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0] }.Select(dt => dt.TimeOfDay)
+                .Cast<object>().ToArray()
+            : new[] { result.Rows[0][0], result.Rows[1][0] };
 
 
         Assert.AreEqual(expectedTime, resultTimeSpans[0]);
@@ -216,14 +214,14 @@ public class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "13:11")]
     public void DateColumnTests_TimeOnly_Afternoon(DatabaseType type, object input)
     {
-        var db = GetTestDatabase(type, true);
+        var db = GetTestDatabase(type);
         var tbl = db.CreateTable("MyTable", new[] { new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan))) });
 
-        tbl.Insert(new Dictionary<string, object>() { { "MyTime", input } });
+        tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
         using (var blk = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("MyTime");
             dt.Rows.Add(input);
 
@@ -233,13 +231,12 @@ public class CrossPlatformTests:DatabaseTests
         var result = tbl.GetDataTable();
         var expectedTime = new TimeSpan(13,11,00);
 
-        object[] resultTimeSpans = null;
-
-        //Oracle is a bit special it only stores whole dates then has server side settings about how much to return (like a format string)
-        if(type == DatabaseType.Oracle)
-            resultTimeSpans = new DateTime[] {(DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0]}.Select(dt=>dt.TimeOfDay).Cast<object>().ToArray();
-        else
-            resultTimeSpans = new[] {result.Rows[0][0], result.Rows[1][0]};
+        var resultTimeSpans =
+            //Oracle is a bit special it only stores whole dates then has server side settings about how much to return (like a format string)
+            type == DatabaseType.Oracle
+            ? new[] { (DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0] }.Select(dt => dt.TimeOfDay)
+                .Cast<object>().ToArray()
+            : new[] { result.Rows[0][0], result.Rows[1][0] };
 
         foreach (TimeSpan t in resultTimeSpans)
         {
@@ -287,14 +284,16 @@ public class CrossPlatformTests:DatabaseTests
 
         Assert.AreEqual(datatType, c.GetSqlDBType(tt));
 
-        string expectedDataType = datatType;
+        var expectedDataType = datatType;
 
         //you ask for an int PostgreSql gives you an integer!
         if(dbType == DatabaseType.PostgreSql)
-            if (datatType == "int")
-                expectedDataType = "integer";
-            else if (datatType == "bit")
-                expectedDataType = "bit(1)";
+            expectedDataType = datatType switch
+            {
+                "int" => "integer",
+                "bit" => "bit(1)",
+                _ => expectedDataType
+            };
 
         Assert.AreEqual(expectedDataType,tbl.DiscoverColumn("mycol").DataType.SQLType);
         Assert.AreEqual(1,tbl.GetRowCount());
@@ -310,7 +309,7 @@ public class CrossPlatformTests:DatabaseTests
         var tblParent = database.CreateTable("Parent", new[]
         {
             new DatabaseColumnRequest("ID",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true},
-            new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10)), //varchar(10)
+            new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
         });
 
         var parentIdPkCol = tblParent.DiscoverColumn("ID");
@@ -320,8 +319,8 @@ public class CrossPlatformTests:DatabaseTests
         var tblChild = database.CreateTable("Child", new[]
         {
             parentIdFkCol,
-            new DatabaseColumnRequest("ChildName",new DatabaseTypeRequest(typeof(string),10)), //varchar(10)
-        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>()
+            new DatabaseColumnRequest("ChildName",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
+        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {parentIdFkCol, parentIdPkCol}
         },true);
@@ -329,7 +328,7 @@ public class CrossPlatformTests:DatabaseTests
         {
             using (var intoParent = tblParent.BeginBulkInsert())
             {
-                var dt = new DataTable();
+                using var dt = new DataTable();
                 dt.Columns.Add("ID");
                 dt.Columns.Add("Name");
 
@@ -385,7 +384,7 @@ public class CrossPlatformTests:DatabaseTests
         {
             new DatabaseColumnRequest("ID1",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true}, //varchar(10)
             new DatabaseColumnRequest("ID2",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true}, //varchar(10)
-            new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10)), //varchar(10)
+            new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
         });
 
         var parentIdPkCol1 = tblParent.DiscoverColumn("ID1");
@@ -398,8 +397,8 @@ public class CrossPlatformTests:DatabaseTests
         {
             parentIdFkCol1,
             parentIdFkCol2,
-            new DatabaseColumnRequest("ChildName",new DatabaseTypeRequest(typeof(string),10)), //varchar(10)
-        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>()
+            new DatabaseColumnRequest("ChildName",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
+        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {parentIdFkCol1,parentIdPkCol1},
             {parentIdFkCol2,parentIdPkCol2}
@@ -407,7 +406,7 @@ public class CrossPlatformTests:DatabaseTests
 
         using (var intoParent = tblParent.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("ID1");
             dt.Columns.Add("ID2");
             dt.Columns.Add("Name");
@@ -463,11 +462,11 @@ public class CrossPlatformTests:DatabaseTests
         var tbl = database.CreateTable("TestDistincting", new[]
         {
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),int.MaxValue)), //varchar(max)
-            new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(string),null)), //varchar(???)
+            new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(string))), //varchar(???)
             new DatabaseColumnRequest("Field3",new DatabaseTypeRequest(typeof(string),1000)), //varchar(???)
             new DatabaseColumnRequest("Field4",new DatabaseTypeRequest(typeof(string),5000)), //varchar(???)
             new DatabaseColumnRequest("Field5",new DatabaseTypeRequest(typeof(string),10000)), //varchar(???)
-            new DatabaseColumnRequest("Field6",new DatabaseTypeRequest(typeof(string),10)), //varchar(10)
+            new DatabaseColumnRequest("Field6",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
         });
 
         Assert.IsTrue(tbl.Exists());
@@ -483,11 +482,11 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
             
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("MassiveColumn");
             
-        StringBuilder sb = new StringBuilder("Amaa");
-        for (int i = 0; i < 10000; i++)
+        var sb = new StringBuilder("Amaa");
+        for (var i = 0; i < 10000; i++)
             sb.Append(i);
 
         dt.Rows.Add(sb.ToString());
@@ -507,7 +506,7 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
         dt.Columns.Add("DateColumn");
         dt.Rows.Add("2001-01-22");
 
@@ -545,11 +544,9 @@ public class CrossPlatformTests:DatabaseTests
         //ALTER TABLE to ADD COLUMN of date type
         if (useTransaction)
         {
-            using (var con = database.Server.BeginNewTransactedConnection())
-            {
-                tbl.AddColumn(newColumnName, new DatabaseTypeRequest(typeof(DateTime)), true,new DatabaseOperationArgs{TimeoutInSeconds = 1000,TransactionIfAny = con.ManagedTransaction});
-                con.ManagedTransaction.CommitAndCloseConnection();
-            }   
+            using var con = database.Server.BeginNewTransactedConnection();
+            tbl.AddColumn(newColumnName, new DatabaseTypeRequest(typeof(DateTime)), true,new DatabaseOperationArgs{TimeoutInSeconds = 1000,TransactionIfAny = con.ManagedTransaction});
+            con.ManagedTransaction.CommitAndCloseConnection();
         }
         else
         {
@@ -571,7 +568,7 @@ public class CrossPlatformTests:DatabaseTests
         if (type == DatabaseType.MicrosoftSQLServer)
             fieldsToAlter.Remove("Field1"); 
 
-        foreach (string fieldName in new String[]{})
+        foreach (var fieldName in fieldsToAlter)
         {
 
             //ALTER TABLE, ALTER COLUMN of date type each of these to be now varchar(10)s
@@ -619,20 +616,20 @@ public class CrossPlatformTests:DatabaseTests
             new DatabaseColumnRequest(dodgyNames?",,,,":"Field3",new DatabaseTypeRequest(typeof(int)))
         });
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Field1");
         dt.Columns.Add("Field2");
         dt.Columns.Add(dodgyNames?",,,,":"Field3");
 
-        dt.Rows.Add(new[] {"dave", "2001-01-01", "50"});
-        dt.Rows.Add(new[] {"dave", "2001-01-01", "50"});
-        dt.Rows.Add(new[] {"dave", "2001-01-01", "50"});
-        dt.Rows.Add(new[] {"dave", "2001-01-01", "50"});
-        dt.Rows.Add(new[] {"frank", "2001-01-01", "50"});
-        dt.Rows.Add(new[] {"frank", "2001-01-01", "50"});
-        dt.Rows.Add(new[] {"frank", "2001-01-01", "51"});
+        dt.Rows.Add("dave", "2001-01-01", "50");
+        dt.Rows.Add("dave", "2001-01-01", "50");
+        dt.Rows.Add("dave", "2001-01-01", "50");
+        dt.Rows.Add("dave", "2001-01-01", "50");
+        dt.Rows.Add("frank", "2001-01-01", "50");
+        dt.Rows.Add("frank", "2001-01-01", "50");
+        dt.Rows.Add("frank", "2001-01-01", "51");
 
-        Assert.AreEqual(1,tbl.Database.DiscoverTables(false).Count());
+        Assert.AreEqual(1,tbl.Database.DiscoverTables(false).Length);
         Assert.AreEqual(0,tbl.GetRowCount());
 
         using (var insert = tbl.BeginBulkInsert())
@@ -642,17 +639,15 @@ public class CrossPlatformTests:DatabaseTests
 
         if(useTransaction)
         {
-            using (var con = tbl.Database.Server.BeginNewTransactedConnection())
-            {
-                tbl.MakeDistinct(new DatabaseOperationArgs(){TransactionIfAny = con.ManagedTransaction});
-                con.ManagedTransaction.CommitAndCloseConnection();
-            }
+            using var con = tbl.Database.Server.BeginNewTransactedConnection();
+            tbl.MakeDistinct(new DatabaseOperationArgs {TransactionIfAny = con.ManagedTransaction});
+            con.ManagedTransaction.CommitAndCloseConnection();
         }
         else
             tbl.MakeDistinct();
 
         Assert.AreEqual(3, tbl.GetRowCount());
-        Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Count());
+        Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Length);
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -661,11 +656,11 @@ public class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         var dt = new DataTable();
-        dt.Columns.Add("MyCol"); ;
+        dt.Columns.Add("MyCol");
 
-        dt.Rows.Add(new[] { "100" });
-        dt.Rows.Add(new[] { "105" });
-        dt.Rows.Add(new[] { "1" });
+        dt.Rows.Add("100");
+        dt.Rows.Add("105");
+        dt.Rows.Add("1");
 
         var tbl = database.CreateTable("IntTestTable", dt);
 
@@ -700,11 +695,11 @@ public class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         var dt = new DataTable();
-        dt.Columns.Add("MyCol");;
+        dt.Columns.Add("MyCol");
 
-        dt.Rows.Add(new[] { "100"});
-        dt.Rows.Add(new[] { "105"});
-        dt.Rows.Add(new[] { "2.1"});
+        dt.Rows.Add("100");
+        dt.Rows.Add("105");
+        dt.Rows.Add("2.1");
 
         var tbl = database.CreateTable("DecimalTestTable", dt);
 
@@ -757,20 +752,20 @@ public class CrossPlatformTests:DatabaseTests
                 new DatabaseColumnRequest("Field3",new DatabaseTypeRequest(typeof(int))){AllowNulls=false}
             });
 
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("Field1");
             dt.Columns.Add("Field2");
             dt.Columns.Add("Field3");
 
-            dt.Rows.Add(new[] { "dave", "2001-01-01", "50" });
-            dt.Rows.Add(new[] { "dave", "2001-01-01", "50" });
-            dt.Rows.Add(new[] { "dave", "2001-01-01", "50" });
-            dt.Rows.Add(new[] { "dave", "2001-01-01", "50" });
-            dt.Rows.Add(new[] { "frank", "2001-01-01", "50" });
-            dt.Rows.Add(new[] { "frank", "2001-01-01", "50" });
-            dt.Rows.Add(new[] { "frank", "2001-01-01", "51" });
+            dt.Rows.Add("dave", "2001-01-01", "50");
+            dt.Rows.Add("dave", "2001-01-01", "50");
+            dt.Rows.Add("dave", "2001-01-01", "50");
+            dt.Rows.Add("dave", "2001-01-01", "50");
+            dt.Rows.Add("frank", "2001-01-01", "50");
+            dt.Rows.Add("frank", "2001-01-01", "50");
+            dt.Rows.Add("frank", "2001-01-01", "51");
 
-            Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Count());
+            Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Length);
             Assert.AreEqual(0, tbl.GetRowCount());
 
             using (var insert = tbl.BeginBulkInsert())
@@ -781,7 +776,7 @@ public class CrossPlatformTests:DatabaseTests
             tbl.MakeDistinct();
 
             Assert.AreEqual(3, tbl.GetRowCount());
-            Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Count());
+            Assert.AreEqual(1, tbl.Database.DiscoverTables(false).Length);
 
             tbl.Truncate();
 
@@ -813,29 +808,31 @@ public class CrossPlatformTests:DatabaseTests
         StringAssert.IsMatch(
             "Database .* contained unsupported .* characters",
             Assert.Throws<RuntimeNameException>(()=>database.Server.ExpectDatabase(horribleDatabaseName))
-                .Message);
+                ?.Message);
 
         //ExpectTable with illegal name
         StringAssert.IsMatch(
             "Table .* contained unsupported .* characters",
             Assert.Throws<RuntimeNameException>(()=>database.ExpectTable(horribleTableName))
-                .Message);
+                ?.Message);
             
         //CreateTable with illegal name
         StringAssert.IsMatch(
             "Table .* contained unsupported .* characters",
             Assert.Throws<RuntimeNameException>(()=> database.CreateTable(horribleTableName, new DatabaseColumnRequest[]
             {
-                new DatabaseColumnRequest("a", new DatabaseTypeRequest(typeof(string), 10))
-            })).Message);
+                new("a", new DatabaseTypeRequest(typeof(string), 10))
+            }))
+                ?.Message);
 
         //CreateTable with (column) illegal name
         StringAssert.IsMatch(
             "Column .* contained unsupported .* characters",
             Assert.Throws<RuntimeNameException>(()=> database.CreateTable("f", new DatabaseColumnRequest[]
             {
-                new DatabaseColumnRequest(columnName, new DatabaseTypeRequest(typeof(string), 10))
-            })).Message);
+                new(columnName, new DatabaseTypeRequest(typeof(string), 10))
+            }))
+                ?.Message);
 
         AssertCanCreateDatabases();
             
@@ -843,7 +840,7 @@ public class CrossPlatformTests:DatabaseTests
         StringAssert.IsMatch(
             "Database .* contained unsupported .* characters",
             Assert.Throws<RuntimeNameException>(()=>database.Server.CreateDatabase(horribleDatabaseName))
-                .Message);
+                ?.Message);
     }
 
     [TestCase(DatabaseType.MySql, "_-o-_", ":>0<:","-_")]
@@ -870,7 +867,7 @@ public class CrossPlatformTests:DatabaseTests
         {
             var dt = new DataTable();
             dt.Columns.Add(columnName);
-            dt.Rows.Add(new[] {"dave"});
+            dt.Rows.Add("dave");
             dt.PrimaryKey = new[] {dt.Columns[0]};
 
             var tbl = database.CreateTable(horribleTableName, dt);
@@ -881,7 +878,7 @@ public class CrossPlatformTests:DatabaseTests
 
             Assert.AreEqual(1,tbl.GetDataTable().Rows.Count);
 
-            tbl.Insert(new Dictionary<string, object>(){ {columnName,"fff" } });
+            tbl.Insert(new Dictionary<string, object> { {columnName,"fff" } });
                 
             Assert.AreEqual(2,tbl.GetDataTable().Rows.Count);
         }
@@ -894,7 +891,7 @@ public class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_AutoIncrementColumnTest(DatabaseType type)
     {
-        var database = GetTestDatabase(type, true);
+        var database = GetTestDatabase(type);
 
         var tbl =  database.CreateTable("MyTable", new[]
         {
@@ -908,7 +905,7 @@ public class CrossPlatformTests:DatabaseTests
 
         });
 
-        DataTable dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Name");
         dt.Rows.Add("Frank");
 
@@ -924,7 +921,7 @@ public class CrossPlatformTests:DatabaseTests
         Assert.IsTrue(tbl.DiscoverColumn("IdColumn").IsAutoIncrement);
         Assert.IsFalse(tbl.DiscoverColumn("Name").IsAutoIncrement);
 
-        int autoIncrement = tbl.Insert(new Dictionary<string, object>() {{"Name", "Tony"}});
+        var autoIncrement = tbl.Insert(new Dictionary<string, object> {{"Name", "Tony"}});
         Assert.AreEqual(2,autoIncrement);
     }
 
@@ -946,7 +943,7 @@ public class CrossPlatformTests:DatabaseTests
             
         using (var insert = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("Name");
             dt.Rows.Add("Hi");
 
@@ -969,17 +966,20 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        if(type == DatabaseType.MySql && database.Server.GetVersion().Major < 8)
-            Assert.Inconclusive("UID defaults are only supported in MySql 8+");
-
-        if (type == DatabaseType.PostgreSql)
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+        switch (type)
         {
-            //we need this extension on the server to work
-            using (var con = database.Server.GetConnection())
+            case DatabaseType.MySql when database.Server.GetVersion().Major < 8:
+                Assert.Inconclusive("UID defaults are only supported in MySql 8+");
+                break;
+            case DatabaseType.PostgreSql:
             {
+                //we need this extension on the server to work
+                using var con = database.Server.GetConnection();
                 con.Open();
-                using (var cmd = database.Server.GetCommand("CREATE EXTENSION IF NOT EXISTS pgcrypto;", con))
-                    cmd.ExecuteNonQuery();
+                using var cmd = database.Server.GetCommand("CREATE EXTENSION IF NOT EXISTS pgcrypto;", con);
+                cmd.ExecuteNonQuery();
+                break;
             }
         }
 
@@ -992,15 +992,13 @@ public class CrossPlatformTests:DatabaseTests
                 Default = MandatoryScalarFunctions.GetGuid
             }
         });
-        DateTime currentValue;
-            
+
         using (var insert = tbl.BeginBulkInsert())
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("Name");
             dt.Rows.Add("Hi");
 
-            currentValue = DateTime.Now;
             insert.Upload(dt);
         }
 
@@ -1015,20 +1013,21 @@ public class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_BulkInserting_LotsOfDates(DatabaseType type)
     {
-        CultureInfo culture = new CultureInfo("en-gb");
+        var culture = new CultureInfo("en-gb");
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("LotsOfDatesTest",new DatabaseColumnRequest[]
         { 
-            new DatabaseColumnRequest("ID",new DatabaseTypeRequest(typeof(int))),
-            new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime))),    
-            new DatabaseColumnRequest("MyString",new DatabaseTypeRequest(typeof(string),int.MaxValue)),
+            new("ID",new DatabaseTypeRequest(typeof(int))),
+            new("MyDate",new DatabaseTypeRequest(typeof(DateTime))),    
+            new("MyString",new DatabaseTypeRequest(typeof(string),int.MaxValue))
         });
 
         //test basic insert
-        foreach(string s in someDates)
+        foreach(var s in someDates)
         {
-            tbl.Insert(new Dictionary<string,object>(){ 
+            tbl.Insert(new Dictionary<string,object>
+                { 
                     {"ID",1}, 
                     {"MyDate",s}, 
                     {"MyString",Guid.NewGuid().ToString()}
@@ -1037,13 +1036,13 @@ public class CrossPlatformTests:DatabaseTests
         }
 
 
-        DataTable dt = new DataTable();
+        using var dt = new DataTable();
 
         dt.Columns.Add("id");
         dt.Columns.Add("mydate");
         dt.Columns.Add("mystring");
 
-        foreach(string s in someDates)
+        foreach(var s in someDates)
             dt.Rows.Add(2,s,Guid.NewGuid().ToString());
 
         Assert.AreEqual(someDates.Length,tbl.GetRowCount());
@@ -1056,8 +1055,7 @@ public class CrossPlatformTests:DatabaseTests
         Assert.AreEqual(someDates.Length*2,tbl.GetRowCount());
     }
 
-    readonly string [] someDates = new string[]
-    {
+    private readonly string [] someDates = {
         "22\\5\\19",
         "22/5/19",
         "22-5-19",
@@ -1306,32 +1304,11 @@ public class CrossPlatformTests:DatabaseTests
     public void DateTimeTypeDeciderPerformance()
     {
         var d = new DateTimeTypeDecider(new CultureInfo("en-gb"));
-            
-        var sw = Stopwatch.StartNew();
+        var dt = new DateTime(2019,5,22,8,59,36);
 
-        DateTime dt = new DateTime(2019,5,22,8,59,36);
+        foreach(var f in DateTimeTypeDecider.DateFormatsDM) d.Parse(dt.ToString(f));
+        foreach(var f in DateTimeTypeDecider.TimeFormats) d.Parse(dt.ToString(f));
 
-        foreach(string f in DateTimeTypeDecider.DateFormatsDM)
-        {
-            var val = dt.ToString(f);
-            TestContext.WriteLine(val);
-                
-            d.Parse(val);
-        }
-                
-
-        foreach(string f in DateTimeTypeDecider.TimeFormats)
-        {
-            var t = dt.ToString(f);
-            TestContext.WriteLine(t); 
-            d.Parse(t);
-        }
-
-        for(int i = 0 ; i < 1000;i++)
-            Assert.AreEqual(new DateTime(1993,2,28,5,36,27),d.Parse("28/2/1993 5:36:27 AM"));
-
-        //12s
-        sw.Stop();
-        TestContext.WriteLine($"{sw.ElapsedMilliseconds} ms");
+        Assert.AreEqual(new DateTime(1993,2,28,5,36,27),d.Parse("28/2/1993 5:36:27 AM"));
     }
 }

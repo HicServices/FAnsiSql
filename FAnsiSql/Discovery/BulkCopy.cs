@@ -104,62 +104,58 @@ public abstract class BulkCopy:IBulkCopy
         var factory = new TypeDeciderFactory(Culture);
             
         //These are the problematic Types
-        Dictionary<Type, IDecideTypesForStrings> deciders = factory.Dictionary;
+        var deciders = factory.Dictionary;
             
         //for each column in the destination
         foreach(var kvp in dict)
         {
             //if the destination column is a problematic type
             var dataType = kvp.Value.DataType.GetCSharpDataType();
-            if(deciders.ContainsKey(dataType))
+            if (!deciders.TryGetValue(dataType, out var decider)) continue;
+            //if it's already not a string then that's fine (hopefully its a legit Type e.g. DateTime!)
+            if(kvp.Key.DataType != typeof(string))
+                continue;
+
+            //create a new column hard typed to DateTime
+            var newColumn = dt.Columns.Add($"{kvp.Key.ColumnName}_{Guid.NewGuid()}",dataType);
+
+            //if it's a DateTime decider then guess DateTime culture based on values in the table
+            if(decider is DateTimeTypeDecider)
             {
-                //if it's already not a string then that's fine (hopefully its a legit Type e.g. DateTime!)
-                if(kvp.Key.DataType != typeof(string))
-                    continue;
-
-                //create a new column hard typed to DateTime
-                var newColumn = dt.Columns.Add(kvp.Key.ColumnName + "_" + Guid.NewGuid().ToString(),dataType);
-
-                var decider = deciders[dataType];
-                    
-                //if it's a DateTime decider then guess DateTime culture based on values in the table
-                if(decider is DateTimeTypeDecider)
-                {
-                    //also use this one incase the user has set up explicit stuff on it e.g. Culture/Settings
-                    decider = DateTimeDecider;
-                    DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
-                }
+                //also use this one in case the user has set up explicit stuff on it e.g. Culture/Settings
+                decider = DateTimeDecider;
+                DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
+            }
                         
 
-                foreach(DataRow dr in dt.Rows)
+            foreach(DataRow dr in dt.Rows)
+            {
+                try
                 {
-                    try
-                    {
-                        //parse the value
-                        dr[newColumn] = decider.Parse(dr[kvp.Key] as string)??DBNull.Value;
+                    //parse the value
+                    dr[newColumn] = decider.Parse(dr[kvp.Key] as string)??DBNull.Value;
 
-                    }
-                    catch(Exception ex)
-                    {
-                        throw new Exception($"Failed to parse value '{dr[kvp.Key]}' in column '{kvp.Key}'",ex);
-                    }
                 }
-
-                //if the DataColumn is part of the Primary Key of the DataTable (in memory)
-                //then we need to update the primary key to include the new column not the old one
-                if(dt.PrimaryKey != null && dt.PrimaryKey.Contains(kvp.Key))
-                    dt.PrimaryKey = dt.PrimaryKey.Except(new []{kvp.Key }).Union(new []{newColumn }).ToArray();
-
-                var oldOrdinal  = kvp.Key.Ordinal;
-
-                //drop the original column
-                dt.Columns.Remove(kvp.Key);
-
-                //rename the hard typed column to match the old column name
-                newColumn.ColumnName = kvp.Key.ColumnName;
-                if(oldOrdinal != -1)
-                    newColumn.SetOrdinal(oldOrdinal);
+                catch(Exception ex)
+                {
+                    throw new Exception($"Failed to parse value '{dr[kvp.Key]}' in column '{kvp.Key}'",ex);
+                }
             }
+
+            //if the DataColumn is part of the Primary Key of the DataTable (in memory)
+            //then we need to update the primary key to include the new column not the old one
+            if(dt.PrimaryKey != null && dt.PrimaryKey.Contains(kvp.Key))
+                dt.PrimaryKey = dt.PrimaryKey.Except(new []{kvp.Key }).Union(new []{newColumn }).ToArray();
+
+            var oldOrdinal  = kvp.Key.Ordinal;
+
+            //drop the original column
+            dt.Columns.Remove(kvp.Key);
+
+            //rename the hard typed column to match the old column name
+            newColumn.ColumnName = kvp.Key.ColumnName;
+            if(oldOrdinal != -1)
+                newColumn.SetOrdinal(oldOrdinal);
         }
     }
 
@@ -174,9 +170,9 @@ public abstract class BulkCopy:IBulkCopy
     /// <returns></returns>
     protected Dictionary<DataColumn, DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns, out DiscoveredColumn[] unmatchedColumnsInDestination)
     {
-        Dictionary<DataColumn, DiscoveredColumn> mapping = new Dictionary<DataColumn, DiscoveredColumn>();
+        var mapping = new Dictionary<DataColumn, DiscoveredColumn>();
 
-        foreach (DataColumn colInSource in inputColumns)
+        foreach (var colInSource in inputColumns)
         {
             var match = TargetTableColumns.SingleOrDefault(c => c.GetRuntimeName().Equals(colInSource.ColumnName, StringComparison.CurrentCultureIgnoreCase));
 
@@ -206,7 +202,6 @@ public abstract class BulkCopy:IBulkCopy
     /// <returns></returns>
     protected Dictionary<DataColumn,DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns)
     {
-        DiscoveredColumn[] whoCares;
-        return GetMapping(inputColumns, out whoCares);
+        return GetMapping(inputColumns, out _);
     }
 }

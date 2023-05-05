@@ -8,7 +8,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Database;
 
-class DiscoverTablesTests:DatabaseTests
+internal class DiscoverTablesTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_DiscoverTables_Normal(DatabaseType dbType)
@@ -18,13 +18,13 @@ class DiscoverTablesTests:DatabaseTests
         db.CreateTable("AA",
             new DatabaseColumnRequest[]
             {
-                new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
+                new("F",new DatabaseTypeRequest(typeof(int)))
             });
 
         db.CreateTable("BB",
             new DatabaseColumnRequest[]
             {
-                new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
+                new("F",new DatabaseTypeRequest(typeof(int)))
             });
 
         var tbls = db.DiscoverTables(false);
@@ -53,14 +53,14 @@ class DiscoverTablesTests:DatabaseTests
             db.CreateTable("FF (troll)",
                 new DatabaseColumnRequest[]
                 {
-                    new DatabaseColumnRequest("F", new DatabaseTypeRequest(typeof(int)))
+                    new("F", new DatabaseTypeRequest(typeof(int)))
                 }));
 
         //but we can create a table "FF"
         db.CreateTable("FF",
             new DatabaseColumnRequest[]
             {
-                new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
+                new("F",new DatabaseTypeRequest(typeof(int)))
             });
             
         //even though there are 2 tables in the database [BB (ff)] and [FF] only [FF] should be returned
@@ -89,14 +89,14 @@ class DiscoverTablesTests:DatabaseTests
             db.CreateTable("FF (troll)",
                 new DatabaseColumnRequest[]
                 {
-                    new DatabaseColumnRequest("F", new DatabaseTypeRequest(typeof(int)))
+                    new("F", new DatabaseTypeRequest(typeof(int)))
                 }));
 
         //but we can create a table "FF"
         db.CreateTable("FF",
             new DatabaseColumnRequest[]
             {
-                new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
+                new("F",new DatabaseTypeRequest(typeof(int)))
             });
             
         //even though there are 2 tables in the database [BB (ff)] and [FF] only [FF] should be returned
@@ -114,52 +114,41 @@ class DiscoverTablesTests:DatabaseTests
 
     private void DropBadTable(DiscoveredDatabase db,bool ignoreFailure)
     {
-        using(var con = db.Server.GetConnection())
+        using var con = db.Server.GetConnection();
+        con.Open();
+        var cmd = db.Server.GetCommand($"DROP TABLE {GetBadTableName(db)}",con);
+        try
         {
-            con.Open();
-            var cmd = db.Server.GetCommand($"DROP TABLE {GetBadTableName(db)}",con);
-            try
-            {
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception)
-            {
-                if (!ignoreFailure)
-                    throw;
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception)
+        {
+            if (!ignoreFailure)
+                throw;
 
-                TestContext.WriteLine("Drop table failed, this is expected, since FAnsi won't see this dodgy table name we can't drop it as normal before tests");
-            }
+            TestContext.WriteLine("Drop table failed, this is expected, since FAnsi won't see this dodgy table name we can't drop it as normal before tests");
         }
     }
 
-    private string GetBadTableName(DiscoveredDatabase db)
-    {
-        switch (db.Server.DatabaseType)
+    private string GetBadTableName(DiscoveredDatabase db) =>
+        db.Server.DatabaseType switch
         {
-            case DatabaseType.MicrosoftSQLServer:
-                return "[BB (ff)]";
-            case DatabaseType.MySql:
-                return "`BB (ff)`";
-            case DatabaseType.Oracle:
-                return  db.GetRuntimeName() + ".\"BB (ff)\"";
-            case DatabaseType.PostgreSql:
-                return  '"' + db.GetRuntimeName() + "\".public.\"BB (ff)\"";
-            default:
-                throw new ArgumentOutOfRangeException(nameof(db.Server.DatabaseType), db.Server.DatabaseType, null);
-        }
-    }
+            DatabaseType.MicrosoftSQLServer => "[BB (ff)]",
+            DatabaseType.MySql => "`BB (ff)`",
+            DatabaseType.Oracle => $"{db.GetRuntimeName()}.\"BB (ff)\"",
+            DatabaseType.PostgreSql => $"\"{db.GetRuntimeName()}\".public.\"BB (ff)\"",
+            _ => throw new ArgumentOutOfRangeException(nameof(db.Server.DatabaseType), db.Server.DatabaseType, null)
+        };
 
     private void CreateBadTable(DiscoveredDatabase db)
     {
         //drop it if it exists
         DropBadTable(db,true);
 
-        using(var con = db.Server.GetConnection())
-        {
-            con.Open();
-            var cmd = db.Server.GetCommand($"CREATE TABLE {GetBadTableName(db)} (A int not null)",con);
-            cmd.ExecuteNonQuery();
-        }
+        using var con = db.Server.GetConnection();
+        con.Open();
+        var cmd = db.Server.GetCommand($"CREATE TABLE {GetBadTableName(db)} (A int not null)",con);
+        cmd.ExecuteNonQuery();
     }
 
 
@@ -196,16 +185,14 @@ class DiscoverTablesTests:DatabaseTests
         //drop it if it exists
         DropBadView(db,true);
 
-        db.CreateTable("ABC",new DatabaseColumnRequest[]{new DatabaseColumnRequest("A",new DatabaseTypeRequest(typeof(int)))});
+        db.CreateTable("ABC",new DatabaseColumnRequest[]{new("A",new DatabaseTypeRequest(typeof(int)))});
 
-        using(var con = db.Server.GetConnection())
-        {
-            con.Open();
+        using var con = db.Server.GetConnection();
+        con.Open();
  
-            var viewname = db.Server.GetQuerySyntaxHelper().EnsureWrapped("ABC");
+        var viewname = db.Server.GetQuerySyntaxHelper().EnsureWrapped("ABC");
 
-            var cmd = db.Server.GetCommand($"CREATE VIEW {GetBadTableName(db)} as select * from " + viewname,con);
-            cmd.ExecuteNonQuery();
-        }
+        var cmd = db.Server.GetCommand($"CREATE VIEW {GetBadTableName(db)} as select * from {viewname}",con);
+        cmd.ExecuteNonQuery();
     }
 }

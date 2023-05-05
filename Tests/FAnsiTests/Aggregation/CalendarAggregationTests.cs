@@ -8,7 +8,7 @@ using System.Data;
 
 namespace FAnsiTests.Aggregation;
 
-class CalendarAggregationTests:AggregationTests
+internal class CalendarAggregationTests:AggregationTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_Calendar_Year(DatabaseType type)
@@ -21,14 +21,14 @@ class CalendarAggregationTests:AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
+            new("SELECT", QueryComponent.SELECT),
+            new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new CustomLine(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
-            new CustomLine("FROM ", QueryComponent.FROM),
-            new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
-            new CustomLine("GROUP BY", QueryComponent.GroupBy),
-            new CustomLine(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
+            new("FROM ", QueryComponent.FROM),
+            new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
+            new("GROUP BY", QueryComponent.GroupBy),
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
         };
 
         var axis = new QueryAxis
@@ -46,7 +46,7 @@ class CalendarAggregationTests:AggregationTests
         con.Open();
 
         using var da = svr.GetDataAdapter(sql, con);
-        using DataTable dt = new DataTable();
+        using var dt = new DataTable();
         da.Fill(dt);
 
         Assert.AreEqual(10, dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
@@ -81,13 +81,13 @@ class CalendarAggregationTests:AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
-            new CustomLine(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis },                      //tell it which the axis are 
-            new CustomLine("FROM ", QueryComponent.FROM),
-            new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
-            new CustomLine("GROUP BY", QueryComponent.GroupBy),
-            new CustomLine(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis }                                           //tell it which the axis are 
+            new("SELECT", QueryComponent.SELECT),
+            new("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
+            new(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis },                      //tell it which the axis are 
+            new("FROM ", QueryComponent.FROM),
+            new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
+            new("GROUP BY", QueryComponent.GroupBy),
+            new(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis }                                           //tell it which the axis are 
         };
 
         var axis = new QueryAxis
@@ -104,7 +104,7 @@ class CalendarAggregationTests:AggregationTests
         con.Open();
 
         using var da = svr.GetDataAdapter(sql, con);
-        using DataTable dt = new DataTable();
+        using var dt = new DataTable();
         da.Fill(dt);
 
         ConsoleWriteTable(dt);
@@ -125,14 +125,14 @@ class CalendarAggregationTests:AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
+            new("SELECT", QueryComponent.SELECT),
+            new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new CustomLine(syntax.EnsureWrapped("EventDate"), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
-            new CustomLine("FROM ", QueryComponent.FROM),
-            new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
-            new CustomLine("GROUP BY", QueryComponent.GroupBy),
-            new CustomLine(syntax.EnsureWrapped("EventDate"), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(syntax.EnsureWrapped("EventDate"), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
+            new("FROM ", QueryComponent.FROM),
+            new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
+            new("GROUP BY", QueryComponent.GroupBy),
+            new(syntax.EnsureWrapped("EventDate"), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
         };
 
         var axis = new QueryAxis
@@ -149,7 +149,7 @@ class CalendarAggregationTests:AggregationTests
         con.Open();
 
         using var da = svr.GetDataAdapter(sql, con);
-        using DataTable dt = new DataTable();
+        using var dt = new DataTable();
         da.Fill(dt);
 
         ConsoleWriteTable(dt);
@@ -169,14 +169,14 @@ class CalendarAggregationTests:AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
+            new("SELECT", QueryComponent.SELECT),
+            new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new CustomLine(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
-            new CustomLine("FROM ", QueryComponent.FROM),
-            new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
-            new CustomLine("GROUP BY", QueryComponent.GroupBy),
-            new CustomLine(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
+            new("FROM ", QueryComponent.FROM),
+            new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
+            new("GROUP BY", QueryComponent.GroupBy),
+            new(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
         };
 
         var axis = new QueryAxis
@@ -193,17 +193,14 @@ class CalendarAggregationTests:AggregationTests
         con.Open();
 
         var da = svr.GetDataAdapter(sql, con);
-        DataTable dt = new DataTable();
+        using var dt = new DataTable();
         da.Fill(dt);
-
-        ConsoleWriteTable(dt);
 
         Assert.AreEqual(3288, dt.Rows.Count); // 109 months between 2001 and 2010 (inclusive)
 
         AssertHasRow(dt, new DateTime(2001,1,1), 4);
         AssertHasRow(dt, new DateTime(2001, 1, 2), 1);
         AssertHasRow(dt, new DateTime(2001, 1, 3), null);
-        dt.Dispose();
     }
 
 
@@ -216,14 +213,14 @@ class CalendarAggregationTests:AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
+            new("SELECT", QueryComponent.SELECT),
+            new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new CustomLine(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
-            new CustomLine("FROM ", QueryComponent.FROM),
-            new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
-            new CustomLine("GROUP BY", QueryComponent.GroupBy),
-            new CustomLine(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
+            new("FROM ", QueryComponent.FROM),
+            new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
+            new("GROUP BY", QueryComponent.GroupBy),
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
         };
 
         var axis = new QueryAxis
@@ -242,7 +239,7 @@ class CalendarAggregationTests:AggregationTests
         con.Open();
 
         using var da = svr.GetDataAdapter(sql, con);
-        using DataTable dt = new DataTable();
+        using var dt = new DataTable();
         da.Fill(dt);
 
         Assert.GreaterOrEqual(dt.Rows.Count, 19); //there are 19 years between 2001 and 2019 (use greater than because we don't want test to fail in 2020)
@@ -268,7 +265,7 @@ class CalendarAggregationTests:AggregationTests
         Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
 
         //should go up to this year
-        Assert.AreEqual(DateTime.Now.Year, dt.Rows[dt.Rows.Count - 1][0]);
+        Assert.AreEqual(DateTime.Now.Year, dt.Rows[^1][0]);
         Assert.AreEqual(DBNull.Value, dt.Rows[9][1]);
     }
 
@@ -285,14 +282,14 @@ class CalendarAggregationTests:AggregationTests
 
         var lines = new List<CustomLine>
         {
-            new CustomLine("SELECT", QueryComponent.SELECT),
-            new CustomLine($"{eventDate.GetFullyQualifiedName()},", QueryComponent.QueryTimeColumn)
+            new("SELECT", QueryComponent.SELECT),
+            new($"{eventDate.GetFullyQualifiedName()},", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.Axis }, //tell it which the axis are 
-            new CustomLine("count(*) as MyCount", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
-            new CustomLine("FROM ", QueryComponent.FROM),
-            new CustomLine(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
-            new CustomLine("GROUP BY", QueryComponent.GroupBy),
-            new CustomLine(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new("count(*) as MyCount", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
+            new("FROM ", QueryComponent.FROM),
+            new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
+            new("GROUP BY", QueryComponent.GroupBy),
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
         };
 
         var axis = new QueryAxis
@@ -311,7 +308,7 @@ class CalendarAggregationTests:AggregationTests
         con.Open();
 
         using var da = svr.GetDataAdapter(sql, con);
-        using DataTable dt = new DataTable();
+        using var dt = new DataTable();
         da.Fill(dt);
 
         Assert.AreEqual(10, dt.Rows.Count); //there are 10 years between 2001 and 2010 even though not all years are represented in the data

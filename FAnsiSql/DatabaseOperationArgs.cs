@@ -26,7 +26,7 @@ public class DatabaseOperationArgs
     /// <summary>
     /// Optional, if provided all commands interacting with these args should cancel if the command was cancelled
     /// </summary>
-    public CancellationToken CancellationToken =  default(CancellationToken);
+    public CancellationToken CancellationToken;
 
     public DatabaseOperationArgs()
     {
@@ -48,7 +48,7 @@ public class DatabaseOperationArgs
     /// <exception cref="OperationCanceledException"></exception>
     public int ExecuteNonQuery(DbCommand cmd)
     {
-        return Execute<int>(cmd, ()=>cmd.ExecuteNonQueryAsync(CancellationToken));
+        return Execute(cmd, ()=>cmd.ExecuteNonQueryAsync(CancellationToken));
     }
     /// <summary>
     /// Sets the timeout and cancellation on <paramref name="cmd"/> then runs <see cref="DbCommand.ExecuteScalar()"/> with the
@@ -59,7 +59,7 @@ public class DatabaseOperationArgs
     /// <exception cref="OperationCanceledException"></exception>
     public object ExecuteScalar(DbCommand cmd)
     {
-        return Execute<object>(cmd, ()=>cmd.ExecuteScalarAsync(CancellationToken));
+        return Execute(cmd, ()=>cmd.ExecuteScalarAsync(CancellationToken));
     }
 
     private T Execute<T>(DbCommand cmd, Func<Task<T>> method)
@@ -69,33 +69,31 @@ public class DatabaseOperationArgs
             
         try
         {
-            if (t.Status == TaskStatus.Faulted)
-                throw t.Exception?? new Exception("Task crashed without Exception!");
-                
-            if(t.Status != TaskStatus.Canceled)
-                t.Wait();
-            else
-                throw new OperationCanceledException();
-                
+            switch (t.Status)
+            {
+                case TaskStatus.Faulted:
+                    throw t.Exception?? new Exception("Task crashed without Exception!");
+                case TaskStatus.Canceled:
+                    throw new OperationCanceledException();
+                default:
+                    t.Wait();
+                    break;
+            }
         }
         catch (AggregateException e)
         {
             if (e.InnerExceptions.Count == 1)
                 throw e.InnerExceptions[0];
-                
             throw;
         }
             
         if (!t.IsCompleted) 
             cmd.Cancel();
-            
-        if( t.Exception != null)
-            if (t.Exception.InnerExceptions.Count == 1)
-                throw t.Exception.InnerExceptions[0];
-            else
-                throw t.Exception;
 
-        return t.Result;
+        if (t.Exception == null) return t.Result;
+        if (t.Exception.InnerExceptions.Count == 1)
+            throw t.Exception.InnerExceptions[0];
+        throw t.Exception;
     }
         
     public void Fill(DbDataAdapter da, DbCommand cmd, DataTable dt)

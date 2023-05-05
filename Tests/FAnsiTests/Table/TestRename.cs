@@ -5,7 +5,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-class TestRename:DatabaseTests
+internal class TestRename:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestRenamingTable(DatabaseType type)

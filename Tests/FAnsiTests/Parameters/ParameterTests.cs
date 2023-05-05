@@ -8,7 +8,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Parameters;
 
-class ParameterTests:DatabaseTests
+internal class ParameterTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_SupportsEmbeddedParameters_DeclarationOrThrow(DatabaseType type)
@@ -40,7 +40,7 @@ class ParameterTests:DatabaseTests
     {
         var db = GetTestDatabase(type);
 
-        DataTable dt = new DataTable();
+        var dt = new DataTable();
             
         dt.Columns.Add("FF");
         dt.Rows.Add("armag");
@@ -48,7 +48,7 @@ class ParameterTests:DatabaseTests
 
         var tbl = db.CreateTable("ParameterUseTest",dt);
             
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
                         
         //declare the variable
         sb.AppendLine(tbl.GetQuerySyntaxHelper().GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)));
@@ -56,15 +56,13 @@ class ParameterTests:DatabaseTests
         sb.AppendLine("SET @bob='armag';");
         //set the variable
 
-        sb.AppendLine("SELECT FF from " + tbl.GetFullyQualifiedName() +" WHERE FF = @bob;");
-            
-        using(var con = db.Server.GetConnection())
-        {
-            con.Open();
-            var r = db.Server.GetCommand(sb.ToString(),con).ExecuteReader();
+        sb.AppendLine($"SELECT FF from {tbl.GetFullyQualifiedName()} WHERE FF = @bob;");
 
-            Assert.IsTrue(r.Read());
-            Assert.IsFalse(r.Read());
-        }
+        using var con = db.Server.GetConnection();
+        con.Open();
+        var r = db.Server.GetCommand(sb.ToString(),con).ExecuteReader();
+
+        Assert.IsTrue(r.Read());
+        Assert.IsFalse(r.Read());
     }
 }

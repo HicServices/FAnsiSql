@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using FAnsi.Implementation;
+using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Discovery.ConnectionStringDefaults;
 
@@ -18,7 +19,7 @@ public class ConnectionStringKeywordAccumulator
     /// </summary>
     public DatabaseType DatabaseType { get; private set; }
 
-    private readonly Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>> _keywords = new Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>>(StringComparer.CurrentCultureIgnoreCase);
+    private readonly Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>> _keywords = new(StringComparer.CurrentCultureIgnoreCase);
     private readonly DbConnectionStringBuilder _builder;
 
     /// <summary>
@@ -54,13 +55,10 @@ public class ConnectionStringKeywordAccumulator
         }
 
         //if we have not got that keyword yet
-        if(!_keywords.ContainsKey(keyword))
-            _keywords.Add(keyword,Tuple.Create(value,priority));
-        else
+        if(!_keywords.TryAdd(keyword, Tuple.Create(value, priority)) && _keywords[keyword].Item2 <= priority)
         {
             //or the keyword that was previously specified had a lower priority
-            if (_keywords[keyword].Item2 <= priority)
-                _keywords[keyword] = Tuple.Create(value, priority); //update it with the new value
+            _keywords[keyword] = Tuple.Create(value, priority); //update it with the new value
         }
     }
 
@@ -73,31 +71,40 @@ public class ConnectionStringKeywordAccumulator
     /// <returns></returns>
     private string GetCollisionWithKeyword(string keyword, string value)
     {
-        //lets evaluate this alleged keyword!
+        ArgumentNullException.ThrowIfNull(keyword);
+        ArgumentNullException.ThrowIfNull(value);
+
+        //let's evaluate this alleged keyword!
         _builder.Clear();
 
         try
         {
             //Make sure it is supported by the connection string builder
             _builder.Add(keyword, value);
-        }catch(Exception ex)
+        }
+        catch (OracleException ex)
+        {
+            //don't output the value since that could be a password
+            throw new ArgumentException(string.Format(FAnsiStrings.ConnectionStringKeyword_ValueNotSupported, keyword), ex);
+        }
+        catch (NotSupportedException ex)
         {
             //don't output the value since that could be a password
             throw new ArgumentException(string.Format(FAnsiStrings.ConnectionStringKeyword_ValueNotSupported, keyword),ex);
         }            
 
         //now iterate all the keys we had before and add those too, if the key count doesn't change for any of them we know it's a duplicate semantically
-        if (_builder.Keys != null)
-            foreach (var current in _keywords)
-            {
-                int keysBefore = _builder.Keys.Count;
+        if (_builder.Keys == null) return null;
+        foreach (var current in _keywords)
+        {
+            var keysBefore = _builder.Keys.Count;
 
-                _builder.Add(current.Key, current.Value.Item1);
+            _builder.Add(current.Key, current.Value.Item1);
 
-                //key count in builder didn't change dispite there being new values added
-                if (_builder.Keys.Count == keysBefore)
-                    return current.Key;
-            }
+            //key count in builder didn't change despite there being new values added
+            if (_builder.Keys.Count == keysBefore)
+                return current.Key;
+        }
 
         //no collisions
         return null;

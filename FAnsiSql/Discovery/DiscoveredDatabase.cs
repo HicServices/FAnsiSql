@@ -54,10 +54,10 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
     /// <returns></returns>
     public DiscoveredTable[] DiscoverTables(bool includeViews, IManagedTransaction transaction = null)
     {
-        using (var managedConnection = Server.GetManagedConnection(transaction))
-            return
-                Helper.ListTables(this, _querySyntaxHelper, managedConnection.Connection, GetRuntimeName(),
-                    includeViews, managedConnection.Transaction).ToArray();
+        using var managedConnection = Server.GetManagedConnection(transaction);
+        return
+            Helper.ListTables(this, _querySyntaxHelper, managedConnection.Connection, GetRuntimeName(),
+                includeViews, managedConnection.Transaction).ToArray();
     }
 
     /// <summary>
@@ -66,12 +66,12 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - if provided the database query will be sent using the connection/transaction provided</param>
     /// <returns></returns>
-    public DiscoveredTableValuedFunction[] DiscoverTableValuedFunctions(IManagedTransaction transaction = null)
+    public IEnumerable<DiscoveredTableValuedFunction> DiscoverTableValuedFunctions(IManagedTransaction transaction = null)
     {
-        using (var managedConnection = Server.GetManagedConnection(transaction))
-            return
-                Helper.ListTableValuedFunctions(this, _querySyntaxHelper, managedConnection.Connection,
-                    GetRuntimeName(), managedConnection.Transaction).ToArray();
+        using var managedConnection = Server.GetManagedConnection(transaction);
+        return
+            Helper.ListTableValuedFunctions(this, _querySyntaxHelper, managedConnection.Connection,
+                GetRuntimeName(), managedConnection.Transaction).ToArray();
     }
         
     /// <summary>
@@ -328,7 +328,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((DiscoveredDatabase)obj);
     }
 

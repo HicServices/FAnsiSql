@@ -15,7 +15,7 @@ namespace FAnsi.Discovery;
 /// </summary>
 public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
 {
-    private static readonly Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = new Dictionary<DatabaseType, ConnectionStringKeywordAccumulator>();
+    private static readonly Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = new();
 
     /// <summary>
     /// Register a system wide rule that all connection strings of <paramref name="databaseType"/> should include the given <paramref name="keyword"/>.
@@ -71,8 +71,8 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     protected virtual void EnforceKeywords(DbConnectionStringBuilder builder)
     {
         //if we have any keywords to enforce
-        if (ConnectionStringKeywordAccumulators.ContainsKey(DatabaseType))
-            ConnectionStringKeywordAccumulators[DatabaseType].EnforceOptions(builder);
+        if (ConnectionStringKeywordAccumulators.TryGetValue(DatabaseType, out var accumulator))
+            accumulator.EnforceOptions(builder);
     }
     protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString, string database, string username, string password);
     protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString);
@@ -81,7 +81,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
 
     protected abstract string ServerKeyName { get; }
     protected abstract string DatabaseKeyName { get; }
-    protected virtual string ConnectionTimeoutKeyName { get { return "ConnectionTimeout"; } }
+    protected virtual string ConnectionTimeoutKeyName => "ConnectionTimeout";
 
     public string GetServerName(DbConnectionStringBuilder builder)
     {
@@ -107,13 +107,13 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
         return newBuilder;
     }
 
-    public abstract string[] ListDatabases(DbConnectionStringBuilder builder);
+    public abstract IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder);
     public abstract string[] ListDatabases(DbConnection con);
 
     public string[] ListDatabasesAsync(DbConnectionStringBuilder builder, CancellationToken token)
     {
         //list the database on the server
-        DbConnection con = GetConnection(builder);
+        var con = GetConnection(builder);
             
         //this will work or timeout
         var openTask = con.OpenAsync(token);
@@ -148,15 +148,13 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
             var copyBuilder = GetConnectionStringBuilder(builder.ConnectionString);
             copyBuilder[ConnectionTimeoutKeyName] = timeoutInSeconds;
 
-            using (var con = GetConnection(copyBuilder))
-            {
-                con.Open();
+            using var con = GetConnection(copyBuilder);
+            con.Open();
 
-                con.Close();
+            con.Close();
 
-                exception = null;
-                return true;
-            }
+            exception = null;
+            return true;
         }
         catch (Exception e)
         {
@@ -167,8 +165,8 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     public abstract string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
     public abstract string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
     public abstract Version GetVersion(DiscoveredServer server);
-        
-    Regex rVagueVersion = new Regex(@"\d+\.\d+(\.\d+)?(\.\d+)?");
+
+    private readonly Regex rVagueVersion = new(@"\d+\.\d+(\.\d+)?(\.\d+)?",RegexOptions.Compiled|RegexOptions.CultureInvariant);
 
     /// <summary>
     /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
@@ -185,15 +183,13 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     /// <returns></returns>
     protected Version CreateVersionFromString(string versionString)
     {
-        if (Version.TryParse(versionString, out Version result))
+        if (Version.TryParse(versionString, out var result))
             return result;
 
         var m = rVagueVersion.Match(versionString);
-        if (m.Success)
-            return Version.Parse(m.Value);
-
-        //whatever the string was it didn't even remotely resemble a Version
-        return null;
+        return m.Success ? Version.Parse(m.Value) :
+            //whatever the string was it didn't even remotely resemble a Version
+            null;
     }
 
     protected DiscoveredServerHelper(DatabaseType databaseType)

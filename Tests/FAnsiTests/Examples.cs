@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Data.Common;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Implementation;
@@ -9,7 +8,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests;
 
-class TestExamples : DatabaseTests
+internal class TestExamples : DatabaseTests
 { 
     [Ignore("Test only works when the hard coded connection strings pass,  this test is used to build clear examples in the documentation")]
     [Test] 
@@ -21,9 +20,6 @@ class TestExamples : DatabaseTests
         dt.Columns.Add("Date of Birth");
         dt.Rows.Add("Frank \"The Boss\" Spagetti","1920-01-01");
         dt.Rows.Add("Pete Mudarillo","22-May-1910");
-
-        //Load the DBMS implementation(s) you need
-        ImplementationManager.Load<MicrosoftSQLImplementation>();
 
         //Get Management object for the database
         var server = new DiscoveredServer(
@@ -52,14 +48,7 @@ class TestExamples : DatabaseTests
     [Ignore("Test only works when the hard coded connection strings pass,  this test is used to build clear examples in the documentation")]
     public void Example_TableCreation()
     {
-        //Load implementation assemblies that are relevant to your application
-        ImplementationManager.Load(
-            typeof(FAnsi.Implementations.MicrosoftSQL.MicrosoftSQLImplementation).Assembly,
-            typeof(FAnsi.Implementations.Oracle.OracleImplementation).Assembly,
-            typeof(FAnsi.Implementations.MySql.MySqlImplementation).Assembly);
-
-        //Create some test data
-        DataTable dt = new DataTable();
+        using var dt = new DataTable();
 
         dt.Columns.Add("Name");
         dt.Columns.Add("DateOfBirth");
@@ -86,10 +75,10 @@ class TestExamples : DatabaseTests
         TestContext.WriteLine("Column Name is of type {0}", table.DiscoverColumn("Name").DataType.SQLType);
         TestContext.WriteLine("Column DateOfBirth is of type {0}", table.DiscoverColumn("DateOfBirth").DataType.SQLType);
 
-        using DbConnection con = server.GetConnection();
+        using var con = server.GetConnection();
         con.Open();
-        using DbCommand cmd = server.GetCommand($"Select * from {table.GetFullyQualifiedName()}", con);
-        using DbDataReader r = cmd.ExecuteReader();
+        using var cmd = server.GetCommand($"Select * from {table.GetFullyQualifiedName()}", con);
+        using var r = cmd.ExecuteReader();
         while (r.Read())
             TestContext.WriteLine(string.Join(",", r["Name"],r["DateOfBirth"]));
 
