@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-20.04
     services:
       oracle:
-        image: oracleinanutshell/oracle-xe-11g
+        image: konnecteam/docker-oracle-12c:sequelize
         env:
-          ORACLE_DISABLE_ASYNCH_IO: true
+          DBCA_TOTAL_MEMORY: 512
         ports:
           - 1521:1521
       postgres:

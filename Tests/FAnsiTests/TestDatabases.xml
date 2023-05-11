@@ -5,7 +5,7 @@
           </Settings>
           <TestDatabase>
             <DatabaseType>MicrosoftSQLServer</DatabaseType>
-            <ConnectionString>Data Source=localhost;Encrypt=true;TrustServerCertificate=true;Integrated Security=false;User ID=sa;Password=YourStrong!Passw0rd;</ConnectionString>
+            <ConnectionString>Data Source=(localdb)\MSSQLLocalDB</ConnectionString>
           </TestDatabase>
           <TestDatabase>
             <DatabaseType>MySql</DatabaseType>
