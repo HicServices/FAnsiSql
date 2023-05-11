@@ -46,9 +46,7 @@ public sealed class OracleTypeTranslater:TypeTranslater
     protected override string GetBigIntDataType() => "number(19)";
 
     /// <summary>
-    /// <para>Returns False.  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint
-    /// For our purposes we will have to just use varchar2(5) to store "True" or "False" and "1" and "0" etc</para>
-    /// 
+    /// <para>Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1)</para>
     /// <para>See https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns</para>
     /// </summary>
     /// <param name="sqlType"></param>
