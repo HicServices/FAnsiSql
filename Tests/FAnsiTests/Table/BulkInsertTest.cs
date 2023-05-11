@@ -462,7 +462,7 @@ internal class BulkInsertTest : DatabaseTests
         Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString()?.Length, 5); //should be a date
         Assert.AreEqual("no", result.Rows[0]["peter"]);
             
-        //while we have a ton of data in there lets test some cancellation operations
+        //while we have a ton of data in there let's test some cancellation operations
             
         //no primary key
         var bobCol = tbl.DiscoverColumn("bob");
