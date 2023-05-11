@@ -38,7 +38,7 @@ internal class OracleBulkCopy : BulkCopy
         var dateColumns = new HashSet<DataColumn>();
 
         var sql = string.Format("INSERT INTO " + TargetTable.GetFullyQualifiedName() + "({0}) VALUES ({1})",
-            string.Join(",", mapping.Values.Select(c=> $"\"{c.GetRuntimeName()}\"")),
+            string.Join(",", mapping.Values.Select(c=> $"\"{c.GetWrappedName()}\"")),
             string.Join(",", mapping.Keys.Select(c => parameterNames[c]))
         );
 
