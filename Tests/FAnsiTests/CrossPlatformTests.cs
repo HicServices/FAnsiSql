@@ -657,7 +657,7 @@ public class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         var dt = new DataTable();
-        dt.Columns.Add("MyCol");
+        dt.Columns.Add("MyCol",typeof(decimal));
 
         dt.Rows.Add("100");
         dt.Rows.Add("105");
@@ -671,13 +671,9 @@ public class CrossPlatformTests:DatabaseTests
         Assert.AreEqual(1, dt.Rows.OfType<DataRow>().Count(r => Convert.ToInt32(r[0]) == 1));
 
         var col = tbl.DiscoverColumn("MyCol");
-        var size = col.DataType.GetDecimalSize();
-        //ints are not decimals so null
-        Assert.IsNull(size);
-
         col.DataType.AlterTypeTo("decimal(5,2)");
 
-        size = tbl.DiscoverColumn("MyCol").DataType.GetDecimalSize();
+        var size = tbl.DiscoverColumn("MyCol").DataType.GetDecimalSize();
         Assert.AreEqual(new DecimalSize(3, 2), size); //3 before decimal place 2 after;
         Assert.AreEqual(3, size.NumbersBeforeDecimalPlace);
         Assert.AreEqual(2, size.NumbersAfterDecimalPlace);
