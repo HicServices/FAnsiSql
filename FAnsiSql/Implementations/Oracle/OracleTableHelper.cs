@@ -118,7 +118,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
     public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
     {
         using var cmd = new OracleCommand(
-            $"ALTER TABLE {columnToDrop.Table.GetFullyQualifiedName()}  DROP COLUMN {columnToDrop.GetRuntimeName()}", (OracleConnection)connection);
+            $"ALTER TABLE {columnToDrop.Table.GetFullyQualifiedName()}  DROP COLUMN {columnToDrop.GetWrappedName()}", (OracleConnection)connection);
         cmd.ExecuteNonQuery();
     }
         
