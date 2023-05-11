@@ -205,22 +205,22 @@ internal class CreateTableTests:DatabaseTests
     public void CreateTable_BoolStrings(DatabaseType type)
     {
         var db = GetTestDatabase(type);
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.TableName = "MyTable";
-        dt.Columns.Add("MyBoolCol");
+        dt.Columns.Add("MyBoolCol",typeof(bool));
         dt.Rows.Add("true");
 
         var tbl = db.CreateTable("MyTable", dt);
 
         Assert.AreEqual(1,tbl.GetRowCount());
 
-        if (type == DatabaseType.Oracle)
+        /*if (type == DatabaseType.Oracle)
         {
             //Oracle doesn't have a bit datatype
             Assert.AreEqual(typeof(string), tbl.DiscoverColumn("MyBoolCol").GetGuesser().Guess.CSharpType);
             Assert.AreEqual("true", tbl.GetDataTable().Rows[0][0]);
             return;
-        }
+        }*/
 
         Assert.AreEqual(typeof(bool),tbl.DiscoverColumn("MyBoolCol").GetGuesser().Guess.CSharpType);
         Assert.AreEqual(true,tbl.GetDataTable().Rows[0][0]);

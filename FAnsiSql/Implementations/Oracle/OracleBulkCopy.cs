@@ -54,6 +54,8 @@ internal class OracleBulkCopy : BulkCopy
 
             if (p.DbType == DbType.DateTime)
                 dateColumns.Add(dataColumn);
+            else if (p.DbType == DbType.Boolean)
+                p.DbType = DbType.Int32;    // JS 2023-05-11 special case since we don't have a true boolean type in Oracle, but use 0/1 instead
         }
                 
         var values = mapping.Keys.ToDictionary(c => c, _ => new List<object>());
@@ -68,12 +70,15 @@ internal class OracleBulkCopy : BulkCopy
                 if (val is string stringVal && string.IsNullOrWhiteSpace(stringVal))
                     val = null;
                 else
-                if (val == null || val == DBNull.Value)
+                if (val == DBNull.Value)
                     val = null;
                 else if (dateColumns.Contains(col))
                     val = val is string s ? (DateTime)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
 
-                values[col].Add(val);
+                if (col.DataType == typeof(bool) && val is bool b)
+                    values[col].Add(b?1:0);
+                else
+                    values[col].Add(val);
             }
         }
 
