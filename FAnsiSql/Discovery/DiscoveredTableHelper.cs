@@ -224,7 +224,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
     {
         var server = discoveredTable.Database.Server;
 
-        //if it's got a primary key they it's distinct! job done
+        //if it's got a primary key then it's distinct! job done
         if (discoveredTable.DiscoverColumns().Any(c => c.IsPrimaryKey))
             return;
 
