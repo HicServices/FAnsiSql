@@ -38,7 +38,7 @@ internal class OracleBulkCopy : BulkCopy
         var dateColumns = new HashSet<DataColumn>();
 
         var sql = string.Format("INSERT INTO " + TargetTable.GetFullyQualifiedName() + "({0}) VALUES ({1})",
-            string.Join(",", mapping.Values.Select(c=> $"\"{c.GetWrappedName()}\"")),
+            string.Join(",", mapping.Values.Select(c=> c.GetWrappedName())),
             string.Join(",", mapping.Keys.Select(c => parameterNames[c]))
         );
 
@@ -47,13 +47,13 @@ internal class OracleBulkCopy : BulkCopy
         //send all the data at once
         cmd.ArrayBindCount = dt.Rows.Count;
 
-        foreach (var kvp in mapping)
+        foreach (var (dataColumn, discoveredColumn) in mapping)
         {
-            var p = _server.AddParameterWithValueToCommand(parameterNames[kvp.Key], cmd, DBNull.Value);
-            p.DbType = tt.GetDbTypeForSQLDBType(kvp.Value.DataType.SQLType);
+            var p = _server.AddParameterWithValueToCommand(parameterNames[dataColumn], cmd, DBNull.Value);
+            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
 
             if (p.DbType == DbType.DateTime)
-                dateColumns.Add(kvp.Key);
+                dateColumns.Add(dataColumn);
         }
                 
         var values = mapping.Keys.ToDictionary(c => c, _ => new List<object>());
