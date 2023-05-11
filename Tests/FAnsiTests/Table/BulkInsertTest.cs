@@ -471,8 +471,9 @@ internal class BulkInsertTest : DatabaseTests
 
         using (var con = tbl.Database.Server.BeginNewTransactedConnection())
         {
-            //give it 100 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
-            using var cts = new CancellationTokenSource(100);
+            // Create and cancel a CTS (simulates user cancelling not DbCommand.Timeout expiring) - any delay and Oracle will actually complete regardless...
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
             //creation should have been cancelled at the database level
             var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
                 
