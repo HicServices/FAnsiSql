@@ -16,7 +16,7 @@ jobs:
       oracle:
         image: konnecteam/docker-oracle-12c:sequelize
         env:
-          DBCA_TOTAL_MEMORY: 512
+          DB_MEMORY: 128m
         ports:
           - 1521:1521
       postgres:
