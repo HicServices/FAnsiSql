@@ -525,6 +525,7 @@ internal class CreateTableTests:DatabaseTests
         Assert.AreEqual(typeof(long),tbl.DiscoverColumn("clong").DataType.GetCSharpDataType());
         Assert.AreEqual(typeof(short),tbl.DiscoverColumn("cshort").DataType.GetCSharpDataType());
         Assert.AreEqual(typeof(string),tbl.DiscoverColumn("script_name").DataType.GetCSharpDataType());
+        tbl.Drop();
     }
 
     /// <summary>
