@@ -305,6 +305,7 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
 
     protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
     {
+        newName = discoveredTable.GetQuerySyntaxHelper().EnsureWrapped(newName);
         return $@"alter table {discoveredTable.GetFullyQualifiedName()} rename to {newName}";
     }
 
