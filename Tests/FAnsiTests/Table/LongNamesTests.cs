@@ -13,19 +13,9 @@ internal class LongNamesTests : DatabaseTests
     {
         var db = GetTestDatabase(dbType);
 
-        var sb = new StringBuilder();
+        var tableName = new StringBuilder(db.Server.GetQuerySyntaxHelper().MaximumTableLength).Append('a', db.Server.GetQuerySyntaxHelper().MaximumTableLength).ToString();
+        var columnName = new StringBuilder(db.Server.GetQuerySyntaxHelper().MaximumColumnLength).Append('b', db.Server.GetQuerySyntaxHelper().MaximumColumnLength).ToString();
 
-        for (var i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumTableLength; i++)
-            sb.Append('a');
-
-        var sb2 = new StringBuilder();
-        for (var i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumColumnLength; i++)
-            sb2.Append('b');
-
-        //128 characters long
-        var tableName = sb.ToString();
-        var columnName = sb2.ToString();
-            
         var tbl = db.CreateTable(tableName,new DatabaseColumnRequest[]{new(columnName,new DatabaseTypeRequest(typeof(string),100))});
 
         Assert.IsTrue(tbl.Exists());
