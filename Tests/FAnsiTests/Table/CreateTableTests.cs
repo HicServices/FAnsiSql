@@ -271,7 +271,7 @@ internal class CreateTableTests:DatabaseTests
     }
 
     [Test]
-    public void Test_OracleBit_IsActuallyString()
+    public void Test_OracleBit_IsNotStringAnyMore()
     {
         var db = GetTestDatabase(DatabaseType.Oracle);
         var table = db.CreateTable("MyTable",
@@ -281,9 +281,7 @@ internal class CreateTableTests:DatabaseTests
             });
 
         var col = table.DiscoverColumn("MyCol");
-        Assert.AreEqual("varchar2(5)", col.DataType.SQLType);
-        Assert.AreEqual(5, col.DataType.GetLengthIfString());
-
+        Assert.AreEqual("decimal(1,0)", col.DataType.SQLType);
     }
 
 
