@@ -160,12 +160,12 @@ public abstract class TypeTranslater:ITypeTranslater
         return "bit";
     }
 
-    protected string GetSmallIntDataType()
+    protected virtual string GetSmallIntDataType()
     {
         return "smallint";
     }
 
-    protected string GetIntDataType()
+    protected virtual string GetIntDataType()
     {
         return "int";
     }
@@ -444,7 +444,7 @@ select LEN(dt) from omgdates
     {
         return IntRegex.IsMatch(sqlType);
     }
-    protected bool IsLong(string sqlType)
+    protected virtual bool IsLong(string sqlType)
     {
         return LongRegex.IsMatch(sqlType);
     }
