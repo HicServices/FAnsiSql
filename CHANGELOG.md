@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ...
-## [3.1.0] - 2023-04-21
+## [3.1.0] - 2023-05-15
 
 - Now targeting .Net 6
 - Single assembly build, more single-file and AOT friendly
+- Oracle CI tests implemented, multiple bug fixes (stop mistaking Oracle LONG blob type for an integer value, wrap column names correctly, fix naming limits)
+- Bump HIC.TypeGuesser from 1.0.3 to 1.1.0
+- Bump Microsoft.Data.SqlClient from 5.0.1 to 5.1.1
+- Bump MySqlConnector from 2.1.13 to 2.2.6
+- Bump Npgsql from 6.0.7 to 7.0.4
+- Bump Oracle.ManagedDataAccess.Core from 2.19.101 to 3.21.100
+- Eliminate System.ComponentModel.Composition dependency
 
 ## [3.0.1] - 2022-10-28
 
