@@ -35,7 +35,7 @@ public sealed class OracleTypeTranslater:TypeTranslater
     protected override string GetTimeDataType() => "TIMESTAMP";
 
     /// <summary>
-    /// <para>Returns char(5).  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint if necessary to enforce it</para>
+    /// <para>Oracle doesn't have a native bit type.  You can only approximate it with char(1) or number(1) and optionally an independent named CHECK constraint if necessary to enforce it</para>
     /// <para>See https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns</para>
     /// </summary>
     /// <returns></returns>
