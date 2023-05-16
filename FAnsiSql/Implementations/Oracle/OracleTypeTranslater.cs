@@ -79,8 +79,6 @@ public sealed class OracleTypeTranslater:TypeTranslater
 
     public override Guesser GetGuesserFor(DiscoveredColumn discoveredColumn)
     {
-        var guesser = base.GetGuesserFor(discoveredColumn);
-        guesser.ExtraLengthPerNonAsciiCharacter = ExtraLengthPerNonAsciiCharacter;
-        return guesser;
+        return base.GetGuesserFor(discoveredColumn, ExtraLengthPerNonAsciiCharacter);
     }
 }
