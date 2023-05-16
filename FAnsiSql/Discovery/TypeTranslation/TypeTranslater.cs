@@ -317,9 +317,16 @@ public abstract class TypeTranslater:ITypeTranslater
 
     public virtual Guesser GetGuesserFor(DiscoveredColumn discoveredColumn)
     {
+        return GetGuesserFor(discoveredColumn, 0);
+    }
+
+    protected Guesser GetGuesserFor(DiscoveredColumn discoveredColumn, int extraLengthPerNonAsciiCharacter)
+    {
         var reqType = GetDataTypeRequestForSQLDBType(discoveredColumn.DataType.SQLType);
-        var req = new Guesser(reqType);
-        return req;
+        return new Guesser(reqType)
+        {
+            ExtraLengthPerNonAsciiCharacter = extraLengthPerNonAsciiCharacter
+        };
     }
         
     public virtual int GetLengthIfString(string sqlType)

@@ -90,7 +90,7 @@ public class CreateTableArgs
         Database = database;
         TableName = tableName;
         Schema = schema;
-        GuessSettings = new GuessSettingsFactory().Create();
+        GuessSettings = GuessSettingsFactory.Create();
     }
         
     /// <summary>
