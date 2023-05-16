@@ -38,7 +38,7 @@ internal class OracleBulkCopy : BulkCopy
         var dateColumns = new HashSet<DataColumn>();
 
         var sql = string.Format("INSERT INTO " + TargetTable.GetFullyQualifiedName() + "({0}) VALUES ({1})",
-            string.Join(",", mapping.Values.Select(c=> $"\"{c.GetRuntimeName()}\"")),
+            string.Join(",", mapping.Values.Select(c=> c.GetWrappedName())),
             string.Join(",", mapping.Keys.Select(c => parameterNames[c]))
         );
 
@@ -47,13 +47,15 @@ internal class OracleBulkCopy : BulkCopy
         //send all the data at once
         cmd.ArrayBindCount = dt.Rows.Count;
 
-        foreach (var kvp in mapping)
+        foreach (var (dataColumn, discoveredColumn) in mapping)
         {
-            var p = _server.AddParameterWithValueToCommand(parameterNames[kvp.Key], cmd, DBNull.Value);
-            p.DbType = tt.GetDbTypeForSQLDBType(kvp.Value.DataType.SQLType);
+            var p = _server.AddParameterWithValueToCommand(parameterNames[dataColumn], cmd, DBNull.Value);
+            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
 
             if (p.DbType == DbType.DateTime)
-                dateColumns.Add(kvp.Key);
+                dateColumns.Add(dataColumn);
+            else if (p.DbType == DbType.Boolean)
+                p.DbType = DbType.Int32;    // JS 2023-05-11 special case since we don't have a true boolean type in Oracle, but use 0/1 instead
         }
                 
         var values = mapping.Keys.ToDictionary(c => c, _ => new List<object>());
@@ -68,12 +70,15 @@ internal class OracleBulkCopy : BulkCopy
                 if (val is string stringVal && string.IsNullOrWhiteSpace(stringVal))
                     val = null;
                 else
-                if (val == null || val == DBNull.Value)
+                if (val == DBNull.Value)
                     val = null;
                 else if (dateColumns.Contains(col))
                     val = val is string s ? (DateTime)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
 
-                values[col].Add(val);
+                if (col.DataType == typeof(bool) && val is bool b)
+                    values[col].Add(b?1:0);
+                else
+                    values[col].Add(val);
             }
         }
 

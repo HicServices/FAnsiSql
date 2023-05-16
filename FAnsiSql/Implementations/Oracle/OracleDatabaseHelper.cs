@@ -32,8 +32,9 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
     protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
     {
         if (col.IsAutoIncrement)
-            return $"{col.ColumnName} NUMBER {syntaxHelper.GetAutoIncrementKeywordIfAny()}";
-
+            return $"{col.ColumnName} INTEGER {syntaxHelper.GetAutoIncrementKeywordIfAny()}";
+        if (datatype.Equals("bigint", StringComparison.OrdinalIgnoreCase))
+            return $"{col.ColumnName} NUMBER(19,0)";
         return base.GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper);
     }
 

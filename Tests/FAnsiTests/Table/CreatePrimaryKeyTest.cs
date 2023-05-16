@@ -4,6 +4,7 @@ using System.Data.Common;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Exceptions;
+using FAnsi.Extensions;
 using NUnit.Framework;
 
 namespace FAnsiTests.Table;
@@ -13,12 +14,17 @@ internal class CreatePrimaryKeyTest: DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBasicCase_KeysCreated(DatabaseType databaseType)
     {
+        // Force columns B and C to be strings otherwise Oracle gets upset by TypeGuesser mis-guessing the nulls as boolean
+        var b=new DataColumn("B", typeof(string));
+        b.SetDoNotReType(true);
+        var c=new DataColumn("C", typeof(string));
+        c.SetDoNotReType(true);
         DiscoveredTable tbl;
         using (var dt = new DataTable("Fish"))
         {
             dt.Columns.Add("A");
-            dt.Columns.Add("B");
-            dt.Columns.Add("C");
+            dt.Columns.Add(b);
+            dt.Columns.Add(c);
 
             dt.Rows.Add("a1", null, null);
             dt.Rows.Add("a2", null, null);
@@ -46,11 +52,14 @@ internal class CreatePrimaryKeyTest: DatabaseTests
     public void TestBasicCase_FailHalfWay_SchemaUnchanged(DatabaseType databaseType)
     {
         DiscoveredTable tbl;
+        // Force column C to be a string otherwise Oracle gets upset by TypeGuesser mis-guessing the nulls as boolean
+        var c = new DataColumn("C", typeof(string));
+        c.SetDoNotReType(true);
         using (var dt = new DataTable("Fish"))
         {
             dt.Columns.Add("A");
             dt.Columns.Add("B");
-            dt.Columns.Add("C");
+            dt.Columns.Add(c);
 
             dt.Rows.Add("a1", "b1", null);
             dt.Rows.Add("a2", null, null);

@@ -2,7 +2,7 @@ using System.Reflection;
 
 [assembly: AssemblyCompany("Health Informatics Centre, University of Dundee")]
 [assembly: AssemblyProduct("FAnsiSql")]
-[assembly: AssemblyCopyright("Copyright (c) 2018 - 2019")]
+[assembly: AssemblyCopyright("Copyright (c) 2018 - 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

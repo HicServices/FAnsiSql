@@ -10,9 +10,9 @@ namespace FAnsi.Implementations.Oracle;
 public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
 {
     public static readonly OracleQuerySyntaxHelper Instance=new();
-    public override int MaximumDatabaseLength => 128;
-    public override int MaximumTableLength => 128;
-    public override int MaximumColumnLength => 128;
+    public override int MaximumDatabaseLength => 30;    // JS 2023-05-11 Can be longer, but Oracle RAC limits to 30
+    public override int MaximumTableLength => 30;
+    public override int MaximumColumnLength => 30;
 
         
     public override string OpenQualifier => "\"";

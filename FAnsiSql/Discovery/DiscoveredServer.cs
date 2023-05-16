@@ -109,10 +109,7 @@ public class DiscoveredServer : IMightNotExist
     /// <returns></returns>
     public DbConnection GetConnection(IManagedTransaction transaction = null)
     {
-        if (transaction != null)
-            return transaction.Connection;
-
-        return Helper.GetConnection(Builder);
+        return transaction != null ? transaction.Connection : Helper.GetConnection(Builder);
     }
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>

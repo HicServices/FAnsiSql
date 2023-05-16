@@ -179,7 +179,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     public virtual string GetCreateTableSql(DiscoveredDatabase database, string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string schema)
     {
         if (string.IsNullOrWhiteSpace(tableName))
-            throw new ArgumentNullException(FAnsiStrings.DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null, "tableName");
+            throw new ArgumentNullException(nameof(tableName),FAnsiStrings.DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null);
 
         var bodySql = new StringBuilder();
 
@@ -194,7 +194,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         //the name sans brackets (hopefully they didn't pass any brackets)
         tableName = syntaxHelper.GetRuntimeName(tableName);
 
-        //the name uflly specified e.g. [db]..[tbl] or `db`.`tbl` - See Test HorribleColumnNames
+        //the name fully specified e.g. [db]..[tbl] or `db`.`tbl` - See Test HorribleColumnNames
         var fullyQualifiedName = syntaxHelper.EnsureFullyQualified(database.GetRuntimeName(), schema, tableName);
 
         bodySql.AppendLine($"CREATE TABLE {fullyQualifiedName}(");

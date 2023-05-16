@@ -87,6 +87,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
         using var con = new OracleConnection(builder.ConnectionString);
+        con.UseHourOffsetForUnsupportedTimezone = true;
         con.Open();
         //create a new user with a random password!!! - go oracle this makes perfect sense database=user!
         using(var cmd = new OracleCommand(
@@ -122,7 +123,8 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
 
     public override Version GetVersion(DiscoveredServer server)
     {
-        using var con = server.GetConnection();
+        using var con = server.GetConnection() as OracleConnection;
+        con.UseHourOffsetForUnsupportedTimezone = true;
         con.Open();
         using var cmd = server.GetCommand("SELECT * FROM v$version WHERE BANNER like 'Oracle Database%'",con);
         using var r = cmd.ExecuteReader();
@@ -133,8 +135,9 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
 
     public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
-        //todo do we have to edit the builder in here incase it is pointed at nothing?
+        //todo do we have to edit the builder in here in case it is pointed at nothing?
         using var con = new OracleConnection(builder.ConnectionString);
+        con.UseHourOffsetForUnsupportedTimezone = true;
         con.Open();
         return ListDatabases(con);
     }

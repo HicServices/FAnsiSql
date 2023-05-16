@@ -35,25 +35,23 @@ public sealed class OracleTypeTranslater:TypeTranslater
     protected override string GetTimeDataType() => "TIMESTAMP";
 
     /// <summary>
-    /// <para>Returns char(5).  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint
-    /// For our purposes we will have to just use varchar2(5) to store "True" or "False" and "1" and "0" etc</para>
-    /// 
+    /// <para>Oracle doesn't have a native bit type.  You can only approximate it with char(1) or number(1) and optionally an independent named CHECK constraint if necessary to enforce it</para>
     /// <para>See https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns</para>
     /// </summary>
     /// <returns></returns>
-    protected override string GetBoolDataType() => "varchar2(5)";
+    protected override string GetBoolDataType() => "number(1)";
 
-    protected override string GetBigIntDataType() => "long";
+    protected override string GetSmallIntDataType() => "number(5)";
+    protected override string GetIntDataType() => "number(10)";
+    protected override string GetBigIntDataType() => "number(19)";
 
     /// <summary>
-    /// <para>Returns False.  Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1) and an independent named CHECK constraint
-    /// For our purposes we will have to just use varchar2(5) to store "True" or "False" and "1" and "0" etc</para>
-    /// 
+    /// <para>Oracle doesn't have a bit character type.  You can only approximate it with char(1) or number(1)</para>
     /// <para>See https://stackoverflow.com/questions/2426145/oracles-lack-of-a-bit-datatype-for-table-columns</para>
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    protected override bool IsBit(string sqlType) => false;
+    protected override bool IsBit(string sqlType) => sqlType.Equals("decimal(1,0)",StringComparison.InvariantCultureIgnoreCase);
 
     protected override bool IsString(string sqlType)
     {
@@ -67,12 +65,14 @@ public sealed class OracleTypeTranslater:TypeTranslater
 
     protected override bool IsSmallInt(string sqlType) =>
         //yup you ask for one of these, you will get a NUMBER(38) https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm
-        !sqlType.StartsWith("SMALLINT", StringComparison.InvariantCultureIgnoreCase) && base.IsSmallInt(sqlType);
+        sqlType.Equals("decimal(5,0)", StringComparison.InvariantCultureIgnoreCase) ||
+        (!sqlType.StartsWith("SMALLINT", StringComparison.InvariantCultureIgnoreCase) && base.IsSmallInt(sqlType));
 
     protected override bool IsInt(string sqlType) =>
         //yup you ask for one of these, you will get a NUMBER(38) https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm
-        sqlType.StartsWith("SMALLINT", StringComparison.CurrentCultureIgnoreCase) || base.IsInt(sqlType);
+        sqlType.Equals("decimal(10,0)",StringComparison.InvariantCultureIgnoreCase)|| (sqlType.StartsWith("SMALLINT", StringComparison.InvariantCultureIgnoreCase) || base.IsInt(sqlType));
 
+    protected override bool IsLong(string sqlType) => sqlType.Equals("decimal(19,0)", StringComparison.InvariantCultureIgnoreCase) || base.IsLong(sqlType);
     protected override bool IsByteArray(string sqlType) => base.IsByteArray(sqlType) || AlsoByteArrayRegex.IsMatch(sqlType);
 
     protected override string GetDateDateTimeDataType() => "DATE";

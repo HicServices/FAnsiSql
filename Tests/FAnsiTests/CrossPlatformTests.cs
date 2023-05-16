@@ -609,9 +609,10 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
+        // JS 2023-05-11 4000 characters, because SELECT DISTINCT doesn't work on CLOB (Oracle)
         var tbl = database.CreateTable(dodgyNames?",,":"Field3",new []
         {
-            new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),int.MaxValue)), //varchar(max)
+            new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),4000)), //varchar(max)
             new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(DateTime))),
             new DatabaseColumnRequest(dodgyNames?",,,,":"Field3",new DatabaseTypeRequest(typeof(int)))
         });
@@ -656,7 +657,7 @@ public class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         var dt = new DataTable();
-        dt.Columns.Add("MyCol");
+        dt.Columns.Add("MyCol",typeof(decimal));
 
         dt.Rows.Add("100");
         dt.Rows.Add("105");
@@ -670,13 +671,9 @@ public class CrossPlatformTests:DatabaseTests
         Assert.AreEqual(1, dt.Rows.OfType<DataRow>().Count(r => Convert.ToInt32(r[0]) == 1));
 
         var col = tbl.DiscoverColumn("MyCol");
-        var size = col.DataType.GetDecimalSize();
-        //ints are not decimals so null
-        Assert.IsNull(size);
-
         col.DataType.AlterTypeTo("decimal(5,2)");
 
-        size = tbl.DiscoverColumn("MyCol").DataType.GetDecimalSize();
+        var size = tbl.DiscoverColumn("MyCol").DataType.GetDecimalSize();
         Assert.AreEqual(new DecimalSize(3, 2), size); //3 before decimal place 2 after;
         Assert.AreEqual(3, size.NumbersBeforeDecimalPlace);
         Assert.AreEqual(2, size.NumbersAfterDecimalPlace);

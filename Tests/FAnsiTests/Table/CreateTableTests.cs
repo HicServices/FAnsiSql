@@ -205,22 +205,22 @@ internal class CreateTableTests:DatabaseTests
     public void CreateTable_BoolStrings(DatabaseType type)
     {
         var db = GetTestDatabase(type);
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.TableName = "MyTable";
-        dt.Columns.Add("MyBoolCol");
+        dt.Columns.Add("MyBoolCol",typeof(bool));
         dt.Rows.Add("true");
 
         var tbl = db.CreateTable("MyTable", dt);
 
         Assert.AreEqual(1,tbl.GetRowCount());
 
-        if (type == DatabaseType.Oracle)
+        /*if (type == DatabaseType.Oracle)
         {
             //Oracle doesn't have a bit datatype
             Assert.AreEqual(typeof(string), tbl.DiscoverColumn("MyBoolCol").GetGuesser().Guess.CSharpType);
             Assert.AreEqual("true", tbl.GetDataTable().Rows[0][0]);
             return;
-        }
+        }*/
 
         Assert.AreEqual(typeof(bool),tbl.DiscoverColumn("MyBoolCol").GetGuesser().Guess.CSharpType);
         Assert.AreEqual(true,tbl.GetDataTable().Rows[0][0]);
@@ -271,7 +271,7 @@ internal class CreateTableTests:DatabaseTests
     }
 
     [Test]
-    public void Test_OracleBit_IsActuallyString()
+    public void Test_OracleBit_IsNotStringAnyMore()
     {
         var db = GetTestDatabase(DatabaseType.Oracle);
         var table = db.CreateTable("MyTable",
@@ -281,9 +281,7 @@ internal class CreateTableTests:DatabaseTests
             });
 
         var col = table.DiscoverColumn("MyCol");
-        Assert.AreEqual("varchar2(5)", col.DataType.SQLType);
-        Assert.AreEqual(5, col.DataType.GetLengthIfString());
-
+        Assert.AreEqual("decimal(1,0)", col.DataType.SQLType);
     }
 
 
@@ -525,6 +523,7 @@ internal class CreateTableTests:DatabaseTests
         Assert.AreEqual(typeof(long),tbl.DiscoverColumn("clong").DataType.GetCSharpDataType());
         Assert.AreEqual(typeof(short),tbl.DiscoverColumn("cshort").DataType.GetCSharpDataType());
         Assert.AreEqual(typeof(string),tbl.DiscoverColumn("script_name").DataType.GetCSharpDataType());
+        tbl.Drop();
     }
 
     /// <summary>

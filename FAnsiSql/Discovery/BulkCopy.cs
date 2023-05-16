@@ -72,7 +72,7 @@ public abstract class BulkCopy:IBulkCopy
     }
 
     /// <summary>
-    /// Closes the connection and completes the bulk insert operation (including comitting the transaction).  If this method is not called
+    /// Closes the connection and completes the bulk insert operation (including committing the transaction).  If this method is not called
     /// then the records may not be committed.
     /// </summary>
     public virtual void Dispose()
