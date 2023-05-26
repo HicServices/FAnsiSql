@@ -1,6 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <id>HIC.FAnsiSql</id>
+    <PackageId>HIC.FAnsiSql</PackageId>
+    <version>0.0.7</version>
+    <title>HIC.FAnsiSql</title>
+    <authors>Health Informatics Centre - University of Dundee</authors>
+    <owners>Health Informatics Centre - University of Dundee</owners>
+    <PackageProjectUrl>https://github.com/HicServices/FAnsiSql</PackageProjectUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</description>
+    <copyright>Copyright 2019</copyright>
+    <PackageTags>Ansi,SQL</PackageTags>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyTitle>HIC.FAnsiSql</AssemblyTitle>
     <Company>Health Informatics Centre, University of Dundee</Company>
     <Product>HIC.FAnsiSql</Product>
@@ -20,8 +32,15 @@
     <None Include="Discovery\TypeTranslation\TypeTranslation.cd" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.TypeGuesser" Version="1.0.3" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
+    <PackageReference Include="HIC.TypeGuesser" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="MySqlConnector" Version="2.2.6" />
+    <PackageReference Include="Npgsql" Version="7.0.4" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.100" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="FAnsiStrings.Designer.cs">
@@ -29,11 +48,25 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>FAnsiStrings.resx</DependentUpon>
     </Compile>
+    <Compile Update="SR.Designer.cs">
+      <DependentUpon>SR.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="FAnsiStrings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>FAnsiStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="SR.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>SR.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Aggregation\" />
+    <Folder Include="Update\" />
   </ItemGroup>
 </Project>

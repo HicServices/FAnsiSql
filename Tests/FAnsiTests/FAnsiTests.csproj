@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AssemblyTitle>FAnsiSqlTests</AssemblyTitle>
     <Product>FAnsiSqlTests</Product>
     <Copyright>Copyright ©  2019</Copyright>
@@ -10,11 +10,10 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
-    <PackageReference Include="NunitXml.TestLogger" Version="3.0.127" />
-    <PackageReference Include="XunitXml.TestLogger" Version="3.0.70" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+    <PackageReference Include="NunitXml.TestLogger" Version="3.0.131" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestDatabases.xml">
@@ -27,9 +26,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FAnsiSql\FAnsi.csproj" />
-    <ProjectReference Include="..\..\Implementations\FAnsi.Implementations.MicrosoftSQL\FAnsi.Implementations.MicrosoftSQL.csproj" />
-    <ProjectReference Include="..\..\Implementations\FAnsi.Implementations.MySql\FAnsi.Implementations.MySql.csproj" />
-    <ProjectReference Include="..\..\Implementations\FAnsi.Implementations.Oracle\FAnsi.Implementations.Oracle.csproj" />
-    <ProjectReference Include="..\..\Implementations\FAnsi.Implementations.PostgreSql\FAnsi.Implementations.PostgreSql.csproj" />
   </ItemGroup>
 </Project>

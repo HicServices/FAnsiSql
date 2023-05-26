@@ -1,12 +1,11 @@
 using System;
 
-namespace FAnsi.Exceptions
+namespace FAnsi.Exceptions;
+
+public class ImplementationNotFoundException:Exception
 {
-    public class ImplementationNotFoundException:Exception
+    public ImplementationNotFoundException(string message):base(message)
     {
-        public ImplementationNotFoundException(string message):base(message)
-        {
             
-        }
     }
 }

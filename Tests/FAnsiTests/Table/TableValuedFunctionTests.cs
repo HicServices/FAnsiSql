@@ -1,35 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using FAnsi;
-using FAnsi.Discovery;
 using NUnit.Framework;
 
-namespace FAnsiTests.Table
+namespace FAnsiTests.Table;
+
+internal class TableValuedFunctionTests:DatabaseTests
 {
-    class TableValuedFunctionTests:DatabaseTests
+    [TestCase("dbo")]
+    [TestCase("Omg")]
+    public void Test_DropTableValuedFunction(string schema)
     {
-        [TestCase("dbo")]
-        [TestCase("Omg")]
-        public void Test_DropTableValuedFunction(string schema)
+        var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer);
+
+        using (var con = db.Server.GetConnection())
         {
-             var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer);
+            con.Open();
 
-            using (var con = db.Server.GetConnection())
-            {
-                con.Open();
-
-                //create the schema if it doesn't exist yet
-                if(schema != null)
-                    db.Server.GetCommand($@"
+            //create the schema if it doesn't exist yet
+            if(schema != null)
+                db.Server.GetCommand($@"
 IF NOT EXISTS ( SELECT  *
                 FROM    sys.schemas
                 WHERE   name = N'{schema}' ) 
 EXEC('CREATE SCHEMA  {schema}')", con).ExecuteNonQuery();
 
 
-                string sql = $@"CREATE FUNCTION {schema}.MyAwesomeFunction
+            var sql = $@"CREATE FUNCTION {schema}.MyAwesomeFunction
 (	
 	-- Add the parameters for the function here
 	@startNumber int ,
@@ -57,24 +53,23 @@ BEGIN
 
 	RETURN 
 END";
-                db.Server.GetCommand(sql,con).ExecuteNonQuery();
-            }
+            db.Server.GetCommand(sql,con).ExecuteNonQuery();
+        }
 
-            var tvf = db.DiscoverTableValuedFunctions().Single();
-            var p = tvf.DiscoverParameters().First();
-            Assert.AreEqual("@startNumber",p.ParameterName);
-            Assert.AreEqual("int",p.DataType.SQLType);
-            Assert.AreEqual(schema,tvf.Schema??"dbo");
+        var tvf = db.DiscoverTableValuedFunctions().Single();
+        var p = tvf.DiscoverParameters().First();
+        Assert.AreEqual("@startNumber",p.ParameterName);
+        Assert.AreEqual("int",p.DataType.SQLType);
+        Assert.AreEqual(schema,tvf.Schema??"dbo");
 
-            StringAssert.EndsWith(".MyAwesomeFunction(@startNumber,@stopNumber,@name)",tvf.GetFullyQualifiedName());
+        StringAssert.EndsWith(".MyAwesomeFunction(@startNumber,@stopNumber,@name)",tvf.GetFullyQualifiedName());
 
-            Assert.IsTrue(tvf.Exists());
+        Assert.IsTrue(tvf.Exists());
 
-            tvf.Drop();
+        tvf.Drop();
 
-            Assert.IsFalse(tvf.Exists());
+        Assert.IsFalse(tvf.Exists());
 
             
-        }
     }
 }
