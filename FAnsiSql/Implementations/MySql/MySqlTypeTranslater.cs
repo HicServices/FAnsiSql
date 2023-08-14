@@ -26,12 +26,12 @@ public class MySqlTypeTranslater : TypeTranslater
 
     public override string GetStringDataTypeWithUnlimitedWidth()
     {
-        return "text";
+        return "longtext";
     }
 
     public override string GetUnicodeStringDataTypeWithUnlimitedWidth()
     {
-        return "text";
+        return "longtext";
     }
 
     protected override string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth)
