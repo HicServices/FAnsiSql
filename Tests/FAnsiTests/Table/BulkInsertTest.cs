@@ -476,7 +476,7 @@ internal class BulkInsertTest : DatabaseTests
             cts.Cancel();
             //creation should have been cancelled at the database level
             var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
-                
+
             //MySql seems to be throwing null reference inside ExecuteNonQueryAsync.  No idea why but it is still cancelled
             if(type != DatabaseType.MySql)
                 StringAssert.Contains("cancel",ex?.InnerException?.Message);
@@ -653,7 +653,7 @@ internal class BulkInsertTest : DatabaseTests
         Assert.Contains("你好",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
         Assert.Contains("مرحبا",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
         table.Drop();
-    }   
+    }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_SchemaTooNarrow_StringError(DatabaseType type)
@@ -762,7 +762,7 @@ internal class BulkInsertTest : DatabaseTests
 
         dt.Rows.Add(60,"Jamie",1.2);
         dt.Rows.Add(30,"Frank",1.3);
-        dt.Rows.Add(11,"Toad",111111111.11); //bad data 
+        dt.Rows.Add(11,"Toad",111111111.11); //bad data
         dt.Rows.Add(100,"King");
         dt.Rows.Add(10,"Frog");
 
@@ -770,7 +770,7 @@ internal class BulkInsertTest : DatabaseTests
         bulk.Timeout = 30;
                 
         Exception ex = null;
-        try 
+        try
         {
             bulk.Upload(dt);
         }
@@ -827,7 +827,7 @@ internal class BulkInsertTest : DatabaseTests
 
         dt.Rows.Add(60,"Jamie",1.2);
         dt.Rows.Add(30,"Frank",1.3);
-        dt.Rows.Add(11,"Toad","."); //bad data 
+        dt.Rows.Add(11,"Toad","."); //bad data
         dt.Rows.Add(100,"King");
         dt.Rows.Add(10,"Frog");
 
@@ -835,7 +835,7 @@ internal class BulkInsertTest : DatabaseTests
         bulk.Timeout = 30;
                 
         Exception ex = null;
-        try 
+        try
         {
             bulk.Upload(dt);
         }

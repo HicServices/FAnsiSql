@@ -7,7 +7,7 @@ using Oracle.ManagedDataAccess.Client;
 namespace FAnsi.Discovery.ConnectionStringDefaults;
 
 /// <summary>
-/// <para>Gathers keywords for use in building connection strings for a given <see cref="DatabaseType"/>.  Once created you can add keywords and then apply the template 
+/// <para>Gathers keywords for use in building connection strings for a given <see cref="DatabaseType"/>.  Once created you can add keywords and then apply the template
 /// to new novel connection strings (see <see cref="EnforceOptions"/>).</para>
 /// 
 /// <para>Also handles connection string keyword aliases (where two words mean the same thing)</para>
@@ -33,7 +33,7 @@ public class ConnectionStringKeywordAccumulator
     }
 
     /// <summary>
-    /// Adds a new connection string option (which must be compatible with <see cref="DatabaseType"/>) 
+    /// Adds a new connection string option (which must be compatible with <see cref="DatabaseType"/>)
     /// </summary>
     /// <param name="keyword"></param>
     /// <param name="value"></param>
@@ -44,12 +44,12 @@ public class ConnectionStringKeywordAccumulator
 
         if (collision != null)
         {
-            //if there is already a semantically equivalent keyword.... 
+            //if there is already a semantically equivalent keyword....
 
             //if it is of lower or equal priority
             if (_keywords[collision].Item2 <= priority)
-                _keywords[collision] = Tuple.Create(value, priority); //update it 
-                
+                _keywords[collision] = Tuple.Create(value, priority); //update it
+
             //either way don't record it as a new keyword
             return;
         }

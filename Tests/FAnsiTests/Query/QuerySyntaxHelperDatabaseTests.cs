@@ -7,7 +7,7 @@ namespace FAnsiTests.Query;
 
 internal class QuerySyntaxHelperDatabaseTests : DatabaseTests
 {
-        
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_HowDoWeAchieveMd5(DatabaseType dbType)
     {

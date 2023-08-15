@@ -36,7 +36,7 @@ public class AggregateCustomLineCollection
     /// The single aggregate function line e.g. "count(distinct chi) as Fish,"
     /// </summary>
     public CustomLine CountSelect => Lines.SingleOrDefault(l => l.Role == CustomLineRole.CountFunction && l.LocationToInsert == QueryComponent.QueryTimeColumn);
-        
+
     /// <summary>
     /// The (optional) single line of SELECT SQL which is the Axis join column e.g. "[MyDb]..[mytbl].[AdmissionDate] as Admt,"
     /// </summary>

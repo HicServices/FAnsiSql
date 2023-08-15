@@ -16,7 +16,7 @@ using TypeGuesser;
 namespace FAnsi.Discovery;
 
 /// <summary>
-/// DBMS specific implementation of all functionality that relates to interacting with existing databases (dropping databases, creating tables, finding stored proceedures etc).  For 
+/// DBMS specific implementation of all functionality that relates to interacting with existing databases (dropping databases, creating tables, finding stored proceedures etc).  For
 /// database creation see <see cref="DiscoveredServerHelper"/>
 /// </summary>
 public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
@@ -60,17 +60,17 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
 
                     //Type requested is a proper FAnsi type (e.g. string, at least 5 long)
                     var request = overriding.TypeRequested;
-                        
+
                     if(request == null)
                         if(!string.IsNullOrWhiteSpace(overriding.ExplicitDbType))
                         {
                             //Type is for an explicit SQL Type e.g. varchar(5)
 
-                            //Translate the sql type to a FAnsi type definition 
+                            //Translate the sql type to a FAnsi type definition
                             var tt = args.Database.Server.GetQuerySyntaxHelper().TypeTranslater;
 
                             request = tt.GetDataTypeRequestForSQLDBType(overriding.ExplicitDbType);
-                                
+
                         }
                         else
                             throw new Exception(string.Format(FAnsiStrings.DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType, column));
@@ -84,15 +84,15 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
                     //no, work out the column definition using a guesser
                     var guesser = GetGuesser(column);
                     guesser.Culture = args.Culture;
-                        
+
                     CopySettings(guesser,args);
 
                     guesser.AdjustToCompensateForValues(column);
-                        
+
                     //if DoNotRetype is set on the column adjust the requested CSharpType to be the original type
                     if (column.GetDoNotReType())
                         guesser.Guess.CSharpType = column.DataType;
-                        
+
                     typeDictionary.Add(column.ColumnName,guesser);
 
                     columns.Add(new DatabaseColumnRequest(column.ColumnName, guesser.Guess, column.AllowDBNull) { IsPrimaryKey = args.DataTable.PrimaryKey.Contains(column)});
@@ -202,7 +202,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         foreach (var col in columns)
         {
             var datatype = col.GetSQLDbType(syntaxHelper.TypeTranslater);
-                
+
             //add the column name and accompanying datatype
             bodySql.AppendLine($"{GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper)},");
         }
@@ -278,7 +278,7 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
 
         return $"{prefix}{constraintName}";
     }
-        
+
     public void ExecuteBatchNonQuery(string sql, DbConnection conn, DbTransaction transaction = null, int timeout = 30)
     {
         ExecuteBatchNonQuery(sql, conn, transaction, out _, timeout);

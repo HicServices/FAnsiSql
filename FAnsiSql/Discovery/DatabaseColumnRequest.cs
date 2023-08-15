@@ -38,7 +38,7 @@ public class DatabaseColumnRequest:ISupplementalColumnInformation,IHasRuntimeNam
     public bool AllowNulls { get; set; }
 
     /// <summary>
-    /// True to include the column as part of the tables primary key 
+    /// True to include the column as part of the tables primary key
     /// </summary>
     public bool IsPrimaryKey { get; set; }
 
@@ -53,7 +53,7 @@ public class DatabaseColumnRequest:ISupplementalColumnInformation,IHasRuntimeNam
     public MandatoryScalarFunctions Default { get; set; }
 
     /// <summary>
-    /// Applies only if the <see cref="TypeRequested"/> is string based.  Setting this will override the default collation and specify 
+    /// Applies only if the <see cref="TypeRequested"/> is string based.  Setting this will override the default collation and specify
     /// a specific collation.  The value specified must be an installed collation supported by the DBMS
     /// </summary>
     public string Collation { get; set; }

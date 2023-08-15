@@ -69,7 +69,7 @@ public class ImplementationManager
 
     public static IImplementation GetImplementation(DbConnection connection)
     {
-        return GetImplementation(i => i.IsFor(connection), 
+        return GetImplementation(i => i.IsFor(connection),
             string.Format(
                 FAnsiStrings
                     .ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_,

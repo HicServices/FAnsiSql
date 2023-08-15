@@ -63,7 +63,7 @@ public class MySqlServerHelper : DiscoveredServerHelper
     }
 
     #endregion
-                
+
     public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder) => builder; //no special stuff required?
 
     public override IDiscoveredDatabaseHelper GetDatabaseHelper() => new MySqlDatabaseHelper();
@@ -98,7 +98,7 @@ public class MySqlServerHelper : DiscoveredServerHelper
             return r["Value"] == DBNull.Value ? null: CreateVersionFromString((string)r["Value"]);
         return null;
     }
-        
+
     public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
         var b = (MySqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);

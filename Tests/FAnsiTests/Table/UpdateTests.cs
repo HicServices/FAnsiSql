@@ -36,7 +36,7 @@ internal class UpdateTests :DatabaseTests
             dt2.Columns.Add("Score");
             dt2.Rows.Add("Dave", 50);
             dt2.Rows.Add("Frank", 900);
-                
+
             tbl2 = db.CreateTable("NewScoresTable", dt2);
         }
 

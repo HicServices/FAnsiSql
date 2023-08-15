@@ -58,11 +58,11 @@ WHERE table_schema = @db
 
                 if (r["COLUMN_KEY"].Equals("PRI"))
                     toAdd.IsPrimaryKey = true;
-                    
+
                 toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
                 toAdd.Collation = r["COLLATION_NAME"] as string;
 
-                //todo the only way to know if something in MySql is unicode is by r["character_set_name"] 
+                //todo the only way to know if something in MySql is unicode is by r["character_set_name"]
 
 
                 toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);

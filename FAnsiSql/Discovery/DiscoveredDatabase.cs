@@ -73,7 +73,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
             Helper.ListTableValuedFunctions(this, _querySyntaxHelper, managedConnection.Connection,
                 GetRuntimeName(), managedConnection.Transaction).ToArray();
     }
-        
+
     /// <summary>
     /// Returns the name of the database without any qualifiers
     /// </summary>
@@ -82,7 +82,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
     {
         return _querySyntaxHelper.GetRuntimeName(_database);
     }
-        
+
     /// <summary>
     /// Returns the wrapped e.g. "[MyDatabase]" name of the database including escaping e.g. if you wanted to name a database "][nquisitor" (which would return "[]][nquisitor]").
     /// </summary>
@@ -250,7 +250,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
     }
 
     /// <summary>
-    /// Creates a table in the database big enough to store the supplied DataTable with appropriate types. 
+    /// Creates a table in the database big enough to store the supplied DataTable with appropriate types.
     /// </summary>
     /// <param name="typeDictionary">The computers used to determine column types</param>
     /// <param name="tableName"></param>
@@ -275,7 +275,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
 
         return table;
     }
-        
+
 
     /// <summary>
     /// Creates a new schema within the database if the DBMS supports it (Sql Server does, MySql doesn't) and it does not already exist.  Schema

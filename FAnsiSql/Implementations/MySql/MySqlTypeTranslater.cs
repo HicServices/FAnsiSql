@@ -4,11 +4,11 @@ using FAnsi.Discovery.TypeTranslation;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlTypeTranslater : TypeTranslater
+public sealed class MySqlTypeTranslater : TypeTranslater
 {
     public static readonly MySqlTypeTranslater Instance = new();
 
-    //yup thats right!, long is string (MEDIUMTEXT)
+    //yup that's right!, long is string (MEDIUMTEXT)
     //https://dev.mysql.com/doc/refman/8.0/en/other-vendor-data-types.html
     private static readonly Regex AlsoBitRegex = new(@"tinyint\(1\)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
     private static readonly Regex AlsoStringRegex = new("(long)|(enum)|(set)|(text)|(mediumtext)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
@@ -23,6 +23,16 @@ public class MySqlTypeTranslater : TypeTranslater
         LongRegex = new Regex(@"^(bigint)|(int8)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
         DateRegex = new Regex(@"(date)|(timestamp)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
     }
+
+    public override int GetLengthIfString(string sqlType) =>
+        sqlType.ToUpperInvariant() switch
+        {
+            "TINYTEXT" => 1 << 8,
+            "TEXT" => 1 << 16,
+            "MEDIUMTEXT" => 1 << 24,
+            "LONGTEXT" => int.MaxValue, // Should be 1<<32 but that overflows...
+            _ => AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType)
+        };
 
     public override string GetStringDataTypeWithUnlimitedWidth()
     {

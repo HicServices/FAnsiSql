@@ -12,7 +12,7 @@ internal class BasicInsertTests:DatabaseTests
     [TestCase(DatabaseType.MySql,"Dave")]
     [TestCase(DatabaseType.Oracle, "Dave")]
     [TestCase(DatabaseType.PostgreSql, "Dave")]
-        
+
     [TestCase(DatabaseType.MicrosoftSQLServer, @"].;\""ffff 
 [")]
 
@@ -82,7 +82,7 @@ internal class BasicInsertTests:DatabaseTests
         var tbl = db.CreateTable("InsertTable",
             new[]
             {
-                new DatabaseColumnRequest("myidentity",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true,IsAutoIncrement = true}, 
+                new DatabaseColumnRequest("myidentity",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true,IsAutoIncrement = true},
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),100))
             });
 

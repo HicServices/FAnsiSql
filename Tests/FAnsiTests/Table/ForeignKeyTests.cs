@@ -36,7 +36,7 @@ internal class ForeignKeyTests:DatabaseTests
         }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {requested_fkCol,discovered_pkCol}
-            
+
         }, cascade);
 
         var discovered_fkCol = childTable.DiscoverColumn("Parent_Id");
@@ -189,7 +189,7 @@ internal class ForeignKeyTests:DatabaseTests
         Assert.Contains(t2, sort2.Order.ToList());
         Assert.Contains(t3, sort2.Order.ToList());
     }
-        
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_ThreeTables_TwoPrimary(DatabaseType dbType)
     {

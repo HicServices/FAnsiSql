@@ -67,7 +67,7 @@ public class CreateTableArgs
     public bool TableCreated { get; private set; }
 
     /// <summary>
-    /// Customise guessing behaviour 
+    /// Customise guessing behaviour
     /// </summary>
     public GuessSettings GuessSettings { get; set; }
 
@@ -92,7 +92,7 @@ public class CreateTableArgs
         Schema = schema;
         GuessSettings = GuessSettingsFactory.Create();
     }
-        
+
     /// <summary>
     /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
     /// </summary>
@@ -104,7 +104,7 @@ public class CreateTableArgs
     }
 
     /// <summary>
-    /// Create a table with the given name based on the columns and data in the provided <paramref name="dataTable"/>.  If you want to override the 
+    /// Create a table with the given name based on the columns and data in the provided <paramref name="dataTable"/>.  If you want to override the
     /// data type of a given column set <see cref="ExplicitColumnDefinitions"/>
     /// </summary>
     public CreateTableArgs(DiscoveredDatabase database, string tableName, string schema,DataTable dataTable, bool createEmpty)
@@ -113,9 +113,9 @@ public class CreateTableArgs
         DataTable = dataTable;
         CreateEmpty = createEmpty;
     }
-        
+
     /// <summary>
-    /// Create a table with the given name based on the columns and data in the provided <paramref name="dataTable"/>.  If you want to override the 
+    /// Create a table with the given name based on the columns and data in the provided <paramref name="dataTable"/>.  If you want to override the
     /// data type of a given column set <see cref="ExplicitColumnDefinitions"/>
     /// </summary>
     public CreateTableArgs(DiscoveredDatabase database, string tableName, string schema,DataTable dataTable, bool createEmpty, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete)

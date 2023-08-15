@@ -58,7 +58,7 @@ internal class TopXTests :DatabaseTests
             var sqlcol = tbl.DiscoverColumn("X").GetTopXSql(1,false);
 
             Assert.AreEqual(DBNull.Value,db.Server.GetCommand(sqlcol,con).ExecuteScalar());
-                                
+
             sqlcol = tbl.DiscoverColumn("X").GetTopXSql(1,true);
 
             Assert.AreEqual("fish",db.Server.GetCommand(sqlcol,con).ExecuteScalar());

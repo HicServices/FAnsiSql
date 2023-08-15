@@ -29,7 +29,7 @@ public abstract class BulkCopy:IBulkCopy
     /// call <see cref="InvalidateTableSchema"/> to refresh this.
     /// </summary>
     protected DiscoveredColumn[] TargetTableColumns;
-        
+
     /// <summary>
     /// When calling GetMapping if there are DataColumns in the input table that you are trying to bulk insert that are not matched
     /// in the destination table then the default behaviour is to throw a KeyNotFoundException.  Set this to false to ignore that
@@ -41,7 +41,7 @@ public abstract class BulkCopy:IBulkCopy
 
     /// <inheritdoc/>
     public DateTimeTypeDecider DateTimeDecider {get; protected set; }
-        
+
     /// <summary>
     /// Begins a new bulk copy operation in which one or more data tables are uploaded to the <paramref name="targetTable"/>.  The API entrypoint for this is
     /// <see cref="DiscoveredTable.BeginBulkInsert(IManagedTransaction)"/>.
@@ -126,7 +126,7 @@ public abstract class BulkCopy:IBulkCopy
                 decider = DateTimeDecider;
                 DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
             }
-                        
+
 
             foreach(DataRow dr in dt.Rows)
             {
@@ -160,8 +160,8 @@ public abstract class BulkCopy:IBulkCopy
     }
 
     /// <summary>
-    /// Returns a case insensitive mapping between columns in your DataTable that you are trying to upload and the columns that actually exist in the destination 
-    /// table.  
+    /// Returns a case insensitive mapping between columns in your DataTable that you are trying to upload and the columns that actually exist in the destination
+    /// table.
     /// <para>This overload gives you a list of all unmatched destination columns, these should be given null/default automatically by your database API</para>
     /// <para>Throws <exception cref="KeyNotFoundException"> if there are unmatched input columns unless <see cref="AllowUnmatchedInputColumns"/> is true.</exception></para>
     /// </summary>
@@ -194,8 +194,8 @@ public abstract class BulkCopy:IBulkCopy
     }
 
     /// <summary>
-    /// Returns a case insensitive mapping between columns in your DataTable that you are trying to upload and the columns that actually exist in the destination 
-    /// table.  
+    /// Returns a case insensitive mapping between columns in your DataTable that you are trying to upload and the columns that actually exist in the destination
+    /// table.
     /// <para>Throws <exception cref="KeyNotFoundException"> if there are unmatched input columns unless <see cref="AllowUnmatchedInputColumns"/> is true.</exception></para>
     /// </summary>
     /// <param name="inputColumns"></param>

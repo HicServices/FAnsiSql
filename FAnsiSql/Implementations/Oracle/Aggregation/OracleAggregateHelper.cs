@@ -70,7 +70,7 @@ floor(months_between({endDateSql}, {startDateSql}) /3)
             _ => throw new NotImplementedException()
         };
     }
-        
+
     protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
     {
         //we are trying to produce something like this:

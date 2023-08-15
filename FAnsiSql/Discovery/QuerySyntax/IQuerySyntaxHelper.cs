@@ -11,10 +11,10 @@ namespace FAnsi.Discovery.QuerySyntax;
 
 /// <summary>
 /// Cross database type functionality for helping build SQL commands that will work regardless of DatabaseType (Microsoft Sql Server / MySql etc).  Describes
-/// how to translate broad requirements like 'database type capable of storing strings up to 10 characters long' into a specific implementation e.g. 
+/// how to translate broad requirements like 'database type capable of storing strings up to 10 characters long' into a specific implementation e.g.
 /// 'varchar(10)' in Microsoft SQL Server and 'varchar2(10)' in Oracle (See ITypeTranslater).
 /// 
-/// <para>Also includes features such as qualifying database entities [MyDatabase]..[MyTable].[MyColumn] in Sql Server vs `MyDatabase`.`MyTable`.`MyColumn` in 
+/// <para>Also includes features such as qualifying database entities [MyDatabase]..[MyTable].[MyColumn] in Sql Server vs `MyDatabase`.`MyTable`.`MyColumn` in
 /// MySql.</para>
 /// 
 /// <para>Also includes methods for dealing with no n Ansi standard functionality e.g. TOP X , MD5 etc</para>
@@ -36,7 +36,7 @@ public interface IQuerySyntaxHelper
     IAggregateHelper AggregateHelper { get; }
     IUpdateHelper UpdateHelper { get; set; }
 
-        
+
     /// <summary>
     /// The character that is used to qualify database entity names e.g. "[" for "[My Table]"
     /// </summary>
@@ -80,7 +80,7 @@ public interface IQuerySyntaxHelper
 
     string EnsureFullyQualified(string databaseName,string schemaName, string tableName);
     string EnsureFullyQualified(string databaseName, string schemaName,string tableName, string columnName, bool isTableValuedFunction = false);
-        
+
     /// <summary>
     /// Returns the given <paramref name="sql"/> escaped e.g. doubling up single quotes.  Does not add any wrapping.
     /// </summary>
@@ -91,11 +91,11 @@ public interface IQuerySyntaxHelper
     TopXResponse HowDoWeAchieveTopX(int x);
     string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request);
     string GetParameterDeclaration(string proposedNewParameterName, string sqlType);
-        
+
     bool IsValidParameterName(string parameterSQL);
 
     string AliasPrefix { get; }
-        
+
     /// <summary>
     /// The maximum number of characters allowed in database names according to the DBMS
     /// </summary>
@@ -142,7 +142,7 @@ public interface IQuerySyntaxHelper
 
     bool IsBasicallyNull(object value);
     bool IsTimeout(Exception exception);
-        
+
     HashSet<string> GetReservedWords();
 
     /// <summary>
@@ -155,7 +155,7 @@ public interface IQuerySyntaxHelper
 
     /// <summary>
     /// Gets a DbParameter hard typed with the correct DbType for the discoveredColumn and the Value set to the correct Value representation (e.g. DBNull for nulls or whitespace).
-    /// <para>Also handles converting DateTime representations since many DBMS are a bit rubbish at that</para> 
+    /// <para>Also handles converting DateTime representations since many DBMS are a bit rubbish at that</para>
     /// </summary>
     /// <param name="p"></param>
     /// <param name="discoveredColumn">The column the parameter is for loading - this is used to determine the DbType for the paramter</param>
@@ -165,7 +165,7 @@ public interface IQuerySyntaxHelper
 
     /// <summary>
     /// Gets a DbParameter hard typed with the correct DbType for the discoveredColumn and the Value set to the correct Value representation (e.g. DBNull for nulls or whitespace).
-    /// <para>Also handles converting DateTime representations since many DBMS are a bit rubbish at that</para> 
+    /// <para>Also handles converting DateTime representations since many DBMS are a bit rubbish at that</para>
     /// </summary>
     /// <param name="p"></param>
     /// <param name="discoveredColumn">The column the parameter is for loading - this is used to determine the DbType for the paramter</param>
@@ -189,7 +189,7 @@ public interface IQuerySyntaxHelper
     /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
     /// </summary>
     void ValidateColumnName(string columnName);
-        
+
     /// <summary>
     /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
     /// </summary>
@@ -222,12 +222,12 @@ public enum MandatoryScalarFunctions
     /// A scalar function which must return todays datetime.  Must be valid as a column default too
     /// </summary>
     GetTodaysDate,
-        
+
     /// <summary>
     /// A scalar function which must return a new random GUID.
     /// </summary>
     GetGuid,
-       
+
     /// <summary>
     /// A scalar function which must take a single argument (column name) and return the length of values in it
     /// </summary>

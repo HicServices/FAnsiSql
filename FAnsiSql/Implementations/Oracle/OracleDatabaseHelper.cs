@@ -71,7 +71,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
             using var cmd = new OracleCommand($"SELECT view_name FROM all_views where owner='{database}'", (OracleConnection) connection);
             cmd.Transaction = transaction as OracleTransaction;
             var r = cmd.ExecuteReader();
-                
+
             while (r.Read())
                 if(querySyntaxHelper.IsValidTableName((string)r["view_name"],out _))
                     tables.Add(new DiscoveredTable(parent,r["view_name"].ToString(),querySyntaxHelper,null,TableType.View));
@@ -86,7 +86,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
     {
         return Array.Empty<DiscoveredTableValuedFunction>();
     }
-        
+
     public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
     {
         return Array.Empty<DiscoveredStoredprocedure>();
