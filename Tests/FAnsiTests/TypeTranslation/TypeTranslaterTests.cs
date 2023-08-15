@@ -73,7 +73,7 @@ public class TypeTranslaterTests : DatabaseTests
     [TestCase(DatabaseType.MicrosoftSQLServer, "nvarchar(max)",true)]
     [TestCase(DatabaseType.MicrosoftSQLServer, "text",false)]
     [TestCase(DatabaseType.MicrosoftSQLServer, "ntext",true)]
-    [TestCase(DatabaseType.MySql, "text",false)]
+    [TestCase(DatabaseType.MySql, "longtext",false)]
     [TestCase(DatabaseType.Oracle, "CLOB", false)]
     [TestCase(DatabaseType.PostgreSql, "text", false)]
     public void Test_GetLengthIfString_VarcharMaxCols(DatabaseType type, string datatype, bool expectUnicode)
