@@ -18,7 +18,7 @@ namespace FAnsi.Discovery;
 public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 {
     public virtual string DatabaseTableSeparator => ".";
-        
+
     /// <inheritdoc/>
     public abstract int MaximumDatabaseLength { get; }
 
@@ -27,7 +27,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     /// <inheritdoc/>
     public abstract int MaximumColumnLength { get; }
-        
+
     /// <inheritdoc/>
     public virtual char[] IllegalNameChars { get; } = {'.','(',')'};
 
@@ -44,12 +44,12 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     /// <inheritdoc/>
     public abstract string OpenQualifier {get;}
-        
+
     /// <inheritdoc/>
     public abstract string CloseQualifier {get;}
 
     public ITypeTranslater TypeTranslater { get; private set; }
-        
+
     private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = new();
 
     public IAggregateHelper AggregateHelper { get; private set; }
@@ -81,14 +81,14 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     {
         return " AS ";
     }
-        
+
     public string AliasPrefix => GetAliasConst();
 
     //Only look at the start of the string or following an equals or white space and stop at word boundaries
     private static readonly Regex ParameterNameRegex = new ($@"(?:^|[\s+\-*/\\=(,])+{ParameterNamesRegex}\b");
 
     /// <summary>
-    /// Lists the names of all parameters required by the supplied whereSql e.g. @bob = 'bob' would return "@bob" 
+    /// Lists the names of all parameters required by the supplied whereSql e.g. @bob = 'bob' would return "@bob"
     /// </summary>
     /// <param name="query">the SQL you want to determine the parameter names in</param>
     /// <returns>parameter names that are required by the SQL</returns>
@@ -122,7 +122,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         DatabaseType = databaseType;
     }
 
-        
+
     public virtual string GetRuntimeName(string s)
     {
         if (string.IsNullOrWhiteSpace(s))
@@ -219,7 +219,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public abstract string GetParameterDeclaration(string proposedNewParameterName, string sqlType);
 
     /// <summary>
-    /// Splits the given <paramref name="lineToSplit"/> into 
+    /// Splits the given <paramref name="lineToSplit"/> into
     /// </summary>
     /// <param name="lineToSplit"></param>
     /// <param name="selectSQL"></param>
@@ -303,7 +303,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         for (var i = 0; i < sb.Length; i++)
         {
             //if we are looking at a space
-            if (sb[i] == ' ' && i + 1 < sb.Length && sb[i + 1] >= 'a' && sb[i + 1] <= 'z') //and there is another character 
+            if (sb[i] == ' ' && i + 1 < sb.Length && sb[i + 1] >= 'a' && sb[i + 1] <= 'z') //and there is another character
                 //and that character is a lower case letter
                 sb[i + 1] = char.ToUpper(sb[i + 1]);
         }
@@ -357,15 +357,15 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     }
 
     public abstract string HowDoWeAchieveMd5(string selectSql);
-        
-        
+
+
 
     public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value,CultureInfo culture)
     {
         try
         {
             culture ??= CultureInfo.InvariantCulture;
-                
+
             if(!factories.ContainsKey(culture))
                 factories.Add(culture,new TypeDeciderFactory(culture));
 
@@ -376,7 +376,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
             if (IsBasicallyNull(value))
                 p.Value = DBNull.Value;
             else
-            if (value is string strVal && factories[culture].IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan 
+            if (value is string strVal && factories[culture].IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan
             {
                 var decider = factories[culture].Create(cSharpType);
                 var o = decider.Parse(strVal);
@@ -391,7 +391,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
                 {
                     o = FormatTimespanForDbParameter(t);
                 }
-                            
+
 
                 p.Value = o;
 
@@ -428,7 +428,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         reason = ValidateName(databaseName, "Database", MaximumDatabaseLength);
         return string.IsNullOrWhiteSpace(reason);
     }
-        
+
     public bool IsValidTableName(string tableName,out string reason)
     {
         reason = ValidateName(tableName, "Table", MaximumTableLength);
@@ -470,7 +470,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         return null;
     }
 
-        
+
 
     public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
     {
@@ -539,7 +539,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         {
             var c = columns[i];
             var columnName = toStringFunc(c);
-                
+
             if(!sensibleParameterNamesInclude.IsMatch(columnName)) //if column name is "_:_" or something
                 toReturn.Add(c, $"{ParameterSymbol}p{i}");
             else

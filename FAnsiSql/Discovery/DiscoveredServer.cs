@@ -149,7 +149,7 @@ public class DiscoveredServer : IMightNotExist
     }
 
     /// <summary>
-    /// Returns a new <see cref="DbParameter"/> of the correct <see cref="DatabaseType"/> of the server.  Also adds it 
+    /// Returns a new <see cref="DbParameter"/> of the correct <see cref="DatabaseType"/> of the server.  Also adds it
     /// to the <see cref="DbCommand.Parameters"/> of <paramref name="command"/> and sets it's <paramref name="valueForParameter"/>
     /// </summary>
     /// <param name="parameterName"></param>
@@ -297,10 +297,10 @@ public class DiscoveredServer : IMightNotExist
         //no (e.g. Oracle or no default database specified in connection string)
         return _currentDatabase; //yes use that one
     }
-        
+
     /// <summary>
-    /// Edits the connection string (See <see cref="Builder"/>) to allow async operations.  Depending on DBMS this may have 
-    /// no effect (e.g. Sql Server needs AsynchronousProcessing and MultipleActiveResultSets but Oracle / MySql do not need 
+    /// Edits the connection string (See <see cref="Builder"/>) to allow async operations.  Depending on DBMS this may have
+    /// no effect (e.g. Sql Server needs AsynchronousProcessing and MultipleActiveResultSets but Oracle / MySql do not need
     /// any special keywords)
     /// </summary>
     public void EnableAsync()
@@ -383,7 +383,7 @@ public class DiscoveredServer : IMightNotExist
     {
         return Helper.GetQuerySyntaxHelper();
     }
-        
+
     /// <summary>
     /// Return key value pairs which describe attributes of the server e.g. version, available drive space etc
     /// </summary>

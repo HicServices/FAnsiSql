@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+- Bugfix: MySQL text was erroneously capped at 64k (TEXT) instead of LONGTEXT (4GiB)
+
 ## [3.1.0] - 2023-05-15
 
 - Now targeting .Net 6

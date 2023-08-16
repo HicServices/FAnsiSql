@@ -14,7 +14,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     /// <summary>
     /// True to attempt sending "ALTER DATABASE MyDatabase SET SINGLE_USER WITH ROLLBACK IMMEDIATE"
     /// before DROP DATABASE command when using <see cref="DropDatabase(DiscoveredDatabase)"/>.
-    /// Defaults to true.  This command makes dropping databases more robust so is recommended but 
+    /// Defaults to true.  This command makes dropping databases more robust so is recommended but
     /// is not supported by some servers (e.g. Microsoft Azure)
     /// </summary>
     public static bool SetSingleUserWhenDroppingDatabases = true;
@@ -136,7 +136,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     }
 
     /// <summary>
-    /// Sends a DROP database command to the <paramref name="server"/>.  Optionally sets to SINGLE_USER 
+    /// Sends a DROP database command to the <paramref name="server"/>.  Optionally sets to SINGLE_USER
     /// first in order to more reliably drop the database.
     /// </summary>
     /// <param name="databaseToDrop"></param>

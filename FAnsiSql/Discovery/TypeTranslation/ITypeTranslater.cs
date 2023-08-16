@@ -6,7 +6,7 @@ namespace FAnsi.Discovery.TypeTranslation;
 
 /// <summary>
 ///  Cross database type functionality for translating between database proprietary datatypes e.g. varchar (varchar2 in Oracle) and the C# Type (and vice
-///  versa).  
+///  versa).
 /// 
 /// <para>When translating into a database type from a C# Type you also need to know additonal information e.g. how long is the maximum length of a string, how much
 /// scale/precision should a decimal have.  This is represented by the DatabaseTypeRequest class.</para>
@@ -15,7 +15,7 @@ namespace FAnsi.Discovery.TypeTranslation;
 public interface ITypeTranslater
 {
     /// <summary>
-    ///  DatabaseTypeRequest is turned into the proprietary string e.g. A DatabaseTypeRequest with CSharpType = typeof(DateTime) is translated into 
+    ///  DatabaseTypeRequest is turned into the proprietary string e.g. A DatabaseTypeRequest with CSharpType = typeof(DateTime) is translated into
     /// 'datetime2' in Microsoft SQL Server but 'datetime' in MySql server.
     /// </summary>
     /// <param name="request"></param>
@@ -37,7 +37,7 @@ public interface ITypeTranslater
     /// <param name="sqlType"></param>
     /// <returns>The C# Type which can be used to store values of this database type</returns>
     Type GetCSharpTypeForSQLDBType(string sqlType);
-        
+
     /// <summary>
     /// Translates a database proprietary type e.g. 'decimal(10,2)' into a C# type e.g. 'typeof(decimal)'
     /// 
@@ -64,7 +64,7 @@ public interface ITypeTranslater
 
     int GetLengthIfString(string sqlType);
     DecimalSize GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType);
-        
+
     /// <summary>
     /// Translates the given sqlType which must be an SQL string compatible with this TypeTranslater e.g. varchar(10) into the destination ITypeTranslater
     /// e.g. Varchar2(10) if destinationTypeTranslater was Oracle.  Even if both this and the destination are the same you might find a different datatype

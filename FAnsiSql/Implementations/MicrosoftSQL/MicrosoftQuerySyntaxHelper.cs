@@ -18,9 +18,9 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 
     /// <summary>
     /// Maximum database name length.  This is less than 128 in order to allow for "_logs" etc getting appended to end.
-    /// See: https://stackoverflow.com/a/5096245/4824531 
+    /// See: https://stackoverflow.com/a/5096245/4824531
     /// </summary>
-    public override int MaximumDatabaseLength => 100; 
+    public override int MaximumDatabaseLength => 100;
     public override int MaximumTableLength => 128;
     public override int MaximumColumnLength => 128;
 
@@ -74,7 +74,7 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
             if (sqlE.Number is -2 or 11 or 1205)
                 return true;
 
-            //yup, I've seen this behaviour from Sql Server.  ExceptionMessage of " " and .Number of 
+            //yup, I've seen this behaviour from Sql Server.  ExceptionMessage of " " and .Number of
             if (string.IsNullOrWhiteSpace(sqlE.Message) && sqlE.Number == 3617)
                 return true;
         }
@@ -96,13 +96,13 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
     {
         return true;
     }
-        
+
     public override string EnsureWrappedImpl(string databaseOrTableName)
     {
         return $"[{GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName)}]";
     }
 
-        
+
     protected override string UnescapeWrappedNameBody(string name)
     {
         return name.Replace("]]","]");

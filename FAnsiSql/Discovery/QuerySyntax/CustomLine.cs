@@ -18,9 +18,9 @@ public class CustomLine
     public QueryComponent LocationToInsert { get; set; }
 
     public CustomLineRole Role { get; set; }
-        
+
     /// <summary>
-    /// The line of code that caused the CustomLine to be created, this can be a StackTrace passed into the constructor or calculated automatically by CustomLine 
+    /// The line of code that caused the CustomLine to be created, this can be a StackTrace passed into the constructor or calculated automatically by CustomLine
     /// </summary>
     public string StackTrace { get; private set; }
 

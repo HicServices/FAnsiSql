@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 
 /// <summary>
-/// Cross Database Type class for turning a collection of arbitrary sql lines (CustomLine) into a Group by query.  The query can include an axis calendar 
+/// Cross Database Type class for turning a collection of arbitrary sql lines (CustomLine) into a Group by query.  The query can include an axis calendar
 /// table and can include a dynamic pivot.  See AggregateDataBasedTests for expected inputs/outputs.
 /// 
 /// <para>Because building a dynamic pivot / calendar table for a group by is so different in each DatabaseType the input is basically just a collection of strings

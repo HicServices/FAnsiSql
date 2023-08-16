@@ -69,7 +69,7 @@ internal class ServerLevelTests:DatabaseTests
         Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
     }
 
-        
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void ServerHelper_GetConnectionStringBuilder_NoDatabase(DatabaseType type,bool useWhitespace)
     {
@@ -224,5 +224,5 @@ internal class ServerLevelTests:DatabaseTests
 
         Assert.Greater(ver.Major,0);
     }
-        
+
 }

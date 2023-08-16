@@ -3,7 +3,7 @@
 namespace FAnsi.Connections;
 
 /// <summary>
-/// Wrapper for DbTransaction that associates it with a specific DbConnection.  Helps simplify calls to information 
+/// Wrapper for DbTransaction that associates it with a specific DbConnection.  Helps simplify calls to information
 /// methods such as DiscoveredTable.GetRowCount etc during the middle of an ongoing database transaction
 /// </summary>
 public interface IManagedTransaction

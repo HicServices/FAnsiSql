@@ -75,7 +75,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
     }
     #endregion
 
-        
+
     public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
         //create a copy so as not to corrupt the original
@@ -102,7 +102,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         con.Close();
         return databases.ToArray();
     }
-       
+
     public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)
     {
         var b = (SqlConnectionStringBuilder) builder;

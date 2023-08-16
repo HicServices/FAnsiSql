@@ -128,7 +128,7 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
         cmd.ExecuteNonQuery();
     }
 
-        
+
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
     {
         var toReturn = new List<DiscoveredParameter>();
@@ -202,7 +202,7 @@ where object_id = OBJECT_ID(@tableName)";
         {
             if(transaction != null)
                 cmd.Transaction = transaction.Transaction;
-            
+
             var p = cmd.CreateParameter();
             p.ParameterName = "@table";
             p.Value = table.GetRuntimeName();
@@ -214,7 +214,7 @@ where object_id = OBJECT_ID(@tableName)";
             p.Value = table.Schema ?? "dbo";
             p.DbType = DbType.String;
             cmd.Parameters.Add(p);
-                
+
             p = cmd.CreateParameter();
             p.ParameterName = "@database";
             p.Value = table.Database.GetRuntimeName();
@@ -224,7 +224,7 @@ where object_id = OBJECT_ID(@tableName)";
             using var dt = new DataTable();
             var da = table.Database.Server.GetDataAdapter(cmd);
             da.Fill(dt);
-                    
+
             foreach(DataRow r in dt.Rows)
             {
                 var fkName = r["FK_NAME"].ToString();
@@ -316,7 +316,7 @@ where object_id = OBJECT_ID(@tableName)";
     {
         return $"SELECT TOP {topX} * FROM {table.GetFullyQualifiedName()}";
     }
-        
+
     private string GetSQLType_FromSpColumnsResult(DbDataReader r)
     {
         var columnType = r["TYPE_NAME"] as string;

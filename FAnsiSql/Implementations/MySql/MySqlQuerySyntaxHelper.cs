@@ -16,7 +16,7 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
     public override int MaximumColumnLength => 64;
 
 
-        
+
     public override string OpenQualifier => "`";
 
     public override string CloseQualifier => "`";

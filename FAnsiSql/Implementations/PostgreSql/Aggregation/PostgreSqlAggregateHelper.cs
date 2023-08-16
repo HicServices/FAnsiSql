@@ -43,7 +43,7 @@ LEFT JOIN
 ON dataset.{7} = {1}
 ORDER BY 
 {1}
-", 
+",
                 //Anything before the SELECT
                 string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
                 GetDatePartOfColumn(query.Axis.AxisIncrement, "generate_series.date"),

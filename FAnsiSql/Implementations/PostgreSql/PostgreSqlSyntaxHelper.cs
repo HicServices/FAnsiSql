@@ -17,9 +17,9 @@ public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
     public override int MaximumDatabaseLength => 63;
     public override int MaximumTableLength => 63;
     public override int MaximumColumnLength => 63;
-        
+
     public const string DefaultPostgresSchema = "public";
-        
+
     public override string OpenQualifier => "\"";
 
     public override string CloseQualifier => "\"";
@@ -51,7 +51,7 @@ public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
     {
         return GetRuntimeName(s)?.Replace("\"","\"\"");
     }
-                
+
     protected override string UnescapeWrappedNameBody(string name)
     {
         return name.Replace("\"\"","\"");

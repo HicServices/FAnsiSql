@@ -47,7 +47,7 @@ public abstract class AggregateHelper:IAggregateHelper
     /// <param name="query"></param>
     /// <returns></returns>
     protected abstract string BuildAxisAggregate(AggregateCustomLineCollection query);
-        
+
     protected abstract string BuildPivotOnlyAggregate(AggregateCustomLineCollection query,CustomLine nonPivotColumn);
 
     protected abstract string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query);

@@ -9,9 +9,9 @@ using NUnit.Framework;
 namespace FAnsiTests;
 
 internal class TestExamples : DatabaseTests
-{ 
+{
     [Ignore("Test only works when the hard coded connection strings pass,  this test is used to build clear examples in the documentation")]
-    [Test] 
+    [Test]
     public void Simple_Example()
     {
         //Some data we want to load

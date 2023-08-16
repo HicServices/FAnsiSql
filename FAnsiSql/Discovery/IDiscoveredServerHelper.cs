@@ -21,9 +21,9 @@ public interface IDiscoveredServerHelper
     DbConnection GetConnection(DbConnectionStringBuilder builder);
 
     DbConnectionStringBuilder GetConnectionStringBuilder(string connectionString);
-        
+
     /// <summary>
-    /// Returns a new connection string builder with the supplied parameters.  Note that if a concept is not supported in the 
+    /// Returns a new connection string builder with the supplied parameters.  Note that if a concept is not supported in the
     /// <see cref="DbConnectionStringBuilder"/> implementation then the value will not appear in the connection string (e.g. Oracle
     /// does not support specifying a <paramref name="database"/> to connect to).
     /// </summary>
@@ -54,7 +54,7 @@ public interface IDiscoveredServerHelper
     DatabaseType DatabaseType { get; }
     Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder);
     bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds, out Exception exception);
-        
+
     string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
     string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
     Version GetVersion(DiscoveredServer server);

@@ -80,7 +80,7 @@ internal class ManagedConnectionTests:DatabaseTests
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
         {
             var ongoingTrans = ongoingCon.ManagedTransaction;
-            
+
             //BeginNewTransactedConnection should open itself
             Assert.AreEqual(ConnectionState.Open,ongoingCon.Connection.State);
             Assert.IsNotNull(ongoingTrans);
@@ -105,7 +105,7 @@ internal class ManagedConnectionTests:DatabaseTests
 
     /// <summary>
     /// Same as Test_GetManagedConnection_OngoingTransaction except we call <see cref="IManagedTransaction.CommitAndCloseConnection"/> or
-    /// <see cref="IManagedTransaction.AbandonAndCloseConnection"/> instead of relying on the outermost using finally 
+    /// <see cref="IManagedTransaction.AbandonAndCloseConnection"/> instead of relying on the outermost using finally
     /// </summary>
     /// <param name="dbType"></param>
     /// <param name="commit">Whether to commit</param>
@@ -119,7 +119,7 @@ internal class ManagedConnectionTests:DatabaseTests
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
         {
             var ongoingTrans = ongoingCon.ManagedTransaction;
-            
+
             //BeginNewTransactedConnection should open itself
             Assert.AreEqual(ConnectionState.Open,ongoingCon.Connection.State);
             Assert.IsNotNull(ongoingTrans);

@@ -30,7 +30,7 @@ public class All
         new object[] {DatabaseType.PostgreSql,false}
     };
 
-        
+
     /// <summary>
     /// <see cref="TestCaseSourceAttribute"/> for tests that should run on all DBMS
     /// with all permutations of true/false for 2 args.  Matches exhaustively method signature (DatabaseType,bool,bool)

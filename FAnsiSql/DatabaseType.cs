@@ -11,7 +11,7 @@ public enum DatabaseType
     MicrosoftSQLServer,
 
     /// <summary>
-    /// My Sql database engine.  
+    /// My Sql database engine.
     /// </summary>
     MySql,
 

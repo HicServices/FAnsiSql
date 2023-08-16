@@ -14,7 +14,7 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
     public override int MaximumTableLength => 30;
     public override int MaximumColumnLength => 30;
 
-        
+
     public override string OpenQualifier => "\"";
 
     public override string CloseQualifier => "\"";
@@ -86,7 +86,7 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
     /// <returns></returns>
     public override string GetAutoIncrementKeywordIfAny()
     {
-        //this is handled in 
+        //this is handled in
         return " GENERATED ALWAYS AS IDENTITY";
     }
 

@@ -20,7 +20,7 @@ public interface IDiscoveredTableHelper
     DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);
 
     IDiscoveredColumnHelper GetColumnHelper();
-        
+
     void DropTable(DbConnection connection, DiscoveredTable tableToDrop);
     void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
     void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
@@ -32,7 +32,7 @@ public interface IDiscoveredTableHelper
     IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
 
     IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture);
-        
+
     void TruncateTable(DiscoveredTable discoveredTable);
     void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable);
 
@@ -44,8 +44,8 @@ public interface IDiscoveredTableHelper
     int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null);
     DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction transaction = null);
     void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt);
-        
-        
+
+
     /// <summary>
     /// Creates a new primary key relationship in a foreign key table that points to a primary key table (which must have a primary key)
     /// </summary>

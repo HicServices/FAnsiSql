@@ -22,7 +22,7 @@ public class DatabaseOperationArgs
     /// Time to allow <see cref="DbCommand"/> to run before cancelling (this is db timeout and doesn't affect <see cref="CancellationToken"/>)
     /// </summary>
     public int TimeoutInSeconds { get; set; }
-        
+
     /// <summary>
     /// Optional, if provided all commands interacting with these args should cancel if the command was cancelled
     /// </summary>
@@ -87,7 +87,7 @@ public class DatabaseOperationArgs
             throw;
         }
             
-        if (!t.IsCompleted) 
+        if (!t.IsCompleted)
             cmd.Cancel();
 
         if (t.Exception == null) return t.Result;
@@ -95,7 +95,7 @@ public class DatabaseOperationArgs
             throw t.Exception.InnerExceptions[0];
         throw t.Exception;
     }
-        
+
     public void Fill(DbDataAdapter da, DbCommand cmd, DataTable dt)
     {
         Hydrate(cmd);

@@ -118,7 +118,7 @@ internal class AggregationTests:DatabaseTests
                     //they are not a match because they are not the same type and cannot be converted
                     return false;
                 }
-            
+
             if (!a.Equals(b))
                 return false;
         }                
@@ -177,5 +177,5 @@ internal class AggregationTests:DatabaseTests
             
         return dic[type];
     }
-            
+
 }

@@ -7,7 +7,7 @@ using FAnsi.Exceptions;
 namespace FAnsi.Discovery.Constraints;
 
 /// <summary>
-/// Helps resolve a dependency order between a collection of tables with interlinking foreign key constraints.  Implements Khan's algorithm. 
+/// Helps resolve a dependency order between a collection of tables with interlinking foreign key constraints.  Implements Khan's algorithm.
 /// </summary>
 public class RelationshipTopologicalSort
 {
@@ -42,7 +42,7 @@ public class RelationshipTopologicalSort
     }
 
     /// <summary>
-    /// Topological Sorting (Kahn's algorithm) 
+    /// Topological Sorting (Kahn's algorithm)
     /// </summary>
     /// <remarks>https://en.wikipedia.org/wiki/Topological_sorting</remarks>
     /// <typeparam name="T"></typeparam>

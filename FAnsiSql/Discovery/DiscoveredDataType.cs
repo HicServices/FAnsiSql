@@ -13,7 +13,7 @@ namespace FAnsi.Discovery;
 /// </summary>
 public class DiscoveredDataType
 {
-    private readonly DiscoveredColumn Column; 
+    private readonly DiscoveredColumn Column;
 
     /// <summary>
     /// The proprietary DBMS name for the datatype e.g. varchar2(100) for Oracle, datetime2 for Sql Server etc.
@@ -91,7 +91,7 @@ public class DiscoveredDataType
     public void Resize(int newSize, IManagedTransaction managedTransaction = null)
     {
         var toReplace = GetLengthIfString();
-            
+
         if(newSize == toReplace)
             return;
 
@@ -104,7 +104,7 @@ public class DiscoveredDataType
     }
 
     /// <summary>
-    /// <para>Creates and runs an ALTER TABLE statement which will increase the size of a decimal column to support larger Precision/Scale values than it currently does. 
+    /// <para>Creates and runs an ALTER TABLE statement which will increase the size of a decimal column to support larger Precision/Scale values than it currently does.
     /// If you want decimal(4,2) then pass <paramref name="numberOfDigitsBeforeDecimalPoint"/>=2 and <paramref name="numberOfDigitsAfterDecimalPoint"/>=2</para>
     /// 
     /// <para>Throws <see cref="InvalidResizeException"/> if the column is not a decimal type or the new size is smaller than the current column size</para>
@@ -126,11 +126,11 @@ public class DiscoveredDataType
 
         if (toReplace.NumbersAfterDecimalPlace> numberOfDigitsAfterDecimalPoint)
             throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__, toReplace.NumbersAfterDecimalPlace, numberOfDigitsAfterDecimalPoint, SQLType));
-            
+
         var newDataType = Column.Table.GetQuerySyntaxHelper()
             .TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof (decimal), null,
                 new DecimalSize(numberOfDigitsBeforeDecimalPoint, numberOfDigitsAfterDecimalPoint)));
-            
+
         AlterTypeTo(newDataType, managedTransaction);
     }
 
@@ -164,7 +164,7 @@ public class DiscoveredDataType
             }
         }
 
-        SQLType = newType; 
+        SQLType = newType;
     }
 
     /// <summary>

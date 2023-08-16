@@ -24,11 +24,11 @@ internal class CalendarAggregationTests:AggregationTests
             new("SELECT", QueryComponent.SELECT),
             new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are
             new("FROM ", QueryComponent.FROM),
             new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
             new("GROUP BY", QueryComponent.GroupBy),
-            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are
         };
 
         var axis = new QueryAxis
@@ -83,11 +83,11 @@ internal class CalendarAggregationTests:AggregationTests
         {
             new("SELECT", QueryComponent.SELECT),
             new("count(*) as MyCount,", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
-            new(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis },                      //tell it which the axis are 
+            new(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis },                      //tell it which the axis are
             new("FROM ", QueryComponent.FROM),
             new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
             new("GROUP BY", QueryComponent.GroupBy),
-            new(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis }                                           //tell it which the axis are 
+            new(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis }                                           //tell it which the axis are
         };
 
         var axis = new QueryAxis
@@ -128,11 +128,11 @@ internal class CalendarAggregationTests:AggregationTests
             new("SELECT", QueryComponent.SELECT),
             new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new(syntax.EnsureWrapped("EventDate"), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
+            new(syntax.EnsureWrapped("EventDate"), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are
             new("FROM ", QueryComponent.FROM),
             new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
             new("GROUP BY", QueryComponent.GroupBy),
-            new(syntax.EnsureWrapped("EventDate"), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(syntax.EnsureWrapped("EventDate"), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are
         };
 
         var axis = new QueryAxis
@@ -172,11 +172,11 @@ internal class CalendarAggregationTests:AggregationTests
             new("SELECT", QueryComponent.SELECT),
             new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
+            new(col.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are
             new("FROM ", QueryComponent.FROM),
             new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
             new("GROUP BY", QueryComponent.GroupBy),
-            new(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(col.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are
         };
 
         var axis = new QueryAxis
@@ -216,11 +216,11 @@ internal class CalendarAggregationTests:AggregationTests
             new("SELECT", QueryComponent.SELECT),
             new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                 { Role = CustomLineRole.CountFunction },
-            new(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are 
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.QueryTimeColumn) { Role = CustomLineRole.Axis }, //tell it which the axis are
             new("FROM ", QueryComponent.FROM),
             new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
             new("GROUP BY", QueryComponent.GroupBy),
-            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are
         };
 
         var axis = new QueryAxis
@@ -284,12 +284,12 @@ internal class CalendarAggregationTests:AggregationTests
         {
             new("SELECT", QueryComponent.SELECT),
             new($"{eventDate.GetFullyQualifiedName()},", QueryComponent.QueryTimeColumn)
-                { Role = CustomLineRole.Axis }, //tell it which the axis are 
+                { Role = CustomLineRole.Axis }, //tell it which the axis are
             new("count(*) as MyCount", QueryComponent.QueryTimeColumn) { Role = CustomLineRole.CountFunction },
             new("FROM ", QueryComponent.FROM),
             new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
             new("GROUP BY", QueryComponent.GroupBy),
-            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are 
+            new(eventDate.GetFullyQualifiedName(), QueryComponent.GroupBy) { Role = CustomLineRole.Axis } //tell it which the axis are
         };
 
         var axis = new QueryAxis
