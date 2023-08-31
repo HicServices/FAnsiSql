@@ -22,7 +22,7 @@ public class DatabaseOperationArgs
     /// Time to allow <see cref="DbCommand"/> to run before cancelling (this is db timeout and doesn't affect <see cref="CancellationToken"/>)
     /// </summary>
     public int TimeoutInSeconds { get; set; }
-        
+
     /// <summary>
     /// Optional, if provided all commands interacting with these args should cancel if the command was cancelled
     /// </summary>
@@ -30,7 +30,7 @@ public class DatabaseOperationArgs
 
     public DatabaseOperationArgs()
     {
-            
+
     }
     public DatabaseOperationArgs(IManagedTransaction transactionIfAny, CancellationToken cancellationToken, int timeoutInSeconds)
     {
@@ -66,7 +66,7 @@ public class DatabaseOperationArgs
     {
         Hydrate(cmd);
         var t = method();
-            
+
         try
         {
             switch (t.Status)
@@ -86,8 +86,8 @@ public class DatabaseOperationArgs
                 throw e.InnerExceptions[0];
             throw;
         }
-            
-        if (!t.IsCompleted) 
+
+        if (!t.IsCompleted)
             cmd.Cancel();
 
         if (t.Exception == null) return t.Result;
@@ -95,7 +95,7 @@ public class DatabaseOperationArgs
             throw t.Exception.InnerExceptions[0];
         throw t.Exception;
     }
-        
+
     public void Fill(DbDataAdapter da, DbCommand cmd, DataTable dt)
     {
         Hydrate(cmd);
@@ -103,7 +103,7 @@ public class DatabaseOperationArgs
         CancellationToken.ThrowIfCancellationRequested();
 
         if(CancellationToken.CanBeCanceled)
-            dt.RowChanged += ThrowIfCancelled;  
+            dt.RowChanged += ThrowIfCancelled;
 
         da.Fill(dt);
         CancellationToken.ThrowIfCancellationRequested();
