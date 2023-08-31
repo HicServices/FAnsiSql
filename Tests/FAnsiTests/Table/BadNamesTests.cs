@@ -38,8 +38,8 @@ internal class BadNamesTests : DatabaseTests
         var (badTableName,badColumnName,badColumnName2) = GetBadNames(dbType);
         return db.CreateTable(badTableName,new[]
         {
-            new DatabaseColumnRequest(badColumnName,new DatabaseTypeRequest(typeof(string),100)), 
-            new DatabaseColumnRequest(badColumnName2,new DatabaseTypeRequest(typeof(int))) 
+            new DatabaseColumnRequest(badColumnName,new DatabaseTypeRequest(typeof(string),100)),
+            new DatabaseColumnRequest(badColumnName2,new DatabaseTypeRequest(typeof(int)))
         });
 
     }
@@ -125,14 +125,14 @@ internal class BadNamesTests : DatabaseTests
             Assert.IsTrue(r.Read());
 
             Assert.AreEqual(!noNulls,r.Read());
-                
+
             Assert.IsFalse(r.Read());
         }
 
         tbl.Drop();
 
     }
-        
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void BadNames_DropColumn(DatabaseType dbType)
     {
@@ -181,7 +181,7 @@ internal class BadNamesTests : DatabaseTests
 
         tbl.Drop();
     }
-        
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void BadNames_DiscoverRelationships(DatabaseType dbType)
     {
@@ -191,8 +191,8 @@ internal class BadNamesTests : DatabaseTests
             
         var tbl1 = db.CreateTable(badTableName,new[]
         {
-            new DatabaseColumnRequest(badColumnName,new DatabaseTypeRequest(typeof(string),100)){IsPrimaryKey = true }, 
-            new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int))) 
+            new DatabaseColumnRequest(badColumnName,new DatabaseTypeRequest(typeof(string),100)){IsPrimaryKey = true },
+            new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int)))
         });
 
         var pk = tbl1.DiscoverColumns().Single(c=>c.IsPrimaryKey);
@@ -200,7 +200,7 @@ internal class BadNamesTests : DatabaseTests
 
         var tbl2 = db.CreateTable(new CreateTableArgs(db, $"{badTableName}2",null)
         {
-            ExplicitColumnDefinitions = new []{fk = new DatabaseColumnRequest($"{badColumnName}2",new DatabaseTypeRequest(typeof(string),100)) }, 
+            ExplicitColumnDefinitions = new []{fk = new DatabaseColumnRequest($"{badColumnName}2",new DatabaseTypeRequest(typeof(string),100)) },
             ForeignKeyPairs = new Dictionary<DatabaseColumnRequest, DiscoveredColumn> {{fk, pk} }
         });
 
@@ -237,7 +237,7 @@ internal class BadNamesTests : DatabaseTests
         tbl.Drop();
     }
 
-        
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void BadNames_Rename(DatabaseType dbType)
     {

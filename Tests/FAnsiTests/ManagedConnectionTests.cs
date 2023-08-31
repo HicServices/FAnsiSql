@@ -13,7 +13,7 @@ internal class ManagedConnectionTests:DatabaseTests
         var db = GetTestDatabase(dbType);
 
         var con = db.Server.GetConnection();
-            
+
         //GetConnection should return an unopened connection
         Assert.AreEqual(ConnectionState.Closed,con.State);
     }
@@ -74,13 +74,13 @@ internal class ManagedConnectionTests:DatabaseTests
     public void Test_GetManagedConnection_OngoingTransaction(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
-            
+
         IManagedConnection ongoingCon;
         //pretend that there is an ongoing transaction already
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
         {
             var ongoingTrans = ongoingCon.ManagedTransaction;
-            
+
             //BeginNewTransactedConnection should open itself
             Assert.AreEqual(ConnectionState.Open,ongoingCon.Connection.State);
             Assert.IsNotNull(ongoingTrans);
@@ -97,7 +97,7 @@ internal class ManagedConnectionTests:DatabaseTests
             //it should still be open after this finally block
             Assert.AreEqual(ConnectionState.Open,con.Connection.State);
         }
-            
+
         //this is the using on the transaction this one should now close itself
         Assert.AreEqual(ConnectionState.Closed,ongoingCon.Connection.State);
     }
@@ -105,7 +105,7 @@ internal class ManagedConnectionTests:DatabaseTests
 
     /// <summary>
     /// Same as Test_GetManagedConnection_OngoingTransaction except we call <see cref="IManagedTransaction.CommitAndCloseConnection"/> or
-    /// <see cref="IManagedTransaction.AbandonAndCloseConnection"/> instead of relying on the outermost using finally 
+    /// <see cref="IManagedTransaction.AbandonAndCloseConnection"/> instead of relying on the outermost using finally
     /// </summary>
     /// <param name="dbType"></param>
     /// <param name="commit">Whether to commit</param>
@@ -119,7 +119,7 @@ internal class ManagedConnectionTests:DatabaseTests
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
         {
             var ongoingTrans = ongoingCon.ManagedTransaction;
-            
+
             //BeginNewTransactedConnection should open itself
             Assert.AreEqual(ConnectionState.Open,ongoingCon.Connection.State);
             Assert.IsNotNull(ongoingTrans);

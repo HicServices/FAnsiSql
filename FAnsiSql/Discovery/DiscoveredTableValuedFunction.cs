@@ -12,7 +12,7 @@ namespace FAnsi.Discovery;
 public class DiscoveredTableValuedFunction : DiscoveredTable
 {
     private readonly string _functionName;
-        
+
     //constructor
     public DiscoveredTableValuedFunction(DiscoveredDatabase database, string functionName,
         IQuerySyntaxHelper querySyntaxHelper, string schema = null) : base(database, functionName, querySyntaxHelper,
@@ -36,7 +36,7 @@ public class DiscoveredTableValuedFunction : DiscoveredTable
         //Note that we do not give the parameters values, the client must decide appropriate values and put them in correspondingly named variables
         return $"{Database.GetRuntimeName()}..{GetRuntimeName()}({parameters})";
     }
-        
+
     public override string ToString() => _functionName;
 
     public override void Drop()

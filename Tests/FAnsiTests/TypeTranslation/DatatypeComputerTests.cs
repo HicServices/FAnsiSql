@@ -12,7 +12,7 @@ namespace FAnsiTests.TypeTranslation;
 /// 
 /// <para>Critically it covers fallback from one data type estimate to another based on new data e.g. if you see a "100" then a "1" then a "1.1"
 /// the final estimate should be decimal(4,1) to allow for both 100.0f and 1.1f.
-/// </para> 
+/// </para>
 /// </summary>
 public class GuesserTests
 {
@@ -413,7 +413,7 @@ public class GuesserTests
         Assert.AreEqual(9, t.Guess.Size.NumbersBeforeDecimalPlace);
         Assert.AreEqual(14, t.Guess.Size.NumbersAfterDecimalPlace);
     }
-        
+
 
     [Test]
     public void TestGuesser_TrailingZeroesFallbackToString()
@@ -616,7 +616,7 @@ public class GuesserTests
         t.AdjustToCompensateForValue(randomCrud);
         Assert.AreEqual(typeof(string), t.Guess.CSharpType);
     }
-        
+
     [Test]
     public void TestGuesser_ScientificNotation()
     {

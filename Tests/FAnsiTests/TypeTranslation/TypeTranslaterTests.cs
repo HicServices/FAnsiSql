@@ -23,7 +23,7 @@ namespace FAnsiTests.TypeTranslation;
 public class TypeTranslaterTests : DatabaseTests
 {
     private readonly Dictionary<DatabaseType,ITypeTranslater> _translaters = new();
-        
+
     [OneTimeSetUp]
     public void SetupDatabases()
     {

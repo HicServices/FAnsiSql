@@ -38,7 +38,7 @@ public class DatabaseTests
             ImplementationManager.Load<PostgreSqlImplementation>();
 
             var file = Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilename);
-            
+
             Assert.IsTrue(File.Exists(file),"Could not find " + TestFilename);
 
             var doc = XDocument.Load(file);
@@ -57,7 +57,7 @@ public class DatabaseTests
                 throw new Exception($"Missing element 'TestScratchDatabase' in {TestFilename}");
 
             _testScratchDatabase = e.Value;
-            
+
             foreach (var element in root.Elements("TestDatabase"))
             {
                 var type = element.Element("DatabaseType")?.Value;
@@ -65,9 +65,9 @@ public class DatabaseTests
                 if(!Enum.TryParse(type, out DatabaseType databaseType))
                     throw new Exception($"Could not parse DatabaseType {type}");
 
-         
+
                 var constr = element.Element("ConnectionString")?.Value;
-                
+
                 TestConnectionStrings.Add(databaseType,constr);
             }
         }
@@ -76,7 +76,7 @@ public class DatabaseTests
             TestContext.WriteLine(exception);
             throw;
         }
-            
+
     }
 
     protected IEnumerable<DiscoveredServer> TestServer()

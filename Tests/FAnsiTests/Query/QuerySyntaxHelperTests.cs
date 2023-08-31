@@ -10,18 +10,18 @@ namespace FAnsiTests.Query;
 
 internal class QuerySyntaxHelperTests
 {
-        
+
 
     //Oracle always uppers everything because... Oracle
     [TestCase(DatabaseType.Oracle,"CHI","\"TEST_ScratchArea\".public.\"Biochemistry\".\"chi\"")]
     [TestCase(DatabaseType.PostgreSql,"chi","\"TEST_ScratchArea\".public.\"Biochemistry\".\"chi\"")]
-                
+
     [TestCase(DatabaseType.Oracle,"FRANK","count(*) as Frank")]
     [TestCase(DatabaseType.PostgreSql,"Frank","count(*) as Frank")]
 
     [TestCase(DatabaseType.Oracle,"FRANK","count(cast(1 as int)) as Frank")]
     [TestCase(DatabaseType.PostgreSql,"Frank","count(cast(1 as int)) as Frank")]
-                
+
     [TestCase(DatabaseType.Oracle,"FRANK","count(cast(1 as int)) as \"Frank\"")]
     [TestCase(DatabaseType.PostgreSql,"Frank","count(cast(1 as int)) as \"Frank\"")]
     [TestCase(DatabaseType.MySql,"Frank","count(cast(1 as int)) as `Frank`")]
@@ -36,11 +36,11 @@ internal class QuerySyntaxHelperTests
     [TestCase(DatabaseType.MicrosoftSQLServer,"zombie","dbo.GetMyCoolThing(\"Magic Fun Times\") as zombie")]
     [TestCase(DatabaseType.MySql,"zombie","dbo.GetMyCoolThing(\"Magic Fun Times\") as zombie")]
     [TestCase(DatabaseType.PostgreSql,"zombie","dbo.GetMyCoolThing(\"Magic Fun Times\") as zombie")]
-        
+
     [TestCase(DatabaseType.Oracle,"MYCOL","\"mydb\".\"mytbl\".\"mycol\"")]
     [TestCase(DatabaseType.MicrosoftSQLServer,"mycol","[mydb].[mytbl].[mycol]")]
     [TestCase(DatabaseType.MySql,"mycol","`mydb`.`mytbl`.`mycol`")]
-    [TestCase(DatabaseType.PostgreSql,"mycol","\"mydb\".\"mytbl\".\"mycol\"")]        
+    [TestCase(DatabaseType.PostgreSql,"mycol","\"mydb\".\"mytbl\".\"mycol\"")]
     public void SyntaxHelperTest_GetRuntimeName(DatabaseType dbType,  string expected, string forInput)
     {
         var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
@@ -86,7 +86,7 @@ internal class QuerySyntaxHelperTests
             }
         }
     }
-        
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void EnsureWrapped_MultipleCalls(DatabaseType dbType)
     {

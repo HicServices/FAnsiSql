@@ -27,7 +27,7 @@ internal class TopXTests :DatabaseTests
 
             tbl = db.CreateTable("MyTopXTable",dt);
         }
-            
+
         var topx = tbl.GetQuerySyntaxHelper().HowDoWeAchieveTopX(1);
 
         var f = tbl.GetQuerySyntaxHelper().EnsureWrapped("F");
@@ -58,7 +58,7 @@ internal class TopXTests :DatabaseTests
             var sqlcol = tbl.DiscoverColumn("X").GetTopXSql(1,false);
 
             Assert.AreEqual(DBNull.Value,db.Server.GetCommand(sqlcol,con).ExecuteScalar());
-                                
+
             sqlcol = tbl.DiscoverColumn("X").GetTopXSql(1,true);
 
             Assert.AreEqual("fish",db.Server.GetCommand(sqlcol,con).ExecuteScalar());

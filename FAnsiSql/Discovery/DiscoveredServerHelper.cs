@@ -31,7 +31,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
 
         ConnectionStringKeywordAccumulators[databaseType].AddOrUpdateKeyword(keyword,value,priority);
     }
-    
+
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
     public abstract DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null);
 
@@ -43,7 +43,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetParameter"]'/>
     public abstract DbParameter GetParameter(string parameterName);
-        
+
     public abstract DbConnection GetConnection(DbConnectionStringBuilder builder);
 
     public DbConnectionStringBuilder GetConnectionStringBuilder(string connectionString)
@@ -53,7 +53,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
 
         return builder;
     }
-        
+
     /// <inheritdoc/>
     public DbConnectionStringBuilder GetConnectionStringBuilder(string server, string database, string username, string password)
     {
@@ -76,8 +76,8 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     }
     protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString, string database, string username, string password);
     protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString);
-        
-        
+
+
 
     protected abstract string ServerKeyName { get; }
     protected abstract string DatabaseKeyName { get; }

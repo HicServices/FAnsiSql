@@ -13,7 +13,7 @@ namespace FAnsi.Discovery;
 /// </summary>
 public class DiscoveredDataType
 {
-    private readonly DiscoveredColumn Column; 
+    private readonly DiscoveredColumn Column;
 
     /// <summary>
     /// The proprietary DBMS name for the datatype e.g. varchar2(100) for Oracle, datetime2 for Sql Server etc.
@@ -104,7 +104,7 @@ public class DiscoveredDataType
     }
 
     /// <summary>
-    /// <para>Creates and runs an ALTER TABLE statement which will increase the size of a decimal column to support larger Precision/Scale values than it currently does. 
+    /// <para>Creates and runs an ALTER TABLE statement which will increase the size of a decimal column to support larger Precision/Scale values than it currently does.
     /// If you want decimal(4,2) then pass <paramref name="numberOfDigitsBeforeDecimalPoint"/>=2 and <paramref name="numberOfDigitsAfterDecimalPoint"/>=2</para>
     /// 
     /// <para>Throws <see cref="InvalidResizeException"/> if the column is not a decimal type or the new size is smaller than the current column size</para>

@@ -49,7 +49,7 @@ internal class CreateTableTests:DatabaseTests
             new DatabaseColumnRequest("address", new DatabaseTypeRequest(typeof (string), 500)),
             new DatabaseColumnRequest("dob", new DatabaseTypeRequest(typeof (DateTime)),false),
             new DatabaseColumnRequest("score",
-                new DatabaseTypeRequest(typeof (decimal), null, new DecimalSize(5, 3))) //<- e.g. 12345.123 
+                new DatabaseTypeRequest(typeof (decimal), null, new DecimalSize(5, 3))) //<- e.g. 12345.123
 
         });
 
@@ -160,7 +160,7 @@ internal class CreateTableTests:DatabaseTests
 
         Assert.IsTrue(table.DiscoverColumn("Name").IsPrimaryKey);
     }
-        
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_PrimaryKey_FromColumnRequest(DatabaseType databaseType)
     {
@@ -285,7 +285,7 @@ internal class CreateTableTests:DatabaseTests
     }
 
 
-        
+
     [TestCase(DatabaseType.MicrosoftSQLServer, "didn’t")] //<- it's a ’ not a '
     [TestCase(DatabaseType.MicrosoftSQLServer, "Æther")]
     [TestCase(DatabaseType.MicrosoftSQLServer, "乗")]
@@ -406,7 +406,7 @@ internal class CreateTableTests:DatabaseTests
 
         tbl.Drop();
     }
-        
+
     /// <summary>
     /// Just to check that clone on <see cref="DataTable"/> properly clones <see cref="DataColumn.ExtendedProperties"/>
     /// </summary>
@@ -460,7 +460,7 @@ internal class CreateTableTests:DatabaseTests
         StringAssert.Contains("System.Object",ex?.Message);
 
     }
-        
+
     /// <summary>
     /// Tests how we can customize how "T" and "F" etc are interpreted (either as boolean true/false or as string). This test
     /// uses the static defaults in <see cref="GuessSettingsFactory.Defaults"/>.

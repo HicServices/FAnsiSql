@@ -68,7 +68,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
 
         QuerySyntaxHelper.ValidateTableName(_table);
     }
-        
+
     /// <summary>
     /// <para>Checks that the <see cref="Database"/> exists then lists the tables in the database to confirm this table exists on the server</para>
     /// </summary>
@@ -101,7 +101,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
     {
         return QuerySyntaxHelper.EnsureFullyQualified(Database.GetRuntimeName(),Schema, GetRuntimeName());
     }
-        
+
     /// <summary>
     /// Returns the wrapped e.g. "[MyTbl]" name of the table including escaping e.g. if you wanted to name a table "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
     /// </summary>
@@ -142,7 +142,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
 
     /// <summary>
     /// Returns from <see cref="DiscoverColumns"/> the <paramref name="specificColumnName"/> on the server.  This is not not case sensitive.  Requires
-    /// connecting to the database. 
+    /// connecting to the database.
     /// </summary>
     /// <param name="specificColumnName">The column you want to find</param>
     /// <param name="transaction">Optional - if set the connection to list tables will be sent on the connection on which the current
@@ -198,9 +198,9 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
 
         return dt;
     }
-        
+
     /// <summary>
-    /// Drops (deletes) the table from the database.  This is irreversible unless you have a database backup. 
+    /// Drops (deletes) the table from the database.  This is irreversible unless you have a database backup.
     /// </summary>
     public virtual void Drop()
     {
@@ -223,7 +223,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
     {
         return Helper.GetRowCount(args, this);
     }
-        
+
     /// <summary>
     /// Returns true if there are no rows in the table
     /// </summary>
@@ -294,7 +294,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
         using var connection = Database.Server.GetManagedConnection();
         Helper.DropColumn(connection.Connection, column);
     }
-        
+
     /// <summary>
     /// Creates a new object for bulk inserting records into the table.  You should use a using block since <see cref="IBulkCopy"/> is <see cref="IDisposable"/>.
     /// Depending on implementation, records may not be committed to the server until the <see cref="IBulkCopy"/> is disposed.
@@ -411,7 +411,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
         }, this, discoverColumns);
     }
 
-        
+
     public void CreatePrimaryKey(DatabaseOperationArgs args, params DiscoveredColumn[] discoverColumns)
     {
         Helper.CreatePrimaryKey(args,this, discoverColumns);

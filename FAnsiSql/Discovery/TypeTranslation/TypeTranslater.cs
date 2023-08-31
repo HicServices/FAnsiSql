@@ -37,7 +37,7 @@ public abstract class TypeTranslater:ITypeTranslater
     /// use <see cref="Guesser"/> to determine the required length/type at runtime.
     /// </summary>
     private readonly int StringWidthWhenNotSupplied;
-        
+
     /// <summary>
     /// 
     /// </summary>
@@ -89,7 +89,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
         throw new TypeNotMappedException(string.Format(FAnsiStrings.TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__, t.Name, GetType().Name));
     }
-        
+
     protected string GetByteArrayDataType()
     {
         return "varbinary(max)";
@@ -130,8 +130,8 @@ public abstract class TypeTranslater:ITypeTranslater
     }
 
     public abstract string GetStringDataTypeWithUnlimitedWidth();
-        
-        
+
+
     private string GetUnicodeStringDataType(int? maxExpectedStringWidth)
     {
         if (maxExpectedStringWidth == null)
@@ -228,7 +228,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
         return null;
     }
-        
+
     /// <inheritdoc/>
     public bool IsSupportedSQLDBType(string sqlType)
     {
@@ -328,7 +328,7 @@ public abstract class TypeTranslater:ITypeTranslater
             ExtraLengthPerNonAsciiCharacter = extraLengthPerNonAsciiCharacter
         };
     }
-        
+
     public virtual int GetLengthIfString(string sqlType)
     {
         if (string.IsNullOrWhiteSpace(sqlType))
@@ -374,11 +374,11 @@ public abstract class TypeTranslater:ITypeTranslater
         //this then returns datetime (e.g. mysql)
         return destinationTypeTranslater.GetSQLDBTypeForCSharpType(requested);
     }
-        
+
 
     /// <summary>
     /// Return the number of characters required to not truncate/lose any data when altering a column from time (e.g. TIME etc) to varchar(x).  Return
-    /// x such that the column does not loose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table. 
+    /// x such that the column does not loose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table.
     /// if we see many times and nulls we will decide to use a time column then we see strings and have to convert the column to a varchar column without loosing the
     /// currently loaded data.
     /// </summary>
@@ -409,7 +409,7 @@ select LEN(dt) from omgTimes
 
     /// <summary>
     /// Return the number of characters required to not truncate/loose any data when altering a column from datetime (e.g. datetime2, DATE etc) to varchar(x).  Return
-    /// x such that the column does not lose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table. 
+    /// x such that the column does not lose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table.
     /// if we see many dates and nulls we will decide to use a date column then we see strings and have to convert the column to a varchar column without loosing the
     /// currently loaded data.
     /// </summary>

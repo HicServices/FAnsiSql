@@ -26,7 +26,7 @@ public interface IDiscoveredDatabaseHelper
     Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database);
 
     DiscoveredTable CreateTable(CreateTableArgs args);
-        
+
     string GetCreateTableSql(DiscoveredDatabase database, string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete,string schema = null);
 
     /// <summary>
@@ -47,7 +47,7 @@ public interface IDiscoveredDatabaseHelper
 
     DirectoryInfo Detach(DiscoveredDatabase database);
     void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName);
-        
+
     /// <summary>
     /// Gets a sensible name for a foreign key constraint between the two tables
     /// </summary>

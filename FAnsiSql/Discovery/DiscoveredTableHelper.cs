@@ -20,7 +20,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
     public abstract string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX);
 
     public abstract DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);
-        
+
     public abstract IDiscoveredColumnHelper GetColumnHelper();
     public virtual void DropTable(DbConnection connection, DiscoveredTable tableToDrop)
     {
