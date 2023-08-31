@@ -16,7 +16,7 @@ using TypeGuesser;
 namespace FAnsi.Discovery;
 
 /// <summary>
-/// DBMS specific implementation of all functionality that relates to interacting with existing databases (dropping databases, creating tables, finding stored proceedures etc).  For 
+/// DBMS specific implementation of all functionality that relates to interacting with existing databases (dropping databases, creating tables, finding stored procedures etc).  For
 /// database creation see <see cref="DiscoveredServerHelper"/>
 /// </summary>
 public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper

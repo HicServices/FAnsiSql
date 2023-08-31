@@ -113,7 +113,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
                    DestinationTableName = insert.DestinationTableName
                })
         {
-                   
+
             foreach (SqlBulkCopyColumnMapping m in insert.ColumnMappings)
                 investigationOneLineAtATime.ColumnMappings.Add(m);
 
@@ -143,7 +143,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
 
                         return new Exception(string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_, line, result), e);
                     }
-                        
+
                     return  new FileLoadException(
                         string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_, line, Environment.NewLine, string.Join(Environment.NewLine,dr.ItemArray), firstPass),
                         exception);
@@ -186,17 +186,17 @@ public class MicrosoftSQLBulkCopy : BulkCopy
 
             var itemData = items[columnItHates].GetType().GetField("_metadata", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new NullReferenceException();
             var metadata = itemData.GetValue(items[columnItHates]) ?? throw new NullReferenceException();
-                
+
             var destinationColumn = (string)metadata.GetType().GetField("column", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata) ?? throw new NullReferenceException();
-                
+
             var length = metadata.GetType().GetField("length", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata);
 
             badMapping = insert.ColumnMappings.Cast<SqlBulkCopyColumnMapping>()
                 .SingleOrDefault(m => string.Equals(m.DestinationColumn , destinationColumn, StringComparison.CurrentCultureIgnoreCase));
-                
+
             newMessage = ex.Message.Insert(match.Index + match.Length,
                 $"(Source Column <<{badMapping?.SourceColumn??"unknown"}>> Dest Column <<{destinationColumn}>> which has MaxLength of {length})");
-                
+
             return true;
         }
         catch (NullReferenceException)

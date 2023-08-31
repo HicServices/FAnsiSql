@@ -470,7 +470,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         return null;
     }
 
-        
+
 
     public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
     {

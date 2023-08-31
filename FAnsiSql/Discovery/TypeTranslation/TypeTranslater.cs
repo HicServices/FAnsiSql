@@ -377,7 +377,7 @@ public abstract class TypeTranslater:ITypeTranslater
         
 
     /// <summary>
-    /// Return the number of characters required to not truncate/loose any data when altering a column from time (e.g. TIME etc) to varchar(x).  Return
+    /// Return the number of characters required to not truncate/lose any data when altering a column from time (e.g. TIME etc) to varchar(x).  Return
     /// x such that the column does not loose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table. 
     /// if we see many times and nulls we will decide to use a time column then we see strings and have to convert the column to a varchar column without loosing the
     /// currently loaded data.
@@ -409,7 +409,7 @@ select LEN(dt) from omgTimes
 
     /// <summary>
     /// Return the number of characters required to not truncate/loose any data when altering a column from datetime (e.g. datetime2, DATE etc) to varchar(x).  Return
-    /// x such that the column does not loose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table. 
+    /// x such that the column does not lose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table. 
     /// if we see many dates and nulls we will decide to use a date column then we see strings and have to convert the column to a varchar column without loosing the
     /// currently loaded data.
     /// </summary>

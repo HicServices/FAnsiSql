@@ -18,7 +18,7 @@ internal class OracleBulkCopy : BulkCopy
     {
         _server = targetTable.Database.Server;
     }
-        
+
     public override int UploadImpl(DataTable dt)
     {
         //don't run an insert if there are 0 rows

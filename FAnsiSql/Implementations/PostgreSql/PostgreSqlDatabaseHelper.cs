@@ -46,7 +46,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             {
                 //its a system table
                 var schema = r["schemaname"] as string;
-                    
+
                 if(querySyntaxHelper.IsValidTableName((string)r["tablename"], out _))
                     tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema));
             }
@@ -62,7 +62,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             {
                 //its a system table
                 var schema = r["schemaname"] as string;
-                    
+
                 if(querySyntaxHelper.IsValidTableName((string)r["viewname"], out _))
                     tables.Add(new DiscoveredTable(parent, (string)r["viewname"], querySyntaxHelper, schema, TableType.View));
             }
@@ -92,7 +92,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             con.Open();
 
             // https://dba.stackexchange.com/a/11895
-                
+
             using(var cmd = new NpgsqlCommand($"UPDATE pg_database SET datallowconn = 'false' WHERE datname = '{database.GetRuntimeName()}';",con))
                 cmd.ExecuteNonQuery();
 
@@ -101,7 +101,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
                 WHERE datname = '{database.GetRuntimeName()}';"
                       ,con))
                 cmd.ExecuteNonQuery();
-                
+
             using(var cmd = new NpgsqlCommand($"DROP DATABASE \"{database.GetRuntimeName()}\"",con))
                 cmd.ExecuteNonQuery();
         }

@@ -37,7 +37,7 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
             p.ParameterName = "@tableName";
             p.Value = discoveredTable.GetRuntimeName();
             cmd.Parameters.Add(p);
-            
+
             var p2 = cmd.CreateParameter();
             p2.ParameterName = "@schemaName";
             p2.Value = string.IsNullOrWhiteSpace(discoveredTable.Schema) ? PostgreSqlSyntaxHelper.DefaultPostgresSchema : discoveredTable.Schema;
@@ -53,7 +53,7 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
                 var columnName = discoveredTable is DiscoveredTableValuedFunction
                     ? $"{discoveredTable.GetRuntimeName()}.{r["column_name"]}"
                     : r["column_name"].ToString();
-                        
+
                 var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
                 {
                     IsAutoIncrement = Equals(r["is_identity"],"YES"),
@@ -198,7 +198,7 @@ order by c.constraint_name, x.ordinal_position";
             p.ParameterName = "@tableName";
             p.Value = table.GetRuntimeName();
             cmd.Parameters.Add(p);
-                
+
             var p2 = cmd.CreateParameter();
             p2.ParameterName = "@schema";
             p2.Value = string.IsNullOrWhiteSpace(table.Schema)? PostgreSqlSyntaxHelper.DefaultPostgresSchema : table.Schema;

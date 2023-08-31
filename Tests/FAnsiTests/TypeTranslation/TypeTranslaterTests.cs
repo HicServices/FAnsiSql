@@ -52,13 +52,13 @@ public class TypeTranslaterTests : DatabaseTests
         Assert.AreEqual(expectedType,_translaters[type].GetSQLDBTypeForCSharpType(cSharpType));}
 
     [TestCase(DatabaseType.MicrosoftSQLServer, "varchar(max)")]
-    [TestCase(DatabaseType.MySql, "text")]
+    [TestCase(DatabaseType.MySql, "longtext")]
     [TestCase(DatabaseType.Oracle, "CLOB")]
     [TestCase(DatabaseType.PostgreSql, "text")]
     public void Test_CSharpToDbType_StringMax(DatabaseType type,string expectedType)
     {
         var cSharpType = new DatabaseTypeRequest(typeof(string), 10000000);
-            
+
         //Does a request for a max length string give the expected data type?
         Assert.AreEqual(expectedType,_translaters[type].GetSQLDBTypeForCSharpType(cSharpType));
 
@@ -73,7 +73,7 @@ public class TypeTranslaterTests : DatabaseTests
     [TestCase(DatabaseType.MicrosoftSQLServer, "nvarchar(max)",true)]
     [TestCase(DatabaseType.MicrosoftSQLServer, "text",false)]
     [TestCase(DatabaseType.MicrosoftSQLServer, "ntext",true)]
-    [TestCase(DatabaseType.MySql, "text",false)]
+    [TestCase(DatabaseType.MySql, "longtext",false)]
     [TestCase(DatabaseType.Oracle, "CLOB", false)]
     [TestCase(DatabaseType.PostgreSql, "text", false)]
     public void Test_GetLengthIfString_VarcharMaxCols(DatabaseType type, string datatype, bool expectUnicode)
@@ -85,7 +85,7 @@ public class TypeTranslaterTests : DatabaseTests
         Assert.AreEqual(int.MaxValue, dbType.Width);
         Assert.AreEqual(expectUnicode, dbType.Unicode);
     }
-        
+
     [TestCase(DatabaseType.MicrosoftSQLServer,"bigint",typeof(long))]
     [TestCase(DatabaseType.MicrosoftSQLServer,"binary",typeof(byte[]))]
     [TestCase(DatabaseType.MicrosoftSQLServer,"bit",typeof(bool))]
@@ -172,7 +172,7 @@ public class TypeTranslaterTests : DatabaseTests
     [TestCase(DatabaseType.MySql, "nchar",typeof(string))]
     [TestCase(DatabaseType.MySql, "nvarchar(10)",typeof(string))]
     [TestCase(DatabaseType.MySql, "real",typeof(decimal))]
-        
+
     [TestCase(DatabaseType.Oracle, "varchar2(10)",typeof(string))]
     [TestCase(DatabaseType.Oracle, "CHAR(10)", typeof(string))]
     [TestCase(DatabaseType.Oracle, "CHAR", typeof(string))]
@@ -202,25 +202,25 @@ public class TypeTranslaterTests : DatabaseTests
 
     [TestCase(DatabaseType.Oracle, "DEC(3,2)", typeof(decimal))]
     [TestCase(DatabaseType.Oracle, "DEC(*,3)", typeof(decimal))]
-        
+
     //These types are all converted to Number(38) by Oracle : https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm (See ANSI/ISO, DB2, and SQL/DS Datatypes )
-    [TestCase(DatabaseType.Oracle, "INTEGER", typeof(int))] 
+    [TestCase(DatabaseType.Oracle, "INTEGER", typeof(int))]
     [TestCase(DatabaseType.Oracle, "INT", typeof(int))]
     [TestCase(DatabaseType.Oracle, "SMALLINT", typeof(int))] //yup, see the link above
     public void TestIsKnownType(DatabaseType databaseType,string sqlType, Type expectedType)
     {
         RunKnownTypeTest(databaseType, sqlType, expectedType);
     }
-        
+
     private void RunKnownTypeTest(DatabaseType type, string sqlType, Type expectedType)
     {
         //Get test database
         var db = GetTestDatabase(type);
         var tt = db.Server.GetQuerySyntaxHelper().TypeTranslater;
-            
+
         //Create it in database (crashes here if it's an invalid datatype according to DBMS)
         var tbl = db.CreateTable("TTT", new[] { new DatabaseColumnRequest("MyCol", sqlType) });
-            
+
         try
         {
             //Find the column on the created table and fetch it
@@ -235,7 +235,7 @@ public class TypeTranslaterTests : DatabaseTests
             var Guesser = col.GetGuesser();
             Assert.IsNotNull(Guesser.Guess.CSharpType);
             var tAfter = Guesser.Guess.CSharpType;
-                
+
             //was the Type REQUESTED correct according to the test case expectation
             Assert.AreEqual(expectedType, tBefore,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'",sqlType,col.DataType.SQLType,tBefore,tAfter);
 

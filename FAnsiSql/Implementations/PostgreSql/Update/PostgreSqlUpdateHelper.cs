@@ -34,7 +34,7 @@ WHERE
 ",
 
             string.Join($", {Environment.NewLine}",lines.Where(l=>l.LocationToInsert == QueryComponent.SET)
-                .Select(c => 
+                .Select(c =>
                     //seems like you cant specify the table alias in the SET section of the query
                     c.Text.Replace("t1.",""))),
             table1.GetFullyQualifiedName(),

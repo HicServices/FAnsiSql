@@ -14,7 +14,7 @@ public class MySqlAggregateHelper : AggregateHelper
         //if the axis is days then there are likely to be thousands of them but if we start adding thousands of years
         //mysql date falls over with overflow exceptions
         var thousands =
-            axis.AxisIncrement == AxisIncrement.Day ? 
+            axis.AxisIncrement == AxisIncrement.Day ?
                 @"JOIN 
 (SELECT 0 thousands
 UNION ALL SELECT  1000 UNION ALL SELECT  2000 UNION ALL SELECT  3000
@@ -25,7 +25,7 @@ UNION ALL SELECT  7000 UNION ALL SELECT  8000 UNION ALL SELECT  9000
         var plusThousands = axis.AxisIncrement == AxisIncrement.Day ? "+ thousands":"";
 
         //QueryComponent.JoinInfoJoin
-        return 
+        return
             $@"
 
     SET @startDate = {axis.StartDate};
@@ -83,9 +83,9 @@ delete from dateAxis where dt > @endDate;";
     {
         var countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);
         var axisColumnAlias = query.AxisSelect.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
-            
+
         WrapAxisColumnWithDatePartFunction(query,axisColumnAlias);
-            
+
 
         return string.Format(
             @"
@@ -110,19 +110,19 @@ ORDER BY
 
             GetDatePartOfColumn(query.Axis.AxisIncrement,"dateAxis.dt"),
             countAlias,
-                
+
             //the entire query
             string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
             axisColumnAlias
         ).Trim();
 
     }
-        
+
     protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query)
     {
         var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
         var part1 = GetPivotPart1(query);
-            
+
         return string.Format(@"
 {0}
 
@@ -170,11 +170,11 @@ DEALLOCATE PREPARE stmt;",
             string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.FROM and <= QueryComponent.WHERE).Select(x=> query.SyntaxHelper.Escape(x.Text)))
         );
     }
-        
+
     protected override string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn)
     {
         var part1 = GetPivotPart1(query);
-            
+
         var joinAlias = nonPivotColumn.GetAliasFromText(query.SyntaxHelper);
 
         return string.Format(@"
@@ -204,9 +204,9 @@ DEALLOCATE PREPARE stmt;",
             part1,
             nonPivotColumn,
 
-            //everything inclusive of FROM but stopping before GROUP BY 
+            //everything inclusive of FROM but stopping before GROUP BY
             query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.FROM and < QueryComponent.GroupBy))),
-                
+
             joinAlias,
 
             //any HAVING SQL
@@ -231,14 +231,14 @@ DEALLOCATE PREPARE stmt;",
         if (aggregateParameter.Equals("*"))
             aggregateParameter = "1";
 
-            
+
         //if there is an axis we must ensure we only pull pivot values where the values appear in that axis range
         var whereDateColumnNotNull = "";
-            
+
         if(query.AxisSelect != null)
         {
             var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
-                
+
             whereDateColumnNotNull += query.Lines.Any(l => l.LocationToInsert == QueryComponent.WHERE) ? "AND " : "WHERE ";
             whereDateColumnNotNull += $"{axisColumnWithoutAlias} IS NOT NULL";
         }
@@ -314,10 +314,10 @@ pivotValues;
             orderBy,
             havingSqlIfAny
         );
-            
+
     }
 
-        
+
     //so janky to double select GROUP_Concat just so we can get dataset* except join.dt -- can we do it once into @columns then again into the other
 
 //use mysql;
@@ -335,28 +335,28 @@ pivotValues;
 //insert into dateAxis
 
 //    SELECT distinct (@startDate + INTERVAL c.number Year) AS date
-//FROM (SELECT singles + tens + hundreds number FROM 
+//FROM (SELECT singles + tens + hundreds number FROM
 //( SELECT 0 singles
 //UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
 //UNION ALL SELECT   4 UNION ALL SELECT   5 UNION ALL SELECT   6
 //UNION ALL SELECT   7 UNION ALL SELECT   8 UNION ALL SELECT   9
-//) singles JOIN 
+//) singles JOIN
 //(SELECT 0 tens
 //UNION ALL SELECT  10 UNION ALL SELECT  20 UNION ALL SELECT  30
 //UNION ALL SELECT  40 UNION ALL SELECT  50 UNION ALL SELECT  60
 //UNION ALL SELECT  70 UNION ALL SELECT  80 UNION ALL SELECT  90
-//) tens  JOIN 
+//) tens  JOIN
 //(SELECT 0 hundreds
 //UNION ALL SELECT  100 UNION ALL SELECT  200 UNION ALL SELECT  300
 //UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
 //UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
-//) hundreds 
-//ORDER BY number DESC) c  
+//) hundreds
+//ORDER BY number DESC) c
 //WHERE c.number BETWEEN 0 and 1000;
 
 //delete from dateAxis where dt > @endDate;
 
-//SET SESSION group_concat_max_len = 1000000; 
+//SET SESSION group_concat_max_len = 1000000;
 
 //SET @columns = NULL;
 //SELECT
@@ -371,7 +371,7 @@ pivotValues;
 //FROM
 //(
 //select `test`.`biochemistry`.`hb_extract` AS Pivot, count(*) AS CountName
-//FROM 
+//FROM
 //`test`.`biochemistry`
 //group by `test`.`biochemistry`.`hb_extract`
 //) as b;
@@ -386,7 +386,7 @@ pivotValues;
 //FROM
 //(
 //select `test`.`biochemistry`.`hb_extract` AS Pivot, count(*) AS CountName
-//FROM 
+//FROM
 //`test`.`biochemistry`
 //group by `test`.`biochemistry`.`hb_extract`
 //) as b;
@@ -399,7 +399,7 @@ pivotValues;
 
 //CONCAT(
 //'
-//SELECT 
+//SELECT
 //YEAR(dateAxis.dt) AS joinDt,',@columnNames,'
 //FROM
 //dateAxis
@@ -411,13 +411,13 @@ pivotValues;
 //'
 //    ,@columns,
 //'
-//FROM 
+//FROM
 //`test`.`biochemistry`
 //group by
 //YEAR(`test`.`biochemistry`.`sample_date`)
 //) dataset
 //ON dataset.joinDt = YEAR(dateAxis.dt)
-//ORDER BY 
+//ORDER BY
 //YEAR(dateAxis.dt)
 //');
 

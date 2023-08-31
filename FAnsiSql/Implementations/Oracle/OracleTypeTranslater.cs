@@ -11,14 +11,14 @@ public sealed class OracleTypeTranslater:TypeTranslater
     public static readonly OracleTypeTranslater Instance = new();
     private static readonly Regex AlsoFloatingPointRegex = new("^(NUMBER)|(DEC)",RegexOptions.CultureInvariant|RegexOptions.IgnoreCase|RegexOptions.Compiled);
     private static readonly Regex AlsoByteArrayRegex = new("(BFILE)|(BLOB)|(RAW)|(ROWID)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        
+
     public const int ExtraLengthPerNonAsciiCharacter = 3;
 
     /// <summary>
     /// Oracle specific string types, these are all max length as returned by <see cref="GetLengthIfString"/>
     /// </summary>
     private static readonly Regex AlsoStringRegex = new("^([N]?CLOB)|(LONG)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        
+
 
     private OracleTypeTranslater(): base(4000, 4000)
     {

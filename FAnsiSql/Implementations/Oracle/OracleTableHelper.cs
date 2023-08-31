@@ -56,7 +56,7 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
                 columns.Add(toAdd);
             }
         }
-                
+
 
         //get auto increment information
         using (var cmd =
@@ -83,8 +83,8 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
             }
         }
 
-                
-        //get primary key information 
+
+        //get primary key information
         using(var cmd = new OracleCommand(@"SELECT cols.table_name, cols.column_name, cols.position, cons.status, cons.owner
 FROM all_constraints cons, all_cons_columns cols
 WHERE cols.table_name = :table_name AND cols.owner = :owner
@@ -107,7 +107,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             while (r.Read())
                 columns.Single(c => c.GetRuntimeName().Equals(r["COLUMN_NAME"])).IsPrimaryKey = true;//mark all primary keys as primary
         }
-            
+
 
         return columns.ToArray();
     }
@@ -121,7 +121,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             $"ALTER TABLE {columnToDrop.Table.GetFullyQualifiedName()}  DROP COLUMN {columnToDrop.GetWrappedName()}", (OracleConnection)connection);
         cmd.ExecuteNonQuery();
     }
-        
+
     private string GetBasicTypeFromOracleType(DbDataReader r)
     {
         int? precision = null;
@@ -173,7 +173,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
     {
         throw new NotImplementedException();
     }
-        
+
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
         DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
     {

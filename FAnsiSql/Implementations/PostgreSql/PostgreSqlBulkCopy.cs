@@ -15,7 +15,7 @@ public class PostgreSqlBulkCopy : BulkCopy
     {
     }
 
-        
+
 
     public override int UploadImpl(DataTable dt)
     {

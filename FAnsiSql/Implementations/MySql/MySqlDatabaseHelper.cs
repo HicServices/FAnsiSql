@@ -86,7 +86,7 @@ public class MySqlDatabaseHelper : DiscoveredDatabaseHelper
                 //if we are skipping views
                 if(isView && !includeViews)
                     continue;
-                
+
                 //skip invalid table names
                 if(!querySyntaxHelper.IsValidTableName((string)r[0],out _))
                     continue;

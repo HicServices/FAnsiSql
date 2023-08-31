@@ -28,14 +28,14 @@ internal class CalendarWithPivotAggregationTests:AggregationTests
                 new("count(*) as MyCount,", QueryComponent.QueryTimeColumn)
                     { Role = CustomLineRole.CountFunction },
                 new("EventDate,", QueryComponent.QueryTimeColumn)
-                    { Role = CustomLineRole.Axis }, //tell it which the axis are 
+                    { Role = CustomLineRole.Axis }, //tell it which the axis are
                 new("Category", QueryComponent.QueryTimeColumn)
                     { Role = CustomLineRole.Pivot }, //tell it which the pivot
                 new("FROM ", QueryComponent.FROM),
                 new(tbl.GetFullyQualifiedName(), QueryComponent.FROM),
                 new("GROUP BY", QueryComponent.GroupBy),
                 new("EventDate,", QueryComponent.GroupBy)
-                    { Role = CustomLineRole.Axis }, //tell it which the axis are 
+                    { Role = CustomLineRole.Axis }, //tell it which the axis are
                 new("Category", QueryComponent.GroupBy) { Role = CustomLineRole.Pivot }
             };
 

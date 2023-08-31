@@ -67,7 +67,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
             
         return toReturn;
     }
-        
+
     public override DbConnectionStringBuilder ChangeDatabase(DbConnectionStringBuilder builder, string newDatabase)
     {
         //does not apply to oracle since user = database but we create users with random passwords
