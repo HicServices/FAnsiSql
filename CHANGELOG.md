@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.1] - 2023-09-01
+
 - Bugfix: MySQL text was erroneously capped at 64k (TEXT) instead of LONGTEXT (4GiB)
+- Adjust timeout handling, use 10 seconds not 3 for server live tests since our Azure VM is slow
+- Bump MySqlConnector from 2.2.6 to 2.2.7
+- Bump Oracle.ManagedDataAccess.Core from 3.21.100 to 3.21.110
 
 ## [3.1.0] - 2023-05-15
 
@@ -349,7 +354,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/3.1.0...develop
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/3.1.1...develop
+[3.1.1]: https://github.com/HicServices/FAnsiSql/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/HicServices/FAnsiSql/compare/3.0.1...3.1.0
 [3.0.1]: https://github.com/HicServices/FAnsiSql/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/HicServices/FAnsiSql/compare/2.0.5...3.0.0
