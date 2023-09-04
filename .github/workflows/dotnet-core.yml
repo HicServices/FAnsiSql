@@ -34,7 +34,7 @@ jobs:
     steps:
     - name: Disable write flush for CI runs
       run: sudo apt-get install -y libeatmydata1 apt-transport-https curl
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v3
       with:
