@@ -27,7 +27,7 @@ internal class TopXTests :DatabaseTests
 
             tbl = db.CreateTable("MyTopXTable",dt);
         }
-            
+
         var topx = tbl.GetQuerySyntaxHelper().HowDoWeAchieveTopX(1);
 
         var f = tbl.GetQuerySyntaxHelper().EnsureWrapped("F");

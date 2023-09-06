@@ -76,7 +76,7 @@ public class DatabaseTests
             TestContext.WriteLine(exception);
             throw;
         }
-            
+
     }
 
     protected IEnumerable<DiscoveredServer> TestServer()

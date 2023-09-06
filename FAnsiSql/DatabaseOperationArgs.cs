@@ -30,7 +30,7 @@ public class DatabaseOperationArgs
 
     public DatabaseOperationArgs()
     {
-            
+
     }
     public DatabaseOperationArgs(IManagedTransaction transactionIfAny, CancellationToken cancellationToken, int timeoutInSeconds)
     {
@@ -66,7 +66,7 @@ public class DatabaseOperationArgs
     {
         Hydrate(cmd);
         var t = method();
-            
+
         try
         {
             switch (t.Status)
@@ -86,7 +86,7 @@ public class DatabaseOperationArgs
                 throw e.InnerExceptions[0];
             throw;
         }
-            
+
         if (!t.IsCompleted)
             cmd.Cancel();
 
@@ -103,7 +103,7 @@ public class DatabaseOperationArgs
         CancellationToken.ThrowIfCancellationRequested();
 
         if(CancellationToken.CanBeCanceled)
-            dt.RowChanged += ThrowIfCancelled;  
+            dt.RowChanged += ThrowIfCancelled;
 
         da.Fill(dt);
         CancellationToken.ThrowIfCancellationRequested();

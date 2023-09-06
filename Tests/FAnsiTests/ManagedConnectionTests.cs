@@ -13,7 +13,7 @@ internal class ManagedConnectionTests:DatabaseTests
         var db = GetTestDatabase(dbType);
 
         var con = db.Server.GetConnection();
-            
+
         //GetConnection should return an unopened connection
         Assert.AreEqual(ConnectionState.Closed,con.State);
     }
@@ -74,7 +74,7 @@ internal class ManagedConnectionTests:DatabaseTests
     public void Test_GetManagedConnection_OngoingTransaction(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
-            
+
         IManagedConnection ongoingCon;
         //pretend that there is an ongoing transaction already
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
@@ -97,7 +97,7 @@ internal class ManagedConnectionTests:DatabaseTests
             //it should still be open after this finally block
             Assert.AreEqual(ConnectionState.Open,con.Connection.State);
         }
-            
+
         //this is the using on the transaction this one should now close itself
         Assert.AreEqual(ConnectionState.Closed,ongoingCon.Connection.State);
     }

@@ -188,7 +188,7 @@ public class DiscoveredServer : IMightNotExist
     /// <param name="timeoutInMillis"></param>
     /// <exception cref="TimeoutException"></exception>
     /// <exception cref="AggregateException"></exception>
-    public void TestConnection(int timeoutInMillis = 3000)
+    public void TestConnection(int timeoutInMillis = 10000)
     {
         using var con = Helper.GetConnection(Builder);
         using(var tokenSource = new CancellationTokenSource(timeoutInMillis))
@@ -196,7 +196,15 @@ public class DiscoveredServer : IMightNotExist
         {
             try
             {
-                openTask.Wait(tokenSource.Token);
+                openTask.Wait(timeoutInMillis, tokenSource.Token);
+            }
+            catch (OperationCanceledException e)
+            {
+                throw new TimeoutException(
+                    string.Format(
+                        FAnsiStrings
+                            .DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,
+                        Name, timeoutInMillis), e);
             }
             catch (AggregateException e)
             {

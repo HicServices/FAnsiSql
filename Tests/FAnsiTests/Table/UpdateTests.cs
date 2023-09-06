@@ -43,7 +43,7 @@ internal class UpdateTests :DatabaseTests
         var syntaxHelper = db.Server.GetQuerySyntaxHelper();
 
         var updateHelper = syntaxHelper.UpdateHelper;
-            
+
         var queryLines = new List<CustomLine>();
 
         var highScore = syntaxHelper.EnsureWrapped("HighScore");

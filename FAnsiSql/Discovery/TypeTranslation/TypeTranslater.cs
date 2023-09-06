@@ -58,13 +58,13 @@ public abstract class TypeTranslater:ITypeTranslater
 
         if (t == typeof(byte))
             return GetByteDataType();
-
+            
         if (t == typeof(short) || t == typeof(short) || t == typeof(ushort) || t == typeof(short?) || t == typeof(ushort?))
             return GetSmallIntDataType();
 
         if (t == typeof(int) || t == typeof(int)  || t == typeof(uint) || t == typeof(int?) || t == typeof(uint?))
             return GetIntDataType();
-
+            
         if (t == typeof (long) || t == typeof(ulong) || t == typeof(long?) || t == typeof(ulong?))
             return GetBigIntDataType();
 
@@ -80,7 +80,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
         if (t == typeof(TimeSpan) || t == typeof(TimeSpan?))
             return GetTimeDataType();
-
+            
         if (t == typeof (byte[]))
             return GetByteArrayDataType();
 
@@ -120,7 +120,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
         if (maxExpectedStringWidth > MaxStringWidthBeforeMax)
             return GetStringDataTypeWithUnlimitedWidth();
-
+            
         return GetStringDataTypeImpl(maxExpectedStringWidth.Value);
     }
 
@@ -139,7 +139,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
         if (maxExpectedStringWidth > MaxStringWidthBeforeMax)
             return GetUnicodeStringDataTypeWithUnlimitedWidth();
-
+            
         return GetUnicodeStringDataTypeImpl(maxExpectedStringWidth.Value);
     }
 
@@ -259,13 +259,13 @@ public abstract class TypeTranslater:ITypeTranslater
 
         if (IsString(sqlType))
             return DbType.String;
-
+            
         if (IsDate(sqlType))
             return DbType.DateTime;
 
         if (IsTime(sqlType))
             return DbType.Time;
-
+            
         if (IsByteArray(sqlType))
             return DbType.Object;
 
@@ -295,7 +295,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
         if (cSharpType == typeof(TimeSpan))
             lengthIfString = GetStringLengthForTimeSpan();
-
+            
         var request = new DatabaseTypeRequest(cSharpType, lengthIfString, digits);
 
         if (cSharpType == typeof(string))
@@ -377,7 +377,7 @@ public abstract class TypeTranslater:ITypeTranslater
 
 
     /// <summary>
-    /// Return the number of characters required to not truncate/loose any data when altering a column from time (e.g. TIME etc) to varchar(x).  Return
+    /// Return the number of characters required to not truncate/lose any data when altering a column from time (e.g. TIME etc) to varchar(x).  Return
     /// x such that the column does not loose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table.
     /// if we see many times and nulls we will decide to use a time column then we see strings and have to convert the column to a varchar column without loosing the
     /// currently loaded data.
@@ -409,7 +409,7 @@ select LEN(dt) from omgTimes
 
     /// <summary>
     /// Return the number of characters required to not truncate/loose any data when altering a column from datetime (e.g. datetime2, DATE etc) to varchar(x).  Return
-    /// x such that the column does not loose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table.
+    /// x such that the column does not lose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table.
     /// if we see many dates and nulls we will decide to use a date column then we see strings and have to convert the column to a varchar column without loosing the
     /// currently loaded data.
     /// </summary>
