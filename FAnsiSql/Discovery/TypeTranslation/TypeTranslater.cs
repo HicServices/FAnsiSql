@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using TypeGuesser;
 
@@ -181,6 +182,9 @@ public abstract class TypeTranslater:ITypeTranslater
     }
 
     /// <inheritdoc/>
+    [return:
+        DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                   DynamicallyAccessedMemberTypes.PublicFields)]
     public Type GetCSharpTypeForSQLDBType(string sqlType)
     {
         return TryGetCSharpTypeForSQLDBType(sqlType) ??
@@ -191,6 +195,9 @@ public abstract class TypeTranslater:ITypeTranslater
     }
 
     /// <inheritdoc/>
+    [return:
+        DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                   DynamicallyAccessedMemberTypes.PublicFields)]
     public Type TryGetCSharpTypeForSQLDBType(string sqlType)
     {
         if (IsBit(sqlType))
