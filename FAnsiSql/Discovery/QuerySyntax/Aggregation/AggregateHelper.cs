@@ -9,15 +9,15 @@ public abstract class AggregateHelper:IAggregateHelper
     public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny)
     {
         var lines = new AggregateCustomLineCollection(queryLines, axisIfAny, GetQuerySyntaxHelper());
-            
+
         //no axis no pivot
         if (lines.AxisSelect == null  && lines.PivotSelect == null)
-            return BuildBasicAggregate(lines);  
+            return BuildBasicAggregate(lines);
 
         //axis (no pivot)
         if (lines.PivotSelect == null)
             return BuildAxisAggregate(lines);
-            
+
         //pivot (no axis)
         if (lines.AxisSelect == null)
             return BuildPivotOnlyAggregate(lines,GetPivotOnlyNonPivotColumn(lines));

@@ -28,7 +28,7 @@ public class BigIntTests : DatabaseTests
     {
         var db = GetTestDatabase(dbType);
         var tbl = db.CreateTable("MyBigIntTable", new []{ new DatabaseColumnRequest("Col1","bigint",false)});
-            
+
         Assert.AreEqual(0,tbl.GetRowCount());
 
         using var dt = new DataTable();

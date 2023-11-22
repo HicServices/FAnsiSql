@@ -14,7 +14,7 @@ public class RuntimeNameException:Exception
     /// <param name="innerException"></param>
     public RuntimeNameException(string message, Exception innerException):base(message,innerException)
     {
-                
+
     }
 
     /// <summary>
@@ -23,6 +23,6 @@ public class RuntimeNameException:Exception
     /// <param name="message"></param>
     public RuntimeNameException(string message):base(message)
     {
-                
+
     }
 }

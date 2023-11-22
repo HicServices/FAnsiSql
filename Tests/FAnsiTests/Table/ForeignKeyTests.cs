@@ -40,11 +40,11 @@ internal class ForeignKeyTests:DatabaseTests
         }, cascade);
 
         var discovered_fkCol = childTable.DiscoverColumn("Parent_Id");
-            
+
         var relationships = parentTable.DiscoverRelationships();
 
         Assert.AreEqual(1,relationships.Length);
-            
+
         Assert.AreEqual(parentTable,relationships[0].PrimaryKeyTable);
         Assert.AreEqual(childTable,relationships[0].ForeignKeyTable);
         Assert.AreEqual(1,relationships[0].Keys.Count);
@@ -65,7 +65,7 @@ internal class ForeignKeyTests:DatabaseTests
         var sort2 = new RelationshipTopologicalSort(new[] { parentTable,childTable});
         Assert.AreEqual(sort2.Order[0], parentTable);
         Assert.AreEqual(sort2.Order[1], childTable);
-            
+
         childTable.Drop();
         parentTable.Drop();
     }
@@ -121,7 +121,7 @@ internal class ForeignKeyTests:DatabaseTests
 
         Assert.AreEqual(discovered_fkCol1, relationships[0].Keys[discovered_pkCol1]);
         Assert.AreEqual(discovered_fkCol2, relationships[0].Keys[discovered_pkCol2]);
-            
+
         childTable.Drop();
         parentTable.Drop();
     }
@@ -135,7 +135,7 @@ internal class ForeignKeyTests:DatabaseTests
          *    ↖
          *      t3
          */
-             
+
         var db = GetTestDatabase(dbType);
 
         var t2 = db.CreateTable("T2", new DatabaseColumnRequest[]
@@ -147,7 +147,7 @@ internal class ForeignKeyTests:DatabaseTests
         {
             new("c3", new DatabaseTypeRequest(typeof(int)))
         });
-            
+
         var t1 = db.CreateTable("T1", new DatabaseColumnRequest[]
         {
             new("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
@@ -173,8 +173,8 @@ internal class ForeignKeyTests:DatabaseTests
             constraint2 = t1.AddForeignKey(c3,c1,true,"FK_Lol");
         }
 
-            
-            
+
+
 
         Assert.IsNotNull(constraint1);
         Assert.IsNotNull(constraint2);
@@ -183,8 +183,8 @@ internal class ForeignKeyTests:DatabaseTests
         StringAssert.AreEqualIgnoringCase("FK_Lol",constraint2.Name);
 
         var sort2 = new RelationshipTopologicalSort(new[] { t1,t2,t3 });
-            
-            
+
+
         Assert.Contains(t1, sort2.Order.ToList());
         Assert.Contains(t2, sort2.Order.ToList());
         Assert.Contains(t3, sort2.Order.ToList());
@@ -199,9 +199,9 @@ internal class ForeignKeyTests:DatabaseTests
          *      ↙
          *  t2
          */
-             
+
         var db = GetTestDatabase(dbType);
-            
+
         var t1 = db.CreateTable("T1", new DatabaseColumnRequest[]
         {
             new("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
@@ -228,7 +228,7 @@ internal class ForeignKeyTests:DatabaseTests
         Assert.IsNotNull(constraint2);
 
         var sort2 = new RelationshipTopologicalSort(new[] { t1,t2,t3 });
-            
+
         Assert.Contains(t1, sort2.Order.ToList());
         Assert.Contains(t2, sort2.Order.ToList());
         Assert.Contains(t3, sort2.Order.ToList());
@@ -245,7 +245,7 @@ internal class ForeignKeyTests:DatabaseTests
 
         var sort = new RelationshipTopologicalSort(new[] {cops});
         Assert.AreEqual(cops,sort.Order.Single());
-            
+
         var sort2 = new RelationshipTopologicalSort(new[] { cops,robbers,lawyers });
         Assert.AreEqual(cops, sort2.Order[0]);
         Assert.AreEqual(robbers, sort2.Order[1]);

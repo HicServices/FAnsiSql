@@ -10,7 +10,7 @@ public sealed class MicrosoftSQLImplementation : Implementation<SqlConnectionStr
 {
     public MicrosoftSQLImplementation():base(DatabaseType.MicrosoftSQLServer)
     {
-            
+
     }
 
     public override IDiscoveredServerHelper GetServerHelper() => MicrosoftSQLServerHelper.Instance;

@@ -14,7 +14,7 @@ public class MySqlColumnHelper : IDiscoveredColumnHelper
         var syntax = MySqlQuerySyntaxHelper.Instance;
 
         var sql = new StringBuilder();
-        
+
         sql.Append($"SELECT {syntax.EnsureWrapped(column.GetRuntimeName())} FROM {table.GetFullyQualifiedName()}");
 
         if (discardNulls)

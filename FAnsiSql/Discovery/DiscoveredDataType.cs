@@ -91,7 +91,7 @@ public class DiscoveredDataType
     public void Resize(int newSize, IManagedTransaction managedTransaction = null)
     {
         var toReplace = GetLengthIfString();
-            
+
         if(newSize == toReplace)
             return;
 
@@ -126,11 +126,11 @@ public class DiscoveredDataType
 
         if (toReplace.NumbersAfterDecimalPlace> numberOfDigitsAfterDecimalPoint)
             throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__, toReplace.NumbersAfterDecimalPlace, numberOfDigitsAfterDecimalPoint, SQLType));
-            
+
         var newDataType = Column.Table.GetQuerySyntaxHelper()
             .TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof (decimal), null,
                 new DecimalSize(numberOfDigitsBeforeDecimalPoint, numberOfDigitsAfterDecimalPoint)));
-            
+
         AlterTypeTo(newDataType, managedTransaction);
     }
 
@@ -164,7 +164,7 @@ public class DiscoveredDataType
             }
         }
 
-        SQLType = newType; 
+        SQLType = newType;
     }
 
     /// <summary>

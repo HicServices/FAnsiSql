@@ -313,7 +313,7 @@ public class CrossPlatformTests:DatabaseTests
         });
 
         var parentIdPkCol = tblParent.DiscoverColumn("ID");
-            
+
         var parentIdFkCol = new DatabaseColumnRequest("Parent_ID", new DatabaseTypeRequest(typeof (int)));
 
         var tblChild = database.CreateTable("Child", new[]
@@ -481,10 +481,10 @@ public class CrossPlatformTests:DatabaseTests
     public void CreateMaxVarcharColumnFromDataTable(DatabaseType type)
     {
         var database = GetTestDatabase(type);
-            
+
         var dt = new DataTable();
         dt.Columns.Add("MassiveColumn");
-            
+
         var sb = new StringBuilder("Amaa");
         for (var i = 0; i < 10000; i++)
             sb.Append(i);
@@ -552,7 +552,7 @@ public class CrossPlatformTests:DatabaseTests
         {
             tbl.AddColumn(newColumnName, new DatabaseTypeRequest(typeof(DateTime)), true, 1000);
         }
-            
+
 
         //new column should exist
         var newCol = tbl.DiscoverColumn(newColumnName);
@@ -566,7 +566,7 @@ public class CrossPlatformTests:DatabaseTests
 
         //sql server can't handle altering primary key columns or anything with a foreign key on it too!
         if (type == DatabaseType.MicrosoftSQLServer)
-            fieldsToAlter.Remove("Field1"); 
+            fieldsToAlter.Remove("Field1");
 
         foreach (var fieldName in fieldsToAlter)
         {
@@ -679,7 +679,7 @@ public class CrossPlatformTests:DatabaseTests
         Assert.AreEqual(2, size.NumbersAfterDecimalPlace);
         Assert.AreEqual(5, size.Precision);
         Assert.AreEqual(2, size.Scale);
-            
+
         dt = tbl.GetDataTable();
         Assert.AreEqual(1, dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(100.0f)));
         Assert.AreEqual(1, dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(105.0f)));
@@ -704,7 +704,7 @@ public class CrossPlatformTests:DatabaseTests
         Assert.AreEqual(1,dt.Rows.OfType<DataRow>().Count(r=>Convert.ToDecimal(r[0]) == new decimal(100.0f)));
         Assert.AreEqual(1, dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(105.0f)));
         Assert.AreEqual(1, dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(2.1f)));
-            
+
 
         var col = tbl.DiscoverColumn("MyCol");
         var size = col.DataType.GetDecimalSize();
@@ -713,7 +713,7 @@ public class CrossPlatformTests:DatabaseTests
         Assert.AreEqual(1,size.NumbersAfterDecimalPlace);
         Assert.AreEqual(4, size.Precision);
         Assert.AreEqual(1, size.Scale);
-            
+
         col.DataType.AlterTypeTo("decimal(5,2)");
 
         size = tbl.DiscoverColumn("MyCol").DataType.GetDecimalSize();
@@ -737,7 +737,7 @@ public class CrossPlatformTests:DatabaseTests
 
         database = database.Server.ExpectDatabase(horribleDatabaseName);
         database.Create(true);
-            
+
         SqlConnection.ClearAllPools();
 
         try
@@ -798,7 +798,7 @@ public class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "my.database", "my.table", "my.col")]
     public void UnsupportedEntityNames(DatabaseType type, string horribleDatabaseName, string horribleTableName,string columnName)
     {
-            
+
         var database = GetTestDatabase(type);
 
         //ExpectDatabase with illegal name
@@ -812,7 +812,7 @@ public class CrossPlatformTests:DatabaseTests
             "Table .* contained unsupported .* characters",
             Assert.Throws<RuntimeNameException>(()=>database.ExpectTable(horribleTableName))
                 ?.Message);
-            
+
         //CreateTable with illegal name
         StringAssert.IsMatch(
             "Table .* contained unsupported .* characters",
@@ -832,7 +832,7 @@ public class CrossPlatformTests:DatabaseTests
                 ?.Message);
 
         AssertCanCreateDatabases();
-            
+
         //CreateDatabase with illegal name
         StringAssert.IsMatch(
             "Database .* contained unsupported .* characters",
@@ -937,7 +937,7 @@ public class CrossPlatformTests:DatabaseTests
             }
         });
         DateTime currentValue;
-            
+
         using (var insert = tbl.BeginBulkInsert())
         {
             using var dt = new DataTable();
@@ -951,7 +951,7 @@ public class CrossPlatformTests:DatabaseTests
         var dt2 = tbl.GetDataTable();
 
         var databaseValue = (DateTime)dt2.Rows.Cast<DataRow>().Single()["myDt"];
-            
+
         Assert.AreEqual(currentValue.Year,databaseValue.Year);
         Assert.AreEqual(currentValue.Month, databaseValue.Month);
         Assert.AreEqual(currentValue.Day, databaseValue.Day);
@@ -1002,7 +1002,7 @@ public class CrossPlatformTests:DatabaseTests
         var dt2 = tbl.GetDataTable();
 
         var databaseValue = (string)dt2.Rows.Cast<DataRow>().Single()["MyGuid"];
-            
+
         Assert.IsNotNull(databaseValue);
         TestContext.WriteLine(databaseValue);
     }

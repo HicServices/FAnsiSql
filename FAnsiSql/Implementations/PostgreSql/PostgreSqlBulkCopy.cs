@@ -37,7 +37,7 @@ public class PostgreSqlBulkCopy : BulkCopy
 
         var dataColumns = matchedColumns.Keys.ToArray();
         var types = matchedColumns.Keys.Select(v => tt.GetNpgsqlDbTypeForCSharpType(v.DataType)).ToArray();
-            
+
         using (var import = con.BeginBinaryImport(sb.ToString()))
         {
             foreach (DataRow r in dt.Rows)

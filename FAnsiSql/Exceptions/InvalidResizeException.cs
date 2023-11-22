@@ -9,6 +9,6 @@ public class InvalidResizeException : Exception
 {
     public InvalidResizeException(string s):base(s)
     {
-            
+
     }
 }

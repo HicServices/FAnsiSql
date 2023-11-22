@@ -24,7 +24,7 @@ internal class EqualityTests_TableAndColumn
     public void EqualityTest_DiscoveredTable_AreEqual(string table1, string schema1, string table2, string schema2)
     {
         var s = new DiscoveredServer("Server=fish", DatabaseType.MicrosoftSQLServer);
-            
+
         var db = s.ExpectDatabase("MyDb");
         var db2 = s.ExpectDatabase("MyDb");
 
@@ -50,7 +50,7 @@ internal class EqualityTests_TableAndColumn
 
         var db1 = s1.ExpectDatabase(dbname1);
         var db2 = s2.ExpectDatabase(dbname2);
-            
+
         var t1 = db1.ExpectTable(tablename1, schema1);
         var t2 = db2.ExpectTable(tablename2, schema2);
 

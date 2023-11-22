@@ -114,7 +114,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     {
         //list the database on the server
         var con = GetConnection(builder);
-            
+
         //this will work or timeout
         var openTask = con.OpenAsync(token);
         openTask.Wait(token);

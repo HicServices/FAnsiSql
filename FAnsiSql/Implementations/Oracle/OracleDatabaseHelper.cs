@@ -51,7 +51,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
     public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
     {
         var tables = new List<DiscoveredTable>();
-            
+
         //find all the tables
         using(var cmd = new OracleCommand($"SELECT table_name FROM all_tables where owner='{database}'", (OracleConnection) connection))
         {
@@ -64,7 +64,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
                 if(querySyntaxHelper.IsValidTableName((string)r["table_name"],out _))
                     tables.Add(new DiscoveredTable(parent,r["table_name"].ToString(),querySyntaxHelper));
         }
-            
+
         //find all the views
         if(includeViews)
         {

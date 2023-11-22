@@ -26,7 +26,7 @@ public class ConnectionStringKeywordAccumulatorTests
     {
         var acc = new ConnectionStringKeywordAccumulator(DatabaseType.MySql);
         acc.AddOrUpdateKeyword("Auto Enlist", "false", ConnectionStringKeywordPriority.SystemDefaultLow);
-            
+
         var connectionStringBuilder = _helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb","frank","kangaro");
 
         StringAssert.DoesNotContain("auto enlist",connectionStringBuilder.ConnectionString);
@@ -72,7 +72,7 @@ public class ConnectionStringKeywordAccumulatorTests
         acc.EnforceOptions(connectionStringBuilder);
 
         StringAssert.Contains($"{key1}={value1}", connectionStringBuilder.ConnectionString);
-            
+
         //attempt override with low priority setting it to true but also use the alias
         acc.AddOrUpdateKeyword(equivalentKey,value2,ConnectionStringKeywordPriority.SystemDefaultLow);
 
@@ -108,7 +108,7 @@ public class ConnectionStringKeywordAccumulatorTests
     public void TestKeywords_Invalid(DatabaseType databaseType)
     {
         var acc = new ConnectionStringKeywordAccumulator(databaseType);
-          
+
         var ex = Assert.Throws<ArgumentException>(()=>acc.AddOrUpdateKeyword("FLIBBLE", "false", ConnectionStringKeywordPriority.SystemDefaultLow));
 
         StringAssert.Contains("FLIBBLE",ex?.Message);

@@ -420,13 +420,13 @@ public class GuesserTests
     {
         var t = new Guesser();
         t.AdjustToCompensateForValue("-111.000");
-            
+
         Assert.AreEqual(typeof(int), t.Guess.CSharpType);
         Assert.AreEqual(3, t.Guess.Size.NumbersBeforeDecimalPlace);
 
         //even though they are trailing zeroes we still need this much space... there must be a reason why they are there right? (also makes it easier to go to string later if needed eh!)
-        Assert.AreEqual(0, t.Guess.Size.NumbersAfterDecimalPlace); 
-            
+        Assert.AreEqual(0, t.Guess.Size.NumbersAfterDecimalPlace);
+
         t.AdjustToCompensateForValue("P");
 
         Assert.AreEqual(typeof(string), t.Guess.CSharpType);
@@ -590,7 +590,7 @@ public class GuesserTests
     public void TestGuesser_FallbackOntoStringLength(string legitType, Type expectedLegitType, string str, int expectedLength)
     {
         var t = new Guesser();
-            
+
         //give it the legit hard typed value e.g. a date
         t.AdjustToCompensateForValue(legitType);
         Assert.AreEqual(expectedLegitType, t.Guess.CSharpType);
@@ -601,7 +601,7 @@ public class GuesserTests
 
         //the length should be the max of the length of the legit string and the string str
         Assert.AreEqual(expectedLength, t.Guess.Width);
-            
+
     }
 
     [Test]
@@ -624,7 +624,7 @@ public class GuesserTests
         var t = new Guesser();
         t.AdjustToCompensateForValue(val);
         Assert.AreEqual(typeof(decimal), t.Guess.CSharpType);
-            
+
         Assert.AreEqual(0, t.Guess.Size.NumbersBeforeDecimalPlace);
         Assert.AreEqual(19, t.Guess.Size.NumbersAfterDecimalPlace);
     }
@@ -636,7 +636,7 @@ public class GuesserTests
     {
         var t = new Guesser();
         t.AdjustToCompensateForValue(word);
-            
+
         //computer should have picked up that it needs unicode
         Assert.IsTrue(t.Guess.Unicode);
 

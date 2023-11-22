@@ -159,7 +159,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         var columnType = GetBasicTypeFromOracleType(r);
 
         var lengthQualifier = "";
-            
+
         if (HasPrecisionAndScale(columnType))
             lengthQualifier = $"({r["DATA_PRECISION"]},{r["DATA_SCALE"]})";
         else
@@ -204,7 +204,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
             $"BEGIN {Environment.NewLine}{cmd.CommandText}{Environment.NewLine}COMMIT;{Environment.NewLine}END;";
 
         cmd.ExecuteNonQuery();
-            
+
 
         return Convert.ToInt32(p.Value);
     }
@@ -282,7 +282,7 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
                 current.AddKeys(r["r_column_name"].ToString(), r["column_name"].ToString(), transaction);
             }
         }
-            
+
         return toReturn.Values.ToArray();
     }
 

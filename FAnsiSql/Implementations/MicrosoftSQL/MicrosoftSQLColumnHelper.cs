@@ -39,7 +39,7 @@ public class MicrosoftSQLColumnHelper : IDiscoveredColumnHelper
             $"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {column.GetWrappedName()} varchar(4000) {(allowNulls ? "NULL" : "NOT NULL")}");
         sb.AppendLine(
             $"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {column.GetWrappedName()} {newType} {(allowNulls ? "NULL" : "NOT NULL")}");
-                
+
         return sb.ToString();
     }
 }

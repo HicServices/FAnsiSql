@@ -37,7 +37,7 @@ internal class CalendarAggregationTests:AggregationTests
             EndDate = "'2010-01-01'",
             AxisIncrement = AxisIncrement.Year //by year
         };
-            
+
         var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
         TestContext.WriteLine($"About to send SQL:{Environment.NewLine}{sql}");

@@ -70,7 +70,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         //alias is a word
         //(w+)
-            
+
         //alias is a wrapped word e.g. [hey hey].  In this case we must allow anything between the brackets that is not closing bracket
         //[[`""]([^[`""]+)[]`""]
 
@@ -402,7 +402,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         catch(Exception ex)
         {
             throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__, discoveredColumn.GetFullyQualifiedName()),ex);
-        }            
+        }
 
         return p;
     }
@@ -528,9 +528,9 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T,string> toStringFunc)
     {
         var toReturn = new Dictionary<T, string>();
-            
+
         var reservedKeywords = GetReservedWords();
-                       
+
 
         //sensible parameter names have no spaces or symbols!
         var sensibleParameterNamesInclude = new Regex(@"^\w*$");

@@ -76,7 +76,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
             }
         }
-            
+
 
         return functionsToReturn.ToArray();
     }
@@ -131,7 +131,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
             else
                 throw;
         }
-            
+
         SqlConnection.ClearAllPools();
     }
 
@@ -200,7 +200,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
         // other operations must be done on master
         server.ChangeDatabase("master");
-            
+
         // set single user before detaching
         sql = $"ALTER DATABASE {databaseToDetach} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
         using (var cmd = new SqlCommand(sql, con))

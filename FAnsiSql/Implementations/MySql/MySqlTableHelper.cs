@@ -72,10 +72,10 @@ WHERE table_schema = @db
 
             r.Close();
         }
-            
+
 
         return columns.ToArray();
-            
+
     }
 
     private bool YesNoToBool(object o)
@@ -208,7 +208,7 @@ WHERE
                 current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
             }
         }
-            
+
         return toReturn.Values.ToArray();
     }
 

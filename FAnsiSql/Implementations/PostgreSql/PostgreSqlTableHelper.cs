@@ -64,15 +64,15 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
             }
         }
 
-            
+
 
         if(!toReturn.Any())
             throw new Exception($"Could not find any columns in table {discoveredTable}");
-            
+
         //don't bother looking for pks if it is a table valued function
         if (discoveredTable is DiscoveredTableValuedFunction)
             return toReturn.ToArray();
-            
+
         var pks = ListPrimaryKeys(connection, discoveredTable);
 
         foreach (var c in toReturn.Where(c => pks.Any(pk=>pk.Equals(c.GetRuntimeName()))))
@@ -119,7 +119,7 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
     {
         var columnType = r["data_type"] as string;
         var lengthQualifier = "";
-            
+
         if (HasPrecisionAndScale(columnType))
             lengthQualifier = $"({r["numeric_precision"]},{r["numeric_scale"]})";
         else
@@ -127,7 +127,7 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
         {
             lengthQualifier = $"({Convert.ToInt32(r["character_maximum_length"])})";
         }
-            
+
         return columnType + lengthQualifier;
     }
 
@@ -189,7 +189,7 @@ where
     y.table_schema=@schema
 order by c.constraint_name, x.ordinal_position";
 
-            
+
         var toReturn = new Dictionary<string, DiscoveredRelationship>();
 
         using (var cmd = table.GetCommand(sql, connection, transaction?.Transaction))
@@ -245,7 +245,7 @@ order by c.constraint_name, x.ordinal_position";
                 current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
             }
         }
-            
+
         return toReturn.Values.ToArray();
     }
 

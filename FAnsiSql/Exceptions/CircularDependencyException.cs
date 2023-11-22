@@ -9,6 +9,6 @@ public class CircularDependencyException : Exception
 {
     public CircularDependencyException(string msg):base(msg)
     {
-            
+
     }
 }

@@ -38,12 +38,12 @@ internal class LongNamesTests : DatabaseTests
         for (var i = 0; i < db.Server.GetQuerySyntaxHelper().MaximumDatabaseLength; i++)
             sb.Append('a');
 
-        var db2 = db.Server.ExpectDatabase(sb.ToString());    
+        var db2 = db.Server.ExpectDatabase(sb.ToString());
         db2.Create(true);
-            
+
         Assert.IsTrue(db2.Exists());
         StringAssert.AreEqualIgnoringCase(sb.ToString(),db2.GetRuntimeName());
-            
+
         db2.Drop();
     }
 }

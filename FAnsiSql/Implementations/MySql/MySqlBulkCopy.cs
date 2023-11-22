@@ -72,7 +72,7 @@ public class MySqlBulkCopy : BulkCopy
 
         ourTrans?.Commit();
         return affected;
-            
+
     }
 
     private string ConstructIndividualValue(string dataType, object value)
@@ -93,7 +93,7 @@ public class MySqlBulkCopy : BulkCopy
 
         if(value == null || value == DBNull.Value)
             return "NULL";
-            
+
         return ConstructIndividualValue(dataType,  value.ToString());
     }
 

@@ -113,7 +113,7 @@ internal class ManagedConnectionTests:DatabaseTests
     public void Test_GetManagedConnection_OngoingTransaction_WithCommitRollback(DatabaseType dbType,bool commit)
     {
         var db = GetTestDatabase(dbType);
-            
+
         IManagedConnection ongoingCon;
         //pretend that there is an ongoing transaction already
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
@@ -144,7 +144,7 @@ internal class ManagedConnectionTests:DatabaseTests
             //that should really have closed it!
             Assert.AreEqual(ConnectionState.Closed,ongoingCon.Connection.State);
         }
-            
+
         //this is the using on the transaction this one should now close itself
         Assert.AreEqual(ConnectionState.Closed,ongoingCon.Connection.State);
     }
@@ -154,7 +154,7 @@ internal class ManagedConnectionTests:DatabaseTests
     public void Test_ManagedTransaction_MultipleCancel(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
-            
+
         IManagedConnection ongoingCon;
         //pretend that there is an ongoing transaction already
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
@@ -195,7 +195,7 @@ internal class ManagedConnectionTests:DatabaseTests
             Assert.AreEqual(ConnectionState.Open,con.Connection.State);
 
         } //now disposing the non clone
-            
+
         //finally should close it
         Assert.AreEqual(ConnectionState.Closed,con.Connection.State);
     }

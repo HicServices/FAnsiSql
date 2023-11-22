@@ -108,7 +108,7 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
 
     private static readonly HashSet<string> ReservedWords = new( new []
     {
-            
+
         "ACCESS",
         "ACCOUNT",
         "ACTIVATE",

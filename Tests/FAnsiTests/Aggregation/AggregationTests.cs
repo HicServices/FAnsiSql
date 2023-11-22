@@ -121,8 +121,8 @@ internal class AggregationTests:DatabaseTests
 
             if (!a.Equals(b))
                 return false;
-        }                
-            
+        }
+
         return true;
     }
 
@@ -174,7 +174,7 @@ internal class AggregationTests:DatabaseTests
 
         if (!dic.ContainsKey(type))
             Assert.Inconclusive("No connection string found for Test database type {0}", type);
-            
+
         return dic[type];
     }
 

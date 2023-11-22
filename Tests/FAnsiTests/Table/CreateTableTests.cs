@@ -260,7 +260,7 @@ internal class CreateTableTests:DatabaseTests
             new DatabaseColumnRequest("B", "int")
 
         });
-            
+
         Assert.AreEqual(2,tbl.GetDataTable().Columns.Count);
 
         tbl.DropColumn(tbl.DiscoverColumn("B"));
@@ -301,15 +301,15 @@ internal class CreateTableTests:DatabaseTests
 
         var dt = new DataTable();
         dt.Columns.Add("Yay");
-        dt.Rows.Add(testString); 
+        dt.Rows.Add(testString);
 
         var table = db.CreateTable("GoGo",dt);
 
         //find the table column created
         var col = table.DiscoverColumn("Yay");
-            
+
         //value fetched from database should match the one inserted
-        var dbValue = (string) table.GetDataTable().Rows[0][0];           
+        var dbValue = (string) table.GetDataTable().Rows[0][0];
         Assert.AreEqual(testString,dbValue);
         table.Drop();
 
@@ -329,7 +329,7 @@ internal class CreateTableTests:DatabaseTests
 
         var dt = new DataTable();
         dt.Columns.Add("微笑");
-        dt.Rows.Add("50");     
+        dt.Rows.Add("50");
 
         var table = db.CreateTable("你好", dt);
 
@@ -342,7 +342,7 @@ internal class CreateTableTests:DatabaseTests
         Assert.AreEqual("微笑", col.GetRuntimeName());
 
         table.Insert(new Dictionary<string, object> {{ "微笑","10" } });
-            
+
         Assert.AreEqual(2, table.GetRowCount());
 
         table.Insert(new Dictionary<DiscoveredColumn, object> {{ col,"11" } });
@@ -355,7 +355,7 @@ internal class CreateTableTests:DatabaseTests
 
         using(var bulk = table.BeginBulkInsert())
             bulk.Upload(dt2);
-            
+
         Assert.AreEqual(4,table.GetRowCount());
     }
 
@@ -379,7 +379,7 @@ internal class CreateTableTests:DatabaseTests
         var dt2 = tbl.GetDataTable();
         Assert.Contains(true, dt2.Rows.Cast<DataRow>().Select(c => c[0]).ToArray());
         Assert.Contains(false, dt2.Rows.Cast<DataRow>().Select(c => c[0]).ToArray());
-            
+
         tbl.Drop();
     }
 
@@ -430,7 +430,7 @@ internal class CreateTableTests:DatabaseTests
     {
         using var dt = new DataTable();
         dt.Columns.Add("C1",typeof(int));
-        
+
         dt.SetDoNotReType(true);
 
         //do not retype only applies when it is a string
@@ -540,14 +540,14 @@ internal class CreateTableTests:DatabaseTests
         dt.Columns.Add("Hb");
         dt.Rows.Add("T");
         dt.Rows.Add("F");
-            
+
         var args = new CreateTableArgs(db,"Hb",null,dt,false);
         Assert.AreEqual(args.GuessSettings.CharCanBeBoolean, GuessSettingsFactory.Defaults.CharCanBeBoolean,"Default should match the static default");
         Assert.IsFalse(args.GuessSettings == GuessSettingsFactory.Defaults,"Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
 
         //change the args settings
         args.GuessSettings.CharCanBeBoolean = treatAsBoolean;
-            
+
         var tbl = db.CreateTable(args);
         var col = tbl.DiscoverColumn("Hb");
 
@@ -563,14 +563,14 @@ internal class CreateTableTests:DatabaseTests
         var dt = new DataTable();
         dt.Columns.Add("DateCol");
         dt.Rows.Add("013020");
-            
+
         var args = new CreateTableArgs(db,"Hb",null,dt,false);
         Assert.AreEqual(args.GuessSettings.ExplicitDateFormats, GuessSettingsFactory.Defaults.ExplicitDateFormats,"Default should match the static default");
         Assert.IsFalse(args.GuessSettings == GuessSettingsFactory.Defaults,"Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
 
         //change the args settings to treat this date format
         args.GuessSettings.ExplicitDateFormats = useCustomDate ? new[]{"MMddyy" } :null;
-            
+
         var tbl = db.CreateTable(args);
         var col = tbl.DiscoverColumn("DateCol");
 

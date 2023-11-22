@@ -13,7 +13,7 @@ public sealed class OracleUpdateHelper : UpdateHelper
     private OracleUpdateHelper() {}
     protected override string BuildUpdateImpl(DiscoveredTable table1, DiscoveredTable table2, List<CustomLine> lines)
     {
-            
+
         // This implementation is based on:
         // https://stackoverflow.com/a/32748797/4824531
 

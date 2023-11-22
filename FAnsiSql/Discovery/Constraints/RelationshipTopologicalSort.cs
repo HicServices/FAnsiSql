@@ -89,8 +89,8 @@ public class RelationshipTopologicalSort
         if (edges.Any())
             // return error (graph has at least one cycle)
             throw new CircularDependencyException(FAnsiStrings.RelationshipTopologicalSort_FoundCircularDependencies);
-            
-            
+
+
         // return L (a topologically sorted order)
         return l;
     }

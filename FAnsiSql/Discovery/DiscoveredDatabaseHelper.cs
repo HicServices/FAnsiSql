@@ -153,7 +153,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     public void ThrowIfObjectColumns(DataTable dt)
     {
         var objCol = dt.Columns.Cast<DataColumn>().FirstOrDefault(c => c.DataType == typeof(object));
-            
+
         if(objCol != null)
             throw new NotSupportedException(
                 string.Format(
@@ -210,7 +210,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         var pks = columns.Where(c => c.IsPrimaryKey).ToArray();
         if (pks.Any())
             bodySql.Append(GetPrimaryKeyDeclarationSql(tableName, pks,syntaxHelper));
-            
+
         if (foreignKeyPairs != null)
         {
             bodySql.AppendLine();
@@ -219,7 +219,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         }
 
         var toReturn = bodySql.ToString().TrimEnd('\r', '\n', ',');
-            
+
         toReturn += $"){Environment.NewLine}";
 
         return toReturn;
@@ -302,7 +302,7 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
 
         using var cmd = helper.GetCommand(string.Empty, conn, transaction);
         var hadToOpen = false;
-            
+
         if (conn.State != ConnectionState.Open)
         {
 

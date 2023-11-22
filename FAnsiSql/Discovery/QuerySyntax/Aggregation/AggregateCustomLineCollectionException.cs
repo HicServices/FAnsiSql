@@ -10,7 +10,7 @@ public class AggregateCustomLineCollectionException : Exception
 {
     public AggregateCustomLineCollectionException(string msg):base(msg)
     {
-            
+
     }
 
 }
