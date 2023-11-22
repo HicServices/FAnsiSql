@@ -41,7 +41,7 @@ internal class ServerLevelTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void ServerHelper_GetCurrentDatabase_WhenNoneSpecified(DatabaseType type)
     {
-        var helper = ImplementationManager.GetImplementation(type).GetServerHelper();            
+        var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
         var builder = helper.GetConnectionStringBuilder("");
         var server = new DiscoveredServer(builder);
 
@@ -102,7 +102,7 @@ internal class ServerLevelTests:DatabaseTests
         var server = new DiscoveredServer("loco","bob",type,"franko","wacky");
 
         Assert.AreEqual("loco",server.Name);
-            
+
         //this failure is already exposed by Server_Helper_GetConnectionStringBuilder
         Assert.AreEqual(expectCaps?"BOB":"bob",server.GetCurrentDatabase().GetRuntimeName());
 
@@ -112,7 +112,7 @@ internal class ServerLevelTests:DatabaseTests
         server.ChangeDatabase("omgggg");
 
         Assert.AreEqual(server.Name,"loco");
-            
+
         Assert.AreEqual(expectCaps?"OMGGGG":"omgggg",server.GetCurrentDatabase().GetRuntimeName());
         Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
         Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
@@ -167,13 +167,13 @@ internal class ServerLevelTests:DatabaseTests
         dtToMove.Columns.Add("MyCol");
         dtToMove.Columns.Add("DateOfBirth");
         dtToMove.Columns.Add("Sanity");
-            
+
         dtToMove.Rows.Add("Frank",new DateTime(2001,01,01),"0.50");
         dtToMove.Rows.Add("Tony", null,"9.99");
         dtToMove.Rows.Add("Jez", new DateTime(2001, 05, 01),"100.0");
 
         dtToMove.PrimaryKey = new[] {dtToMove.Columns["MyCol"]};
-            
+
         //Upload it to the first database
         var fromDb = GetTestDatabase(from);
         var tblFrom = fromDb.CreateTable("MyTable", dtToMove);
@@ -186,7 +186,7 @@ internal class ServerLevelTests:DatabaseTests
 
         //Get the clone table sql adjusted to work on the other DBMS
         var sql = tblFrom.ScriptTableCreation(false, false, false, toTable);
-            
+
         //open connection and run the code to create the new table
         using(var con = toDb.Server.GetConnection())
         {

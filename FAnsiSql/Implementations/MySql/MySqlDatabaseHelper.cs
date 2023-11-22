@@ -64,7 +64,7 @@ public class MySqlDatabaseHelper : DiscoveredDatabaseHelper
 
     public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
     {
-            
+
     }
 
     public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
@@ -94,7 +94,7 @@ public class MySqlDatabaseHelper : DiscoveredDatabaseHelper
                 tables.Add(new DiscoveredTable(parent,(string)r[0],querySyntaxHelper,null,isView ? TableType.View : TableType.Table));//this table fieldname will be something like Tables_in_mydbwhatevernameitis
             }
         }
-            
+
         return tables.ToArray();
     }
 

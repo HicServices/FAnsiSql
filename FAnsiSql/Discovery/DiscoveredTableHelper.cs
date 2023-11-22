@@ -247,7 +247,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             cmdTruncate.CommandTimeout = args.TimeoutInSeconds;
             cmdTruncate.ExecuteNonQuery();
         }
-                
+
         using(var cmdBack = server.GetCommand($"INSERT INTO {tableName} (SELECT * FROM {tempTable})", con))
         {
             cmdBack.CommandTimeout = args.TimeoutInSeconds;

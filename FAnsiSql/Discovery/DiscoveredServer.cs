@@ -93,7 +93,7 @@ public class DiscoveredServer : IMightNotExist
     public DiscoveredServer(string server,string database, DatabaseType databaseType,string usernameIfAny,string passwordIfAny)
     {
         Helper = ImplementationManager.GetImplementation(databaseType).GetServerHelper();
-            
+
         Builder = Helper.GetConnectionStringBuilder(server,database,usernameIfAny,passwordIfAny);
 
         if(!string.IsNullOrWhiteSpace(database))
@@ -353,7 +353,7 @@ public class DiscoveredServer : IMightNotExist
         var db = ExpectDatabase(newDatabaseName);
 
         Helper.CreateDatabase(Builder, db);
-            
+
         if(!db.Exists())
             throw new Exception(string.Format(FAnsiStrings.DiscoveredServer_CreateDatabase_Helper___0___tried_to_create_database___1___but_the_database_didn_t_exist_after_the_creation_attempt, Helper.GetType().Name,newDatabaseName));
 

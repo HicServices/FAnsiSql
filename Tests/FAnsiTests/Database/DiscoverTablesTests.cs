@@ -154,7 +154,7 @@ internal class DiscoverTablesTests:DatabaseTests
 
     private void DropBadView(DiscoveredDatabase db, bool ignoreFailure)
     {
-            
+
         using(var con = db.Server.GetConnection())
         {
             con.Open();
@@ -189,7 +189,7 @@ internal class DiscoverTablesTests:DatabaseTests
 
         using var con = db.Server.GetConnection();
         con.Open();
- 
+
         var viewname = db.Server.GetQuerySyntaxHelper().EnsureWrapped("ABC");
 
         var cmd = db.Server.GetCommand($"CREATE VIEW {GetBadTableName(db)} as select * from {viewname}",con);

@@ -276,7 +276,7 @@ internal class BulkInsertTest : DatabaseTests
 
             transaction.ManagedTransaction.CommitAndCloseConnection();
         }
-            
+
         //We abandoned transaction so final rowcount should be 0
         Assert.AreEqual(3, tbl.GetRowCount());
     }
@@ -337,7 +337,7 @@ internal class BulkInsertTest : DatabaseTests
             using var blk = tbl.BeginBulkInsert();
             blk.Upload(dt);
         }
-                
+
 
         var result = tbl.GetDataTable();
         Assert.AreEqual(3, result.Columns.Count);
@@ -452,8 +452,8 @@ internal class BulkInsertTest : DatabaseTests
             sw.Stop();
             TestContext.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
         }
-                
-            
+
+
         var result = tbl.GetDataTable();
         Assert.AreEqual(33, result.Columns.Count);
         Assert.AreEqual(numberOfRowsPerBatch*2, result.Rows.Count);
@@ -461,9 +461,9 @@ internal class BulkInsertTest : DatabaseTests
         Assert.NotNull(result.Rows[0]["frank"]);
         Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString()?.Length, 5); //should be a date
         Assert.AreEqual("no", result.Rows[0]["peter"]);
-            
+
         //while we have a ton of data in there let's test some cancellation operations
-            
+
         //no primary key
         var bobCol = tbl.DiscoverColumn("bob");
         Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
@@ -494,7 +494,7 @@ internal class BulkInsertTest : DatabaseTests
             tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default,50000));
         }
 
-            
+
         //and there should not be any primary keys
         Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
 
@@ -504,7 +504,7 @@ internal class BulkInsertTest : DatabaseTests
 
         bobCol = tbl.DiscoverColumn("bob");
         Assert.IsTrue(bobCol.IsPrimaryKey);
-            
+
         tbl.Drop();
     }
 
@@ -560,7 +560,7 @@ internal class BulkInsertTest : DatabaseTests
             using var blk = tbl.BeginBulkInsert();
             Assert.AreEqual(3, blk.Upload(dt));
         }
-            
+
 
         var result = tbl.GetDataTable();
 
@@ -594,7 +594,7 @@ internal class BulkInsertTest : DatabaseTests
             using var blk = tbl.BeginBulkInsert();
             Assert.AreEqual(1, blk.Upload(dt));
         }
-            
+
 
         tbl.Insert(new Dictionary<string, object> {{"num", "-4.10235746055587E-05"}});
 
@@ -631,7 +631,7 @@ internal class BulkInsertTest : DatabaseTests
 
             table = db.CreateTable("GoGo", dt);
         }
-            
+
         using (var dt2 = new DataTable())
         {
             dt2.Columns.Add("yay");
@@ -640,14 +640,14 @@ internal class BulkInsertTest : DatabaseTests
             using var insert = table.BeginBulkInsert();
             insert.Upload(dt2);
         }
-            
+
         table.Insert(new Dictionary<string, object> {{"Yay", "مرحبا"}});
-            
+
         //now check that it all worked!
 
         var dtResult = table.GetDataTable();
         Assert.AreEqual(3,dtResult.Rows.Count);
-            
+
         //value fetched from database should match the one inserted
         Assert.Contains("乗 12345",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
         Assert.Contains("你好",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
@@ -678,7 +678,7 @@ internal class BulkInsertTest : DatabaseTests
         dt.Rows.Add(60,"Jamie");
         dt.Rows.Add(30,"Frank");
         dt.Rows.Add(11,"Toad");
-        dt.Rows.Add(50, new string('A', 11));    
+        dt.Rows.Add(50, new string('A', 11));
         dt.Rows.Add(100,"King");
         dt.Rows.Add(10,"Frog");
 
@@ -712,7 +712,7 @@ internal class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_ExplicitDateTimeFormats(DatabaseType type)
     {
-            
+
         var db = GetTestDatabase(type);
         var tbl = db.CreateTable("MyDateTestTable",
             new[]
@@ -733,7 +733,7 @@ internal class BulkInsertTest : DatabaseTests
             bulk.DateTimeDecider.Settings.ExplicitDateFormats = new []{"yyyyMMdd" };
             bulk.Upload(dt);
         }
-            
+
         var dtDown = tbl.GetDataTable();
         Assert.AreEqual(new DateTime(2001,12,30),dtDown.Rows[0]["MyDate"]);
     }
@@ -742,7 +742,7 @@ internal class BulkInsertTest : DatabaseTests
     public void TestBulkInsert_SchemaTooNarrow_DecimalError(DatabaseType type)
     {
         var db = GetTestDatabase(type);
-            
+
         var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
@@ -768,7 +768,7 @@ internal class BulkInsertTest : DatabaseTests
 
         using var bulk = tbl.BeginBulkInsert();
         bulk.Timeout = 30;
-                
+
         Exception ex = null;
         try
         {
@@ -807,7 +807,7 @@ internal class BulkInsertTest : DatabaseTests
     public void TestBulkInsert_BadDecimalFormat_DecimalError(DatabaseType type)
     {
         var db = GetTestDatabase(type);
-            
+
         var tbl = db.CreateTable("MyBulkInsertTest",
             new[]
             {
@@ -833,7 +833,7 @@ internal class BulkInsertTest : DatabaseTests
 
         using var bulk = tbl.BeginBulkInsert();
         bulk.Timeout = 30;
-                
+
         Exception ex = null;
         try
         {

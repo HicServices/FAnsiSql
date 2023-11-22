@@ -42,13 +42,13 @@ public sealed class PostgreSqlTypeTranslater : TypeTranslater
 
         if (t == typeof(byte))
             return NpgsqlDbType.Bytea;
-            
+
         if (t == typeof(short) || t == typeof(short) || t == typeof(ushort) || t == typeof(short?) || t == typeof(ushort?))
             return NpgsqlDbType.Smallint;
 
         if (t == typeof(int) || t == typeof(int)  || t == typeof(uint) || t == typeof(int?) || t == typeof(uint?))
             return NpgsqlDbType.Integer;
-            
+
         if (t == typeof (long) || t == typeof(ulong) || t == typeof(long?) || t == typeof(ulong?))
             return NpgsqlDbType.Bigint;
 

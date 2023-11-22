@@ -34,14 +34,14 @@ internal class CreatePrimaryKeyTest: DatabaseTests
 
             tbl = db.CreateTable("Fish", dt);
         }
-            
+
         var col = tbl.DiscoverColumn("A");
 
         Assert.IsTrue(col.AllowNulls);
         Assert.IsFalse(col.IsPrimaryKey);
 
         tbl.CreatePrimaryKey(col);
-            
+
         col = tbl.DiscoverColumn("A");
 
         Assert.IsFalse(col.AllowNulls);
@@ -69,7 +69,7 @@ internal class CreatePrimaryKeyTest: DatabaseTests
 
             tbl = db.CreateTable("Fish", dt);
         }
-            
+
         var colA = tbl.DiscoverColumn("A");
         var colB = tbl.DiscoverColumn("B");
 

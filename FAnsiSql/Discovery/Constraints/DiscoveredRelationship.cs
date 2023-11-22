@@ -52,7 +52,7 @@ public class DiscoveredRelationship
         PrimaryKeyTable = pkTable;
         ForeignKeyTable = fkTable;
         CascadeDelete = deleteRule;
-            
+
         Keys = new Dictionary<DiscoveredColumn, DiscoveredColumn>();
     }
 

@@ -8,7 +8,7 @@ namespace FAnsi.Discovery.TypeTranslation;
 public class TypeNotMappedException : Exception
 {
     public TypeNotMappedException(string msg):base(msg)
-    {   
+    {
     }
 
     public TypeNotMappedException(string msg, Exception innerException) : base(msg, innerException)

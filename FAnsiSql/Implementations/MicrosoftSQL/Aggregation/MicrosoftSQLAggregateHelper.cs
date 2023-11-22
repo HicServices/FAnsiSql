@@ -183,7 +183,7 @@ EXECUTE(@Query)
             syntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement,"axis.dt")),
             axisColumnAlias
         );
-           
+
         return part1 + part2;
     }
 
@@ -194,7 +194,7 @@ EXECUTE(@Query)
         var part1 = GetPivotPart1(query, out var pivotAlias, out var countAlias, out _);
 
         syntaxHelper.SplitLineIntoSelectSQLAndAlias(nonPivotColumn.Text, out var nonPivotColumnSelect, out var nonPivotColumnAlias);
-            
+
         //ensure we have an alias for the non pivot column
         if (string.IsNullOrWhiteSpace(nonPivotColumnAlias))
             nonPivotColumnAlias = syntaxHelper.GetRuntimeName(nonPivotColumnSelect);
@@ -254,7 +254,7 @@ EXECUTE(@Query)
         //ensure it has an RHS
         if (string.IsNullOrWhiteSpace(pivotAlias))
             pivotAlias = syntaxHelper.GetRuntimeName(pivotSqlWithoutAlias);
-            
+
         var countSqlWithoutAlias = query.CountSelect.GetTextWithoutAlias(syntaxHelper);
         countAlias = query.CountSelect.GetAliasFromText(syntaxHelper);
 
@@ -275,7 +275,7 @@ EXECUTE(@Query)
         var anyFilters = query.Lines.Any(l => l.LocationToInsert == QueryComponent.WHERE);
 
         var orderBy = $"{countSqlWithoutAlias} desc";
-            
+
         if (query.TopXOrderBy != null)
             orderBy = query.TopXOrderBy.Text;
 

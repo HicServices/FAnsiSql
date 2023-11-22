@@ -26,7 +26,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             schemaname != 'pg_catalog'
             AND schemaname != 'information_schema';";
 
-            
+
         const string sqlViews = @"SELECT
                 *
                 FROM
@@ -51,7 +51,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
                     tables.Add(new DiscoveredTable(parent, (string)r["tablename"], querySyntaxHelper, schema));
             }
         }
-            
+
         if (includeViews)
         {
             using var cmd = new NpgsqlCommand(sqlViews, (NpgsqlConnection)connection);
@@ -105,7 +105,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             using(var cmd = new NpgsqlCommand($"DROP DATABASE \"{database.GetRuntimeName()}\"",con))
                 cmd.ExecuteNonQuery();
         }
-            
+
         NpgsqlConnection.ClearAllPools();
 
     }
@@ -139,7 +139,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
         con.Open();
 
         var syntax = discoveredDatabase.Server.GetQuerySyntaxHelper();
-                
+
         var sql = $@"create schema if not exists {syntax.EnsureWrapped(name)}";
 
         using var cmd = discoveredDatabase.Server.GetCommand(sql, con);

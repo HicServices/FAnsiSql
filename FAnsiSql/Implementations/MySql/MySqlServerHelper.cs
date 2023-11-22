@@ -15,7 +15,7 @@ public class MySqlServerHelper : DiscoveredServerHelper
     static MySqlServerHelper()
     {
         AddConnectionStringKeyword(DatabaseType.MySql, "AllowUserVariables","True",ConnectionStringKeywordPriority.ApiRule);
-        AddConnectionStringKeyword(DatabaseType.MySql, "CharSet", "utf8", ConnectionStringKeywordPriority.ApiRule);     
+        AddConnectionStringKeyword(DatabaseType.MySql, "CharSet", "utf8", ConnectionStringKeywordPriority.ApiRule);
     }
 
     private MySqlServerHelper() : base(DatabaseType.MySql)
@@ -58,7 +58,7 @@ public class MySqlServerHelper : DiscoveredServerHelper
             toReturn.UserID = username;
             toReturn.Password = password;
         }
-           
+
         return toReturn;
     }
 
@@ -119,7 +119,7 @@ public class MySqlServerHelper : DiscoveredServerHelper
                 databases.Add((string)r["Database"]);
 
         }
-            
+
         con.Close();
         return databases.ToArray();
     }

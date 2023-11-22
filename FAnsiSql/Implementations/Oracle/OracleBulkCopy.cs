@@ -24,7 +24,7 @@ internal class OracleBulkCopy : BulkCopy
         //don't run an insert if there are 0 rows
         if (dt.Rows.Count == 0)
             return 0;
-                        
+
         var syntaxHelper = _server.GetQuerySyntaxHelper();
         var tt = syntaxHelper.TypeTranslater;
 
@@ -32,7 +32,7 @@ internal class OracleBulkCopy : BulkCopy
         var parameterNames = syntaxHelper.GetParameterNamesFor(dt.Columns.Cast<DataColumn>().ToArray(),c=>c.ColumnName);
 
         var affectedRows = 0;
-            
+
         var mapping = GetMapping(dt.Columns.Cast<DataColumn>());
 
         var dateColumns = new HashSet<DataColumn>();
@@ -57,7 +57,7 @@ internal class OracleBulkCopy : BulkCopy
             else if (p.DbType == DbType.Boolean)
                 p.DbType = DbType.Int32;    // JS 2023-05-11 special case since we don't have a true boolean type in Oracle, but use 0/1 instead
         }
-                
+
         var values = mapping.Keys.ToDictionary(c => c, _ => new List<object>());
 
         foreach (DataRow dataRow in dt.Rows)

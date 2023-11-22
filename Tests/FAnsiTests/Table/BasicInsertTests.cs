@@ -35,7 +35,7 @@ internal class BasicInsertTests:DatabaseTests
             {
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(value.GetType(),100,new DecimalSize(5,5)))
             });
-            
+
         var nameCol = tbl.DiscoverColumn("Name");
 
         tbl.Insert(new Dictionary<DiscoveredColumn, object>

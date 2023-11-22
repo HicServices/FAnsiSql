@@ -14,7 +14,7 @@ internal class ParameterTests:DatabaseTests
     public void Test_SupportsEmbeddedParameters_DeclarationOrThrow(DatabaseType type)
     {
         var syntax = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
-                        
+
         if(syntax.SupportsEmbeddedParameters())
             Assert.IsNotEmpty(syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)));
         else
@@ -27,9 +27,9 @@ internal class ParameterTests:DatabaseTests
     public void CreateParameter(DatabaseType type)
     {
         var syntax = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
-                        
+
         var declaration = syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10));
-            
+
         StringAssert.Contains("@bob",declaration);
     }
 
@@ -41,15 +41,15 @@ internal class ParameterTests:DatabaseTests
         var db = GetTestDatabase(type);
 
         var dt = new DataTable();
-            
+
         dt.Columns.Add("FF");
         dt.Rows.Add("armag");
         dt.Rows.Add("geddon");
 
         var tbl = db.CreateTable("ParameterUseTest",dt);
-            
+
         var sb = new StringBuilder();
-                        
+
         //declare the variable
         sb.AppendLine(tbl.GetQuerySyntaxHelper().GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)));
 

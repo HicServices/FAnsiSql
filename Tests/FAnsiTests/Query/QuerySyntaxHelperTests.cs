@@ -243,7 +243,7 @@ internal class QuerySyntaxHelperTests
                     throw new ArgumentOutOfRangeException(nameof(dbType), dbType, null);
             }
         }
-            
+
     }
 
     [Test]

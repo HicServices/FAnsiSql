@@ -139,12 +139,10 @@ public class PostgreSqlServerHelper : DiscoveredServerHelper
             toReturn.Username = username;
             toReturn.Password = password;
         }
-        else
-            toReturn.IntegratedSecurity = true;
 
         if (!string.IsNullOrWhiteSpace(database))
             toReturn.Database = database;
-            
+
         return toReturn;
     }
 }

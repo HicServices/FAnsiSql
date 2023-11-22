@@ -49,11 +49,11 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
 
         if(!toReturn.Any())
             throw new Exception($"Could not find any columns in table {discoveredTable}");
-            
+
         //don't bother looking for pks if it is a table valued function
         if (discoveredTable is DiscoveredTableValuedFunction)
             return toReturn.ToArray();
-            
+
         var pks = ListPrimaryKeys(connection, discoveredTable);
 
         foreach (var c in toReturn.Where(c => pks.Any(pk=>pk.Equals(c.GetRuntimeName()))))
@@ -86,7 +86,7 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
 
     public override void DropTable(DbConnection connection, DiscoveredTable tableToDrop)
     {
-            
+
         SqlCommand cmd;
 
         switch (tableToDrop.TableType)
@@ -162,7 +162,7 @@ where object_id = OBJECT_ID(@tableName)";
                     DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), null)
                 });
         }
-            
+
         return toReturn.ToArray();
     }
 
@@ -270,7 +270,7 @@ where object_id = OBJECT_ID(@tableName)";
                 current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
             }
         }
-            
+
         return toReturn.Values.ToArray();
 
     }
@@ -278,7 +278,7 @@ where object_id = OBJECT_ID(@tableName)";
     protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
     {
         var oldName = discoveredTable.GetWrappedName();
-            
+
         var syntax = discoveredTable.GetQuerySyntaxHelper();
 
         if (!string.IsNullOrWhiteSpace(discoveredTable.Schema))
@@ -298,7 +298,7 @@ where object_id = OBJECT_ID(@tableName)";
             
             ) as f
             where RowNum > 1";
-            
+
         var columnList = string.Join(",",
             discoveredTable.DiscoverColumns().Select(c=>syntax.EnsureWrapped(c.GetRuntimeName())));
 
@@ -321,7 +321,7 @@ where object_id = OBJECT_ID(@tableName)";
     {
         var columnType = r["TYPE_NAME"] as string;
         var lengthQualifier = "";
-            
+
         if (HasPrecisionAndScale(columnType))
             lengthQualifier = $"({r["PRECISION"]},{r["SCALE"]})";
         else
@@ -379,7 +379,7 @@ ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal";
             r.Close();
         }
 
-            
+
         return toReturn.ToArray();
     }
 }

@@ -38,7 +38,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
         _bulkCopy.ColumnMappings.Clear();
         foreach (var (key, value) in GetMapping(dt.Columns.Cast<DataColumn>()))
             _bulkCopy.ColumnMappings.Add(key.ColumnName, value.GetRuntimeName());
-            
+
         return BulkInsertWithBetterErrorMessages(_bulkCopy, dt, TargetTable.Database.Server);
     }
 
@@ -103,7 +103,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
         var firstPass = ExceptionToListOfInnerMessages(e, true);
         firstPass = firstPass.Replace(Environment.NewLine, $"{Environment.NewLine}\t");
         firstPass = Environment.NewLine + SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_First_Pass_Exception_ + Environment.NewLine + firstPass;
-            
+
         //have to use a new object because current one could have a broken transaction associated with it
         using var con = (SqlConnection)serverForLineByLineInvestigation.GetConnection();
         con.Open();
@@ -153,7 +153,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
             investigationTransaction.Rollback();
             con.Close();
         }
-                
+
         return new Exception(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Bulk_insert_failed_but_when_we_tried_to_repeat_it_a_line_at_a_time_it_worked + firstPass , e);
     }
 
@@ -232,7 +232,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
             message.AppendLine();
             message.Append(e.StackTrace);
         }
-                
+
         if (e is ReflectionTypeLoadException reflectionTypeLoadException)
             foreach (var loaderException in reflectionTypeLoadException.LoaderExceptions)
             {
@@ -245,7 +245,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
             message.AppendLine();
             message.Append( ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace));
         }
-                
+
         return message.ToString();
     }
 

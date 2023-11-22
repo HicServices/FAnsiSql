@@ -64,7 +64,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
             toReturn.UserID = username;
             toReturn.Password = password;
         }
-            
+
         return toReturn;
     }
 
@@ -97,7 +97,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
             cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
             cmd.ExecuteNonQuery();
         }
-                    
+
 
         using(var cmd = new OracleCommand(
                   $"ALTER USER \"{newDatabaseName.GetRuntimeName()}\" quota unlimited on system", con))
@@ -150,7 +150,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
         using (var r = cmd.ExecuteReader())
             while (r.Read())
                 databases.Add((string) r["username"]);
-            
+
         return databases.ToArray();
     }
 }

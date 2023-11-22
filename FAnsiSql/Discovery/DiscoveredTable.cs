@@ -185,7 +185,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
     public DataTable GetDataTable(DatabaseOperationArgs args,int topX = int.MaxValue, bool enforceTypesAndNullness = true)
     {
         var dt = new DataTable();
-            
+
         if (enforceTypesAndNullness)
             foreach (var c in DiscoverColumns(args.TransactionIfAny))
             {
@@ -439,7 +439,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
     {
         var syntaxHelper = GetQuerySyntaxHelper();
         var server = Database.Server;
-                       
+
         var _parameterNames = syntaxHelper.GetParameterNamesFor(toInsert.Keys.ToArray(),c=>c.GetRuntimeName());
 
         using var connection = Database.Server.GetManagedConnection(transaction);

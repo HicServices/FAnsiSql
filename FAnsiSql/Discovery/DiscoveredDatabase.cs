@@ -218,7 +218,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
             Adjuster = adjuster,
             ExplicitColumnDefinitions = columns
         });
-            
+
     }
 
     /// <summary>

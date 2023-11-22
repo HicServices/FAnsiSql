@@ -23,7 +23,7 @@ public class TableTypeTests:DatabaseTests
         Assert.AreEqual(TableType.Table, tbl.TableType);
 
         var viewName = "MyView";
-            
+
         var syntax = tbl.GetQuerySyntaxHelper();
 
         //oracle likes to create stuff under your user account not the database your actually using!
@@ -31,7 +31,7 @@ public class TableTypeTests:DatabaseTests
         {
             viewName = syntax.EnsureFullyQualified(tbl.Database.GetRuntimeName(),null,"MyView");
         }
-            
+
         var sql = string.Format(@"CREATE VIEW {0} AS
 SELECT {2}
 FROM {1}",

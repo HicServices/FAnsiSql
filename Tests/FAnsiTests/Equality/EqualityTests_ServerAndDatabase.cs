@@ -18,7 +18,7 @@ internal class EqualityTests_ServerAndDatabase
     {
         var s1 = new DiscoveredServer(constr1, type1);
         var s2 = new DiscoveredServer(constr2, type2);
-            
+
         Assert.AreEqual(s1,s2);
         Assert.AreEqual(s1.GetHashCode(),s2.GetHashCode());
 
@@ -27,7 +27,7 @@ internal class EqualityTests_ServerAndDatabase
 
         Assert.AreEqual(s1.ExpectDatabase("Mydb"), s2.ExpectDatabase("MyDb"));
         Assert.AreEqual(s1.ExpectDatabase("Mydb").GetHashCode(), s2.ExpectDatabase("MyDb").GetHashCode());
-            
+
         Assert.AreNotEqual(s1.ExpectDatabase("MyDb"), s2.ExpectDatabase("MyDb2"));
 
         //This does not affect things since we are expecting a specific database anyway
@@ -45,7 +45,7 @@ internal class EqualityTests_ServerAndDatabase
     {
         var s1 = new DiscoveredServer(constr1, type1);
         var s2 = new DiscoveredServer(constr2, type2);
-            
+
         Assert.AreNotEqual(s1,s2);
         Assert.AreNotEqual(s1.ExpectDatabase("MyDb"), s2.ExpectDatabase("MyDb"));
     }

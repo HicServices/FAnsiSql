@@ -11,11 +11,11 @@ public class ColumnMappingException : Exception
 {
     public ColumnMappingException(string msg):base(msg)
     {
-            
+
     }
 
     public ColumnMappingException(string msg, Exception innerException):base(msg,innerException)
     {
-            
+
     }
 }

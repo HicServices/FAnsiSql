@@ -86,7 +86,7 @@ public abstract class BulkCopy:IBulkCopy
         TargetTable.Database.Helper.ThrowIfObjectColumns(dt);
 
         ConvertStringTypesToHardTypes(dt);
-            
+
         return UploadImpl(dt);
     }
 
@@ -102,10 +102,10 @@ public abstract class BulkCopy:IBulkCopy
         var dict = GetMapping(dt.Columns.Cast<DataColumn>(),out _);
 
         var factory = new TypeDeciderFactory(Culture);
-            
+
         //These are the problematic Types
         var deciders = factory.Dictionary;
-            
+
         //for each column in the destination
         foreach(var kvp in dict)
         {

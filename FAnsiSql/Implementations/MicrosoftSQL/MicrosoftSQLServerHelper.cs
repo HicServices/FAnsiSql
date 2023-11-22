@@ -98,7 +98,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         using (var r = cmd.ExecuteReader())
             while (r.Read())
                 databases.Add((string) r["Database"]);
-            
+
         con.Close();
         return databases.ToArray();
     }
@@ -147,7 +147,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
         using var con = new SqlConnection(builder.ConnectionString);
         con.Open();
-                
+
         //For more info you could run
         //SELECT *  FROM sys.databases WHERE name = 'AdventureWorks2012';  but there might not be a database?
 
