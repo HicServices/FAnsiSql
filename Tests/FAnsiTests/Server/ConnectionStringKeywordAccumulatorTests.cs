@@ -34,7 +34,7 @@ public class ConnectionStringKeywordAccumulatorTests
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        Assert.That(connectionStringBuilder.ConnectionString.Contains("Auto Enlist=false", StringComparison.InvariantCultureIgnoreCase), Is.False);
+        Assert.That(connectionStringBuilder.ConnectionString.Contains("Auto Enlist=false", StringComparison.InvariantCultureIgnoreCase));
     }
 
 

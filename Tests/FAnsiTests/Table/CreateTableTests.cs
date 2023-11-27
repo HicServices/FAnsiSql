@@ -574,7 +574,7 @@ internal class CreateTableTests:DatabaseTests
         Assert.Multiple(() =>
         {
             Assert.That(GuessSettingsFactory.Defaults.CharCanBeBoolean, Is.EqualTo(args.GuessSettings.CharCanBeBoolean), "Default should match the static default");
-            Assert.That(args.GuessSettings, Is.Not.EqualTo(GuessSettingsFactory.Defaults), "Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
+            Assert.That(!ReferenceEquals(args.GuessSettings, GuessSettingsFactory.Defaults), "Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
         });
 
         //change the args settings
@@ -603,11 +603,11 @@ internal class CreateTableTests:DatabaseTests
         Assert.Multiple(() =>
         {
             Assert.That(GuessSettingsFactory.Defaults.ExplicitDateFormats, Is.EqualTo(args.GuessSettings.ExplicitDateFormats), "Default should match the static default");
-            Assert.That(args.GuessSettings, Is.Not.EqualTo(GuessSettingsFactory.Defaults), "Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
+            Assert.That(!ReferenceEquals(args.GuessSettings, GuessSettingsFactory.Defaults), "Args should not be the same instance! otherwise we would unintentionally edit the defaults!");
         });
 
         //change the args settings to treat this date format
-        args.GuessSettings.ExplicitDateFormats = useCustomDate ? new[]{"MMddyy" } :null;
+        args.GuessSettings.ExplicitDateFormats = useCustomDate ? ["MMddyy"] :null;
 
         var tbl = db.CreateTable(args);
         var col = tbl.DiscoverColumn("DateCol");
