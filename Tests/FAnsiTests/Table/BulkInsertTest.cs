@@ -802,17 +802,7 @@ internal class BulkInsertTest : DatabaseTests
         using var bulk = tbl.BeginBulkInsert();
         bulk.Timeout = 30;
 
-        Exception ex = null;
-        try
-        {
-            bulk.Upload(dt);
-        }
-        catch(Exception e)
-        {
-            ex = e;
-        }
-
-        Assert.That(ex, Is.Not.Null, "Expected upload to fail because value on row 2 is too long");
+        var ex = Assert.Catch(()=>bulk.Upload(dt),"Expected upload to fail because value on row 2 is too long");
 
         switch (type)
         {
@@ -821,7 +811,7 @@ internal class BulkInsertTest : DatabaseTests
                 StringAssert.Contains("Parameter value '111111111.1' is out of range",ex.Message);
                 break;
             case DatabaseType.MySql:
-                Assert.That(ex.Message, Is.EqualTo("Out of range value for column 'Score' at row 3"));
+                Assert.That(ex?.Message, Is.EqualTo("Out of range value for column 'Score' at row 3"));
                 break;
             case DatabaseType.Oracle:
                 StringAssert.Contains("value larger than specified precision allowed for this column",ex.Message);
