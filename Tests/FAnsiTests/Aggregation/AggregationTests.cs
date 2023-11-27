@@ -173,7 +173,7 @@ internal class AggregationTests:DatabaseTests
         var dic = easy ? _easyTables : _hardTables;
 
         if (!dic.ContainsKey(type))
-            Assert.Inconclusive("No connection string found for Test database type {0}", type);
+            Assert.Inconclusive($"No connection string found for Test database type {type}");
 
         return dic[type];
     }

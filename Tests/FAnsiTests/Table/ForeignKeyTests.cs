@@ -4,6 +4,7 @@ using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Table;

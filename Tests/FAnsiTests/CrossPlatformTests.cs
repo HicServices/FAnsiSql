@@ -10,6 +10,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsiTests.TypeTranslation;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TypeGuesser;
 using TypeGuesser.Deciders;
 

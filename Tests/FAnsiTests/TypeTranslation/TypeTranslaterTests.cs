@@ -245,10 +245,10 @@ public class TypeTranslaterTests : DatabaseTests
             Assert.Multiple(() =>
             {
                 //was the Type REQUESTED correct according to the test case expectation
-                Assert.That(tBefore, Is.EqualTo(expectedType), "We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'", sqlType, col.DataType.SQLType, tBefore, tAfter);
+                Assert.That(tBefore, Is.EqualTo(expectedType), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType.SQLType}' is '{tAfter}'");
 
                 //Was the Type CREATED matching the REQUESTED type (as far as FAnsi is concerned)
-                Assert.That(tAfter, Is.EqualTo(tBefore), "We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'", sqlType, col.DataType.SQLType, tBefore, tAfter);
+                Assert.That(tAfter, Is.EqualTo(tBefore), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType.SQLType}' is '{tAfter}'");
             });
 
             if (!string.Equals(col.DataType.SQLType,sqlType,StringComparison.CurrentCultureIgnoreCase))

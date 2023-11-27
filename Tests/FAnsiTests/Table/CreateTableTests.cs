@@ -8,6 +8,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.TableCreation;
 using FAnsi.Extensions;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Table;

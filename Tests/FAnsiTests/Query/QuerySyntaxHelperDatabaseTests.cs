@@ -2,6 +2,7 @@
 using FAnsi;
 using FAnsi.Discovery.QuerySyntax;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Query;
 

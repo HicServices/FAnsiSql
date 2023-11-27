@@ -2,6 +2,7 @@
 using FAnsi;
 using FAnsi.Discovery;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Table;

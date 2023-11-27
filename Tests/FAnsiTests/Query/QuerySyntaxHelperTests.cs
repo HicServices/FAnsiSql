@@ -5,6 +5,7 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementation;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Query;
 

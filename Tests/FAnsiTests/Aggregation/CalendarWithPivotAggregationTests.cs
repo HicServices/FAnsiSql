@@ -5,6 +5,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Aggregation;
 

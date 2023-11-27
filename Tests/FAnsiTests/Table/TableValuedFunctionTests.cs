@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using FAnsi;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Table;
 

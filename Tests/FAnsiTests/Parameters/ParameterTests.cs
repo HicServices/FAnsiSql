@@ -4,6 +4,7 @@ using FAnsi.Implementation;
 using NUnit.Framework;
 using System.Data;
 using System.Text;
+using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Parameters;
