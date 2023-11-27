@@ -50,7 +50,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     public ITypeTranslater TypeTranslater { get; private set; }
 
-    private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = new();
+    private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = [];
 
     public IAggregateHelper AggregateHelper { get; private set; }
     public IUpdateHelper UpdateHelper { get; set; }
@@ -95,7 +95,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public static HashSet<string> GetAllParameterNamesFromQuery(string query)
     {
         if (string.IsNullOrWhiteSpace(query))
-            return new HashSet<string>();
+            return [];
 
         var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Cast<Match>().Select(match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
         return toReturn;

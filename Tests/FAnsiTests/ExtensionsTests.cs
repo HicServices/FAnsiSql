@@ -15,14 +15,14 @@ internal class ExtensionsTests
 
         dt.Columns.Add("FFF");
 
-        Assert.IsFalse(dt.Columns["FFF"].GetDoNotReType());
+        Assert.That(dt.Columns["FFF"].GetDoNotReType(), Is.False);
 
         Assert.DoesNotThrow(()=>dt.SetDoNotReType(true));
 
-        Assert.IsTrue(dt.Columns["FFF"].GetDoNotReType());
+        Assert.That(dt.Columns["FFF"].GetDoNotReType());
 
         Assert.DoesNotThrow(()=>dt.SetDoNotReType(false));
 
-        Assert.IsFalse(dt.Columns["FFF"].GetDoNotReType());
+        Assert.That(dt.Columns["FFF"].GetDoNotReType(), Is.False);
     }
 }

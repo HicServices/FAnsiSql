@@ -44,8 +44,8 @@ internal class BasicInsertTests:DatabaseTests
         });
 
         var result = tbl.GetDataTable();
-        Assert.AreEqual(1,result.Rows.Count);
-        Assert.AreEqual(value,result.Rows[0][0]);
+        Assert.That(result.Rows, Has.Count.EqualTo(1));
+        Assert.That(result.Rows[0][0], Is.EqualTo(value));
 
         tbl.Drop();
     }
@@ -69,8 +69,8 @@ internal class BasicInsertTests:DatabaseTests
         });
 
         var result = tbl.GetDataTable();
-        Assert.AreEqual(1, result.Rows.Count);
-        Assert.AreEqual(value, result.Rows[0][0]);
+        Assert.That(result.Rows, Has.Count.EqualTo(1));
+        Assert.That(result.Rows[0][0], Is.EqualTo(value));
 
         tbl.Drop();
     }
@@ -93,7 +93,7 @@ internal class BasicInsertTests:DatabaseTests
             {nameCol,"fish"}
         });
 
-        Assert.AreEqual(1,result);
+        Assert.That(result, Is.EqualTo(1));
 
 
         result = tbl.Insert(new Dictionary<DiscoveredColumn, object>
@@ -101,6 +101,6 @@ internal class BasicInsertTests:DatabaseTests
             {nameCol,"fish"}
         });
 
-        Assert.AreEqual(2, result);
+        Assert.That(result, Is.EqualTo(2));
     }
 }

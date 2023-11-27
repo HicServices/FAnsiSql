@@ -58,17 +58,20 @@ END";
 
         var tvf = db.DiscoverTableValuedFunctions().Single();
         var p = tvf.DiscoverParameters().First();
-        Assert.AreEqual("@startNumber",p.ParameterName);
-        Assert.AreEqual("int",p.DataType.SQLType);
-        Assert.AreEqual(schema,tvf.Schema??"dbo");
+        Assert.Multiple(() =>
+        {
+            Assert.That(p.ParameterName, Is.EqualTo("@startNumber"));
+            Assert.That(p.DataType.SQLType, Is.EqualTo("int"));
+            Assert.That(tvf.Schema ?? "dbo", Is.EqualTo(schema));
+        });
 
         StringAssert.EndsWith(".MyAwesomeFunction(@startNumber,@stopNumber,@name)",tvf.GetFullyQualifiedName());
 
-        Assert.IsTrue(tvf.Exists());
+        Assert.That(tvf.Exists());
 
         tvf.Drop();
 
-        Assert.IsFalse(tvf.Exists());
+        Assert.That(tvf.Exists(), Is.False);
 
 
     }

@@ -13,7 +13,7 @@ internal class ServerLevelTests:DatabaseTests
     public void Server_Exists(DatabaseType type)
     {
         var server = GetTestServer(type);
-        Assert.IsTrue(server.Exists(), "Server " + server + " did not exist");
+        Assert.That(server.Exists(), "Server " + server + " did not exist");
     }
 
 
@@ -23,7 +23,7 @@ internal class ServerLevelTests:DatabaseTests
         var helper = ImplementationManager.GetImplementation(dbType).GetServerHelper();
         var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,"franko","wacky").ConnectionString,dbType);
 
-        Assert.AreEqual("localhost",server.Name);
+        Assert.That(server.Name, Is.EqualTo("localhost"));
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -31,7 +31,7 @@ internal class ServerLevelTests:DatabaseTests
     {
         var server = GetTestServer(type);
 
-        Assert.IsTrue(server.RespondsWithinTime(3,out _));
+        Assert.That(server.RespondsWithinTime(3,out _));
     }
 
     /// <summary>
@@ -45,8 +45,11 @@ internal class ServerLevelTests:DatabaseTests
         var builder = helper.GetConnectionStringBuilder("");
         var server = new DiscoveredServer(builder);
 
-        Assert.AreEqual(null,server.Name);
-        Assert.AreEqual(null,server.GetCurrentDatabase());
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.Name, Is.EqualTo(null));
+            Assert.That(server.GetCurrentDatabase(), Is.EqualTo(null));
+        });
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -57,16 +60,19 @@ internal class ServerLevelTests:DatabaseTests
 
         var server = new DiscoveredServer(builder);
 
-        Assert.AreEqual("loco",server.Name);
+        Assert.That(server.Name, Is.EqualTo("loco"));
 
         //Oracle does not persist database in connection string
         if(type == DatabaseType.Oracle)
-            Assert.IsNull(server.GetCurrentDatabase());
+            Assert.That(server.GetCurrentDatabase(), Is.Null);
         else
-            Assert.AreEqual("bob",server.GetCurrentDatabase().GetRuntimeName());
+            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("bob"));
 
-        Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
-        Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.ExplicitUsernameIfAny, Is.EqualTo("franko"));
+            Assert.That(server.ExplicitPasswordIfAny, Is.EqualTo("wacky"));
+        });
     }
 
 
@@ -78,17 +84,26 @@ internal class ServerLevelTests:DatabaseTests
 
         var server = new DiscoveredServer(builder);
 
-        Assert.AreEqual("loco",server.Name);
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.Name, Is.EqualTo("loco"));
 
-        Assert.IsNull(server.GetCurrentDatabase());
+            Assert.That(server.GetCurrentDatabase(), Is.Null);
+        });
 
-        Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
-        Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.ExplicitUsernameIfAny, Is.EqualTo("franko"));
+            Assert.That(server.ExplicitPasswordIfAny, Is.EqualTo("wacky"));
+        });
 
         server = new DiscoveredServer("loco",useWhitespace?"  ":null,type,"frank","kangaro");
-        Assert.AreEqual("loco",server.Name);
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.Name, Is.EqualTo("loco"));
 
-        Assert.IsNull(server.GetCurrentDatabase());
+            Assert.That(server.GetCurrentDatabase(), Is.Null);
+        });
 
 
     }
@@ -101,21 +116,27 @@ internal class ServerLevelTests:DatabaseTests
     {
         var server = new DiscoveredServer("loco","bob",type,"franko","wacky");
 
-        Assert.AreEqual("loco",server.Name);
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.Name, Is.EqualTo("loco"));
 
-        //this failure is already exposed by Server_Helper_GetConnectionStringBuilder
-        Assert.AreEqual(expectCaps?"BOB":"bob",server.GetCurrentDatabase().GetRuntimeName());
+            //this failure is already exposed by Server_Helper_GetConnectionStringBuilder
+            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo(expectCaps ? "BOB" : "bob"));
 
-        Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
-        Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
+            Assert.That(server.ExplicitUsernameIfAny, Is.EqualTo("franko"));
+            Assert.That(server.ExplicitPasswordIfAny, Is.EqualTo("wacky"));
+        });
 
         server.ChangeDatabase("omgggg");
 
-        Assert.AreEqual(server.Name,"loco");
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.Name, Is.EqualTo("loco"));
 
-        Assert.AreEqual(expectCaps?"OMGGGG":"omgggg",server.GetCurrentDatabase().GetRuntimeName());
-        Assert.AreEqual("franko",server.ExplicitUsernameIfAny);
-        Assert.AreEqual("wacky",server.ExplicitPasswordIfAny);
+            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo(expectCaps ? "OMGGGG" : "omgggg"));
+            Assert.That(server.ExplicitUsernameIfAny, Is.EqualTo("franko"));
+            Assert.That(server.ExplicitPasswordIfAny, Is.EqualTo("wacky"));
+        });
     }
 
 
@@ -134,25 +155,37 @@ internal class ServerLevelTests:DatabaseTests
         //create initial server reference
         var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
         var server = new DiscoveredServer(helper.GetConnectionStringBuilder("loco","bob","franko","wacky"));
-        Assert.AreEqual("loco",server.Name);
-        Assert.AreEqual("bob",server.GetCurrentDatabase().GetRuntimeName());
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.Name, Is.EqualTo("loco"));
+            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("bob"));
+        });
 
         //Use API to change databases
-        if(useApiFirst)
+        if (useApiFirst)
         {
             server.ChangeDatabase("omgggg");
-            Assert.AreEqual("loco",server.Name);
-            Assert.AreEqual("omgggg",server.GetCurrentDatabase().GetRuntimeName());
+            Assert.Multiple(() =>
+            {
+                Assert.That(server.Name, Is.EqualTo("loco"));
+                Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("omgggg"));
+            });
         }
 
         //adhoc changes to builder
         server.Builder["Database"] = "Fisss";
-        Assert.AreEqual("loco",server.Name);
-        Assert.AreEqual("Fisss",server.GetCurrentDatabase().GetRuntimeName());
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.Name, Is.EqualTo("loco"));
+            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("Fisss"));
+        });
 
         server.Builder["Server"] = "Amagad";
-        Assert.AreEqual("Amagad",server.Name);
-        Assert.AreEqual("Fisss",server.GetCurrentDatabase().GetRuntimeName());
+        Assert.Multiple(() =>
+        {
+            Assert.That(server.Name, Is.EqualTo("Amagad"));
+            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("Fisss"));
+        });
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer,DatabaseType.MySql)]
@@ -177,12 +210,12 @@ internal class ServerLevelTests:DatabaseTests
         //Upload it to the first database
         var fromDb = GetTestDatabase(from);
         var tblFrom = fromDb.CreateTable("MyTable", dtToMove);
-        Assert.IsTrue(tblFrom.Exists());
+        Assert.That(tblFrom.Exists());
 
         //Get pointer to the second database table (which doesn't exist yet)
         var toDb = GetTestDatabase(to);
         var toTable = toDb.ExpectTable("MyNewTable");
-        Assert.IsFalse(toTable.Exists());
+        Assert.That(toTable.Exists(), Is.False);
 
         //Get the clone table sql adjusted to work on the other DBMS
         var sql = tblFrom.ScriptTableCreation(false, false, false, toTable);
@@ -196,7 +229,7 @@ internal class ServerLevelTests:DatabaseTests
         }
 
         //new table should exist
-        Assert.IsTrue(tblFrom.Exists());
+        Assert.That(tblFrom.Exists());
 
         using (var insert = toTable.BeginBulkInsert())
         {
@@ -207,8 +240,11 @@ internal class ServerLevelTests:DatabaseTests
             insert.Upload(fromData);
         }
 
-        Assert.AreEqual(3, tblFrom.GetRowCount());
-        Assert.AreEqual(3, toTable.GetRowCount());
+        Assert.Multiple(() =>
+        {
+            Assert.That(tblFrom.GetRowCount(), Is.EqualTo(3));
+            Assert.That(toTable.GetRowCount(), Is.EqualTo(3));
+        });
 
         AssertAreEqual(toTable.GetDataTable(), tblFrom.GetDataTable());
     }
@@ -220,9 +256,9 @@ internal class ServerLevelTests:DatabaseTests
         var ver = db.Server.GetVersion();
 
         TestContext.WriteLine($"Version:{ver}");
-        Assert.IsNotNull(ver);
+        Assert.That(ver, Is.Not.Null);
 
-        Assert.Greater(ver.Major,0);
+        Assert.That(ver.Major, Is.GreaterThan(0));
     }
 
 }

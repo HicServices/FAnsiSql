@@ -29,7 +29,7 @@ public class DiscoveredRelationship
     /// Mapping of primary key column(s) in <see cref="PrimaryKeyTable"/> to foreign key column(s) in <see cref="ForeignKeyTable"/>.  If there are more than one entry
     /// then the foreign key is a composite key.
     /// </summary>
-    public Dictionary<DiscoveredColumn, DiscoveredColumn> Keys { get; private set; }
+    public Dictionary<DiscoveredColumn, DiscoveredColumn> Keys { get; }
 
     /// <summary>
     /// Describes what happens to records in the <see cref="ForeignKeyTable"/> when thier parent records (in the <see cref="PrimaryKeyTable"/>) are deleted.
@@ -51,9 +51,8 @@ public class DiscoveredRelationship
         Name = fkName;
         PrimaryKeyTable = pkTable;
         ForeignKeyTable = fkTable;
+        Keys = [];
         CascadeDelete = deleteRule;
-
-        Keys = new Dictionary<DiscoveredColumn, DiscoveredColumn>();
     }
 
     /// <summary>

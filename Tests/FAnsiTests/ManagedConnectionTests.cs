@@ -15,7 +15,7 @@ internal class ManagedConnectionTests:DatabaseTests
         var con = db.Server.GetConnection();
 
         //GetConnection should return an unopened connection
-        Assert.AreEqual(ConnectionState.Closed,con.State);
+        Assert.That(con.State, Is.EqualTo(ConnectionState.Closed));
     }
 
     /// <summary>
@@ -32,11 +32,11 @@ internal class ManagedConnectionTests:DatabaseTests
         using (con = db.Server.GetManagedConnection())
         {
             //GetManagedConnection should open itself
-            Assert.AreEqual(ConnectionState.Open,con.Connection.State);
+            Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
         }
 
         //finally should close it
-        Assert.AreEqual(ConnectionState.Closed,con.Connection.State);
+        Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Closed));
     }
 
 
@@ -54,11 +54,11 @@ internal class ManagedConnectionTests:DatabaseTests
         using (con = db.Server.BeginNewTransactedConnection())
         {
             //GetManagedConnection should open itself
-            Assert.AreEqual(ConnectionState.Open,con.Connection.State);
+            Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
         }
 
         //finally should close it
-        Assert.AreEqual(ConnectionState.Closed,con.Connection.State);
+        Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Closed));
     }
 
     /// <summary>
@@ -81,25 +81,31 @@ internal class ManagedConnectionTests:DatabaseTests
         {
             var ongoingTrans = ongoingCon.ManagedTransaction;
 
-            //BeginNewTransactedConnection should open itself
-            Assert.AreEqual(ConnectionState.Open,ongoingCon.Connection.State);
-            Assert.IsNotNull(ongoingTrans);
+            Assert.Multiple(() =>
+            {
+                //BeginNewTransactedConnection should open itself
+                Assert.That(ongoingCon.Connection.State, Is.EqualTo(ConnectionState.Open));
+                Assert.That(ongoingTrans, Is.Not.Null);
+            });
 
             //a managed connection with an ongoing transaction
             IManagedConnection con;
             using (con = db.Server.GetManagedConnection(ongoingTrans))
             {
-                //still open
-                Assert.AreEqual(ConnectionState.Open,con.Connection.State);
-                Assert.IsTrue(con.Connection == ongoingCon.Connection); //same underlying connection
+                Assert.Multiple(() =>
+                {
+                    //still open
+                    Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
+                    Assert.That(con.Connection, Is.EqualTo(ongoingCon.Connection)); //same underlying connection
+                });
 
             }
             //it should still be open after this finally block
-            Assert.AreEqual(ConnectionState.Open,con.Connection.State);
+            Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
         }
 
         //this is the using on the transaction this one should now close itself
-        Assert.AreEqual(ConnectionState.Closed,ongoingCon.Connection.State);
+        Assert.That(ongoingCon.Connection.State, Is.EqualTo(ConnectionState.Closed));
     }
 
 
@@ -120,21 +126,27 @@ internal class ManagedConnectionTests:DatabaseTests
         {
             var ongoingTrans = ongoingCon.ManagedTransaction;
 
-            //BeginNewTransactedConnection should open itself
-            Assert.AreEqual(ConnectionState.Open,ongoingCon.Connection.State);
-            Assert.IsNotNull(ongoingTrans);
+            Assert.Multiple(() =>
+            {
+                //BeginNewTransactedConnection should open itself
+                Assert.That(ongoingCon.Connection.State, Is.EqualTo(ConnectionState.Open));
+                Assert.That(ongoingTrans, Is.Not.Null);
+            });
 
             //a managed connection with an ongoing transaction
             IManagedConnection con;
             using (con = db.Server.GetManagedConnection(ongoingTrans))
             {
-                //still open
-                Assert.AreEqual(ConnectionState.Open,con.Connection.State);
-                Assert.IsTrue(con.Connection == ongoingCon.Connection); //same underlying connection
+                Assert.Multiple(() =>
+                {
+                    //still open
+                    Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
+                    Assert.That(con.Connection, Is.EqualTo(ongoingCon.Connection)); //same underlying connection
+                });
 
             }
             //it should still be open after this finally block
-            Assert.AreEqual(ConnectionState.Open,con.Connection.State);
+            Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
 
             if(commit)
                 ongoingCon.ManagedTransaction.CommitAndCloseConnection();
@@ -142,11 +154,11 @@ internal class ManagedConnectionTests:DatabaseTests
                 ongoingCon.ManagedTransaction.AbandonAndCloseConnection();
 
             //that should really have closed it!
-            Assert.AreEqual(ConnectionState.Closed,ongoingCon.Connection.State);
+            Assert.That(ongoingCon.Connection.State, Is.EqualTo(ConnectionState.Closed));
         }
 
         //this is the using on the transaction this one should now close itself
-        Assert.AreEqual(ConnectionState.Closed,ongoingCon.Connection.State);
+        Assert.That(ongoingCon.Connection.State, Is.EqualTo(ConnectionState.Closed));
     }
 
 
@@ -180,23 +192,26 @@ internal class ManagedConnectionTests:DatabaseTests
         using (con = db.Server.BeginNewTransactedConnection())
         {
             //GetManagedConnection should open itself
-            Assert.AreEqual(ConnectionState.Open,con.Connection.State);
+            Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
 
             using (var clone = con.Clone())
             {
                 clone.CloseOnDispose = false;
-                //GetManagedConnection should open itself
-                Assert.AreEqual(ConnectionState.Open,clone.Connection.State);
+                Assert.Multiple(() =>
+                {
+                    //GetManagedConnection should open itself
+                    Assert.That(clone.Connection.State, Is.EqualTo(ConnectionState.Open));
 
-                Assert.IsTrue(clone.Connection == con.Connection);
+                    Assert.That(clone.Connection, Is.EqualTo(con.Connection));
+                });
             }
 
             //GetManagedConnection should not have closed because we told the clone not to
-            Assert.AreEqual(ConnectionState.Open,con.Connection.State);
+            Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
 
         } //now disposing the non clone
 
         //finally should close it
-        Assert.AreEqual(ConnectionState.Closed,con.Connection.State);
+        Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Closed));
     }
 }

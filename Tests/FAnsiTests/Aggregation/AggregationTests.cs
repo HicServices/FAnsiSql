@@ -10,8 +10,8 @@ namespace FAnsiTests.Aggregation;
 
 internal class AggregationTests:DatabaseTests
 {
-    private readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = new();
-    private readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = new();
+    private readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = [];
+    private readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = [];
 
     [OneTimeSetUp]
     public void Setup()
@@ -88,7 +88,7 @@ internal class AggregationTests:DatabaseTests
 
     protected void AssertHasRow(DataTable dt, params object[] cells)
     {
-        Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r=>IsMatch(r,cells)),"Did not find expected row:{0}", string.Join("|",cells));
+        Assert.That(dt.Rows.Cast<DataRow>().Any(r=>IsMatch(r,cells)),"Did not find expected row:{0}", string.Join("|",cells));
     }
 
     /// <summary>

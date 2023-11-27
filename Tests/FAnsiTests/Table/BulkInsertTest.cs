@@ -28,7 +28,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
         //There are no rows in the table yet
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using var dt = new DataTable();
         dt.Columns.Add("Name");
@@ -40,14 +40,14 @@ internal class BulkInsertTest : DatabaseTests
         bulk.Timeout = 30;
         bulk.Upload(dt);
 
-        Assert.AreEqual(2, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(2));
 
         dt.Rows.Clear();
         dt.Rows.Add("Frank", 100);
 
         bulk.Upload(dt);
 
-        Assert.AreEqual(3, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(3));
     }
 
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
@@ -63,7 +63,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
         //There are no rows in the table yet
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using (var dt = new DataTable())
         {
@@ -76,14 +76,14 @@ internal class BulkInsertTest : DatabaseTests
             bulk.Timeout = 30;
             bulk.Upload(dt);
 
-            Assert.AreEqual(2, tbl.GetRowCount());
+            Assert.That(tbl.GetRowCount(), Is.EqualTo(2));
 
             dt.Rows.Clear();
             dt.Rows.Add("Frank", 100);
 
             bulk.Upload(dt);
 
-            Assert.AreEqual(3, tbl.GetRowCount());
+            Assert.That(tbl.GetRowCount(), Is.EqualTo(3));
         }
 
         tbl.Insert(new Dictionary<string, object>
@@ -92,7 +92,7 @@ internal class BulkInsertTest : DatabaseTests
             {"A ge", "300"}
         });
 
-        Assert.AreEqual(4, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(4));
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -108,7 +108,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
         //There are no rows in the table yet
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using var dt = new DataTable();
         dt.Columns.Add("Age");
@@ -116,20 +116,26 @@ internal class BulkInsertTest : DatabaseTests
         dt.Rows.Add( "50","David");
         dt.Rows.Add("60","Jamie");
 
-        Assert.AreEqual("Age",dt.Columns[0].ColumnName);
-        Assert.AreEqual(typeof(string),dt.Columns[0].DataType);
+        Assert.Multiple(() =>
+        {
+            Assert.That(dt.Columns[0].ColumnName, Is.EqualTo("Age"));
+            Assert.That(dt.Columns[0].DataType, Is.EqualTo(typeof(string)));
+        });
 
         using (var bulk = tbl.BeginBulkInsert())
         {
             bulk.Timeout = 30;
             bulk.Upload(dt);
 
-            Assert.AreEqual(2, tbl.GetRowCount());
+            Assert.That(tbl.GetRowCount(), Is.EqualTo(2));
         }
 
-        //columns should not be reordered
-        Assert.AreEqual("Age",dt.Columns[0].ColumnName);
-        Assert.AreEqual(typeof(int),dt.Columns[0].DataType); //but the data type was changed by HardTyping it
+        Assert.Multiple(() =>
+        {
+            //columns should not be reordered
+            Assert.That(dt.Columns[0].ColumnName, Is.EqualTo("Age"));
+            Assert.That(dt.Columns[0].DataType, Is.EqualTo(typeof(int))); //but the data type was changed by HardTyping it
+        });
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -145,7 +151,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
 
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using (var dt = new DataTable())
         {
@@ -161,7 +167,7 @@ internal class BulkInsertTest : DatabaseTests
                 bulk.Upload(dt);
 
                 //inside transaction the count is 2
-                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(2));
 
                 dt.Rows.Clear();
                 dt.Rows.Add("Frank", 100);
@@ -169,14 +175,14 @@ internal class BulkInsertTest : DatabaseTests
                 bulk.Upload(dt);
 
                 //inside transaction the count is 3
-                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(3));
             }
 
             transaction.ManagedTransaction.CommitAndCloseConnection();
         }
 
         //Transaction was committed final row count should be 3
-        Assert.AreEqual(3, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(3));
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -192,7 +198,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
 
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using (var dt = new DataTable())
         {
@@ -208,7 +214,7 @@ internal class BulkInsertTest : DatabaseTests
                 bulk.Upload(dt);
 
                 //inside transaction the count is 2
-                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(2));
 
                 dt.Rows.Clear();
                 dt.Rows.Add("Frank", 100);
@@ -216,14 +222,14 @@ internal class BulkInsertTest : DatabaseTests
                 bulk.Upload(dt);
 
                 //inside transaction the count is 3
-                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(3));
             }
 
             transaction.ManagedTransaction.AbandonAndCloseConnection();
         }
 
         //We abandoned transaction so final rowcount should be 0
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
     }
 
 
@@ -239,7 +245,7 @@ internal class BulkInsertTest : DatabaseTests
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
             });
 
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using (var dt = new DataTable())
         {
@@ -255,7 +261,7 @@ internal class BulkInsertTest : DatabaseTests
                 bulk.Upload(dt);
 
                 //inside transaction the count is 2
-                Assert.AreEqual(2, tbl.GetRowCount(transaction.ManagedTransaction));
+                Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(2));
 
                 //New row is too long for the data type
                 dt.Rows.Clear();
@@ -271,14 +277,14 @@ internal class BulkInsertTest : DatabaseTests
                 bulk.Upload(dt);
 
                 //inside transaction the count is 3
-                Assert.AreEqual(3, tbl.GetRowCount(transaction.ManagedTransaction));
+                Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(3));
             }
 
             transaction.ManagedTransaction.CommitAndCloseConnection();
         }
 
         //We abandoned transaction so final rowcount should be 0
-        Assert.AreEqual(3, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(3));
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -305,7 +311,7 @@ internal class BulkInsertTest : DatabaseTests
         }
 
         using var result = tbl.GetDataTable();
-        Assert.AreEqual(2, result.Rows.Count); //2 rows inserted
+        Assert.That(result.Rows, Has.Count.EqualTo(2)); //2 rows inserted
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -340,11 +346,17 @@ internal class BulkInsertTest : DatabaseTests
 
 
         var result = tbl.GetDataTable();
-        Assert.AreEqual(3, result.Columns.Count);
-        Assert.AreEqual("yes", result.Rows[0]["bob"]);
-        Assert.NotNull(result.Rows[0]["frank"]);
-        Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString()?.Length, 5); //should be a date
-        Assert.AreEqual("no", result.Rows[0]["peter"]);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Columns, Has.Count.EqualTo(3));
+            Assert.That(result.Rows[0]["bob"], Is.EqualTo("yes"));
+            Assert.That(result.Rows[0]["frank"], Is.Not.Null);
+        });
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Rows[0]["frank"].ToString()?.Length, Is.GreaterThanOrEqualTo(5)); //should be a date
+            Assert.That(result.Rows[0]["peter"], Is.EqualTo("no"));
+        });
 
         tbl.Drop();
     }
@@ -431,7 +443,7 @@ internal class BulkInsertTest : DatabaseTests
 
             using (var blk = tbl.BeginBulkInsert())
             {
-                Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt)); //affected rows should match batch size
+                Assert.That(blk.Upload(dt), Is.EqualTo(numberOfRowsPerBatch)); //affected rows should match batch size
             }
             sw.Stop();
             TestContext.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
@@ -446,7 +458,7 @@ internal class BulkInsertTest : DatabaseTests
 
             using (var blk = tbl.BeginBulkInsert())
             {
-                Assert.AreEqual(numberOfRowsPerBatch, blk.Upload(dt));
+                Assert.That(blk.Upload(dt), Is.EqualTo(numberOfRowsPerBatch));
             }
 
             sw.Stop();
@@ -455,18 +467,27 @@ internal class BulkInsertTest : DatabaseTests
 
 
         var result = tbl.GetDataTable();
-        Assert.AreEqual(33, result.Columns.Count);
-        Assert.AreEqual(numberOfRowsPerBatch*2, result.Rows.Count);
-        Assert.NotNull(result.Rows[0]["bob"]);
-        Assert.NotNull(result.Rows[0]["frank"]);
-        Assert.GreaterOrEqual(result.Rows[0]["frank"].ToString()?.Length, 5); //should be a date
-        Assert.AreEqual("no", result.Rows[0]["peter"]);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Columns, Has.Count.EqualTo(33));
+            Assert.That(result.Rows, Has.Count.EqualTo(numberOfRowsPerBatch * 2));
+        });
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Rows[0]["bob"], Is.Not.Null);
+            Assert.That(result.Rows[0]["frank"], Is.Not.Null);
+        });
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Rows[0]["frank"].ToString()?.Length, Is.GreaterThanOrEqualTo(5)); //should be a date
+            Assert.That(result.Rows[0]["peter"], Is.EqualTo("no"));
+        });
 
         //while we have a ton of data in there let's test some cancellation operations
 
         //no primary key
         var bobCol = tbl.DiscoverColumn("bob");
-        Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
+        Assert.That(!tbl.DiscoverColumns().Any(static c=>c.IsPrimaryKey), Is.True);
 
 
         using (var con = tbl.Database.Server.BeginNewTransactedConnection())
@@ -490,20 +511,21 @@ internal class BulkInsertTest : DatabaseTests
             //give it 300 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
             using var cts = new CancellationTokenSource(300);
             //GetDataTable should have been cancelled at the database level
-            Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,cts.Token,50000)));
-            tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,default,50000));
+            Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,50000,
+                cts.Token)));
+            tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,50000, default));
         }
 
 
         //and there should not be any primary keys
-        Assert.IsFalse(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey));
+        Assert.That(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey), Is.False);
 
         //now give it a bit longer to create it
         using(var cts = new CancellationTokenSource(50000000))
             tbl.CreatePrimaryKey(null, cts.Token, 50000, bobCol);
 
         bobCol = tbl.DiscoverColumn("bob");
-        Assert.IsTrue(bobCol.IsPrimaryKey);
+        Assert.That(bobCol.IsPrimaryKey);
 
         tbl.Drop();
     }
@@ -558,17 +580,23 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("tank");
 
             using var blk = tbl.BeginBulkInsert();
-            Assert.AreEqual(3, blk.Upload(dt));
+            Assert.That(blk.Upload(dt), Is.EqualTo(3));
         }
 
 
         var result = tbl.GetDataTable();
 
-        Assert.AreEqual(2, result.Columns.Count);
-        Assert.AreEqual(3, result.Rows.Count);
-        Assert.AreEqual(1, result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 1));
-        Assert.AreEqual(1, result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 2));
-        Assert.AreEqual(1, result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 3));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Columns, Has.Count.EqualTo(2));
+            Assert.That(result.Rows, Has.Count.EqualTo(3));
+        });
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 1), Is.EqualTo(1));
+            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 2), Is.EqualTo(1));
+            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 3), Is.EqualTo(1));
+        });
 
     }
 
@@ -592,7 +620,7 @@ internal class BulkInsertTest : DatabaseTests
             dt.Rows.Add("-4.10235746055587E-05"); //-0.0000410235746055587  <- this is what the number is
             //-0.0000410235           <- this is what goes into db since we only asked for 10 digits after decimal place
             using var blk = tbl.BeginBulkInsert();
-            Assert.AreEqual(1, blk.Upload(dt));
+            Assert.That(blk.Upload(dt), Is.EqualTo(1));
         }
 
 
@@ -601,9 +629,12 @@ internal class BulkInsertTest : DatabaseTests
         //the numbers read from the database should be pretty much exactly -0.0000410235 but Decimals are always a pain so...
         var result = tbl.GetDataTable();
 
-        //right number of rows/columns?
-        Assert.AreEqual(1, result.Columns.Count);
-        Assert.AreEqual(2, result.Rows.Count);
+        Assert.Multiple(() =>
+        {
+            //right number of rows/columns?
+            Assert.That(result.Columns, Has.Count.EqualTo(1));
+            Assert.That(result.Rows, Has.Count.EqualTo(2));
+        });
 
         //get cell values rounded to 9 decimal places
         var c1 = Math.Round((decimal) result.Rows[0][0], 9);
@@ -646,12 +677,13 @@ internal class BulkInsertTest : DatabaseTests
         //now check that it all worked!
 
         var dtResult = table.GetDataTable();
-        Assert.AreEqual(3,dtResult.Rows.Count);
+        Assert.That(dtResult.Rows, Has.Count.EqualTo(3));
 
         //value fetched from database should match the one inserted
-        Assert.Contains("乗 12345",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
-        Assert.Contains("你好",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
-        Assert.Contains("مرحبا",dtResult.Rows.Cast<DataRow>().Select(r=>r[0]).ToArray());
+        var values = dtResult.Rows.Cast<DataRow>().Select(static r => (string)r[0]).ToArray();
+        Assert.That(values, Does.Contain("乗 12345"));
+        Assert.That(values, Does.Contain("你好"));
+        Assert.That(values, Does.Contain("مرحبا"));
         table.Drop();
     }
 
@@ -669,7 +701,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
         //There are no rows in the table yet
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using var dt = new DataTable();
         dt.Columns.Add("age");
@@ -693,7 +725,7 @@ internal class BulkInsertTest : DatabaseTests
                 StringAssert.Contains("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>",ex.Message);
                 break;
             case DatabaseType.MySql:
-                Assert.AreEqual("Data too long for column 'Name' at row 4",ex.Message);
+                Assert.That(ex.Message, Is.EqualTo("Data too long for column 'Name' at row 4"));
                 break;
             case DatabaseType.Oracle:
                 StringAssert.Contains("NAME",ex.Message);
@@ -721,7 +753,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
         //There are no rows in the table yet
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using (var dt = new DataTable())
         {
@@ -735,7 +767,7 @@ internal class BulkInsertTest : DatabaseTests
         }
 
         var dtDown = tbl.GetDataTable();
-        Assert.AreEqual(new DateTime(2001,12,30),dtDown.Rows[0]["MyDate"]);
+        Assert.That(dtDown.Rows[0]["MyDate"], Is.EqualTo(new DateTime(2001,12,30)));
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -753,7 +785,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
         //There are no rows in the table yet
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using var dt = new DataTable();
         dt.Columns.Add("age");
@@ -779,7 +811,7 @@ internal class BulkInsertTest : DatabaseTests
             ex = e;
         }
 
-        Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is too long");
+        Assert.That(ex, Is.Not.Null, "Expected upload to fail because value on row 2 is too long");
 
         switch (type)
         {
@@ -788,7 +820,7 @@ internal class BulkInsertTest : DatabaseTests
                 StringAssert.Contains("Parameter value '111111111.1' is out of range",ex.Message);
                 break;
             case DatabaseType.MySql:
-                Assert.AreEqual("Out of range value for column 'Score' at row 3",ex.Message);
+                Assert.That(ex.Message, Is.EqualTo("Out of range value for column 'Score' at row 3"));
                 break;
             case DatabaseType.Oracle:
                 StringAssert.Contains("value larger than specified precision allowed for this column",ex.Message);
@@ -818,7 +850,7 @@ internal class BulkInsertTest : DatabaseTests
             });
 
         //There are no rows in the table yet
-        Assert.AreEqual(0, tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         using var dt = new DataTable();
         dt.Columns.Add("age");
@@ -844,10 +876,13 @@ internal class BulkInsertTest : DatabaseTests
             ex = e;
         }
 
-        Assert.IsNotNull(ex,"Expected upload to fail because value on row 2 is bad");
+        Assert.That(ex, Is.Not.Null, "Expected upload to fail because value on row 2 is bad");
 
-        Assert.AreEqual("Failed to parse value '.' in column 'score'",ex.Message);
-        Assert.IsNotNull(ex.InnerException,"Expected parse error to be an inner exception");
+        Assert.Multiple(() =>
+        {
+            Assert.That(ex.Message, Is.EqualTo("Failed to parse value '.' in column 'score'"));
+            Assert.That(ex.InnerException, Is.Not.Null, "Expected parse error to be an inner exception");
+        });
         StringAssert.Contains("Could not parse string value '.' with Decider Type:DecimalTypeDecider",ex.InnerException.Message);
     }
 }

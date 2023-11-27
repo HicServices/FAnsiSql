@@ -39,7 +39,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         var columns = new List<DatabaseColumnRequest>();
         var customRequests = args.ExplicitColumnDefinitions != null
             ? args.ExplicitColumnDefinitions.ToList()
-            : new List<DatabaseColumnRequest>();
+            : [];
 
         if(args.DataTable != null)
         {
@@ -294,7 +294,7 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
     /// <param name="timeout">Timeout in seconds to run each batch in the <paramref name="sql"/></param>
     public void ExecuteBatchNonQuery(string sql, DbConnection conn, DbTransaction transaction, out Dictionary<int, Stopwatch> performanceFigures, int timeout = 30)
     {
-        performanceFigures = new Dictionary<int, Stopwatch>();
+        performanceFigures = [];
 
         var sqlBatch = new StringBuilder();
 

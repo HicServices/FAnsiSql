@@ -32,7 +32,8 @@ public class DatabaseOperationArgs
     {
 
     }
-    public DatabaseOperationArgs(IManagedTransaction transactionIfAny, CancellationToken cancellationToken, int timeoutInSeconds)
+    public DatabaseOperationArgs(IManagedTransaction transactionIfAny, int timeoutInSeconds,
+        CancellationToken cancellationToken)
     {
         TransactionIfAny = transactionIfAny;
         CancellationToken = cancellationToken;

@@ -18,11 +18,11 @@ internal class LongNamesTests : DatabaseTests
 
         var tbl = db.CreateTable(tableName,new DatabaseColumnRequest[]{new(columnName,new DatabaseTypeRequest(typeof(string),100))});
 
-        Assert.IsTrue(tbl.Exists());
+        Assert.That(tbl.Exists());
         StringAssert.AreEqualIgnoringCase(tableName,tbl.GetRuntimeName());
 
         var col = tbl.DiscoverColumn(columnName);
-        Assert.IsNotNull(col);
+        Assert.That(col, Is.Not.Null);
         StringAssert.AreEqualIgnoringCase(columnName,col.GetRuntimeName());
     }
 
@@ -41,7 +41,7 @@ internal class LongNamesTests : DatabaseTests
         var db2 = db.Server.ExpectDatabase(sb.ToString());
         db2.Create(true);
 
-        Assert.IsTrue(db2.Exists());
+        Assert.That(db2.Exists());
         StringAssert.AreEqualIgnoringCase(sb.ToString(),db2.GetRuntimeName());
 
         db2.Drop();

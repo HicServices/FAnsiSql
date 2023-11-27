@@ -77,6 +77,7 @@ public abstract class BulkCopy:IBulkCopy
     /// </summary>
     public virtual void Dispose()
     {
+        GC.SuppressFinalize(this);
         Connection.Dispose();
     }
 

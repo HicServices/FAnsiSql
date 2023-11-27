@@ -14,7 +14,10 @@ internal class DatabaseTypeRequestTests
             new DatabaseTypeRequest(typeof(string), 2)
         );
 
-        Assert.AreEqual(2,max.Width);
-        Assert.IsTrue(max.Unicode,"If either arg in a Max call is Unicode then the resulting maximum should be Unicode=true");
+        Assert.Multiple(() =>
+        {
+            Assert.That(max.Width, Is.EqualTo(2));
+            Assert.That(max.Unicode, "If either arg in a Max call is Unicode then the resulting maximum should be Unicode=true");
+        });
     }
 }

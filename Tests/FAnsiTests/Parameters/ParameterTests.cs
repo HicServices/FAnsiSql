@@ -16,7 +16,7 @@ internal class ParameterTests:DatabaseTests
         var syntax = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
 
         if(syntax.SupportsEmbeddedParameters())
-            Assert.IsNotEmpty(syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)));
+            Assert.That(syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)), Is.Not.Empty);
         else
             Assert.Throws<NotSupportedException>(() =>syntax.GetParameterDeclaration("@bob", new DatabaseTypeRequest(typeof(string), 10)));
     }
@@ -62,7 +62,7 @@ internal class ParameterTests:DatabaseTests
         con.Open();
         var r = db.Server.GetCommand(sb.ToString(),con).ExecuteReader();
 
-        Assert.IsTrue(r.Read());
-        Assert.IsFalse(r.Read());
+        Assert.That(r.Read());
+        Assert.That(r.Read(), Is.False);
     }
 }

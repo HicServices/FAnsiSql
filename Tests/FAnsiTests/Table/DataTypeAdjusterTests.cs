@@ -17,7 +17,7 @@ internal class DataTypeAdjusterTests:DatabaseTests
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10))
         }, null, new DataTypeAdjusterTestsPadder());
 
-        Assert.AreEqual(12,tbl.DiscoverColumn("Name").DataType.GetLengthIfString());
+        Assert.That(tbl.DiscoverColumn("Name").DataType.GetLengthIfString(), Is.EqualTo(12));
         tbl.Drop();
     }
 
