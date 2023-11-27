@@ -23,7 +23,7 @@ public class DiscoveredDataType
     /// <summary>
     /// All values read from the database record retrieved when assembling the data type (E.g. the cells of the sys.columns record)
     /// </summary>
-    public Dictionary<string, object> ProprietaryDatatype = new();
+    public Dictionary<string, object> ProprietaryDatatype = [];
 
     /// <summary>
     /// API constructor, instead use <see cref="DiscoveredTable.DiscoverColumns"/> instead.

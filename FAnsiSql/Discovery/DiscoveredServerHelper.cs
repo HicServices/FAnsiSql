@@ -15,7 +15,7 @@ namespace FAnsi.Discovery;
 /// </summary>
 public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
 {
-    private static readonly Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = new();
+    private static readonly Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = [];
 
     /// <summary>
     /// Register a system wide rule that all connection strings of <paramref name="databaseType"/> should include the given <paramref name="keyword"/>.

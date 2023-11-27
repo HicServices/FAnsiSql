@@ -20,7 +20,7 @@ public class TableTypeTests:DatabaseTests
             tbl = db.CreateTable("MyTable",dt);
         }
 
-        Assert.AreEqual(TableType.Table, tbl.TableType);
+        Assert.That(tbl.TableType, Is.EqualTo(TableType.Table));
 
         var viewName = "MyView";
 
@@ -50,22 +50,25 @@ FROM {1}",
 
         //if we expect it to be a table
         var view = tbl.Database.ExpectTable("MyView");
-        Assert.IsFalse(view.Exists()); //we should be wrong
+        Assert.That(view.Exists(), Is.False); //we should be wrong
 
         //if we expect it to be a view
         view = tbl.Database.ExpectTable("MyView",null,TableType.View);
 
-        Assert.AreEqual(1,view.DiscoverColumns().Length);
+        Assert.Multiple(() =>
+        {
+            Assert.That(view.DiscoverColumns(), Has.Length.EqualTo(1));
 
-        //we would be right!
-        Assert.IsTrue(view.Exists());
-        Assert.AreEqual(TableType.View,view.TableType);
+            //we would be right!
+            Assert.That(view.Exists());
+            Assert.That(view.TableType, Is.EqualTo(TableType.View));
+        });
 
         view.Drop();
-        Assert.IsFalse(view.Exists());
+        Assert.That(view.Exists(), Is.False);
 
         var ex = Assert.Throws<NotSupportedException>(()=>view.Rename("Lolz"));
-        Assert.AreEqual("Rename is not supported for TableType View", ex?.Message);
+        Assert.That(ex?.Message, Is.EqualTo("Rename is not supported for TableType View"));
 
     }
 }

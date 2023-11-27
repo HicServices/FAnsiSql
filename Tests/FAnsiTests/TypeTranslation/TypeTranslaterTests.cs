@@ -22,7 +22,7 @@ namespace FAnsiTests.TypeTranslation;
 /// </summary>
 public class TypeTranslaterTests : DatabaseTests
 {
-    private readonly Dictionary<DatabaseType,ITypeTranslater> _translaters = new();
+    private readonly Dictionary<DatabaseType,ITypeTranslater> _translaters = [];
 
     [OneTimeSetUp]
     public void SetupDatabases()
@@ -49,7 +49,7 @@ public class TypeTranslaterTests : DatabaseTests
     {
         var cSharpType = new DatabaseTypeRequest(typeof (string), 10);
 
-        Assert.AreEqual(expectedType,_translaters[type].GetSQLDBTypeForCSharpType(cSharpType));}
+        Assert.That(_translaters[type].GetSQLDBTypeForCSharpType(cSharpType), Is.EqualTo(expectedType));}
 
     [TestCase(DatabaseType.MicrosoftSQLServer, "varchar(max)")]
     [TestCase(DatabaseType.MySql, "longtext")]
@@ -59,14 +59,17 @@ public class TypeTranslaterTests : DatabaseTests
     {
         var cSharpType = new DatabaseTypeRequest(typeof(string), 10000000);
 
-        //Does a request for a max length string give the expected data type?
-        Assert.AreEqual(expectedType,_translaters[type].GetSQLDBTypeForCSharpType(cSharpType));
+        Assert.Multiple(() =>
+        {
+            //Does a request for a max length string give the expected data type?
+            Assert.That(_translaters[type].GetSQLDBTypeForCSharpType(cSharpType), Is.EqualTo(expectedType));
 
-        //Does the TypeTranslater know that this datatype has no limit on characters?
-        Assert.AreEqual(int.MaxValue, _translaters[type].GetLengthIfString(expectedType));
+            //Does the TypeTranslater know that this datatype has no limit on characters?
+            Assert.That(_translaters[type].GetLengthIfString(expectedType), Is.EqualTo(int.MaxValue));
 
-        //And does the TypeTranslater know that this datatype is string
-        Assert.AreEqual(typeof(string), _translaters[type].GetCSharpTypeForSQLDBType(expectedType));
+            //And does the TypeTranslater know that this datatype is string
+            Assert.That(_translaters[type].GetCSharpTypeForSQLDBType(expectedType), Is.EqualTo(typeof(string)));
+        });
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer, "varchar(max)",false)]
@@ -78,12 +81,15 @@ public class TypeTranslaterTests : DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "text", false)]
     public void Test_GetLengthIfString_VarcharMaxCols(DatabaseType type, string datatype, bool expectUnicode)
     {
-        Assert.AreEqual(int.MaxValue, _translaters[type].GetLengthIfString(datatype));
+        Assert.That(_translaters[type].GetLengthIfString(datatype), Is.EqualTo(int.MaxValue));
         var dbType = _translaters[type].GetDataTypeRequestForSQLDBType(datatype);
 
-        Assert.AreEqual(typeof(string), dbType.CSharpType);
-        Assert.AreEqual(int.MaxValue, dbType.Width);
-        Assert.AreEqual(expectUnicode, dbType.Unicode);
+        Assert.Multiple(() =>
+        {
+            Assert.That(dbType.CSharpType, Is.EqualTo(typeof(string)));
+            Assert.That(dbType.Width, Is.EqualTo(int.MaxValue));
+            Assert.That(dbType.Unicode, Is.EqualTo(expectUnicode));
+        });
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer,"bigint",typeof(long))]
@@ -228,21 +234,24 @@ public class TypeTranslaterTests : DatabaseTests
 
             //What type does FAnsi think this is?
             var tBefore = tt.TryGetCSharpTypeForSQLDBType(sqlType);
-            Assert.IsNotNull(tBefore,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi didn't recognise '{0}' as a supported Type",sqlType,col.DataType.SQLType);
+            Assert.That(tBefore, Is.Not.Null, "We asked to create a '{0}', DBMS created a '{1}'.  FAnsi didn't recognise '{0}' as a supported Type",sqlType,col.DataType.SQLType);
 
             //Does FAnsi understand the datatype that was actually created on the server (sometimes you specify something and it is an
             //alias for something else e.g. Oracle creates 'varchar2' when you ask for 'CHAR VARYING'
             var Guesser = col.GetGuesser();
-            Assert.IsNotNull(Guesser.Guess.CSharpType);
+            Assert.That(Guesser.Guess.CSharpType, Is.Not.Null);
             var tAfter = Guesser.Guess.CSharpType;
 
-            //was the Type REQUESTED correct according to the test case expectation
-            Assert.AreEqual(expectedType, tBefore,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'",sqlType,col.DataType.SQLType,tBefore,tAfter);
+            Assert.Multiple(() =>
+            {
+                //was the Type REQUESTED correct according to the test case expectation
+                Assert.That(tBefore, Is.EqualTo(expectedType), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType.SQLType}' is '{tAfter}'");
 
-            //Was the Type CREATED matching the REQUESTED type (as far as FAnsi is concerned)
-            Assert.AreEqual(tBefore, tAfter,"We asked to create a '{0}', DBMS created a '{1}'.  FAnsi decided that '{0}' is '{2}' and that '{1}' is '{3}'",sqlType,col.DataType.SQLType,tBefore,tAfter);
+                //Was the Type CREATED matching the REQUESTED type (as far as FAnsi is concerned)
+                Assert.That(tAfter, Is.EqualTo(tBefore), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType.SQLType}' is '{tAfter}'");
+            });
 
-            if(!string.Equals(col.DataType.SQLType,sqlType,StringComparison.CurrentCultureIgnoreCase))
+            if (!string.Equals(col.DataType.SQLType,sqlType,StringComparison.CurrentCultureIgnoreCase))
                 TestContext.WriteLine("{0} created a '{1}' when asked to create a '{2}'", type,
                     col.DataType.SQLType, sqlType);
 
@@ -266,6 +275,6 @@ public class TypeTranslaterTests : DatabaseTests
     [TestCase(DatabaseType.Oracle, "MLSLABEL")]
     public void TestNotSupportedTypes(DatabaseType type, string sqlType)
     {
-        Assert.IsFalse(_translaters[type].IsSupportedSQLDBType(sqlType));
+        Assert.That(_translaters[type].IsSupportedSQLDBType(sqlType), Is.False);
     }
 }

@@ -8,6 +8,7 @@ using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
 using FAnsi.Implementations.PostgreSql;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Server;
 
@@ -33,7 +34,7 @@ public class ConnectionStringKeywordAccumulatorTests
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        Assert.IsTrue(connectionStringBuilder.ConnectionString.IndexOf("Auto Enlist=false", StringComparison.InvariantCultureIgnoreCase) != -1);
+        Assert.That(connectionStringBuilder.ConnectionString.Contains("Auto Enlist=false", StringComparison.InvariantCultureIgnoreCase));
     }
 
 

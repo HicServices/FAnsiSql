@@ -48,6 +48,7 @@ public class ManagedConnection : IManagedConnection
     /// </summary>
     public void Dispose()
     {
+        System.GC.SuppressFinalize(this);
         if (CloseOnDispose)
             Connection.Dispose();
     }

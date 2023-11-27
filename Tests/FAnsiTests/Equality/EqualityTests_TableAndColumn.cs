@@ -28,14 +28,17 @@ internal class EqualityTests_TableAndColumn
         var db = s.ExpectDatabase("MyDb");
         var db2 = s.ExpectDatabase("MyDb");
 
-        Assert.IsFalse(ReferenceEquals(db,db2));
-        Assert.IsTrue(db.Equals(db2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(ReferenceEquals(db, db2), Is.False);
+            Assert.That(db, Is.EqualTo(db2));
+        });
 
         var t1 = db.ExpectTable(table1,schema1);
         var t2 = db2.ExpectTable(table2,schema2);
 
-        Assert.AreEqual(t1,t2);
-        Assert.AreEqual(t1.GetHashCode(), t2.GetHashCode());
+        Assert.That(t2, Is.EqualTo(t1));
+        Assert.That(t2.GetHashCode(), Is.EqualTo(t1.GetHashCode()));
     }
 
 
@@ -54,6 +57,6 @@ internal class EqualityTests_TableAndColumn
         var t1 = db1.ExpectTable(tablename1, schema1);
         var t2 = db2.ExpectTable(tablename2, schema2);
 
-        Assert.AreNotEqual(t1, t2);
+        Assert.That(t2, Is.Not.EqualTo(t1));
     }
 }

@@ -46,8 +46,11 @@ internal class PivotAggregationTests:AggregationTests
         using var dt = new DataTable();
         da.Fill(dt);
 
-        Assert.AreEqual(9, dt.Columns.Count);
-        Assert.AreEqual(4, dt.Rows.Count);
-        Assert.AreEqual("Cat", dt.Columns[0].ColumnName);
+        Assert.Multiple(() =>
+        {
+            Assert.That(dt.Columns, Has.Count.EqualTo(9));
+            Assert.That(dt.Rows, Has.Count.EqualTo(4));
+            Assert.That(dt.Columns[0].ColumnName, Is.EqualTo("Cat"));
+        });
     }
 }
