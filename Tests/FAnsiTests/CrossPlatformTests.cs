@@ -38,7 +38,7 @@ public class CrossPlatformTests:DatabaseTests
     public void DateColumnTests_NoTime(DatabaseType type, object input)
     {
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable",new []{new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))});
+        var tbl = db.CreateTable("MyTable",[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyDate", input } });
 
@@ -71,7 +71,7 @@ public class CrossPlatformTests:DatabaseTests
     public void DateColumnTests_UkUsFormat_Explicit(DatabaseType type, object input, string culture)
     {
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable",new []{new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))});
+        var tbl = db.CreateTable("MyTable",[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
 
         var cultureInfo = new CultureInfo (culture);
 
@@ -112,10 +112,10 @@ public class CrossPlatformTests:DatabaseTests
     public void DateColumnTests_PrimaryKeyColumn(DatabaseType type, object input, string culture)
     {
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable",new []{
+        var tbl = db.CreateTable("MyTable",[
             new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))
                 {IsPrimaryKey = true }
-        });
+        ]);
 
         //then bulk insert, both need to work
         using (var blk = tbl.BeginBulkInsert(new CultureInfo(culture)))
@@ -149,7 +149,7 @@ public class CrossPlatformTests:DatabaseTests
     public void DateColumnTests_TimeOnly_Midnight(DatabaseType type, object input)
     {
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable", new[] { new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan))) });
+        var tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
@@ -170,7 +170,7 @@ public class CrossPlatformTests:DatabaseTests
             type == DatabaseType.Oracle
             ? new[] { (DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0] }.Select(dt => dt.TimeOfDay)
                 .Cast<object>().ToArray()
-            : new[] { result.Rows[0][0], result.Rows[1][0] };
+            : [result.Rows[0][0], result.Rows[1][0]];
 
         Assert.Multiple(() =>
         {
@@ -224,7 +224,7 @@ public class CrossPlatformTests:DatabaseTests
     public void DateColumnTests_TimeOnly_Afternoon(DatabaseType type, object input)
     {
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable", new[] { new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan))) });
+        var tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
@@ -318,21 +318,21 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        var tblParent = database.CreateTable("Parent", new[]
-        {
+        var tblParent = database.CreateTable("Parent",
+        [
             new DatabaseColumnRequest("ID",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true},
             new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
-        });
+        ]);
 
         var parentIdPkCol = tblParent.DiscoverColumn("ID");
 
         var parentIdFkCol = new DatabaseColumnRequest("Parent_ID", new DatabaseTypeRequest(typeof (int)));
 
-        var tblChild = database.CreateTable("Child", new[]
-        {
+        var tblChild = database.CreateTable("Child",
+        [
             parentIdFkCol,
             new DatabaseColumnRequest("ChildName",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
-        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
+        ], new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {parentIdFkCol, parentIdPkCol}
         },true);
@@ -398,12 +398,12 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        var tblParent = database.CreateTable("Parent", new[]
-        {
+        var tblParent = database.CreateTable("Parent",
+        [
             new DatabaseColumnRequest("ID1",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true}, //varchar(10)
             new DatabaseColumnRequest("ID2",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true}, //varchar(10)
             new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
-        });
+        ]);
 
         var parentIdPkCol1 = tblParent.DiscoverColumn("ID1");
         var parentIdPkCol2 = tblParent.DiscoverColumn("ID2");
@@ -411,12 +411,12 @@ public class CrossPlatformTests:DatabaseTests
         var parentIdFkCol1 = new DatabaseColumnRequest("Parent_ID1", new DatabaseTypeRequest(typeof(int)));
         var parentIdFkCol2 = new DatabaseColumnRequest("Parent_ID2", new DatabaseTypeRequest(typeof(int)));
 
-        var tblChild = database.CreateTable("Child", new[]
-        {
+        var tblChild = database.CreateTable("Child",
+        [
             parentIdFkCol1,
             parentIdFkCol2,
             new DatabaseColumnRequest("ChildName",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
-        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
+        ], new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {parentIdFkCol1,parentIdPkCol1},
             {parentIdFkCol2,parentIdPkCol2}
@@ -483,15 +483,15 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        var tbl = database.CreateTable("TestDistincting", new[]
-        {
+        var tbl = database.CreateTable("TestDistincting",
+        [
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),int.MaxValue)), //varchar(max)
             new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(string))), //varchar(???)
             new DatabaseColumnRequest("Field3",new DatabaseTypeRequest(typeof(string),1000)), //varchar(???)
             new DatabaseColumnRequest("Field4",new DatabaseTypeRequest(typeof(string),5000)), //varchar(???)
             new DatabaseColumnRequest("Field5",new DatabaseTypeRequest(typeof(string),10000)), //varchar(???)
             new DatabaseColumnRequest("Field6",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
-        });
+        ]);
 
         Assert.Multiple(() =>
         {
@@ -556,10 +556,10 @@ public class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         //create a single column table with primary key
-        var tbl = database.CreateTable("TestDistincting", new[]
-        {
+        var tbl = database.CreateTable("TestDistincting",
+        [
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),100)){IsPrimaryKey = true} //varchar(max)
-        });
+        ]);
 
         Assert.Multiple(() =>
         {
@@ -646,12 +646,12 @@ public class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         // JS 2023-05-11 4000 characters, because SELECT DISTINCT doesn't work on CLOB (Oracle)
-        var tbl = database.CreateTable(dodgyNames?",,":"Field3",new []
-        {
+        var tbl = database.CreateTable(dodgyNames?",,":"Field3",
+        [
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),4000)), //varchar(max)
             new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(DateTime))),
             new DatabaseColumnRequest(dodgyNames?",,,,":"Field3",new DatabaseTypeRequest(typeof(int)))
-        });
+        ]);
 
         using var dt = new DataTable();
         dt.Columns.Add("Field1");
@@ -802,12 +802,12 @@ public class CrossPlatformTests:DatabaseTests
 
         try
         {
-            var tbl = database.CreateTable(horribleTableName, new[]
-            {
+            var tbl = database.CreateTable(horribleTableName,
+            [
                 new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),int.MaxValue)), //varchar(max)
                 new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(DateTime))),
                 new DatabaseColumnRequest("Field3",new DatabaseTypeRequest(typeof(int))){AllowNulls=false}
-            });
+            ]);
 
             using var dt = new DataTable();
             dt.Columns.Add("Field1");
@@ -882,19 +882,19 @@ public class CrossPlatformTests:DatabaseTests
         //CreateTable with illegal name
         StringAssert.IsMatch(
             "Table .* contained unsupported .* characters",
-            Assert.Throws<RuntimeNameException>(()=> database.CreateTable(horribleTableName, new DatabaseColumnRequest[]
-            {
+            Assert.Throws<RuntimeNameException>(()=> database.CreateTable(horribleTableName,
+            [
                 new("a", new DatabaseTypeRequest(typeof(string), 10))
-            }))
+            ]))
                 ?.Message);
 
         //CreateTable with (column) illegal name
         StringAssert.IsMatch(
             "Column .* contained unsupported .* characters",
-            Assert.Throws<RuntimeNameException>(()=> database.CreateTable("f", new DatabaseColumnRequest[]
-            {
+            Assert.Throws<RuntimeNameException>(()=> database.CreateTable("f",
+            [
                 new(columnName, new DatabaseTypeRequest(typeof(string), 10))
-            }))
+            ]))
                 ?.Message);
 
         AssertCanCreateDatabases();
@@ -959,8 +959,8 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        var tbl =  database.CreateTable("MyTable", new[]
-        {
+        var tbl =  database.CreateTable("MyTable",
+        [
             new DatabaseColumnRequest("IdColumn", new DatabaseTypeRequest(typeof (int)))
             {
                 AllowNulls = false,
@@ -969,7 +969,7 @@ public class CrossPlatformTests:DatabaseTests
             },
             new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),100))
 
-        });
+        ]);
 
         using var dt = new DataTable();
         dt.Columns.Add("Name");
@@ -999,15 +999,15 @@ public class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        var tbl = database.CreateTable("MyTable", new[]
-        {
+        var tbl = database.CreateTable("MyTable",
+        [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100)),
             new DatabaseColumnRequest("myDt", new DatabaseTypeRequest(typeof (DateTime)))
             {
                 AllowNulls = false,
                 Default = MandatoryScalarFunctions.GetTodaysDate
             }
-        });
+        ]);
         DateTime currentValue;
 
         using (var insert = tbl.BeginBulkInsert())
@@ -1055,15 +1055,15 @@ public class CrossPlatformTests:DatabaseTests
             }
         }
 
-        var tbl = database.CreateTable("MyTable", new[]
-        {
+        var tbl = database.CreateTable("MyTable",
+        [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100)),
             new DatabaseColumnRequest("MyGuid", new DatabaseTypeRequest(typeof (string)))
             {
                 AllowNulls = false,
                 Default = MandatoryScalarFunctions.GetGuid
             }
-        });
+        ]);
 
         using (var insert = tbl.BeginBulkInsert())
         {
@@ -1088,12 +1088,12 @@ public class CrossPlatformTests:DatabaseTests
         var culture = new CultureInfo("en-gb");
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("LotsOfDatesTest",new DatabaseColumnRequest[]
-        {
+        var tbl = db.CreateTable("LotsOfDatesTest",
+        [
             new("ID",new DatabaseTypeRequest(typeof(int))),
             new("MyDate",new DatabaseTypeRequest(typeof(DateTime))),
             new("MyString",new DatabaseTypeRequest(typeof(string),int.MaxValue))
-        });
+        ]);
 
         //test basic insert
         foreach(var s in someDates)
@@ -1127,7 +1127,7 @@ public class CrossPlatformTests:DatabaseTests
         Assert.That(tbl.GetRowCount(), Is.EqualTo(someDates.Length*2));
     }
 
-    private readonly string [] someDates = {
+    private readonly string [] someDates = [
         "22\\5\\19",
         "22/5/19",
         "22-5-19",
@@ -1368,7 +1368,7 @@ public class CrossPlatformTests:DatabaseTests
         "08:59:36 AM",
         "08:59:36",
         "08:59:36 AM"
-    };
+    ];
 
 
 

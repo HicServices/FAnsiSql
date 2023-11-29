@@ -22,11 +22,10 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            });
+            ]);
 
         //There are no rows in the table yet
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -57,11 +56,10 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Na me", new DatabaseTypeRequest(typeof(string), 10)),
                 new DatabaseColumnRequest("A ge", new DatabaseTypeRequest(typeof(int)))
-            });
+            ]);
 
         //There are no rows in the table yet
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -102,11 +100,10 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            });
+            ]);
 
         //There are no rows in the table yet
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -145,11 +142,10 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            });
+            ]);
 
 
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -192,11 +188,10 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            });
+            ]);
 
 
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -240,11 +235,10 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            });
+            ]);
 
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
@@ -293,11 +287,11 @@ internal class BulkInsertTest : DatabaseTests
     {
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("Test", new[]
-        {
+        var tbl = db.CreateTable("Test",
+        [
             new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100)),
             new DatabaseColumnRequest("Frank", new DatabaseTypeRequest(typeof (string), 100))
-        });
+        ]);
 
         using (var dt = new DataTable())
         {
@@ -320,8 +314,8 @@ internal class BulkInsertTest : DatabaseTests
     {
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
-        {
+        var tbl = db.CreateTable("Test",
+        [
             new("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
@@ -332,7 +326,7 @@ internal class BulkInsertTest : DatabaseTests
                 Default = MandatoryScalarFunctions.GetTodaysDate
             },
             new("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false}
-        });
+        ]);
 
         using (var dt = new DataTable())
         {
@@ -375,8 +369,8 @@ internal class BulkInsertTest : DatabaseTests
 
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
-        {
+        var tbl = db.CreateTable("Test",
+        [
             new("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 AllowNulls = false
@@ -420,7 +414,7 @@ internal class BulkInsertTest : DatabaseTests
             new("Column28", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
             new("Column29", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false}
 
-        });
+        ]);
 
         using (var dt = new DataTable())
         {
@@ -536,14 +530,14 @@ internal class BulkInsertTest : DatabaseTests
     {
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
-        {
+        var tbl = db.CreateTable("Test",
+        [
             new("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
             }
-        });
+        ]);
 
         using var dt = new DataTable();
         dt.Columns.Add("bob");
@@ -558,8 +552,8 @@ internal class BulkInsertTest : DatabaseTests
     {
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
-        {
+        var tbl = db.CreateTable("Test",
+        [
             new("bob", new DatabaseTypeRequest(typeof (int), 100))
             {
                 IsPrimaryKey = true,
@@ -571,7 +565,7 @@ internal class BulkInsertTest : DatabaseTests
                 IsPrimaryKey = true,
                 AllowNulls = false
             }
-        });
+        ]);
 
         using (var dt = new DataTable())
         {
@@ -607,13 +601,13 @@ internal class BulkInsertTest : DatabaseTests
     {
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("Test", new DatabaseColumnRequest[]
-        {
+        var tbl = db.CreateTable("Test",
+        [
             new("num", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(1,10)))
             {
                 AllowNulls = false
             }
-        });
+        ]);
 
         using (var dt = new DataTable())
         {
@@ -694,12 +688,11 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Id", new DatabaseTypeRequest(typeof (int))){IsAutoIncrement = true, IsPrimaryKey = true},
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            });
+            ]);
 
         //There are no rows in the table yet
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -748,10 +741,9 @@ internal class BulkInsertTest : DatabaseTests
 
         var db = GetTestDatabase(type);
         var tbl = db.CreateTable("MyDateTestTable",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("MyDate", new DatabaseTypeRequest(typeof (DateTime))){AllowNulls=false }
-            });
+            ]);
 
         //There are no rows in the table yet
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -763,7 +755,7 @@ internal class BulkInsertTest : DatabaseTests
 
             using var bulk = tbl.BeginBulkInsert();
             bulk.Timeout = 30;
-            bulk.DateTimeDecider.Settings.ExplicitDateFormats = new []{"yyyyMMdd" };
+            bulk.DateTimeDecider.Settings.ExplicitDateFormats = ["yyyyMMdd"];
             bulk.Upload(dt);
         }
 
@@ -777,13 +769,12 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Id", new DatabaseTypeRequest(typeof (int))){IsAutoIncrement = true, IsPrimaryKey = true},
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
                 new DatabaseColumnRequest("Score", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(2,1))),
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            });
+            ]);
 
         //There are no rows in the table yet
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -832,13 +823,12 @@ internal class BulkInsertTest : DatabaseTests
         var db = GetTestDatabase(type);
 
         var tbl = db.CreateTable("MyBulkInsertTest",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Id", new DatabaseTypeRequest(typeof (int))){IsAutoIncrement = true, IsPrimaryKey = true},
                 new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
                 new DatabaseColumnRequest("Score", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(2,1))),
                 new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            });
+            ]);
 
         //There are no rows in the table yet
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));

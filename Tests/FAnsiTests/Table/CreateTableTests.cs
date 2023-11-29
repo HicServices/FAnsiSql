@@ -19,10 +19,10 @@ internal class CreateTableTests:DatabaseTests
     public void CreateSimpleTable_Exists(DatabaseType type)
     {
         var db = GetTestDatabase(type);
-        var table = db.CreateTable("People", new[]
-        {
+        var table = db.CreateTable("People",
+        [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10))
-        });
+        ]);
 
         Assert.That(table.Exists());
 
@@ -43,8 +43,8 @@ internal class CreateTableTests:DatabaseTests
 
         var syntaxHelper = database.Server.GetQuerySyntaxHelper();
 
-        database.CreateTable(tbl.GetRuntimeName(), new[]
-        {
+        database.CreateTable(tbl.GetRuntimeName(),
+        [
             new DatabaseColumnRequest("name", new DatabaseTypeRequest(typeof(string),10), false){IsPrimaryKey=true},
             new DatabaseColumnRequest("foreignName", new DatabaseTypeRequest(typeof(string),7)){IsPrimaryKey=true},
             new DatabaseColumnRequest("address", new DatabaseTypeRequest(typeof (string), 500)),
@@ -52,7 +52,7 @@ internal class CreateTableTests:DatabaseTests
             new DatabaseColumnRequest("score",
                 new DatabaseTypeRequest(typeof (decimal), null, new DecimalSize(5, 3))) //<- e.g. 12345.123
 
-        });
+        ]);
 
         Assert.That(tbl.Exists());
 
@@ -116,7 +116,7 @@ internal class CreateTableTests:DatabaseTests
 
         var table = database.CreateTable(
             "MyTable",
-            new [] {new DatabaseColumnRequest("Name", "VARCHAR2(10)")}
+            [new DatabaseColumnRequest("Name", "VARCHAR2(10)")]
         );
 
         Assert.That(table.DiscoverColumn("Name").DataType.GetLengthIfString(), Is.EqualTo(10));
@@ -128,10 +128,10 @@ internal class CreateTableTests:DatabaseTests
     public void CreateSimpleTable_VarcharTypeCorrect(DatabaseType type)
     {
         var db = GetTestDatabase(type);
-        var table = db.CreateTable("People", new[]
-        {
+        var table = db.CreateTable("People",
+        [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 5))
-        });
+        ]);
 
         Assert.That(table.Exists());
 
@@ -184,13 +184,12 @@ internal class CreateTableTests:DatabaseTests
 
         var table = database.CreateTable(
             "PkTable",
-            new DatabaseColumnRequest[]
-            {
+            [
                 new("Name",new DatabaseTypeRequest(typeof(string),10))
                 {
                     IsPrimaryKey = true
                 }
-            });
+            ]);
 
         Assert.That(table.DiscoverColumn("Name").IsPrimaryKey);
 
@@ -205,14 +204,14 @@ internal class CreateTableTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        var tbl = database.CreateTable("MyTable", new[]
-        {
+        var tbl = database.CreateTable("MyTable",
+        [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100))
             {
                 AllowNulls = false,
                 Collation = collation
             }
-        });
+        ]);
 
         Assert.That(tbl.DiscoverColumn("Name").Collation, Is.EqualTo(collation));
     }
@@ -250,14 +249,14 @@ internal class CreateTableTests:DatabaseTests
     {
         var db = GetTestDatabase(DatabaseType.Oracle);
 
-        var tbl = db.CreateTable("RaceTable", new[]
-        {
+        var tbl = db.CreateTable("RaceTable",
+        [
             new DatabaseColumnRequest("A", "int"),
             new DatabaseColumnRequest("B", "int"),
             new DatabaseColumnRequest("C", "int"),
             new DatabaseColumnRequest("D", "int"),
             new DatabaseColumnRequest("E", "int")
-        });
+        ]);
 
         Assert.That(tbl.GetDataTable().Columns, Has.Count.EqualTo(5));
 
@@ -273,12 +272,12 @@ internal class CreateTableTests:DatabaseTests
     {
         var db = GetTestDatabase(dbType);
 
-        var tbl = db.CreateTable("RaceTable", new[]
-        {
+        var tbl = db.CreateTable("RaceTable",
+        [
             new DatabaseColumnRequest("A", "int"){IsPrimaryKey = true},
             new DatabaseColumnRequest("B", "int")
 
-        });
+        ]);
 
         Assert.That(tbl.GetDataTable().Columns, Has.Count.EqualTo(2));
 
@@ -294,10 +293,9 @@ internal class CreateTableTests:DatabaseTests
     {
         var db = GetTestDatabase(DatabaseType.Oracle);
         var table = db.CreateTable("MyTable",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("MyCol", new DatabaseTypeRequest(typeof(bool)))
-            });
+            ]);
 
         var col = table.DiscoverColumn("MyCol");
         Assert.That(col.DataType.SQLType, Is.EqualTo("decimal(1,0)"));
@@ -527,8 +525,8 @@ internal class CreateTableTests:DatabaseTests
         var db = GetTestDatabase(dbType);
 
 
-        var tbl = db.CreateTable("ScriptsRun", new[]
-        {
+        var tbl = db.CreateTable("ScriptsRun",
+        [
             new DatabaseColumnRequest("cint", new DatabaseTypeRequest(typeof(int)))
                 {IsAutoIncrement = true, IsPrimaryKey = true},
             new DatabaseColumnRequest("clong", new DatabaseTypeRequest(typeof(long))),
@@ -541,7 +539,7 @@ internal class CreateTableTests:DatabaseTests
             new DatabaseColumnRequest("modified_date", new DatabaseTypeRequest(typeof(DateTime))),
             new DatabaseColumnRequest("entered_by", new DatabaseTypeRequest(typeof(string), 50))
 
-        });
+        ]);
 
         Assert.Multiple(() =>
         {

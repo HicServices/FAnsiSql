@@ -88,7 +88,7 @@ internal class AggregationTests:DatabaseTests
 
     protected void AssertHasRow(DataTable dt, params object[] cells)
     {
-        Assert.That(dt.Rows.Cast<DataRow>().Any(r=>IsMatch(r,cells)),"Did not find expected row:{0}", string.Join("|",cells));
+        Assert.That(dt.Rows.Cast<DataRow>().Any(r => IsMatch(r, cells)),$"Did not find expected row:{string.Join("|", cells)}");
     }
 
     /// <summary>

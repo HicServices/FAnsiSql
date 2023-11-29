@@ -31,10 +31,9 @@ internal class BasicInsertTests:DatabaseTests
     {
         var db = GetTestDatabase(type);
         var tbl = db.CreateTable("InsertTable",
-            new []
-            {
+            [
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(value.GetType(),100,new DecimalSize(5,5)))
-            });
+            ]);
 
         var nameCol = tbl.DiscoverColumn("Name");
 
@@ -58,10 +57,9 @@ internal class BasicInsertTests:DatabaseTests
     {
         var db = GetTestDatabase(type);
         var tbl = db.CreateTable("InsertTable",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(value.GetType(),100,new DecimalSize(5,5)))
-            });
+            ]);
 
         tbl.Insert(new Dictionary<string, object>
         {
@@ -80,11 +78,10 @@ internal class BasicInsertTests:DatabaseTests
     {
         var db = GetTestDatabase(type);
         var tbl = db.CreateTable("InsertTable",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("myidentity",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true,IsAutoIncrement = true},
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),100))
-            });
+            ]);
 
         var nameCol = tbl.DiscoverColumn("Name");
 

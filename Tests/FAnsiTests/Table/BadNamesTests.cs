@@ -36,11 +36,11 @@ internal class BadNamesTests : DatabaseTests
         var db = GetTestDatabase(dbType);
 
         var (badTableName,badColumnName,badColumnName2) = GetBadNames(dbType);
-        return db.CreateTable(badTableName,new[]
-        {
+        return db.CreateTable(badTableName,
+        [
             new DatabaseColumnRequest(badColumnName,new DatabaseTypeRequest(typeof(string),100)),
             new DatabaseColumnRequest(badColumnName2,new DatabaseTypeRequest(typeof(int)))
-        });
+        ]);
 
     }
 
@@ -195,18 +195,18 @@ internal class BadNamesTests : DatabaseTests
         var db = GetTestDatabase(dbType);
 
 
-        var tbl1 = db.CreateTable(badTableName,new[]
-        {
+        var tbl1 = db.CreateTable(badTableName,
+        [
             new DatabaseColumnRequest(badColumnName,new DatabaseTypeRequest(typeof(string),100)){IsPrimaryKey = true },
             new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int)))
-        });
+        ]);
 
         var pk = tbl1.DiscoverColumns().Single(c=>c.IsPrimaryKey);
         DatabaseColumnRequest fk;
 
         var tbl2 = db.CreateTable(new CreateTableArgs(db, $"{badTableName}2",null)
         {
-            ExplicitColumnDefinitions = new []{fk = new DatabaseColumnRequest($"{badColumnName}2",new DatabaseTypeRequest(typeof(string),100)) },
+            ExplicitColumnDefinitions = [fk = new DatabaseColumnRequest($"{badColumnName}2",new DatabaseTypeRequest(typeof(string),100))],
             ForeignKeyPairs = new Dictionary<DatabaseColumnRequest, DiscoveredColumn> {{fk, pk} }
         });
 

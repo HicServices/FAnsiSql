@@ -18,23 +18,22 @@ internal class ForeignKeyTests:DatabaseTests
 
 
         var parentTable = db.CreateTable("Table1",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Id", "int", false)
                 {
                     IsAutoIncrement = true,
                     IsPrimaryKey = true
                 }
-            });
+            ]);
 
         var discovered_pkCol = parentTable.DiscoverColumn("Id");
         var requested_fkCol = new DatabaseColumnRequest("Parent_Id", "int");
 
-        var childTable = db.CreateTable("Child1", new[]
-        {
+        var childTable = db.CreateTable("Child1",
+        [
             requested_fkCol,
             new DatabaseColumnRequest("SomeNumber", "int")
-        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
+        ], new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {requested_fkCol,discovered_pkCol}
 
@@ -89,8 +88,7 @@ internal class ForeignKeyTests:DatabaseTests
         var db = GetTestDatabase(dbType);
 
         var parentTable = db.CreateTable("Table2",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Id1", "int", false)
                 {
                     IsPrimaryKey = true
@@ -100,19 +98,19 @@ internal class ForeignKeyTests:DatabaseTests
                     IsPrimaryKey = true
                 }
 
-            });
+            ]);
 
         var discovered_pkCol1 = parentTable.DiscoverColumn("Id1");
         var discovered_pkCol2 = parentTable.DiscoverColumn("Id2");
 
         var requested_fkCol1 = new DatabaseColumnRequest("Parent_Id1", "int");
         var requested_fkCol2 = new DatabaseColumnRequest("Parent_Id2", "int");
-        var childTable = db.CreateTable("Child2", new[]
-        {
+        var childTable = db.CreateTable("Child2",
+        [
             requested_fkCol1,
             requested_fkCol2
 
-        }, new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
+        ], new Dictionary<DatabaseColumnRequest, DiscoveredColumn>
         {
             {requested_fkCol1,discovered_pkCol1},
             {requested_fkCol2,discovered_pkCol2}
@@ -157,20 +155,20 @@ internal class ForeignKeyTests:DatabaseTests
 
         var db = GetTestDatabase(dbType);
 
-        var t2 = db.CreateTable("T2", new DatabaseColumnRequest[]
-        {
+        var t2 = db.CreateTable("T2",
+        [
             new("c2", new DatabaseTypeRequest(typeof(int)))
-        });
+        ]);
 
-        var t3 = db.CreateTable("T3", new DatabaseColumnRequest[]
-        {
+        var t3 = db.CreateTable("T3",
+        [
             new("c3", new DatabaseTypeRequest(typeof(int)))
-        });
+        ]);
 
-        var t1 = db.CreateTable("T1", new DatabaseColumnRequest[]
-        {
+        var t1 = db.CreateTable("T1",
+        [
             new("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
-        });
+        ]);
 
         var c1 = t1.DiscoverColumns().Single();
         var c2 = t2.DiscoverColumns().Single();
@@ -221,20 +219,20 @@ internal class ForeignKeyTests:DatabaseTests
 
         var db = GetTestDatabase(dbType);
 
-        var t1 = db.CreateTable("T1", new DatabaseColumnRequest[]
-        {
+        var t1 = db.CreateTable("T1",
+        [
             new("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
-        });
+        ]);
 
-        var t2 = db.CreateTable("T2", new DatabaseColumnRequest[]
-        {
+        var t2 = db.CreateTable("T2",
+        [
             new("c2", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
-        });
+        ]);
 
-        var t3 = db.CreateTable("T3", new DatabaseColumnRequest[]
-        {
+        var t3 = db.CreateTable("T3",
+        [
             new("c3", new DatabaseTypeRequest(typeof(int)))
-        });
+        ]);
 
         var c1 = t1.DiscoverColumns().Single();
         var c2 = t2.DiscoverColumns().Single();
@@ -261,9 +259,9 @@ internal class ForeignKeyTests:DatabaseTests
     {
         var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer);
 
-        var cops = db.CreateTable("Cops", new[] {new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100))});
-        var robbers = db.CreateTable("Robbers", new[] { new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100)) });
-        var lawyers = db.CreateTable("Lawyers", new[] { new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100)) });
+        var cops = db.CreateTable("Cops", [new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100))]);
+        var robbers = db.CreateTable("Robbers", [new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100))]);
+        var lawyers = db.CreateTable("Lawyers", [new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100))]);
 
         var sort = new RelationshipTopologicalSort(new[] {cops});
         Assert.That(sort.Order.Single(), Is.EqualTo(cops));

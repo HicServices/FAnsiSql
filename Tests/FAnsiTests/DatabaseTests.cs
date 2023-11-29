@@ -167,7 +167,7 @@ public class DatabaseTests
         foreach (DataRow row1 in dt1.Rows)
         {
             var match = dt2.Rows.Cast<DataRow>().Any(row2=> dt1.Columns.Cast<DataColumn>().All(c => AreBasicallyEquals(row1[c.ColumnName], row2[c.ColumnName])));
-            Assert.That(match, "Couldn't find match for row:{0}", string.Join(",", row1.ItemArray));
+            Assert.That(match, $"Couldn't find match for row:{string.Join(",", row1.ItemArray)}");
         }
 
     }
