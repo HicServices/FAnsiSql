@@ -41,7 +41,7 @@ internal class DatabaseLevelTests : DatabaseTests
         if (type is DatabaseType.MicrosoftSQLServer or DatabaseType.PostgreSql)
         {
             var tbl = db.CreateTable("Heyyy",
-                new[] {new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))},"Fr ank");
+                [new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))],"Fr ank");
 
             Assert.That(tbl.Exists());
 

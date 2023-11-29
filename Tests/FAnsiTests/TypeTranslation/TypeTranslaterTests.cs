@@ -225,7 +225,7 @@ public class TypeTranslaterTests : DatabaseTests
         var tt = db.Server.GetQuerySyntaxHelper().TypeTranslater;
 
         //Create it in database (crashes here if it's an invalid datatype according to DBMS)
-        var tbl = db.CreateTable("TTT", new[] { new DatabaseColumnRequest("MyCol", sqlType) });
+        var tbl = db.CreateTable("TTT", [new DatabaseColumnRequest("MyCol", sqlType)]);
 
         try
         {
@@ -234,7 +234,7 @@ public class TypeTranslaterTests : DatabaseTests
 
             //What type does FAnsi think this is?
             var tBefore = tt.TryGetCSharpTypeForSQLDBType(sqlType);
-            Assert.That(tBefore, Is.Not.Null, "We asked to create a '{0}', DBMS created a '{1}'.  FAnsi didn't recognise '{0}' as a supported Type",sqlType,col.DataType.SQLType);
+            Assert.That(tBefore, Is.Not.Null, $"We asked to create a '{sqlType}', DBMS created a '{col.DataType.SQLType}'.  FAnsi didn't recognise '{sqlType}' as a supported Type");
 
             //Does FAnsi understand the datatype that was actually created on the server (sometimes you specify something and it is an
             //alias for something else e.g. Oracle creates 'varchar2' when you ask for 'CHAR VARYING'

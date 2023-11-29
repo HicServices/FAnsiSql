@@ -16,16 +16,14 @@ internal class DiscoverTablesTests:DatabaseTests
         var db = GetTestDatabase(dbType);
 
         db.CreateTable("AA",
-            new DatabaseColumnRequest[]
-            {
+            [
                 new("F",new DatabaseTypeRequest(typeof(int)))
-            });
+            ]);
 
         db.CreateTable("BB",
-            new DatabaseColumnRequest[]
-            {
+            [
                 new("F",new DatabaseTypeRequest(typeof(int)))
-            });
+            ]);
 
         var tbls = db.DiscoverTables(false);
 
@@ -54,17 +52,15 @@ internal class DiscoverTablesTests:DatabaseTests
         //FAnsi shouldn't let us create a table with an invalid name
         Assert.Throws<RuntimeNameException>(() =>
             db.CreateTable("FF (troll)",
-                new DatabaseColumnRequest[]
-                {
+                [
                     new("F", new DatabaseTypeRequest(typeof(int)))
-                }));
+                ]));
 
         //but we can create a table "FF"
         db.CreateTable("FF",
-            new DatabaseColumnRequest[]
-            {
+            [
                 new("F",new DatabaseTypeRequest(typeof(int)))
-            });
+            ]);
 
         //even though there are 2 tables in the database [BB (ff)] and [FF] only [FF] should be returned
         var tbls = db.DiscoverTables(false);
@@ -90,17 +86,15 @@ internal class DiscoverTablesTests:DatabaseTests
         //FAnsi shouldn't let us create a table with an invalid name
         Assert.Throws<RuntimeNameException>(() =>
             db.CreateTable("FF (troll)",
-                new DatabaseColumnRequest[]
-                {
+                [
                     new("F", new DatabaseTypeRequest(typeof(int)))
-                }));
+                ]));
 
         //but we can create a table "FF"
         db.CreateTable("FF",
-            new DatabaseColumnRequest[]
-            {
+            [
                 new("F",new DatabaseTypeRequest(typeof(int)))
-            });
+            ]);
 
         //even though there are 2 tables in the database [BB (ff)] and [FF] only [FF] should be returned
         var tbls = db.DiscoverTables(true);
@@ -191,7 +185,7 @@ internal class DiscoverTablesTests:DatabaseTests
         //drop it if it exists
         DropBadView(db,true);
 
-        db.CreateTable("ABC",new DatabaseColumnRequest[]{new("A",new DatabaseTypeRequest(typeof(int)))});
+        db.CreateTable("ABC",[new("A",new DatabaseTypeRequest(typeof(int)))]);
 
         using var con = db.Server.GetConnection();
         con.Open();

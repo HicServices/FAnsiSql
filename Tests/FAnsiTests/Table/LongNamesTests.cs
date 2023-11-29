@@ -17,7 +17,7 @@ internal class LongNamesTests : DatabaseTests
         var tableName = new StringBuilder(db.Server.GetQuerySyntaxHelper().MaximumTableLength).Append('a', db.Server.GetQuerySyntaxHelper().MaximumTableLength).ToString();
         var columnName = new StringBuilder(db.Server.GetQuerySyntaxHelper().MaximumColumnLength).Append('b', db.Server.GetQuerySyntaxHelper().MaximumColumnLength).ToString();
 
-        var tbl = db.CreateTable(tableName,new DatabaseColumnRequest[]{new(columnName,new DatabaseTypeRequest(typeof(string),100))});
+        var tbl = db.CreateTable(tableName,[new(columnName,new DatabaseTypeRequest(typeof(string),100))]);
 
         Assert.That(tbl.Exists());
         StringAssert.AreEqualIgnoringCase(tableName,tbl.GetRuntimeName());

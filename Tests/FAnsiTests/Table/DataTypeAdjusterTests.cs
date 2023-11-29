@@ -12,10 +12,10 @@ internal class DataTypeAdjusterTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_WithAdjuster(DatabaseType type)
     {
-        var tbl = GetTestDatabase(type).CreateTable("MyTable", new[]
-        {
+        var tbl = GetTestDatabase(type).CreateTable("MyTable",
+        [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10))
-        }, null, new DataTypeAdjusterTestsPadder());
+        ], null, new DataTypeAdjusterTestsPadder());
 
         Assert.That(tbl.DiscoverColumn("Name").DataType.GetLengthIfString(), Is.EqualTo(12));
         tbl.Drop();

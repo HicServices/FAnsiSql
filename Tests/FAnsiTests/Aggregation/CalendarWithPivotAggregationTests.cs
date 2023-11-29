@@ -74,7 +74,7 @@ internal class CalendarWithPivotAggregationTests:AggregationTests
 
             Assert.That(dt.Rows, Has.Count.EqualTo(10)); //there are 10 years between 2001 and 2010 even though not all years are represented in the data
 
-            // only validate hard output, we got rows on easy thats enough for now
+            // only validate hard output, we got rows on easy that's enough for now
             if (easy)
                 return;
 

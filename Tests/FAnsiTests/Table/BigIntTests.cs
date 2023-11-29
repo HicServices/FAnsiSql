@@ -12,7 +12,7 @@ public class BigIntTests : DatabaseTests
     public void TestBigInt_Insert(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
-        var tbl = db.CreateTable("MyBigIntTable", new []{ new DatabaseColumnRequest("Col1","bigint",false)});
+        var tbl = db.CreateTable("MyBigIntTable", [new DatabaseColumnRequest("Col1","bigint",false)]);
 
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
@@ -30,7 +30,7 @@ public class BigIntTests : DatabaseTests
     public void TestBigInt_InsertDataTable(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
-        var tbl = db.CreateTable("MyBigIntTable", new []{ new DatabaseColumnRequest("Col1","bigint",false)});
+        var tbl = db.CreateTable("MyBigIntTable", [new DatabaseColumnRequest("Col1","bigint",false)]);
 
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 

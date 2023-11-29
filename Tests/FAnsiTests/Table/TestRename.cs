@@ -12,7 +12,7 @@ internal class TestRename:DatabaseTests
     {
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("MyTable",new []{new DatabaseColumnRequest("Age",new DatabaseTypeRequest(typeof(int)) )});
+        var tbl = db.CreateTable("MyTable",[new DatabaseColumnRequest("Age",new DatabaseTypeRequest(typeof(int)) )]);
 
         Assert.That(tbl.Exists());
 
