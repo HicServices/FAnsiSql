@@ -21,6 +21,6 @@ internal class TypeTranslaterUnitTests
     public void Test_IsSupportedType(DatabaseType dbType,string sqlDbType,bool expectedOutcome)
     {
         var tt = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper().TypeTranslater;
-        Assert.AreEqual(expectedOutcome,tt.IsSupportedSQLDBType(sqlDbType),$"Unexpected result for IsSupportedSQLDBType with {dbType}.  Input was '{sqlDbType}' expected {expectedOutcome}");
+        Assert.That(tt.IsSupportedSQLDBType(sqlDbType), Is.EqualTo(expectedOutcome), $"Unexpected result for IsSupportedSQLDBType with {dbType}.  Input was '{sqlDbType}' expected {expectedOutcome}");
     }
 }

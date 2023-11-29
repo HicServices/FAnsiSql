@@ -31,10 +31,9 @@ internal class BasicInsertTests:DatabaseTests
     {
         var db = GetTestDatabase(type);
         var tbl = db.CreateTable("InsertTable",
-            new []
-            {
+            [
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(value.GetType(),100,new DecimalSize(5,5)))
-            });
+            ]);
 
         var nameCol = tbl.DiscoverColumn("Name");
 
@@ -44,8 +43,8 @@ internal class BasicInsertTests:DatabaseTests
         });
 
         var result = tbl.GetDataTable();
-        Assert.AreEqual(1,result.Rows.Count);
-        Assert.AreEqual(value,result.Rows[0][0]);
+        Assert.That(result.Rows, Has.Count.EqualTo(1));
+        Assert.That(result.Rows[0][0], Is.EqualTo(value));
 
         tbl.Drop();
     }
@@ -58,10 +57,9 @@ internal class BasicInsertTests:DatabaseTests
     {
         var db = GetTestDatabase(type);
         var tbl = db.CreateTable("InsertTable",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(value.GetType(),100,new DecimalSize(5,5)))
-            });
+            ]);
 
         tbl.Insert(new Dictionary<string, object>
         {
@@ -69,8 +67,8 @@ internal class BasicInsertTests:DatabaseTests
         });
 
         var result = tbl.GetDataTable();
-        Assert.AreEqual(1, result.Rows.Count);
-        Assert.AreEqual(value, result.Rows[0][0]);
+        Assert.That(result.Rows, Has.Count.EqualTo(1));
+        Assert.That(result.Rows[0][0], Is.EqualTo(value));
 
         tbl.Drop();
     }
@@ -80,11 +78,10 @@ internal class BasicInsertTests:DatabaseTests
     {
         var db = GetTestDatabase(type);
         var tbl = db.CreateTable("InsertTable",
-            new[]
-            {
+            [
                 new DatabaseColumnRequest("myidentity",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true,IsAutoIncrement = true},
                 new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),100))
-            });
+            ]);
 
         var nameCol = tbl.DiscoverColumn("Name");
 
@@ -93,7 +90,7 @@ internal class BasicInsertTests:DatabaseTests
             {nameCol,"fish"}
         });
 
-        Assert.AreEqual(1,result);
+        Assert.That(result, Is.EqualTo(1));
 
 
         result = tbl.Insert(new Dictionary<DiscoveredColumn, object>
@@ -101,6 +98,6 @@ internal class BasicInsertTests:DatabaseTests
             {nameCol,"fish"}
         });
 
-        Assert.AreEqual(2, result);
+        Assert.That(result, Is.EqualTo(2));
     }
 }

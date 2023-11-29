@@ -20,7 +20,7 @@ namespace FAnsiTests;
 [NonParallelizable]
 public class DatabaseTests
 {
-    protected readonly Dictionary<DatabaseType,string> TestConnectionStrings = new();
+    protected readonly Dictionary<DatabaseType,string> TestConnectionStrings = [];
 
     private bool _allowDatabaseCreation;
     private string _testScratchDatabase;
@@ -39,7 +39,7 @@ public class DatabaseTests
 
             var file = Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilename);
 
-            Assert.IsTrue(File.Exists(file),"Could not find " + TestFilename);
+            Assert.That(File.Exists(file),"Could not find " + TestFilename);
 
             var doc = XDocument.Load(file);
 
@@ -158,13 +158,16 @@ public class DatabaseTests
 
     protected static void AssertAreEqual(DataTable dt1, DataTable dt2)
     {
-        Assert.AreEqual(dt1.Columns.Count, dt2.Columns.Count, "DataTables had a column count mismatch");
-        Assert.AreEqual(dt1.Rows.Count, dt2.Rows.Count, "DataTables had a row count mismatch");
+        Assert.Multiple(() =>
+        {
+            Assert.That(dt2.Columns, Has.Count.EqualTo(dt1.Columns.Count), "DataTables had a column count mismatch");
+            Assert.That(dt2.Rows, Has.Count.EqualTo(dt1.Rows.Count), "DataTables had a row count mismatch");
+        });
 
         foreach (DataRow row1 in dt1.Rows)
         {
             var match = dt2.Rows.Cast<DataRow>().Any(row2=> dt1.Columns.Cast<DataColumn>().All(c => AreBasicallyEquals(row1[c.ColumnName], row2[c.ColumnName])));
-            Assert.IsTrue(match, "Couldn't find match for row:{0}", string.Join(",", row1.ItemArray));
+            Assert.That(match, $"Couldn't find match for row:{string.Join(",", row1.ItemArray)}");
         }
 
     }

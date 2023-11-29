@@ -108,7 +108,7 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
                 DropFunction(connection,(DiscoveredTableValuedFunction) tableToDrop);
                 return;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(tableToDrop),$"Unknown table type {tableToDrop.TableType}");
         }
 
         using(cmd)

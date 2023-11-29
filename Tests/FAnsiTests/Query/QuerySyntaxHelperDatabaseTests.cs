@@ -2,6 +2,7 @@
 using FAnsi;
 using FAnsi.Discovery.QuerySyntax;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Query;
 
@@ -47,6 +48,6 @@ internal class QuerySyntaxHelperDatabaseTests : DatabaseTests
         var sql = $"SELECT MAX({len}(f)) from {tbl.GetFullyQualifiedName()}";
 
         var cmd = tbl.Database.Server.GetCommand(sql, con);
-        Assert.AreEqual(10, cmd.ExecuteScalar());
+        Assert.That(cmd.ExecuteScalar(), Is.EqualTo(10));
     }
 }

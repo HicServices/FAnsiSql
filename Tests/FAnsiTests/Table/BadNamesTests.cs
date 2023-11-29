@@ -36,11 +36,11 @@ internal class BadNamesTests : DatabaseTests
         var db = GetTestDatabase(dbType);
 
         var (badTableName,badColumnName,badColumnName2) = GetBadNames(dbType);
-        return db.CreateTable(badTableName,new[]
-        {
+        return db.CreateTable(badTableName,
+        [
             new DatabaseColumnRequest(badColumnName,new DatabaseTypeRequest(typeof(string),100)),
             new DatabaseColumnRequest(badColumnName2,new DatabaseTypeRequest(typeof(int)))
-        });
+        ]);
 
     }
 
@@ -50,10 +50,13 @@ internal class BadNamesTests : DatabaseTests
         var factory = new QuerySyntaxHelperFactory();
         var syntax = factory.Create(dbType);
 
-        Assert.AreEqual("",syntax.EnsureWrapped(""));
-        Assert.AreEqual(" ", syntax.EnsureWrapped(" "));
-        Assert.AreEqual("\t", syntax.EnsureWrapped("\t"));
-        Assert.IsNull(syntax.EnsureWrapped(null));
+        Assert.Multiple(() =>
+        {
+            Assert.That(syntax.EnsureWrapped(""), Is.EqualTo(""));
+            Assert.That(syntax.EnsureWrapped(" "), Is.EqualTo(" "));
+            Assert.That(syntax.EnsureWrapped("\t"), Is.EqualTo("\t"));
+        });
+        Assert.That(syntax.EnsureWrapped(null), Is.Null);
 
     }
 
@@ -63,8 +66,11 @@ internal class BadNamesTests : DatabaseTests
         var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer);
         var tbl = db.ExpectTable("][nquisitor");
 
-        Assert.IsFalse(tbl.Exists());
-        Assert.AreEqual("[]][nquisitor]",tbl.GetWrappedName());
+        Assert.Multiple(() =>
+        {
+            Assert.That(tbl.Exists(), Is.False);
+            Assert.That(tbl.GetWrappedName(), Is.EqualTo("[]][nquisitor]"));
+        });
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -72,7 +78,7 @@ internal class BadNamesTests : DatabaseTests
     {
         var tbl = SetupBadNamesTable(dbType);
         var cols = tbl.DiscoverColumns();
-        Assert.AreEqual(2,cols.Length);
+        Assert.That(cols, Has.Length.EqualTo(2));
 
         tbl.Drop();
     }
@@ -84,14 +90,14 @@ internal class BadNamesTests : DatabaseTests
 
         var (_, badColumnName, _) = GetBadNames(dbType);
         var col = tbl.DiscoverColumn(badColumnName);
-        Assert.AreEqual(100,col.DataType.GetLengthIfString());
+        Assert.That(col.DataType.GetLengthIfString(), Is.EqualTo(100));
 
         var varcharType = tbl.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof(string),10));
 
         // Can we ALTER its datatype
-        Assert.AreEqual(100,col.DataType.GetLengthIfString());
+        Assert.That(col.DataType.GetLengthIfString(), Is.EqualTo(100));
         col.DataType.AlterTypeTo(varcharType);
-        Assert.AreEqual(10,col.DataType.GetLengthIfString());
+        Assert.That(col.DataType.GetLengthIfString(), Is.EqualTo(10));
 
         tbl.Drop();
 
@@ -104,13 +110,13 @@ internal class BadNamesTests : DatabaseTests
         var tbl = SetupBadNamesTable(dbType);
         var col = tbl.DiscoverColumn(badColumnName);
 
-        Assert.AreEqual(0,tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,"ff" } });
         tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,"ff" } });
         tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,DBNull.Value } });
 
-        Assert.AreEqual(3,tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(3));
 
         var topx = col.GetTopXSql(5,noNulls);
 
@@ -121,12 +127,12 @@ internal class BadNamesTests : DatabaseTests
             var cmd = svr.GetCommand(topx,con);
             var r= cmd.ExecuteReader();
 
-            Assert.IsTrue(r.Read());
-            Assert.IsTrue(r.Read());
+            Assert.That(r.Read());
+            Assert.That(r.Read());
 
-            Assert.AreEqual(!noNulls,r.Read());
+            Assert.That(r.Read(), Is.EqualTo(!noNulls));
 
-            Assert.IsFalse(r.Read());
+            Assert.That(r.Read(), Is.False);
         }
 
         tbl.Drop();
@@ -139,13 +145,13 @@ internal class BadNamesTests : DatabaseTests
         var (_, badColumnName, _) = GetBadNames(dbType);
         var tbl = SetupBadNamesTable(dbType);
 
-        Assert.AreEqual(2,tbl.DiscoverColumns().Length);
+        Assert.That(tbl.DiscoverColumns(), Has.Length.EqualTo(2));
 
         var col = tbl.DiscoverColumn(badColumnName);
 
         tbl.DropColumn(col);
 
-        Assert.AreEqual(1,tbl.DiscoverColumns().Length);
+        Assert.That(tbl.DiscoverColumns(), Has.Length.EqualTo(1));
 
         tbl.Drop();
     }
@@ -159,7 +165,7 @@ internal class BadNamesTests : DatabaseTests
         var tbl = SetupBadNamesTable(dbType);
         var col = tbl.DiscoverColumn(badColumnName);
 
-        Assert.AreEqual(0,tbl.GetRowCount());
+        Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
 
         tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,"ff" } });
         tbl.Insert(new Dictionary<DiscoveredColumn, object>{{col,"ff" } });
@@ -174,9 +180,9 @@ internal class BadNamesTests : DatabaseTests
             var cmd = svr.GetCommand(topx,con);
             var r= cmd.ExecuteReader();
 
-            Assert.IsTrue(r.Read());
-            Assert.IsTrue(r.Read());
-            Assert.IsFalse(r.Read());
+            Assert.That(r.Read());
+            Assert.That(r.Read());
+            Assert.That(r.Read(), Is.False);
         }
 
         tbl.Drop();
@@ -189,28 +195,31 @@ internal class BadNamesTests : DatabaseTests
         var db = GetTestDatabase(dbType);
 
 
-        var tbl1 = db.CreateTable(badTableName,new[]
-        {
+        var tbl1 = db.CreateTable(badTableName,
+        [
             new DatabaseColumnRequest(badColumnName,new DatabaseTypeRequest(typeof(string),100)){IsPrimaryKey = true },
             new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int)))
-        });
+        ]);
 
         var pk = tbl1.DiscoverColumns().Single(c=>c.IsPrimaryKey);
         DatabaseColumnRequest fk;
 
         var tbl2 = db.CreateTable(new CreateTableArgs(db, $"{badTableName}2",null)
         {
-            ExplicitColumnDefinitions = new []{fk = new DatabaseColumnRequest($"{badColumnName}2",new DatabaseTypeRequest(typeof(string),100)) },
+            ExplicitColumnDefinitions = [fk = new DatabaseColumnRequest($"{badColumnName}2",new DatabaseTypeRequest(typeof(string),100))],
             ForeignKeyPairs = new Dictionary<DatabaseColumnRequest, DiscoveredColumn> {{fk, pk} }
         });
 
         var r = tbl1.DiscoverRelationships().Single();
 
-        Assert.AreEqual(tbl1,r.PrimaryKeyTable);
-        Assert.AreEqual(tbl2,r.ForeignKeyTable);
+        Assert.Multiple(() =>
+        {
+            Assert.That(r.PrimaryKeyTable, Is.EqualTo(tbl1));
+            Assert.That(r.ForeignKeyTable, Is.EqualTo(tbl2));
 
-        Assert.AreEqual(pk, r.Keys.Single().Key);
-        Assert.AreEqual(tbl2.DiscoverColumn($"{badColumnName}2"), r.Keys.Single().Value);
+            Assert.That(r.Keys.Single().Key, Is.EqualTo(pk));
+            Assert.That(r.Keys.Single().Value, Is.EqualTo(tbl2.DiscoverColumn($"{badColumnName}2")));
+        });
 
         tbl2.Drop();
         tbl1.Drop();
@@ -233,7 +242,7 @@ internal class BadNamesTests : DatabaseTests
             insert.Upload(dt);
         }
 
-        Assert.AreEqual(1,dt.Rows.Count);
+        Assert.That(dt.Rows, Has.Count.EqualTo(1));
         tbl.Drop();
     }
 
@@ -248,7 +257,7 @@ internal class BadNamesTests : DatabaseTests
 
         tbl.Rename(badTableName.Replace('F','A'));
 
-        Assert.AreNotEqual(nameBefore,tbl.GetFullyQualifiedName());
+        Assert.That(tbl.GetFullyQualifiedName(), Is.Not.EqualTo(nameBefore));
 
         tbl.Drop();
     }

@@ -12,25 +12,19 @@ namespace FAnsi.Discovery.ConnectionStringDefaults;
 /// 
 /// <para>Also handles connection string keyword aliases (where two words mean the same thing)</para>
 /// </summary>
-public class ConnectionStringKeywordAccumulator
+/// <remarks>
+/// Initialises a new blank instance that does nothing.  Call <see cref="AddOrUpdateKeyword"/> to adjust the template connection string options.
+/// </remarks>
+/// <param name="databaseType"></param>
+public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType)
 {
     /// <summary>
-    /// <see cref="DatabaseType"/> describing what implmentation of DbConnectionStringBuilder is being manipulated
+    /// <see cref="DatabaseType"/> describing what implementation of DbConnectionStringBuilder is being manipulated
     /// </summary>
-    public DatabaseType DatabaseType { get; private set; }
+    public DatabaseType DatabaseType { get; private set; } = databaseType;
 
     private readonly Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>> _keywords = new(StringComparer.CurrentCultureIgnoreCase);
-    private readonly DbConnectionStringBuilder _builder;
-
-    /// <summary>
-    /// Initialises a new blank instance that does nothing.  Call <see cref="AddOrUpdateKeyword"/> to adjust the template connection string options.
-    /// </summary>
-    /// <param name="databaseType"></param>
-    public ConnectionStringKeywordAccumulator(DatabaseType databaseType)
-    {
-        DatabaseType = databaseType;
-        _builder = ImplementationManager.GetImplementation(databaseType).GetBuilder();
-    }
+    private readonly DbConnectionStringBuilder _builder = ImplementationManager.GetImplementation(databaseType).GetBuilder();
 
     /// <summary>
     /// Adds a new connection string option (which must be compatible with <see cref="DatabaseType"/>)

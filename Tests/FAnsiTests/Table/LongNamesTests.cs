@@ -2,6 +2,7 @@
 using FAnsi;
 using FAnsi.Discovery;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Table;
@@ -16,13 +17,13 @@ internal class LongNamesTests : DatabaseTests
         var tableName = new StringBuilder(db.Server.GetQuerySyntaxHelper().MaximumTableLength).Append('a', db.Server.GetQuerySyntaxHelper().MaximumTableLength).ToString();
         var columnName = new StringBuilder(db.Server.GetQuerySyntaxHelper().MaximumColumnLength).Append('b', db.Server.GetQuerySyntaxHelper().MaximumColumnLength).ToString();
 
-        var tbl = db.CreateTable(tableName,new DatabaseColumnRequest[]{new(columnName,new DatabaseTypeRequest(typeof(string),100))});
+        var tbl = db.CreateTable(tableName,[new(columnName,new DatabaseTypeRequest(typeof(string),100))]);
 
-        Assert.IsTrue(tbl.Exists());
+        Assert.That(tbl.Exists());
         StringAssert.AreEqualIgnoringCase(tableName,tbl.GetRuntimeName());
 
         var col = tbl.DiscoverColumn(columnName);
-        Assert.IsNotNull(col);
+        Assert.That(col, Is.Not.Null);
         StringAssert.AreEqualIgnoringCase(columnName,col.GetRuntimeName());
     }
 
@@ -41,7 +42,7 @@ internal class LongNamesTests : DatabaseTests
         var db2 = db.Server.ExpectDatabase(sb.ToString());
         db2.Create(true);
 
-        Assert.IsTrue(db2.Exists());
+        Assert.That(db2.Exists());
         StringAssert.AreEqualIgnoringCase(sb.ToString(),db2.GetRuntimeName());
 
         db2.Drop();

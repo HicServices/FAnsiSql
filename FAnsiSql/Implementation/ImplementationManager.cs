@@ -27,7 +27,7 @@ public class ImplementationManager
 
     private ImplementationManager()
     {
-        _implementations = new List<IImplementation>();
+        _implementations = [];
     }
 
     /// <summary>

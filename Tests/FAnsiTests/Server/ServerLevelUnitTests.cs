@@ -13,6 +13,6 @@ internal class ServerLevelUnitTests
                 InitialCatalog = "master"
             };
 
-        Assert.AreEqual("Data Source=localhost;Initial Catalog=master;User ID=SA;Password=blah;Encrypt=True;Trust Server Certificate=True", b.ConnectionString);
+        Assert.That(b.ConnectionString, Is.EqualTo("Data Source=localhost;Initial Catalog=master;User ID=SA;Password=blah;Encrypt=True;Trust Server Certificate=True"));
     }
 }

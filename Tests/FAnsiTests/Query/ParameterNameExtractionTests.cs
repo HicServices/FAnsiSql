@@ -20,15 +20,15 @@ public class ParameterNameExtractionTests
     [TestCase("@bobby='active'")]
     public void TestExtractionOfParmaetersFromSQL_FindOne(string sql)
     {
-        Assert.AreEqual("@bobby",QuerySyntaxHelper.GetAllParameterNamesFromQuery(sql).SingleOrDefault());
+        Assert.That(QuerySyntaxHelper.GetAllParameterNamesFromQuery(sql).SingleOrDefault(), Is.EqualTo("@bobby"));
     }
 
     [TestCase("[bob]='@bobby'")]
     [TestCase("[bob]='myfriend@bobby.ac.uk'")]
     [TestCase("[bob]='myfriend123@bobby.ac.uk'")]
     [TestCase("[bob]=   ':bobby'")]
-    public void TestExtractionOfParmaetersFromSQL_NoneOne(string sql)
+    public void TestExtractionOfParametersFromSQL_NoneOne(string sql)
     {
-        Assert.AreEqual(0, QuerySyntaxHelper.GetAllParameterNamesFromQuery(sql).Count);
+        Assert.That(QuerySyntaxHelper.GetAllParameterNamesFromQuery(sql), Is.Empty);
     }
 }

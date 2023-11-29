@@ -64,15 +64,15 @@ internal class UpdateTests :DatabaseTests
         var cmd = db.Server.GetCommand(sql, con);
         var affectedRows = cmd.ExecuteNonQuery();
 
-        Assert.AreEqual(1,affectedRows);
+        Assert.That(affectedRows, Is.EqualTo(1));
 
         //Frank should have got a new high score of 900
         cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Frank'", con);
-        Assert.AreEqual(900,cmd.ExecuteScalar());
+        Assert.That(cmd.ExecuteScalar(), Is.EqualTo(900));
 
         //Dave should have his old score of 100
         cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Dave'", con);
-        Assert.AreEqual(100, cmd.ExecuteScalar());
+        Assert.That(cmd.ExecuteScalar(), Is.EqualTo(100));
     }
 
 }

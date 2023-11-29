@@ -92,7 +92,7 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
 
     public override Dictionary<string, string> GetSQLFunctionsDictionary()
     {
-        return new Dictionary<string, string>();
+        return [];
     }
 
     public override string HowDoWeAchieveMd5(string selectSql)

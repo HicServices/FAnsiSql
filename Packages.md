@@ -15,3 +15,4 @@
 | Oracle.ManagedDataAccess.Core  | Closed Source | [OTNLA](https://www.oracle.com/downloads/licenses/distribution-license.html) | Enables interaction with Oracle databases |
 | HIC.TypeGuesser | [GitHub](https://github.com/HicServices/TypeGuesser) | [MIT](https://opensource.org/licenses/MIT)| Allows picking system Types for untyped strings e.g. `"12.3"`| |
 | Npgsql | [GitHub](https://github.com/npgsql/npgsql) | [PostgreSQL](https://github.com/npgsql/npgsql/blob/dev/LICENSE)| Enables interaction with Postgres databases  | |
+| [NUnit.Analyzers](https://nunit.org/) |[GitHub](https://github.com/nunit/nunit.analyzers) | [MIT](https://opensource.org/licenses/MIT) | Unit testing support code |

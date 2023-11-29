@@ -104,7 +104,7 @@ public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
 
     public override Dictionary<string, string> GetSQLFunctionsDictionary()
     {
-        return new Dictionary<string, string>();
+        return [];
     }
 
     public override string HowDoWeAchieveMd5(string selectSql)

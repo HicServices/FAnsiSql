@@ -8,6 +8,6 @@ internal class ImplementationManagerLoadTests
     [Test]
     public void Test_LoadAssemblies_FromDirectory()
     {
-        Assert.GreaterOrEqual(ImplementationManager.GetImplementations().Count,3);
+        Assert.That(ImplementationManager.GetImplementations(), Has.Count.GreaterThanOrEqualTo(3));
     }
 }

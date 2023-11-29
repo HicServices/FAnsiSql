@@ -12,7 +12,7 @@ internal class DatabaseLevelTests : DatabaseTests
     public void Database_Exists(DatabaseType type)
     {
         var server = GetTestDatabase(type);
-        Assert.IsTrue(server.Exists(), "Server " + server + " did not exist");
+        Assert.That(server.Exists(), "Server " + server + " did not exist");
     }
 
 
@@ -25,7 +25,7 @@ internal class DatabaseLevelTests : DatabaseTests
         var helper = ImplementationManager.GetImplementation(type).GetServerHelper();
         var server = new DiscoveredServer(helper.GetConnectionStringBuilder("loco","db","frank","kangaro"));
         var db = server.ExpectDatabase("omg");
-        Assert.AreEqual(upperCase?"OMG":"omg",db.GetRuntimeName());
+        Assert.That(db.GetRuntimeName(), Is.EqualTo(upperCase ?"OMG":"omg"));
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -41,12 +41,12 @@ internal class DatabaseLevelTests : DatabaseTests
         if (type is DatabaseType.MicrosoftSQLServer or DatabaseType.PostgreSql)
         {
             var tbl = db.CreateTable("Heyyy",
-                new[] {new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))},"Fr ank");
+                [new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))],"Fr ank");
 
-            Assert.IsTrue(tbl.Exists());
+            Assert.That(tbl.Exists());
 
             if(type == DatabaseType.MicrosoftSQLServer)
-                Assert.AreEqual("Fr ank",tbl.Schema);
+                Assert.That(tbl.Schema, Is.EqualTo("Fr ank"));
         }
     }
 }
