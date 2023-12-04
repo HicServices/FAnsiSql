@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using TypeGuesser;
 
 namespace FAnsi.Discovery.TypeTranslation;
@@ -36,6 +37,9 @@ public interface ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns>The C# Type which can be used to store values of this database type</returns>
+    [return:
+        DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                   DynamicallyAccessedMemberTypes.PublicFields)]
     Type GetCSharpTypeForSQLDBType(string sqlType);
 
     /// <summary>
@@ -45,6 +49,9 @@ public interface ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns>The C# Type which can be used to store values of this database type</returns>
+    [return:
+        DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                   DynamicallyAccessedMemberTypes.PublicFields)]
     Type TryGetCSharpTypeForSQLDBType(string sqlType);
 
     /// <summary>

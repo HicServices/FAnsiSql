@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using FAnsi.Connections;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Exceptions;
@@ -65,6 +66,7 @@ public class DiscoveredDataType
     /// Returns the System.Type that should be used to store values read out of columns of this data type (See <see cref="ITypeTranslater.GetCSharpTypeForSQLDBType"/>
     /// </summary>
     /// <returns></returns>
+    [return:DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties|DynamicallyAccessedMemberTypes.PublicFields)]
     public Type GetCSharpDataType()
     {
         return Column.Table.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(SQLType);
