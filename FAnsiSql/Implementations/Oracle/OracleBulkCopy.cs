@@ -9,15 +9,9 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Implementations.Oracle;
 
-internal class OracleBulkCopy : BulkCopy
+internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture) : BulkCopy(targetTable, connection,culture)
 {
-    private readonly DiscoveredServer _server;
-    private const char ParameterSymbol = ':';
-
-    public OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
-    {
-        _server = targetTable.Database.Server;
-    }
+    private readonly DiscoveredServer _server = targetTable.Database.Server;
 
     public override int UploadImpl(DataTable dt)
     {

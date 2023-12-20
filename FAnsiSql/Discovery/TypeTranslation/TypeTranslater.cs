@@ -7,25 +7,25 @@ using TypeGuesser;
 namespace FAnsi.Discovery.TypeTranslation;
 
 /// <inheritdoc cref="ITypeTranslater"/>
-public abstract class TypeTranslater:ITypeTranslater
+public abstract partial class TypeTranslater:ITypeTranslater
 {
     private const string StringSizeRegexPattern = @"\(([0-9]+)\)";
     private const string DecimalsBeforeAndAfterPattern = @"\(([0-9]+),([0-9]+)\)";
 
     //Take special note of the use or absence of ^ in the regex to do Contains or StartsWith
-    //Ideally dont use $ (end of string) since databases can stick extraneous stuff on the end in many cases
+    //Ideally don't use $ (end of string) since databases can stick extraneous stuff on the end in many cases
 
-    private static readonly Regex BitRegex = new("^(bit)|(bool)|(boolean)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected Regex ByteRegex = new("^tinyint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected Regex SmallIntRegex = new("^smallint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected Regex IntRegex = new("^(int)|(integer)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    protected Regex LongRegex = new("^bigint", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex BitRegex = BitRegexImpl();
+    protected Regex ByteRegex = ByteRegexImpl();
+    protected Regex SmallIntRegex = SmallIntRe();
+    protected Regex IntRegex = IntRe();
+    protected Regex LongRegex = LongRe();
     protected Regex DateRegex;
-    protected Regex TimeRegex = new("^time$", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex StringRegex = new("(char)|(text)|(xml)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex ByteArrayRegex = new("(binary)|(blob)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex FloatingPointRegex = new("^(float)|(decimal)|(numeric)|(real)|(money)|(smallmoney)|(double)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex GuidRegex = new("^uniqueidentifier",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    protected Regex TimeRegex = TimeRe();
+    private static readonly Regex StringRegex = StringRe();
+    private static readonly Regex ByteArrayRegex = ByteArrayRe();
+    private static readonly Regex FloatingPointRegex = FloatingPointRe();
+    private static readonly Regex GuidRegex = GuidRe();
 
     /// <summary>
     /// The maximum number of characters to declare explicitly in the char type (e.g. varchar(500)) before instead declaring the text/varchar(max) etc type
@@ -341,12 +341,12 @@ public abstract class TypeTranslater:ITypeTranslater
         if (string.IsNullOrWhiteSpace(sqlType))
             return -1;
 
-        if (sqlType.ToLower().Contains("(max)") || sqlType.ToLower().Equals("text") || sqlType.ToLower().Equals("ntext"))
+        if (sqlType.Contains("(max)", StringComparison.OrdinalIgnoreCase) || sqlType.ToLower().Equals("text") || sqlType.ToLower().Equals("ntext"))
             return int.MaxValue;
 
-        if (sqlType.ToLower().Contains("char"))
+        if (sqlType.Contains("char", StringComparison.OrdinalIgnoreCase))
         {
-            var match = Regex.Match(sqlType, StringSizeRegexPattern);
+            var match = StringSizeRegex().Match(sqlType);
             if (match.Success)
                 return int.Parse(match.Groups[1].Value);
         }
@@ -359,7 +359,7 @@ public abstract class TypeTranslater:ITypeTranslater
         if (string.IsNullOrWhiteSpace(sqlType))
             return null;
 
-        var match = Regex.Match(sqlType, DecimalsBeforeAndAfterPattern);
+        var match = DecimalsBeforeAndAfterRe().Match(sqlType);
 
         if (match.Success)
         {
@@ -486,4 +486,29 @@ select LEN(dt) from omgdates
     {
         return GuidRegex.IsMatch(sqlType);
     }
+
+    [GeneratedRegex(StringSizeRegexPattern)]
+    private static partial Regex StringSizeRegex();
+    [GeneratedRegex("^(bit)|(bool)|(boolean)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex BitRegexImpl();
+    [GeneratedRegex("^tinyint", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex ByteRegexImpl();
+    [GeneratedRegex("^uniqueidentifier", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex GuidRe();
+    [GeneratedRegex("^smallint", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex SmallIntRe();
+    [GeneratedRegex("^(int)|(integer)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex IntRe();
+    [GeneratedRegex("^bigint", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex LongRe();
+    [GeneratedRegex("^time$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex TimeRe();
+    [GeneratedRegex("(char)|(text)|(xml)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex StringRe();
+    [GeneratedRegex("(binary)|(blob)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex ByteArrayRe();
+    [GeneratedRegex("^(float)|(decimal)|(numeric)|(real)|(money)|(smallmoney)|(double)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex FloatingPointRe();
+    [GeneratedRegex(DecimalsBeforeAndAfterPattern)]
+    private static partial Regex DecimalsBeforeAndAfterRe();
 }

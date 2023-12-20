@@ -867,43 +867,41 @@ public class CrossPlatformTests:DatabaseTests
 
         var database = GetTestDatabase(type);
 
-        //ExpectDatabase with illegal name
-        StringAssert.IsMatch(
-            "Database .* contained unsupported .* characters",
-            Assert.Throws<RuntimeNameException>(()=>database.Server.ExpectDatabase(horribleDatabaseName))
-                ?.Message);
+        Assert.Multiple(() =>
+        {
+            //ExpectDatabase with illegal name
+            Assert.That(
+                Assert.Throws<RuntimeNameException>(() => database.Server.ExpectDatabase(horribleDatabaseName))
+                    ?.Message, Does.Match("Database .* contained unsupported .* characters"));
 
-        //ExpectTable with illegal name
-        StringAssert.IsMatch(
-            "Table .* contained unsupported .* characters",
-            Assert.Throws<RuntimeNameException>(()=>database.ExpectTable(horribleTableName))
-                ?.Message);
+            //ExpectTable with illegal name
+            Assert.That(
+                Assert.Throws<RuntimeNameException>(() => database.ExpectTable(horribleTableName))
+                    ?.Message, Does.Match("Table .* contained unsupported .* characters"));
 
-        //CreateTable with illegal name
-        StringAssert.IsMatch(
-            "Table .* contained unsupported .* characters",
-            Assert.Throws<RuntimeNameException>(()=> database.CreateTable(horribleTableName,
-            [
-                new("a", new DatabaseTypeRequest(typeof(string), 10))
-            ]))
-                ?.Message);
+            //CreateTable with illegal name
+            Assert.That(
+                Assert.Throws<RuntimeNameException>(() => database.CreateTable(horribleTableName,
+                [
+                    new("a", new DatabaseTypeRequest(typeof(string), 10))
+                ]))
+                    ?.Message, Does.Match("Table .* contained unsupported .* characters"));
 
-        //CreateTable with (column) illegal name
-        StringAssert.IsMatch(
-            "Column .* contained unsupported .* characters",
-            Assert.Throws<RuntimeNameException>(()=> database.CreateTable("f",
-            [
-                new(columnName, new DatabaseTypeRequest(typeof(string), 10))
-            ]))
-                ?.Message);
+            //CreateTable with (column) illegal name
+            Assert.That(
+                Assert.Throws<RuntimeNameException>(() => database.CreateTable("f",
+                [
+                    new(columnName, new DatabaseTypeRequest(typeof(string), 10))
+                ]))
+                    ?.Message, Does.Match("Column .* contained unsupported .* characters"));
+        });
 
         AssertCanCreateDatabases();
 
         //CreateDatabase with illegal name
-        StringAssert.IsMatch(
-            "Database .* contained unsupported .* characters",
+        Assert.That(
             Assert.Throws<RuntimeNameException>(()=>database.Server.CreateDatabase(horribleDatabaseName))
-                ?.Message);
+                ?.Message, Does.Match("Database .* contained unsupported .* characters"));
     }
 
     [TestCase(DatabaseType.MySql, "_-o-_", ":>0<:","-_")]
@@ -924,7 +922,7 @@ public class CrossPlatformTests:DatabaseTests
 
         database = database.Server.ExpectDatabase(horribleDatabaseName);
         database.Create(true);
-        StringAssert.AreEqualIgnoringCase(horribleDatabaseName,database.GetRuntimeName());
+        Assert.That(database.GetRuntimeName(), Is.EqualTo(horribleDatabaseName).IgnoreCase);
 
         try
         {

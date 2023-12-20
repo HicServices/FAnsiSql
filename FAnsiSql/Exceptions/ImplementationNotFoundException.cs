@@ -2,10 +2,4 @@ using System;
 
 namespace FAnsi.Exceptions;
 
-public class ImplementationNotFoundException:Exception
-{
-    public ImplementationNotFoundException(string message):base(message)
-    {
-
-    }
-}
+public sealed class ImplementationNotFoundException(string message) : Exception(message);

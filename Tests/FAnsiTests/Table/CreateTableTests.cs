@@ -478,7 +478,7 @@ internal class CreateTableTests:DatabaseTests
 
         var ex = Assert.Throws<NotSupportedException>(()=>db.CreateTable("T1", dt));
 
-        StringAssert.Contains("System.Object",ex?.Message);
+        Assert.That(ex?.Message, Does.Contain("System.Object"));
 
     }
 

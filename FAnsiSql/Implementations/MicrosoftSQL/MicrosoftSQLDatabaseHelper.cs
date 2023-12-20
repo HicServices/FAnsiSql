@@ -97,7 +97,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
                 toReturn.Add(new DiscoveredStoredprocedure((string)result["name"]));
         }
 
-        return toReturn.ToArray();
+        return [.. toReturn];
     }
 
     public override IDiscoveredTableHelper GetTableHelper()
@@ -178,11 +178,13 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
     public override DirectoryInfo Detach(DiscoveredDatabase database)
     {
-        const string getDefaultSqlServerDatabaseDirectory = @"SELECT LEFT(physical_name,LEN(physical_name)-CHARINDEX('\',REVERSE(physical_name))+1) 
-                        FROM sys.master_files mf   
-                        INNER JOIN sys.[databases] d   
-                        ON mf.[database_id] = d.[database_id]   
-                        WHERE d.[name] = 'master' AND type = 0";
+        const string getDefaultSqlServerDatabaseDirectory = """
+                                                            SELECT LEFT(physical_name,LEN(physical_name)-CHARINDEX('\',REVERSE(physical_name))+1)
+                                                                                    FROM sys.master_files mf
+                                                                                    INNER JOIN sys.[databases] d
+                                                                                    ON mf.[database_id] = d.[database_id]
+                                                                                    WHERE d.[name] = 'master' AND type = 0
+                                                            """;
 
         string dataFolder;
 
@@ -243,8 +245,10 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         using var con = discoveredDatabase.Server.GetConnection();
         con.Open();
 
-        var sql = $@"if not exists (select 1 from sys.schemas where name = '{runtimeName}')
-	    EXEC('CREATE SCHEMA {name}')";
+        var sql = $"""
+                   if not exists (select 1 from sys.schemas where name = '{runtimeName}')
+                   	    EXEC('CREATE SCHEMA {name}')
+                   """;
 
         using var cmd = discoveredDatabase.Server.GetCommand(sql, con);
         cmd.ExecuteNonQuery();

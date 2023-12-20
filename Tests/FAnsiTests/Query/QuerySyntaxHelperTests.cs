@@ -104,7 +104,7 @@ internal class QuerySyntaxHelperTests
     {
         var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
         var ex = Assert.Throws<RuntimeNameException>(()=>syntaxHelper.GetRuntimeName("count(*)"));
-        StringAssert.Contains("Could not determine runtime name for Sql:'count(*)'.  It had brackets and no alias.",ex?.Message);
+        Assert.That(ex?.Message, Does.Contain("Could not determine runtime name for Sql:'count(*)'.  It had brackets and no alias."));
 
         Assert.Throws<RuntimeNameException>(()=>syntaxHelper.GetRuntimeName("dbo.GetMyCoolThing(\"Magic Fun Times\")"));
 
@@ -163,7 +163,7 @@ internal class QuerySyntaxHelperTests
     {
         var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
 
-        if (!(syntaxHelper.AliasPrefix.StartsWith(" ") && syntaxHelper.AliasPrefix.EndsWith(" ")))
+        if (!(syntaxHelper.AliasPrefix.StartsWith(' ') && syntaxHelper.AliasPrefix.EndsWith(' ')))
             Assert.Fail(
                 $"GetAliasConst method on Type {GetType().Name} returned a value that was not bounded by whitespace ' '.  GetAliasConst must start and end with a space e.g. ' AS '");
 

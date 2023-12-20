@@ -100,7 +100,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
                 databases.Add((string) r["Database"]);
 
         con.Close();
-        return databases.ToArray();
+        return [.. databases];
     }
 
     public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)

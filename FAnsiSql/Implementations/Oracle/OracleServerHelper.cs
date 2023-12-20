@@ -151,6 +151,6 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
             while (r.Read())
                 databases.Add((string) r["username"]);
 
-        return databases.ToArray();
+        return [.. databases];
     }
 }

@@ -30,16 +30,18 @@ t1.desc = t2.desc;*/
 
 
         return string.Format(
-            @"MERGE INTO {1} t1
-USING
-( 
-    SELECT * FROM {2}
-)t2
-on ({3})
-WHEN MATCHED THEN UPDATE SET
-    {0}
-WHERE
-{4}",
+            """
+            MERGE INTO {1} t1
+            USING
+            (
+                SELECT * FROM {2}
+            )t2
+            on ({3})
+            WHEN MATCHED THEN UPDATE SET
+                {0}
+            WHERE
+            {4}
+            """,
             string.Join($", {Environment.NewLine}", lines.Where(l => l.LocationToInsert == QueryComponent.SET).Select(c => c.Text)),
             table1.GetFullyQualifiedName(),
             table2.GetFullyQualifiedName(),

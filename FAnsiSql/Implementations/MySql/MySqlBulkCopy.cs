@@ -14,14 +14,11 @@ namespace FAnsi.Implementations.MySql;
 /// Inserts rows into MySql table using extended INSERT commands.  'LOAD DATA IN FILE' is not used because it doesn't respect table constraints, can be disabled
 /// on the server and generally can go wrong in a large number of ways.
 /// </summary>
-public class MySqlBulkCopy : BulkCopy
+public partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture)
+    : BulkCopy(targetTable, connection, culture)
 {
 
     public static int BulkInsertBatchTimeoutInSeconds = 0;
-
-    public MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture) : base(targetTable, connection,culture)
-    {
-    }
 
     public override int UploadImpl(DataTable dt)
     {
@@ -78,7 +75,7 @@ public class MySqlBulkCopy : BulkCopy
     private string ConstructIndividualValue(string dataType, object value)
     {
         dataType = dataType.ToUpper();
-        dataType = Regex.Replace(dataType,"\\(.*\\)", "").Trim();
+        dataType = BracketsRe().Replace(dataType, "").Trim();
 
         if(value is DateTime valueDateTime)
             switch (dataType)
@@ -133,4 +130,7 @@ public class MySqlBulkCopy : BulkCopy
             _ => $"'{MySqlHelper.EscapeString(value)}'"
         };
     }
+
+    [GeneratedRegex("\\(.*\\)")]
+    private static partial Regex BracketsRe();
 }

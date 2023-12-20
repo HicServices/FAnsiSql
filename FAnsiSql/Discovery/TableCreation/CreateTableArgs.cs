@@ -9,22 +9,25 @@ namespace FAnsi.Discovery.TableCreation;
 /// Determines the behaviour of <see cref="IDiscoveredDatabaseHelper.CreateTable"/>.  This includes how columns are assigned data types, whether foreign keys
 /// are created etc.
 /// </summary>
-public class CreateTableArgs
+/// <remarks>
+/// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
+/// </remarks>
+public class CreateTableArgs(DiscoveredDatabase database, string tableName, string schema)
 {
     /// <summary>
     /// The destination database in which to create the table
     /// </summary>
-    public DiscoveredDatabase Database { get; set; }
+    public DiscoveredDatabase Database { get; set; } = database;
 
     /// <summary>
     /// Name you want the table to have once created
     /// </summary>
-    public string TableName { get; private set; }
+    public string TableName { get; private set; } = tableName;
 
     /// <summary>
     /// Schema of the <see cref="Database"/> to create the table in.  This is NOT the database e.g. in [MyDb].[dbo].[MyTable] the schema is "dbo". If in doubt leave blank
     /// </summary>
-    public string Schema { get; private set; }
+    public string Schema { get; private set; } = schema;
 
     /// <summary>
     /// Optional - Columns are normally created based on supplied DataTable data rows.  If this is set then the Type specified here will
@@ -69,7 +72,7 @@ public class CreateTableArgs
     /// <summary>
     /// Customise guessing behaviour
     /// </summary>
-    public GuessSettings GuessSettings { get; set; }
+    public GuessSettings GuessSettings { get; set; } = GuessSettingsFactory.Create();
 
     /// <summary>
     /// Populated after the table has been created (See <see cref="TableCreated"/>), list of the <see cref="Guesser"/> used to create the columns in the table.
@@ -81,17 +84,6 @@ public class CreateTableArgs
     /// Used to determine what how to parse untyped strings in <see cref="DataTable"/> (if building schema from data table).
     /// </summary>
     public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
-
-    /// <summary>
-    /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
-    /// </summary>
-    public CreateTableArgs(DiscoveredDatabase database, string tableName, string schema)
-    {
-        Database = database;
-        TableName = tableName;
-        Schema = schema;
-        GuessSettings = GuessSettingsFactory.Create();
-    }
 
     /// <summary>
     /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>

@@ -15,8 +15,10 @@ using TypeGuesser;
 namespace FAnsi.Discovery;
 
 /// <inheritdoc/>
-public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
+public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
 {
+    private static readonly System.Buffers.SearchValues<char> bracket_searcher = System.Buffers.SearchValues.Create("()");
+
     public virtual string DatabaseTableSeparator => ".";
 
     /// <inheritdoc/>
@@ -29,18 +31,18 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public abstract int MaximumColumnLength { get; }
 
     /// <inheritdoc/>
-    public virtual char[] IllegalNameChars { get; } = {'.','(',')'};
+    public virtual char[] IllegalNameChars { get; } = ['.','(',')'];
 
     /// <summary>
     /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
     /// </summary>
     /// <returns></returns>
-    protected static Regex ParameterNamesRegex = new("([@:][A-Za-z0-9_]*)\\s?", RegexOptions.IgnoreCase);
+    protected static Regex ParameterNamesRegex = ParameterNamesRe();
 
     /// <summary>
     /// Symbols (for all database types) which denote wrapped entity names e.g. [dbo].[mytable] contains qualifiers '[' and ']'
     /// </summary>
-    public static char[] TableNameQualifiers = { '[', ']', '`' ,'"'};
+    public static char[] TableNameQualifiers = ['[', ']', '`' ,'"'];
 
     /// <inheritdoc/>
     public abstract string OpenQualifier {get;}
@@ -74,7 +76,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         //alias is a wrapped word e.g. [hey hey].  In this case we must allow anything between the brackets that is not closing bracket
         //[[`""]([^[`""]+)[]`""]
 
-        return new Regex(@"\s+as\s+((\w+)|([[`""]([^[`""]+)[]`""]))$", RegexOptions.IgnoreCase);
+        return AliasRegex();
     }
 
     protected string GetAliasConst()
@@ -135,12 +137,12 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         //it doesn't have an alias, e.g. it's `MyDatabase`.`mytable` or something
 
         //if it's "count(1)" or something then that's a problem!
-        if (s.IndexOfAny(new[]{'(',')' }) != -1)
+        if (s.AsSpan().IndexOfAny(bracket_searcher) != -1)
             throw new RuntimeNameException(
                 $"Could not determine runtime name for Sql:'{s}'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
 
         //Last symbol with no whitespace
-        var lastWord = s[(s.LastIndexOf(".", StringComparison.Ordinal) + 1)..].Trim();
+        var lastWord = s[(s.LastIndexOf('.') + 1)..].Trim();
 
         if(string.IsNullOrWhiteSpace(lastWord) || lastWord.Length<2)
             return lastWord;
@@ -293,7 +295,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         //replace anything that isn't a digit, letter or underscore with emptiness (except spaces - these will go but first...)
         //also accept anything above ASCII 256
-        var r = new Regex("[^A-Za-z0-9_ \u0101-\uFFFF]");
+        var r = HeaderNameCharRegex();
 
         var adjustedHeader = r.Replace(header, "");
 
@@ -311,7 +313,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         adjustedHeader = sb.ToString().Replace(" ", "");
 
         //if it starts with a digit (illegal) put an underscore before it
-        if (Regex.IsMatch(adjustedHeader, "^[0-9]"))
+        if (StartsDigitsRe().IsMatch(adjustedHeader))
             adjustedHeader = $"_{adjustedHeader}";
 
         return adjustedHeader;
@@ -322,11 +324,11 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         potentiallyDodgyName = GetRuntimeName(potentiallyDodgyName);
 
         //replace anything that isn't a digit, letter or underscore with underscores
-        var r = new Regex("[^A-Za-z0-9_]");
+        var r = NotAlphaNumRe();
         var adjustedHeader = r.Replace(potentiallyDodgyName, "_");
 
         //if it starts with a digit (illegal) put an underscore before it
-        if (Regex.IsMatch(adjustedHeader, "^[0-9]"))
+        if (StartsDigitsRe().IsMatch(adjustedHeader))
             adjustedHeader = $"_{adjustedHeader}";
 
         return adjustedHeader;
@@ -353,7 +355,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         if (oleE != null && oleE.ErrorCode == -2147217871)
             return true;*/
 
-        return exception.Message.ToLower().Contains("timeout");
+        return exception.Message.Contains("timeout", StringComparison.OrdinalIgnoreCase);
     }
 
     public abstract string HowDoWeAchieveMd5(string selectSql);
@@ -533,7 +535,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
 
         //sensible parameter names have no spaces or symbols!
-        var sensibleParameterNamesInclude = new Regex(@"^\w*$");
+        var sensibleParameterNamesInclude = sensibleParameterNamesIncludeRe();
 
         for (var i = 0; i < columns.Length; i++)
         {
@@ -548,4 +550,17 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         return toReturn;
     }
+
+    [GeneratedRegex(@"^\w*$")]
+    private static partial Regex sensibleParameterNamesIncludeRe();
+    [GeneratedRegex("""\s+as\s+((\w+)|([[`"]([^[`"]+)[]`"]))$""", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex AliasRegex();
+    [GeneratedRegex("([@:][A-Za-z0-9_]*)\\s?", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex ParameterNamesRe();
+    [GeneratedRegex("[^A-Za-z0-9_ \u0101-\uFFFF]")]
+    private static partial Regex HeaderNameCharRegex();
+    [GeneratedRegex("^[0-9]")]
+    private static partial Regex StartsDigitsRe();
+    [GeneratedRegex("[^A-Za-z0-9_]")]
+    private static partial Regex NotAlphaNumRe();
 }

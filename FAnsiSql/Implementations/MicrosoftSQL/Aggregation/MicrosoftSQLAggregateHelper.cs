@@ -13,29 +13,31 @@ public class MicrosoftSQLAggregateHelper : AggregateHelper
         var startDateSql = axis.StartDate;
         var endDateSql = axis.EndDate;
 
-        return $@"
-    DECLARE	@startDate DATE
-    DECLARE	@endDate DATE
+        return $"""
+                
+                    DECLARE	@startDate DATE
+                    DECLARE	@endDate DATE
+                
+                    SET @startDate = {startDateSql}
+                    SET @endDate = {endDateSql}
+                
+                    DECLARE @dateAxis TABLE
+                    (
+                	    dt DATE
+                    )
+                
+                    DECLARE @currentDate DATE = @startDate
+                
+                    WHILE @currentDate <= @endDate
+                    BEGIN
+                	    INSERT INTO @dateAxis
+                		    SELECT @currentDate
+                
+                	    SET @currentDate = DATEADD({axis.AxisIncrement}, 1, @currentDate)
+                
+                    END
 
-    SET @startDate = {startDateSql}
-    SET @endDate = {endDateSql}
-
-    DECLARE @dateAxis TABLE
-    (
-	    dt DATE
-    )
-
-    DECLARE @currentDate DATE = @startDate
-
-    WHILE @currentDate <= @endDate
-    BEGIN
-	    INSERT INTO @dateAxis 
-		    SELECT @currentDate 
-
-	    SET @currentDate = DATEADD({axis.AxisIncrement}, 1, @currentDate)
-
-    END
-";
+                """;
 
     }
 
@@ -99,22 +101,24 @@ public class MicrosoftSQLAggregateHelper : AggregateHelper
 
 
         return string.Format(
-            @"
-{0}
-{1}
+            """
 
-SELECT 
-{2} AS joinDt,dataset.{3}
-FROM
-@dateAxis axis
-LEFT JOIN
-(
-    {4}
-) dataset
-ON dataset.{5} = {2}
-ORDER BY 
-{2}
-"
+            {0}
+            {1}
+
+            SELECT
+            {2} AS joinDt,dataset.{3}
+            FROM
+            @dateAxis axis
+            LEFT JOIN
+            (
+                {4}
+            ) dataset
+            ON dataset.{5} = {2}
+            ORDER BY
+            {2}
+
+            """
             ,
             string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
             GetDateAxisTableDeclaration(query.Axis),
@@ -135,41 +139,43 @@ ORDER BY
         var part1 = GetPivotPart1(query, out var pivotAlias, out var countAlias, out var axisColumnAlias);
 
         //The dynamic query in which we assemble a query string and EXECUTE it
-        var part2 = string.Format(@"
-/*DYNAMIC PIVOT*/
-declare @Query varchar(MAX)
+        var part2 = string.Format("""
 
-SET @Query = '
-{0}
-{1}
+                                  /*DYNAMIC PIVOT*/
+                                  declare @Query varchar(MAX)
 
-/*Would normally be Select * but must make it IsNull to ensure we see 0s instead of null*/
-select '+@FinalSelectList+'
-from
-(
+                                  SET @Query = '
+                                  {0}
+                                  {1}
 
-SELECT
-    {5} as joinDt,
-    {4},
-    {3}
-    FROM
-    @dateAxis axis
-    LEFT JOIN
-    (
-        {2}
-    )ds
-    on {5} = ds.{6}
-) s
-PIVOT
-(
-	sum({3})
-	for {4} in ('+@Columns+') --The dynamic Column list we just fetched at top of query
-) piv
-ORDER BY 
-joinDt'
+                                  /*Would normally be Select * but must make it IsNull to ensure we see 0s instead of null*/
+                                  select '+@FinalSelectList+'
+                                  from
+                                  (
 
-EXECUTE(@Query)
-",
+                                  SELECT
+                                      {5} as joinDt,
+                                      {4},
+                                      {3}
+                                      FROM
+                                      @dateAxis axis
+                                      LEFT JOIN
+                                      (
+                                          {2}
+                                      )ds
+                                      on {5} = ds.{6}
+                                  ) s
+                                  PIVOT
+                                  (
+                                  	sum({3})
+                                  	for {4} in ('+@Columns+') --The dynamic Column list we just fetched at top of query
+                                  ) piv
+                                  ORDER BY
+                                  joinDt'
+
+                                  EXECUTE(@Query)
+
+                                  """,
             syntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT))),
             syntaxHelper.Escape(GetDateAxisTableDeclaration(query.Axis)),
 
@@ -200,32 +206,34 @@ EXECUTE(@Query)
             nonPivotColumnAlias = syntaxHelper.GetRuntimeName(nonPivotColumnSelect);
 
         //The dynamic query in which we assemble a query string and EXECUTE it
-        var part2 = string.Format(@"
-/*DYNAMIC PIVOT*/
-declare @Query varchar(MAX)
+        var part2 = string.Format("""
 
-SET @Query = '
-{0}
+                                  /*DYNAMIC PIVOT*/
+                                  declare @Query varchar(MAX)
 
-/*Would normally be Select * but must make it IsNull to ensure we see 0s instead of null*/
-select 
-{1},
-'+@FinalSelectList+'
-from
-(
-    {2}
-) s
-PIVOT
-(
-	sum({3})
-	for {4} in ('+@Columns+') --The dynamic Column list we just fetched at top of query
+                                  SET @Query = '
+                                  {0}
 
-) piv
-ORDER BY 
-{1}'
+                                  /*Would normally be Select * but must make it IsNull to ensure we see 0s instead of null*/
+                                  select
+                                  {1},
+                                  '+@FinalSelectList+'
+                                  from
+                                  (
+                                      {2}
+                                  ) s
+                                  PIVOT
+                                  (
+                                  	sum({3})
+                                  	for {4} in ('+@Columns+') --The dynamic Column list we just fetched at top of query
 
-EXECUTE(@Query)
-",
+                                  ) piv
+                                  ORDER BY
+                                  {1}'
+
+                                  EXECUTE(@Query)
+
+                                  """,
             //anything before the SELECT (i.e. parameters)
             syntaxHelper.Escape(string.Join(Environment.NewLine,
                 query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT))),
@@ -283,53 +291,55 @@ EXECUTE(@Query)
             query.Lines.Where(l => l.LocationToInsert == QueryComponent.Having).Select(l => l.Text));
 
         var part1 = string.Format(
-            @"
-/*DYNAMICALLY FETCH COLUMN VALUES FOR USE IN PIVOT*/
-DECLARE @Columns as VARCHAR(MAX)
-{0}
+            """
 
-/*Get distinct values of the PIVOT Column if you have columns with values T and F and Z this will produce [T],[F],[Z] and you will end up with a pivot against these values*/
-set @Columns = (
-{1}
- ',' + QUOTENAME({2}) as [text()] 
-{3}
-{4}
-{5} ( {2} IS NOT NULL and {2} <> '' {7})
-group by 
-{2}
-{8}
-order by 
-{6}
-FOR XML PATH(''), root('MyString'),type
-).value('/MyString[1]','varchar(max)')
+            /*DYNAMICALLY FETCH COLUMN VALUES FOR USE IN PIVOT*/
+            DECLARE @Columns as VARCHAR(MAX)
+            {0}
 
-set @Columns = SUBSTRING(@Columns,2,LEN(@Columns))
+            /*Get distinct values of the PIVOT Column if you have columns with values T and F and Z this will produce [T],[F],[Z] and you will end up with a pivot against these values*/
+            set @Columns = (
+            {1}
+             ',' + QUOTENAME({2}) as [text()]
+            {3}
+            {4}
+            {5} ( {2} IS NOT NULL and {2} <> '' {7})
+            group by
+            {2}
+            {8}
+            order by
+            {6}
+            FOR XML PATH(''), root('MyString'),type
+            ).value('/MyString[1]','varchar(max)')
 
-DECLARE @FinalSelectList as VARCHAR(MAX)
-SET @FinalSelectList = {9}
+            set @Columns = SUBSTRING(@Columns,2,LEN(@Columns))
 
---Split up that pesky string in tsql which has the column names up into array elements again
-DECLARE @value varchar(8000)
-DECLARE @pos INT
-DECLARE @len INT
-set @pos = 0
-set @len = 0
+            DECLARE @FinalSelectList as VARCHAR(MAX)
+            SET @FinalSelectList = {9}
 
-WHILE CHARINDEX('],', @Columns +',', @pos+1)>0
-BEGIN
-    set @len = CHARINDEX('],[', @Columns +'],[', @pos+1) - @pos
-    set @value = SUBSTRING(@Columns, @pos+1, @len)
-        
-    --We are constructing a version that turns: '[fish],[lama]' into 'ISNULL([fish],0) as [fish], ISNULL([lama],0) as [lama]'
-    SET @FinalSelectList = @FinalSelectList + ', ISNULL(' + @value  + ',0) as ' + @value
+            --Split up that pesky string in tsql which has the column names up into array elements again
+            DECLARE @value varchar(8000)
+            DECLARE @pos INT
+            DECLARE @len INT
+            set @pos = 0
+            set @len = 0
 
-    set @pos = CHARINDEX('],[', @Columns +'],[', @pos+@len) +1
-END
+            WHILE CHARINDEX('],', @Columns +',', @pos+1)>0
+            BEGIN
+                set @len = CHARINDEX('],[', @Columns +'],[', @pos+1) - @pos
+                set @value = SUBSTRING(@Columns, @pos+1, @len)
+                    
+                --We are constructing a version that turns: '[fish],[lama]' into 'ISNULL([fish],0) as [fish], ISNULL([lama],0) as [lama]'
+                SET @FinalSelectList = @FinalSelectList + ', ISNULL(' + @value  + ',0) as ' + @value
+            
+                set @pos = CHARINDEX('],[', @Columns +'],[', @pos+@len) +1
+            END
 
-if LEFT(@FinalSelectList,1)  = ','
-	SET @FinalSelectList = RIGHT(@FinalSelectList,LEN(@FinalSelectList)-1)
+            if LEFT(@FinalSelectList,1)  = ','
+            	SET @FinalSelectList = RIGHT(@FinalSelectList,LEN(@FinalSelectList)-1)
 
-",
+
+            """,
             //select SQL and parameter declarations
             string.Join(Environment.NewLine, query.Lines.Where(l => l.LocationToInsert < QueryComponent.SELECT)),
             string.Join(Environment.NewLine, query.Lines.Where(l => l.LocationToInsert == QueryComponent.SELECT)),

@@ -13,15 +13,15 @@ using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlTableHelper : DiscoveredTableHelper
+public partial class MySqlTableHelper : DiscoveredTableHelper
 {
     public static readonly MySqlTableHelper Instance = new();
 
     private MySqlTableHelper() {}
 
-    private static readonly Regex IntParentheses = new(@"^int\(\d+\)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex SmallintParentheses = new(@"^smallint\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    private static readonly Regex BitParentheses = new(@"^bit\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex IntParentheses = IntParenthesesRe();
+    private static readonly Regex SmallintParentheses = SmallintParenthesesRe();
+    private static readonly Regex BitParentheses = BitParenthesesRe();
 
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection,
         string database)
@@ -30,9 +30,11 @@ public class MySqlTableHelper : DiscoveredTableHelper
         var tableName = discoveredTable.GetRuntimeName();
 
         using (var cmd = discoveredTable.Database.Server.Helper.GetCommand(
-                   @"SELECT * FROM information_schema.`COLUMNS` 
-WHERE table_schema = @db
-  AND table_name = @tbl", connection.Connection))
+                   """
+                   SELECT * FROM information_schema.`COLUMNS`
+                   WHERE table_schema = @db
+                     AND table_name = @tbl
+                   """, connection.Connection))
         {
             cmd.Transaction = connection.Transaction;
 
@@ -74,7 +76,7 @@ WHERE table_schema = @db
         }
 
 
-        return columns.ToArray();
+        return [.. columns];
 
     }
 
@@ -137,22 +139,24 @@ WHERE table_schema = @db
     {
         var toReturn = new Dictionary<string,DiscoveredRelationship>();
 
-        const string sql = @"SELECT DISTINCT
-u.CONSTRAINT_NAME,
-u.TABLE_SCHEMA,
-u.TABLE_NAME,
-u.COLUMN_NAME,
-u.REFERENCED_TABLE_SCHEMA,
-u.REFERENCED_TABLE_NAME,
-u.REFERENCED_COLUMN_NAME,
-c.DELETE_RULE
-FROM
-    INFORMATION_SCHEMA.KEY_COLUMN_USAGE u
-INNER JOIN
-    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS c ON c.CONSTRAINT_NAME = u.CONSTRAINT_NAME
-WHERE
-  u.REFERENCED_TABLE_SCHEMA = @db AND
-  u.REFERENCED_TABLE_NAME = @tbl";
+        const string sql = """
+                           SELECT DISTINCT
+                           u.CONSTRAINT_NAME,
+                           u.TABLE_SCHEMA,
+                           u.TABLE_NAME,
+                           u.COLUMN_NAME,
+                           u.REFERENCED_TABLE_SCHEMA,
+                           u.REFERENCED_TABLE_NAME,
+                           u.REFERENCED_COLUMN_NAME,
+                           c.DELETE_RULE
+                           FROM
+                               INFORMATION_SCHEMA.KEY_COLUMN_USAGE u
+                           INNER JOIN
+                               INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS c ON c.CONSTRAINT_NAME = u.CONSTRAINT_NAME
+                           WHERE
+                             u.REFERENCED_TABLE_SCHEMA = @db AND
+                             u.REFERENCED_TABLE_NAME = @tbl
+                           """;
 
         using (var cmd = new MySqlCommand(sql, (MySqlConnection) connection,(MySqlTransaction) transaction?.Transaction))
         {
@@ -209,7 +213,7 @@ WHERE
             }
         }
 
-        return toReturn.Values.ToArray();
+        return [.. toReturn.Values];
     }
 
     protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
@@ -229,4 +233,11 @@ WHERE
     {
         throw new NotImplementedException();
     }
+
+    [GeneratedRegex(@"^int\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex IntParenthesesRe();
+    [GeneratedRegex(@"^smallint\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex SmallintParenthesesRe();
+    [GeneratedRegex(@"^bit\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex BitParenthesesRe();
 }

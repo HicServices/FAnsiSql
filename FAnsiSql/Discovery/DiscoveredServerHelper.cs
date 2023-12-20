@@ -13,7 +13,7 @@ namespace FAnsi.Discovery;
 /// <summary>
 /// DBMS specific implementation of all functionality that relates to interacting with existing server (testing connections, creating databases, etc).
 /// </summary>
-public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
+public abstract partial class DiscoveredServerHelper:IDiscoveredServerHelper
 {
     private static readonly Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = [];
 
@@ -113,7 +113,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     public string[] ListDatabasesAsync(DbConnectionStringBuilder builder, CancellationToken token)
     {
         //list the database on the server
-        var con = GetConnection(builder);
+        using var con = GetConnection(builder);
 
         //this will work or timeout
         var openTask = con.OpenAsync(token);
@@ -166,7 +166,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     public abstract string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
     public abstract Version GetVersion(DiscoveredServer server);
 
-    private readonly Regex rVagueVersion = new(@"\d+\.\d+(\.\d+)?(\.\d+)?",RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private readonly Regex rVagueVersion = rVagueVersionRe();
 
     /// <summary>
     /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
@@ -196,4 +196,7 @@ public abstract class DiscoveredServerHelper:IDiscoveredServerHelper
     {
         DatabaseType = databaseType;
     }
+
+    [GeneratedRegex(@"\d+\.\d+(\.\d+)?(\.\d+)?", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex rVagueVersionRe();
 }

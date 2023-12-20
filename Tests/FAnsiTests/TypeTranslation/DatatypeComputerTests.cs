@@ -204,7 +204,7 @@ public class GuesserTests
         t.AdjustToCompensateForValue(o1);
 
         var ex = Assert.Throws<MixedTypingException>(() => t.AdjustToCompensateForValue(o2));
-        StringAssert.Contains("mixed with untyped objects",ex?.Message);
+        Assert.That(ex?.Message, Does.Contain("mixed with untyped objects"));
     }
 
     [Test]
@@ -406,7 +406,7 @@ public class GuesserTests
         t.AdjustToCompensateForValue((short)5);
         var ex = Assert.Throws<MixedTypingException>(()=>t.AdjustToCompensateForValue(1000));
 
-        StringAssert.Contains("We were adjusting to compensate for object '1000' which is of Type 'System.Int32', we were previously passed a 'System.Int16' type",ex?.Message);
+        Assert.That(ex?.Message, Does.Contain("We were adjusting to compensate for object '1000' which is of Type 'System.Int32', we were previously passed a 'System.Int16' type"));
     }
     [Test]
     public void TestGuesser_Int16s()

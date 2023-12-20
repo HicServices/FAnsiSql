@@ -47,19 +47,19 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
             }
         }
 
-        if(!toReturn.Any())
+        if(toReturn.Count == 0)
             throw new Exception($"Could not find any columns in table {discoveredTable}");
 
         //don't bother looking for pks if it is a table valued function
         if (discoveredTable is DiscoveredTableValuedFunction)
-            return toReturn.ToArray();
+            return [.. toReturn];
 
         var pks = ListPrimaryKeys(connection, discoveredTable);
 
         foreach (var c in toReturn.Where(c => pks.Any(pk=>pk.Equals(c.GetRuntimeName()))))
             c.IsPrimaryKey = true;
 
-        return toReturn.ToArray();
+        return [.. toReturn];
     }
 
     /// <summary>
@@ -133,18 +133,20 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
     {
         var toReturn = new List<DiscoveredParameter>();
 
-        const string query = @"select 
-sys.parameters.name AS name,
-sys.types.name AS TYPE_NAME,
-sys.parameters.max_length AS LENGTH,
-sys.types.collation_name AS COLLATION_NAME,
-sys.parameters.scale AS SCALE,
-sys.parameters.precision AS PRECISION
- from 
-sys.parameters 
-join
-sys.types on sys.parameters.user_type_id = sys.types.user_type_id
-where object_id = OBJECT_ID(@tableName)";
+        const string query = """
+                             select
+                             sys.parameters.name AS name,
+                             sys.types.name AS TYPE_NAME,
+                             sys.parameters.max_length AS LENGTH,
+                             sys.types.collation_name AS COLLATION_NAME,
+                             sys.parameters.scale AS SCALE,
+                             sys.parameters.precision AS PRECISION
+                              from
+                             sys.parameters
+                             join
+                             sys.types on sys.parameters.user_type_id = sys.types.user_type_id
+                             where object_id = OBJECT_ID(@tableName)
+                             """;
 
         using (var cmd = discoveredTableValuedFunction.GetCommand(query, connection))
         {
@@ -271,7 +273,7 @@ where object_id = OBJECT_ID(@tableName)";
             }
         }
 
-        return toReturn.Values.ToArray();
+        return [.. toReturn.Values];
 
     }
 
@@ -291,13 +293,15 @@ where object_id = OBJECT_ID(@tableName)";
     {
         var syntax = discoveredTable.GetQuerySyntaxHelper();
 
-        const string sql = @"DELETE f
-            FROM (
-            SELECT	ROW_NUMBER() OVER (PARTITION BY {0} ORDER BY {0}) AS RowNum
-            FROM {1}
-            
-            ) as f
-            where RowNum > 1";
+        const string sql = """
+                           DELETE f
+                                       FROM (
+                                       SELECT	ROW_NUMBER() OVER (PARTITION BY {0} ORDER BY {0}) AS RowNum
+                                       FROM {1}
+                                       
+                                       ) as f
+                                       where RowNum > 1
+                           """;
 
         var columnList = string.Join(",",
             discoveredTable.DiscoverColumns().Select(c=>syntax.EnsureWrapped(c.GetRuntimeName())));
@@ -352,17 +356,19 @@ where object_id = OBJECT_ID(@tableName)";
     {
         var toReturn = new List<string>();
 
-        const string query = @"SELECT i.name AS IndexName, 
-OBJECT_NAME(ic.OBJECT_ID) AS TableName, 
-COL_NAME(ic.OBJECT_ID,ic.column_id) AS ColumnName, 
-c.is_identity
-FROM sys.indexes AS i 
-INNER JOIN sys.index_columns AS ic 
-INNER JOIN sys.columns AS c ON ic.object_id = c.object_id AND ic.column_id = c.column_id 
-ON i.OBJECT_ID = ic.OBJECT_ID 
-AND i.index_id = ic.index_id 
-WHERE (i.is_primary_key = 1) AND ic.OBJECT_ID = OBJECT_ID(@tableName)
-ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal";
+        const string query = """
+                             SELECT i.name AS IndexName,
+                             OBJECT_NAME(ic.OBJECT_ID) AS TableName,
+                             COL_NAME(ic.OBJECT_ID,ic.column_id) AS ColumnName,
+                             c.is_identity
+                             FROM sys.indexes AS i
+                             INNER JOIN sys.index_columns AS ic
+                             INNER JOIN sys.columns AS c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                             ON i.OBJECT_ID = ic.OBJECT_ID
+                             AND i.index_id = ic.index_id
+                             WHERE (i.is_primary_key = 1) AND ic.OBJECT_ID = OBJECT_ID(@tableName)
+                             ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal
+                             """;
 
         using (var cmd = table.GetCommand(query, con.Connection))
         {
@@ -380,6 +386,6 @@ ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal";
         }
 
 
-        return toReturn.ToArray();
+        return [.. toReturn];
     }
 }

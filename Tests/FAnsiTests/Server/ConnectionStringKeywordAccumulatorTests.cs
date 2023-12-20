@@ -30,7 +30,7 @@ public class ConnectionStringKeywordAccumulatorTests
 
         var connectionStringBuilder = _helpers[DatabaseType.MySql].GetConnectionStringBuilder("localhost","mydb","frank","kangaro");
 
-        StringAssert.DoesNotContain("auto enlist",connectionStringBuilder.ConnectionString);
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Not.Contain("auto enlist"));
 
         acc.EnforceOptions(connectionStringBuilder);
 
@@ -46,18 +46,18 @@ public class ConnectionStringKeywordAccumulatorTests
 
         var connectionStringBuilder = _helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
-        StringAssert.DoesNotContain("pooling", connectionStringBuilder.ConnectionString);
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Not.Contain("pooling"));
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        StringAssert.Contains("Pooling=False", connectionStringBuilder.ConnectionString);
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Contain("Pooling=False"));
 
         //attempt override with low priority setting it to true (note we flipped case of P just to be a curve ball)
         acc.AddOrUpdateKeyword("pooling","true",ConnectionStringKeywordPriority.SystemDefaultLow);
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        StringAssert.Contains("Pooling=False", connectionStringBuilder.ConnectionString);
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Contain("Pooling=False"));
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer, "AttachDbFilename", @"c:\temp\db", "Initial File Name", @"x:\omg.mdf")]
@@ -72,14 +72,14 @@ public class ConnectionStringKeywordAccumulatorTests
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        StringAssert.Contains($"{key1}={value1}", connectionStringBuilder.ConnectionString);
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Contain($"{key1}={value1}"));
 
         //attempt override with low priority setting it to true but also use the alias
         acc.AddOrUpdateKeyword(equivalentKey,value2,ConnectionStringKeywordPriority.SystemDefaultLow);
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        StringAssert.Contains($"{key1}={value1}", connectionStringBuilder.ConnectionString, "ConnectionStringKeywordAccumulator did not realise that keywords are equivalent");
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Contain($"{key1}={value1}"), "ConnectionStringKeywordAccumulator did not realise that keywords are equivalent");
     }
     [TestCase(ConnectionStringKeywordPriority.SystemDefaultHigh)] //same as current (still results in override)
     [TestCase(ConnectionStringKeywordPriority.ApiRule)]
@@ -90,18 +90,18 @@ public class ConnectionStringKeywordAccumulatorTests
 
         var connectionStringBuilder = _helpers[DatabaseType.MicrosoftSQLServer].GetConnectionStringBuilder("localhost", "mydb", "frank","kangaro");
 
-        StringAssert.DoesNotContain("pooling", connectionStringBuilder.ConnectionString);
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Not.Contain("pooling"));
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        StringAssert.Contains("Pooling=False", connectionStringBuilder.ConnectionString);
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Contain("Pooling=False"));
 
         //attempt override with low priority setting it to true (note we flipped case of P just to be a curve ball)
         acc.AddOrUpdateKeyword("pooling", "true", newPriority);
 
         acc.EnforceOptions(connectionStringBuilder);
 
-        StringAssert.Contains("Pooling=True", connectionStringBuilder.ConnectionString);
+        Assert.That(connectionStringBuilder.ConnectionString, Does.Contain("Pooling=True"));
     }
 
 
@@ -112,6 +112,6 @@ public class ConnectionStringKeywordAccumulatorTests
 
         var ex = Assert.Throws<ArgumentException>(()=>acc.AddOrUpdateKeyword("FLIBBLE", "false", ConnectionStringKeywordPriority.SystemDefaultLow));
 
-        StringAssert.Contains("FLIBBLE",ex?.Message);
+        Assert.That(ex?.Message, Does.Contain("FLIBBLE"));
     }
 }

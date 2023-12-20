@@ -196,8 +196,11 @@ internal class ForeignKeyTests:DatabaseTests
             Assert.That(constraint2, Is.Not.Null);
         });
 
-        StringAssert.AreEqualIgnoringCase("FK_T2_T1",constraint1.Name);
-        StringAssert.AreEqualIgnoringCase("FK_Lol",constraint2.Name);
+        Assert.Multiple(() =>
+        {
+            Assert.That(constraint1.Name, Is.EqualTo("FK_T2_T1").IgnoreCase);
+            Assert.That(constraint2.Name, Is.EqualTo("FK_Lol").IgnoreCase);
+        });
 
         var sort2 = new RelationshipTopologicalSort(new[] { t1,t2,t3 });
 

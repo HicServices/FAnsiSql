@@ -22,16 +22,18 @@ public class PostgreSqlUpdateHelper : UpdateHelper
             lines.Where(l => l.LocationToInsert == QueryComponent.WHERE).Select(c => c.Text));
 
         return string.Format(
-            @"UPDATE {1} AS t1
-SET 
-    {0}
-FROM
- {2} AS t2 
-WHERE
-{3}
-{4}
-{5}
-",
+            """
+            UPDATE {1} AS t1
+            SET
+                {0}
+            FROM
+             {2} AS t2
+            WHERE
+            {3}
+            {4}
+            {5}
+
+            """,
 
             string.Join($", {Environment.NewLine}",lines.Where(l=>l.LocationToInsert == QueryComponent.SET)
                 .Select(c =>

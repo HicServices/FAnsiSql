@@ -78,11 +78,14 @@ internal class CalendarWithPivotAggregationTests:AggregationTests
             if (easy)
                 return;
 
-            StringAssert.AreEqualIgnoringCase("joinDt", dt.Columns[0].ColumnName);
-            StringAssert.AreEqualIgnoringCase("T", dt.Columns[1].ColumnName);
-            StringAssert.AreEqualIgnoringCase("E&, %a' mp;E", dt.Columns[2].ColumnName);
-            StringAssert.AreEqualIgnoringCase("F", dt.Columns[3].ColumnName);
-            StringAssert.AreEqualIgnoringCase("G", dt.Columns[4].ColumnName);
+            Assert.Multiple(() =>
+            {
+                Assert.That(dt.Columns[0].ColumnName, Is.EqualTo("joinDt").IgnoreCase);
+                Assert.That(dt.Columns[1].ColumnName, Is.EqualTo("T").IgnoreCase);
+                Assert.That(dt.Columns[2].ColumnName, Is.EqualTo("E&, %a' mp;E").IgnoreCase);
+                Assert.That(dt.Columns[3].ColumnName, Is.EqualTo("F").IgnoreCase);
+                Assert.That(dt.Columns[4].ColumnName, Is.EqualTo("G").IgnoreCase);
+            });
 
             Assert.Multiple(() =>
             {

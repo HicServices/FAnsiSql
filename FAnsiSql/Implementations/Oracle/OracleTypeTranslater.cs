@@ -6,23 +6,23 @@ using TypeGuesser;
 
 namespace FAnsi.Implementations.Oracle;
 
-public sealed class OracleTypeTranslater:TypeTranslater
+public sealed partial class OracleTypeTranslater:TypeTranslater
 {
     public static readonly OracleTypeTranslater Instance = new();
-    private static readonly Regex AlsoFloatingPointRegex = new("^(NUMBER)|(DEC)",RegexOptions.CultureInvariant|RegexOptions.IgnoreCase|RegexOptions.Compiled);
-    private static readonly Regex AlsoByteArrayRegex = new("(BFILE)|(BLOB)|(RAW)|(ROWID)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex AlsoFloatingPointRegex = AlsoFloatingPointRegexImpl();
+    private static readonly Regex AlsoByteArrayRegex = AlsoByteArrayRegexImpl();
 
     public const int ExtraLengthPerNonAsciiCharacter = 3;
 
     /// <summary>
     /// Oracle specific string types, these are all max length as returned by <see cref="GetLengthIfString"/>
     /// </summary>
-    private static readonly Regex AlsoStringRegex = new("^([N]?CLOB)|(LONG)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex AlsoStringRegex = AlsoStringRegexImpl();
 
 
     private OracleTypeTranslater(): base(4000, 4000)
     {
-        DateRegex = new Regex("(date)|(timestamp)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        DateRegex = DateRegexImpl();
     }
     protected override string GetStringDataTypeImpl(int maxExpectedStringWidth) => $"varchar2({maxExpectedStringWidth})";
 
@@ -81,4 +81,13 @@ public sealed class OracleTypeTranslater:TypeTranslater
     {
         return base.GetGuesserFor(discoveredColumn, ExtraLengthPerNonAsciiCharacter);
     }
+
+    [GeneratedRegex("^([N]?CLOB)|(LONG)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex AlsoStringRegexImpl();
+    [GeneratedRegex("^(NUMBER)|(DEC)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex AlsoFloatingPointRegexImpl();
+    [GeneratedRegex("(BFILE)|(BLOB)|(RAW)|(ROWID)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex AlsoByteArrayRegexImpl();
+    [GeneratedRegex("(date)|(timestamp)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex DateRegexImpl();
 }

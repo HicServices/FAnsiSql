@@ -89,7 +89,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
 
     public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
     {
-        return Array.Empty<DiscoveredStoredprocedure>();
+        return [];
     }
 
     protected override Guesser GetGuesser(DatabaseTypeRequest request)

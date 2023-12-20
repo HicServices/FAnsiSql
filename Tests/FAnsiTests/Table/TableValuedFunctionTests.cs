@@ -66,9 +66,12 @@ END";
             Assert.That(tvf.Schema ?? "dbo", Is.EqualTo(schema));
         });
 
-        StringAssert.EndsWith(".MyAwesomeFunction(@startNumber,@stopNumber,@name)",tvf.GetFullyQualifiedName());
+        Assert.Multiple(() =>
+        {
+            Assert.That(tvf.GetFullyQualifiedName(), Does.EndWith(".MyAwesomeFunction(@startNumber,@stopNumber,@name)"));
 
-        Assert.That(tvf.Exists());
+            Assert.That(tvf.Exists());
+        });
 
         tvf.Drop();
 

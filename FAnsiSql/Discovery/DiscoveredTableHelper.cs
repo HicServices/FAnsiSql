@@ -116,7 +116,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
 
         var schema = toCreateTable != null ? toCreateTable.Schema : table.Schema;
 
-        return table.Database.Helper.GetCreateTableSql(destinationTable.Database, destinationTable.GetRuntimeName(), columns.ToArray(), null, false, schema);
+        return table.Database.Helper.GetCreateTableSql(destinationTable.Database, destinationTable.GetRuntimeName(), [.. columns], null, false, schema);
     }
 
     public virtual bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable)
@@ -197,8 +197,10 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             foreignKeyPairs
                 .ToDictionary(k=>(IHasRuntimeName)k.Key,v=>v.Value), cascadeDeletes, constraintName);
 
-        var sql = $@"ALTER TABLE {foreign.GetFullyQualifiedName()}
-                ADD {constraintBit}";
+        var sql = $"""
+                   ALTER TABLE {foreign.GetFullyQualifiedName()}
+                                   ADD {constraintBit}
+                   """;
 
         using (var con = args.GetManagedConnection(primary))
         {

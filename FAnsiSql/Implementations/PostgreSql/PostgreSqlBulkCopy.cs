@@ -9,14 +9,8 @@ using Npgsql;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlBulkCopy : BulkCopy
+public sealed class PostgreSqlBulkCopy(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) : BulkCopy(discoveredTable,connection,culture)
 {
-    public PostgreSqlBulkCopy(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) :base(discoveredTable,connection,culture)
-    {
-    }
-
-
-
     public override int UploadImpl(DataTable dt)
     {
         var con = (NpgsqlConnection) Connection.Connection;

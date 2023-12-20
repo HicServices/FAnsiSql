@@ -31,7 +31,7 @@ internal class ParameterTests:DatabaseTests
 
         var declaration = syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10));
 
-        StringAssert.Contains("@bob",declaration);
+        Assert.That(declaration, Does.Contain("@bob"));
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer)]

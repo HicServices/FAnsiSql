@@ -29,10 +29,12 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
         var columns = new List<DiscoveredColumn>();
         var tableName = discoveredTable.GetRuntimeName();
 
-        using (var cmd = server.Helper.GetCommand(@"SELECT *
-FROM   all_tab_cols
-WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
-", connection.Connection))
+        using (var cmd = server.Helper.GetCommand("""
+                                                  SELECT *
+                                                  FROM   all_tab_cols
+                                                  WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
+
+                                                  """, connection.Connection))
         {
             cmd.Transaction = connection.Transaction;
 
@@ -85,13 +87,15 @@ WHERE  table_name = :table_name AND owner =:owner AND HIDDEN_COLUMN <> 'YES'
 
 
         //get primary key information
-        using(var cmd = new OracleCommand(@"SELECT cols.table_name, cols.column_name, cols.position, cons.status, cons.owner
-FROM all_constraints cons, all_cons_columns cols
-WHERE cols.table_name = :table_name AND cols.owner = :owner
-AND cons.constraint_type = 'P'
-AND cons.constraint_name = cols.constraint_name
-AND cons.owner = cols.owner
-ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connection))
+        using(var cmd = new OracleCommand("""
+                                          SELECT cols.table_name, cols.column_name, cols.position, cons.status, cons.owner
+                                          FROM all_constraints cons, all_cons_columns cols
+                                          WHERE cols.table_name = :table_name AND cols.owner = :owner
+                                          AND cons.constraint_type = 'P'
+                                          AND cons.constraint_name = cols.constraint_name
+                                          AND cons.owner = cols.owner
+                                          ORDER BY cols.table_name, cols.position
+                                          """, (OracleConnection) connection.Connection))
         {
             cmd.Transaction = (OracleTransaction) connection.Transaction;
             cmd.Parameters.Add(new OracleParameter("table_name", OracleDbType.Varchar2)
@@ -109,7 +113,7 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
         }
 
 
-        return columns.ToArray();
+        return [.. columns];
     }
 
 
@@ -214,23 +218,25 @@ ORDER BY cols.table_name, cols.position", (OracleConnection) connection.Connecti
     {
         var toReturn = new Dictionary<string, DiscoveredRelationship>();
 
-        const string sql = @"
-SELECT DISTINCT a.table_name
-     , a.column_name
-     , a.constraint_name
-     , c.owner
-     , c.delete_rule
-     , c.r_owner
-     , c_pk.table_name      r_table_name
-     , c_pk.constraint_name r_pk
-     , cc_pk.column_name    r_column_name
-  FROM all_cons_columns a
-  JOIN all_constraints  c       ON (a.owner                 = c.owner                   AND a.constraint_name   = c.constraint_name     )
-  JOIN all_constraints  c_pk    ON (c.r_owner               = c_pk.owner                AND c.r_constraint_name = c_pk.constraint_name  )
-  JOIN all_cons_columns cc_pk   on (cc_pk.constraint_name   = c_pk.constraint_name      AND cc_pk.owner         = c_pk.owner            AND cc_pk.position = a.position)
- WHERE c.constraint_type = 'R'
-AND  UPPER(c.r_owner) =  UPPER(:DatabaseName)
-AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
+        const string sql = """
+
+                           SELECT DISTINCT a.table_name
+                                , a.column_name
+                                , a.constraint_name
+                                , c.owner
+                                , c.delete_rule
+                                , c.r_owner
+                                , c_pk.table_name      r_table_name
+                                , c_pk.constraint_name r_pk
+                                , cc_pk.column_name    r_column_name
+                             FROM all_cons_columns a
+                             JOIN all_constraints  c       ON (a.owner                 = c.owner                   AND a.constraint_name   = c.constraint_name     )
+                             JOIN all_constraints  c_pk    ON (c.r_owner               = c_pk.owner                AND c.r_constraint_name = c_pk.constraint_name  )
+                             JOIN all_cons_columns cc_pk   on (cc_pk.constraint_name   = c_pk.constraint_name      AND cc_pk.owner         = c_pk.owner            AND cc_pk.position = a.position)
+                            WHERE c.constraint_type = 'R'
+                           AND  UPPER(c.r_owner) =  UPPER(:DatabaseName)
+                           AND  UPPER(c_pk.table_name) =  UPPER(:TableName)
+                           """;
 
 
         using (var cmd = new OracleCommand(sql, (OracleConnection) connection))
@@ -283,7 +289,7 @@ AND  UPPER(c_pk.table_name) =  UPPER(:TableName)";
             }
         }
 
-        return toReturn.Values.ToArray();
+        return [.. toReturn.Values];
     }
 
     public override void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt)

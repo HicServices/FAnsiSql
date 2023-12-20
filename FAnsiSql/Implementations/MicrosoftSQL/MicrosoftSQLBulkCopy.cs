@@ -13,10 +13,10 @@ using Microsoft.Data.SqlClient;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public class MicrosoftSQLBulkCopy : BulkCopy
+public partial class MicrosoftSQLBulkCopy : BulkCopy
 {
     private readonly SqlBulkCopy _bulkCopy;
-    private static readonly Regex ColumnLevelComplaint = new("bcp client for colid (\\d+)",RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex ColumnLevelComplaint = ColumnLevelComplaintRe();
 
 
     public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
@@ -270,4 +270,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
                 $"Found float value {bad} in data table, SQLServer does not support floats in bulk insert, instead you should use doubles otherwise you will end up with the value 0.85 turning into :0.850000023841858 in your database");
         }
     }
+
+    [GeneratedRegex("bcp client for colid (\\d+)", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex ColumnLevelComplaintRe();
 }

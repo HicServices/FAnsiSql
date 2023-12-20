@@ -19,12 +19,15 @@ internal class LongNamesTests : DatabaseTests
 
         var tbl = db.CreateTable(tableName,[new(columnName,new DatabaseTypeRequest(typeof(string),100))]);
 
-        Assert.That(tbl.Exists());
-        StringAssert.AreEqualIgnoringCase(tableName,tbl.GetRuntimeName());
+        Assert.Multiple(() =>
+        {
+            Assert.That(tbl.Exists());
+            Assert.That(tbl.GetRuntimeName(), Is.EqualTo(tableName).IgnoreCase);
+        });
 
         var col = tbl.DiscoverColumn(columnName);
         Assert.That(col, Is.Not.Null);
-        StringAssert.AreEqualIgnoringCase(columnName,col.GetRuntimeName());
+        Assert.That(col.GetRuntimeName(), Is.EqualTo(columnName).IgnoreCase);
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -42,8 +45,11 @@ internal class LongNamesTests : DatabaseTests
         var db2 = db.Server.ExpectDatabase(sb.ToString());
         db2.Create(true);
 
-        Assert.That(db2.Exists());
-        StringAssert.AreEqualIgnoringCase(sb.ToString(),db2.GetRuntimeName());
+        Assert.Multiple(() =>
+        {
+            Assert.That(db2.Exists());
+            Assert.That(db2.GetRuntimeName(), Is.EqualTo(sb.ToString()).IgnoreCase);
+        });
 
         db2.Drop();
     }

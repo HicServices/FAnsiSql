@@ -68,11 +68,11 @@ public abstract class AggregateHelper:IAggregateHelper
         var axisGroupBy = query.AxisGroupBy;
         var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
 
-        var axisColumnEndedWithComma = query.AxisSelect.Text.EndsWith(",");
+        var axisColumnEndedWithComma = query.AxisSelect.Text.EndsWith(',');
         query.AxisSelect.Text =
             $"{GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias)} AS {axisColumnAlias}{(axisColumnEndedWithComma ? "," : "")}";
 
-        var groupByEndedWithComma = axisGroupBy.Text.EndsWith(",");
+        var groupByEndedWithComma = axisGroupBy.Text.EndsWith(',');
         axisGroupBy.Text = GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias) + (groupByEndedWithComma ? "," : "");
     }
 

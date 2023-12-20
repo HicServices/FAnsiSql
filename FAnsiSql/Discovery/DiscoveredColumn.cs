@@ -7,22 +7,28 @@ namespace FAnsi.Discovery;
 /// <summary>
 /// Cross database type reference to a Column in a Table
 /// </summary>
-public class DiscoveredColumn : IHasFullyQualifiedNameToo,ISupplementalColumnInformation
+/// <remarks>
+/// Internal API constructor intended for Implementation classes, instead use <see cref="DiscoveredTable.DiscoverColumn"/> instead.
+/// </remarks>
+/// <param name="table"></param>
+/// <param name="name"></param>
+/// <param name="allowsNulls"></param>
+public class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNulls) : IHasFullyQualifiedNameToo,ISupplementalColumnInformation
 {
     /// <summary>
     /// The <see cref="DiscoveredTable"/> on which the <see cref="DiscoveredColumn"/> was found
     /// </summary>
-    public DiscoveredTable Table { get; }
+    public DiscoveredTable Table { get; } = table;
 
     /// <summary>
     /// Stateless helper class with DBMS specific implementation of the logic required by <see cref="DiscoveredColumn"/>.
     /// </summary>
-    public readonly IDiscoveredColumnHelper Helper;
+    public readonly IDiscoveredColumnHelper Helper = table.Helper.GetColumnHelper();
 
     /// <summary>
     /// True if the column allows rows with nulls in this column
     /// </summary>
-    public bool AllowNulls { get; }
+    public bool AllowNulls { get; } = allowsNulls;
 
     /// <summary>
     /// True if the column is part of the <see cref="Table"/> primary key (a primary key can consist of mulitple columns)
@@ -50,24 +56,8 @@ public class DiscoveredColumn : IHasFullyQualifiedNameToo,ISupplementalColumnInf
     /// </summary>
     public string Format { get; set; }
 
-    private readonly string _name;
-    private readonly IQuerySyntaxHelper _querySyntaxHelper;
-
-    /// <summary>
-    /// Internal API constructor intended for Implementation classes, instead use <see cref="DiscoveredTable.DiscoverColumn"/> instead.
-    /// </summary>
-    /// <param name="table"></param>
-    /// <param name="name"></param>
-    /// <param name="allowsNulls"></param>
-    public DiscoveredColumn(DiscoveredTable table, string name,bool allowsNulls)
-    {
-        Table = table;
-        Helper = table.Helper.GetColumnHelper();
-
-        _name = name;
-        _querySyntaxHelper = table.Database.Server.GetQuerySyntaxHelper();
-        AllowNulls = allowsNulls;
-    }
+    private readonly string _name = name;
+    private readonly IQuerySyntaxHelper _querySyntaxHelper = table.Database.Server.GetQuerySyntaxHelper();
 
     /// <summary>
     /// The unqualified name of the column e.g. "MyCol"

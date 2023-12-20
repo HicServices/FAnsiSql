@@ -108,7 +108,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         args.Adjuster?.AdjustColumns(columns);
 
         //Get the table creation SQL
-        var bodySql = GetCreateTableSql(args.Database, args.TableName, columns.ToArray(), args.ForeignKeyPairs, args.CascadeDelete, args.Schema);
+        var bodySql = GetCreateTableSql(args.Database, args.TableName, [.. columns], args.ForeignKeyPairs, args.CascadeDelete, args.Schema);
 
         //connect to the server and send it
         var server = args.Database.Server;
@@ -208,14 +208,14 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         }
 
         var pks = columns.Where(c => c.IsPrimaryKey).ToArray();
-        if (pks.Any())
+        if (pks.Length != 0)
             bodySql.Append(GetPrimaryKeyDeclarationSql(tableName, pks,syntaxHelper));
 
         if (foreignKeyPairs != null)
         {
             bodySql.AppendLine();
             bodySql.AppendLine(GetForeignKeyConstraintSql(tableName, syntaxHelper,
-                foreignKeyPairs.ToDictionary(k => (IHasRuntimeName) k.Key, v => v.Value), cascadeDelete, null));
+                foreignKeyPairs.ToDictionary(static k => (IHasRuntimeName) k.Key, v => v.Value), cascadeDelete, null));
         }
 
         var toReturn = bodySql.ToString().TrimEnd('\r', '\n', ',');
@@ -247,8 +247,10 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
 
         //@"    CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID) REFERENCES Persons(PersonID) on delete cascade";
         return
-            $@"CONSTRAINT {constraintName} FOREIGN KEY ({string.Join(",", foreignKeyPairs.Keys.Select(k => syntaxHelper.EnsureWrapped(k.GetRuntimeName())))})
-REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKeyPairs.Values.Select(v => syntaxHelper.EnsureWrapped(v.GetRuntimeName())))}) {(cascadeDelete ? " on delete cascade" : "")}";
+            $"""
+             CONSTRAINT {constraintName} FOREIGN KEY ({string.Join(",", foreignKeyPairs.Keys.Select(k => syntaxHelper.EnsureWrapped(k.GetRuntimeName())))})
+             REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKeyPairs.Values.Select(v => syntaxHelper.EnsureWrapped(v.GetRuntimeName())))}) {(cascadeDelete ? " on delete cascade" : "")}
+             """;
     }
     public string GetForeignKeyConstraintNameFor(DiscoveredTable foreignTable, DiscoveredTable primaryTable)
     {
@@ -284,6 +286,8 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
         ExecuteBatchNonQuery(sql, conn, transaction, out _, timeout);
     }
 
+    private static readonly string[] separator = ["\n", "\r"];
+
     /// <summary>
     /// Executes the given SQL against the database + sends GO delimited statements as separate batches
     /// </summary>
@@ -315,7 +319,7 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
         sql += "\nGO";   // make sure last batch is executed.
         try
         {
-            foreach (var line in sql.Split(new[] { "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var line in sql.Split(separator, StringSplitOptions.RemoveEmptyEntries))
             {
                 lineNumber++;
 

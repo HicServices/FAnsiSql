@@ -98,7 +98,7 @@ public class PostgreSqlServerHelper : DiscoveredServerHelper
                 databases.Add((string) r["datname"]);
 
         con.Close();
-        return databases.ToArray();
+        return [.. databases];
     }
 
     public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
