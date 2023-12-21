@@ -123,15 +123,14 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
 
     public override Version GetVersion(DiscoveredServer server)
     {
-        using var con = server.GetConnection() as OracleConnection;
+        using var tcon = server.GetConnection();
+        if (tcon is not OracleConnection con) throw new ArgumentException("Oracle helped called on non-Oracle server",nameof(server));
+
         con.UseHourOffsetForUnsupportedTimezone = true;
         con.Open();
         using var cmd = server.GetCommand("SELECT * FROM v$version WHERE BANNER like 'Oracle Database%'",con);
         using var r = cmd.ExecuteReader();
-        if(r.Read())
-            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
-
-        return null;
+        return !r.Read() || r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
     }
 
     public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)

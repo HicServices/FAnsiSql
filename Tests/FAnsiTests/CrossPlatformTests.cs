@@ -124,7 +124,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             dt.Rows.Add(input);
 
             //this is the novel thing we are testing
-            dt.PrimaryKey = new[]{ dt.Columns[0]};
+            dt.PrimaryKey = [dt.Columns[0]];
             blk.Upload(dt);
 
             Assert.That(dt.PrimaryKey, Has.Length.EqualTo(1));
@@ -928,7 +928,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             var dt = new DataTable();
             dt.Columns.Add(columnName);
             dt.Rows.Add("dave");
-            dt.PrimaryKey = new[] {dt.Columns[0]};
+            dt.PrimaryKey = [dt.Columns[0]];
 
             var tbl = database.CreateTable(horribleTableName, dt);
 

@@ -715,19 +715,19 @@ internal sealed class BulkInsertTest : DatabaseTests
         switch (type)
         {
             case DatabaseType.MicrosoftSQLServer:
-                Assert.That(ex.Message, Does.Contain("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>"));
+                Assert.That(ex?.Message, Does.Contain("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>"));
                 break;
             case DatabaseType.MySql:
-                Assert.That(ex.Message, Is.EqualTo("Data too long for column 'Name' at row 4"));
+                Assert.That(ex?.Message, Is.EqualTo("Data too long for column 'Name' at row 4"));
                 break;
             case DatabaseType.Oracle:
-                Assert.That(ex.Message, Does.Contain("NAME"));
-                Assert.That(ex.Message, Does.Contain("maximum: 10"));
-                Assert.That(ex.Message, Does.Contain("actual: 11"));
+                Assert.That(ex?.Message, Does.Contain("NAME"));
+                Assert.That(ex?.Message, Does.Contain("maximum: 10"));
+                Assert.That(ex?.Message, Does.Contain("actual: 11"));
 
                 break;
             case DatabaseType.PostgreSql:
-                Assert.That(ex.Message, Does.Contain("value too long for type character varying(10)"));
+                Assert.That(ex?.Message, Does.Contain("value too long for type character varying(10)"));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -797,18 +797,18 @@ internal sealed class BulkInsertTest : DatabaseTests
         switch (type)
         {
             case DatabaseType.MicrosoftSQLServer:
-                Assert.That(ex.Message, Does.Contain("Failed to load data row 3 the following values were rejected by the database"));
-                Assert.That(ex.Message, Does.Contain("Parameter value '111111111.1' is out of range"));
+                Assert.That(ex?.Message, Does.Contain("Failed to load data row 3 the following values were rejected by the database"));
+                Assert.That(ex?.Message, Does.Contain("Parameter value '111111111.1' is out of range"));
                 break;
             case DatabaseType.MySql:
                 Assert.That(ex?.Message, Is.EqualTo("Out of range value for column 'Score' at row 3"));
                 break;
             case DatabaseType.Oracle:
-                Assert.That(ex.Message, Does.Contain("value larger than specified precision allowed for this column"));
+                Assert.That(ex?.Message, Does.Contain("value larger than specified precision allowed for this column"));
 
                 break;
             case DatabaseType.PostgreSql:
-                Assert.That(ex.Message, Does.Contain("numeric field overflow"));
+                Assert.That(ex?.Message, Does.Contain("numeric field overflow"));
                 break;
 
             default:
@@ -863,6 +863,6 @@ internal sealed class BulkInsertTest : DatabaseTests
             Assert.That(ex.Message, Is.EqualTo("Failed to parse value '.' in column 'score'"));
             Assert.That(ex.InnerException, Is.Not.Null, "Expected parse error to be an inner exception");
         });
-        Assert.That(ex.InnerException.Message, Does.Contain("Could not parse string value '.' with Decider Type:DecimalTypeDecider"));
+        Assert.That(ex.InnerException?.Message, Does.Contain("Could not parse string value '.' with Decider Type:DecimalTypeDecider"));
     }
 }

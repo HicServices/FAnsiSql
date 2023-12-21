@@ -205,7 +205,7 @@ internal sealed class ServerLevelTests:DatabaseTests
         dtToMove.Rows.Add("Tony", null,"9.99");
         dtToMove.Rows.Add("Jez", new DateTime(2001, 05, 01),"100.0");
 
-        dtToMove.PrimaryKey = new[] {dtToMove.Columns["MyCol"]};
+        dtToMove.PrimaryKey = [dtToMove.Columns["MyCol"]];
 
         //Upload it to the first database
         var fromDb = GetTestDatabase(from);

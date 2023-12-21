@@ -156,7 +156,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
             case "FLOAT":
                 return "double";
             default:
-                return r["DATA_TYPE"].ToString().ToLower();
+                return r["DATA_TYPE"].ToString()?.ToLower();
         }
     }
 

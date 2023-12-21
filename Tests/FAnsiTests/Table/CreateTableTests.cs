@@ -168,7 +168,7 @@ internal sealed class CreateTableTests:DatabaseTests
 
         var dt = new DataTable();
         dt.Columns.Add("Name");
-        dt.PrimaryKey = new[] { dt.Columns[0] };
+        dt.PrimaryKey = [dt.Columns[0]];
         dt.Rows.Add("Frank");
 
         var table = database.CreateTable("PkTable", dt);
