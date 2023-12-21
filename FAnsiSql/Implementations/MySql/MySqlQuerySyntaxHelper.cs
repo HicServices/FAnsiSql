@@ -8,7 +8,7 @@ using FAnsi.Implementations.MySql.Update;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
+public sealed class MySqlQuerySyntaxHelper : QuerySyntaxHelper
 {
     public static readonly MySqlQuerySyntaxHelper Instance = new();
     public override int MaximumDatabaseLength => 64;

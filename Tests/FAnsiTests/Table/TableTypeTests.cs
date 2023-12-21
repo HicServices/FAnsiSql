@@ -6,7 +6,7 @@ using System.Data;
 
 namespace FAnsiTests.Table;
 
-public class TableTypeTests:DatabaseTests
+public sealed class TableTypeTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateView(DatabaseType dbType)

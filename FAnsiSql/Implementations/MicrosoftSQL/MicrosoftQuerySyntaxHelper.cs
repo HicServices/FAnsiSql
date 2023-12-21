@@ -9,7 +9,7 @@ using Microsoft.Data.SqlClient;
 namespace FAnsi.Implementations.MicrosoftSQL;
 
 /// <inheritdoc/>
-public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
+public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 {
     public static readonly MicrosoftQuerySyntaxHelper Instance=new();
     private MicrosoftQuerySyntaxHelper() : base(MicrosoftSQLTypeTranslater.Instance,new MicrosoftSQLAggregateHelper(),new MicrosoftSQLUpdateHelper(),DatabaseType.MicrosoftSQLServer)
@@ -69,17 +69,15 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 
     public override bool IsTimeout(Exception exception)
     {
-        if (exception is SqlException sqlE)
+        if (exception is not SqlException sqlE) return base.IsTimeout(exception);
+
+        return sqlE.Number switch
         {
-            if (sqlE.Number is -2 or 11 or 1205)
-                return true;
-
+            -2 or 11 or 1205 => true,
             //yup, I've seen this behaviour from Sql Server.  ExceptionMessage of " " and .Number of
-            if (string.IsNullOrWhiteSpace(sqlE.Message) && sqlE.Number == 3617)
-                return true;
-        }
-
-        return base.IsTimeout(exception);
+            3617 when string.IsNullOrWhiteSpace(sqlE.Message) => true,
+            _ => base.IsTimeout(exception)
+        };
     }
 
     public override string HowDoWeAchieveMd5(string selectSql)

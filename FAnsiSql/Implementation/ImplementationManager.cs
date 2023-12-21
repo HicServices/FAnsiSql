@@ -6,17 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using FAnsi.Exceptions;
-using FAnsi.Implementations.MicrosoftSQL;
-using FAnsi.Implementations.MySql;
-using FAnsi.Implementations.Oracle;
-using FAnsi.Implementations.PostgreSql;
 
 namespace FAnsi.Implementation;
 
 /// <summary>
 /// Handles detecting and loading implementations
 /// </summary>
-public class ImplementationManager
+public sealed class ImplementationManager
 {
     private static readonly ImplementationManager Instance=new();
 

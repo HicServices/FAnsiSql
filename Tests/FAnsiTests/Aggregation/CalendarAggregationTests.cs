@@ -8,7 +8,7 @@ using System.Data;
 
 namespace FAnsiTests.Aggregation;
 
-internal class CalendarAggregationTests:AggregationTests
+internal sealed class CalendarAggregationTests:AggregationTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_Calendar_Year(DatabaseType type)

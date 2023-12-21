@@ -8,12 +8,11 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.TableCreation;
 using FAnsi.Extensions;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-internal class CreateTableTests:DatabaseTests
+internal sealed class CreateTableTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateSimpleTable_Exists(DatabaseType type)
@@ -56,7 +55,7 @@ internal class CreateTableTests:DatabaseTests
 
         Assert.That(tbl.Exists());
 
-        var colsDictionary = tbl.DiscoverColumns().ToDictionary(k => k.GetRuntimeName(), v => v, StringComparer.InvariantCultureIgnoreCase);
+        var colsDictionary = tbl.DiscoverColumns().ToDictionary(static k => k.GetRuntimeName(), static v => v, StringComparer.InvariantCultureIgnoreCase);
 
         var name = colsDictionary["name"];
         Assert.Multiple(() =>
@@ -185,7 +184,7 @@ internal class CreateTableTests:DatabaseTests
         var table = database.CreateTable(
             "PkTable",
             [
-                new("Name",new DatabaseTypeRequest(typeof(string),10))
+                new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10))
                 {
                     IsPrimaryKey = true
                 }
@@ -397,8 +396,8 @@ internal class CreateTableTests:DatabaseTests
         Assert.That(tbl.DiscoverColumn("Hb").DataType.GetCSharpDataType(), Is.EqualTo(typeof(bool)));
 
         var dt2 = tbl.GetDataTable();
-        Assert.That(dt2.Rows.Cast<DataRow>().Select(c => c[0]).ToArray(), Does.Contain(true));
-        Assert.That(dt2.Rows.Cast<DataRow>().Select(c => c[0]).ToArray(), Does.Contain(false));
+        Assert.That(dt2.Rows.Cast<DataRow>().Select(static c => c[0]).ToArray(), Does.Contain(true));
+        Assert.That(dt2.Rows.Cast<DataRow>().Select(static c => c[0]).ToArray(), Does.Contain(false));
 
         tbl.Drop();
     }
@@ -618,7 +617,7 @@ internal class CreateTableTests:DatabaseTests
     [Test]
     public void GuessSettings_CopyProperties()
     {
-        var props = typeof(GuessSettings).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty).Select(p => p.Name).ToArray();
+        var props = typeof(GuessSettings).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty).Select(static p => p.Name).ToArray();
         Assert.That(props, Has.Length.EqualTo(2), "There are new settable Properties in GuessSettings, we should copy them across in DiscoveredDatabaseHelper.CreateTable");
     }
 }

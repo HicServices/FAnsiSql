@@ -10,7 +10,7 @@ using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlDatabaseHelper : DiscoveredDatabaseHelper
+public sealed class MySqlDatabaseHelper : DiscoveredDatabaseHelper
 {
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
         DbConnection connection, string database, DbTransaction transaction = null) =>

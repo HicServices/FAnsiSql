@@ -12,7 +12,7 @@ namespace FAnsi.Discovery.QuerySyntax;
 /// <para>AggregateBuilder relies heavily on CustomLine because of the complexity of cross database platform GROUP BY (e.g. dynamic pivot with calendar table).  Basically converting
 /// the entire query into CustomLines and passing off implementation to the specific database engine (See IAggregateHelper.BuildAggregate).</para>
 /// </summary>
-public class CustomLine(string text, QueryComponent locationToInsert)
+public sealed class CustomLine(string text, QueryComponent locationToInsert)
 {
     public string Text { get; set; } = string.IsNullOrWhiteSpace(text) ? text : text.Trim();
     public QueryComponent LocationToInsert { get; set; } = locationToInsert;

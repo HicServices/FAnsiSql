@@ -6,6 +6,4 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 /// Thrown when a <see cref="AggregateCustomLineCollection"/> is created in an illegal state (e.g. an axis is defined but no corresponding
 /// SELECT / GROUP by <see cref="CustomLine"/> are provided.
 /// </summary>
-public class AggregateCustomLineCollectionException(string msg) : Exception(msg)
-{
-}
+public sealed class AggregateCustomLineCollectionException(string msg) : Exception(msg);

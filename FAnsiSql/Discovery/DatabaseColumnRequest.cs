@@ -11,7 +11,8 @@ namespace FAnsi.Discovery;
 /// 
 /// <para>Type specification is defined in the DatabaseTypeRequest but can also be specified explicitly (e.g. 'varchar(10)').</para>
 /// </summary>
-public class DatabaseColumnRequest:ISupplementalColumnInformation,IHasRuntimeName
+public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest typeRequested, bool allowNulls = true)
+    : ISupplementalColumnInformation, IHasRuntimeName
 {
     /// <summary>
     /// The fixed string proprietary data type to use.  This overrides <see cref="TypeRequested"/> if specified.
@@ -21,21 +22,21 @@ public class DatabaseColumnRequest:ISupplementalColumnInformation,IHasRuntimeNam
     public string ExplicitDbType { get; set; }
 
 
-    public string ColumnName { get; set; }
+    public string ColumnName { get; set; } = columnName;
 
     /// <summary>
-    /// The cross database platform type descriptior for the column e.g. 'able to store strings up to 18 in length'.
+    /// The cross database platform type descriptor for the column e.g. 'able to store strings up to 18 in length'.
     /// 
     /// <para>This is ignored if you have specified an <see cref="ExplicitDbType"/></para>
     /// 
     /// <para>See also <see cref="GetSQLDbType"/></para>
     /// </summary>
-    public DatabaseTypeRequest TypeRequested { get; set; }
+    public DatabaseTypeRequest TypeRequested { get; set; } = typeRequested;
 
     /// <summary>
     /// True to create a column which is nullable
     /// </summary>
-    public bool AllowNulls { get; set; }
+    public bool AllowNulls { get; set; } = allowNulls;
 
     /// <summary>
     /// True to include the column as part of the tables primary key
@@ -58,18 +59,9 @@ public class DatabaseColumnRequest:ISupplementalColumnInformation,IHasRuntimeNam
     /// </summary>
     public string Collation { get; set; }
 
-    public DatabaseColumnRequest(string columnName, DatabaseTypeRequest typeRequested, bool allowNulls = true)
-    {
-        ColumnName = columnName;
-        TypeRequested = typeRequested;
-        AllowNulls = allowNulls;
-    }
-
-    public DatabaseColumnRequest(string columnName, string explicitDbType, bool allowNulls = true)
+    public DatabaseColumnRequest(string columnName, string explicitDbType, bool allowNulls = true) : this(columnName, (DatabaseTypeRequest)null, allowNulls)
     {
         ExplicitDbType = explicitDbType;
-        ColumnName = columnName;
-        AllowNulls = allowNulls;
     }
 
     /// <summary>

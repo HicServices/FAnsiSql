@@ -26,9 +26,9 @@ public abstract class AggregateHelper:IAggregateHelper
         return BuildPivotAndAxisAggregate(lines);
     }
 
-    private CustomLine GetPivotOnlyNonPivotColumn(AggregateCustomLineCollection query)
+    private static CustomLine GetPivotOnlyNonPivotColumn(AggregateCustomLineCollection query)
     {
-        var nonPivotColumn = query.Lines.Where(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.None).ToArray();
+        var nonPivotColumn = query.Lines.Where(static l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.None).ToArray();
         if(nonPivotColumn.Length != 1)
             throw new Exception("Pivot is only valid when there are 3 SELECT columns, an aggregate (e.g. count(*)), a pivot and a final column");
 
@@ -37,7 +37,7 @@ public abstract class AggregateHelper:IAggregateHelper
 
     protected abstract IQuerySyntaxHelper GetQuerySyntaxHelper();
 
-    protected string BuildBasicAggregate(AggregateCustomLineCollection query) => string.Join(Environment.NewLine, query.Lines);
+    protected static string BuildBasicAggregate(AggregateCustomLineCollection query) => string.Join(Environment.NewLine, query.Lines);
 
     /// <summary>
     /// Builds an SQL GROUP BY query in from the lines in <paramref name="query"/> where records are counted and put into

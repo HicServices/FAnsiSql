@@ -47,10 +47,10 @@ public sealed class PostgreSqlAggregateHelper : AggregateHelper
 
                           """,
                 //Anything before the SELECT
-                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
+                string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT)),
                 GetDatePartOfColumn(query.Axis.AxisIncrement, "generate_series.date"),
                 //the entire query
-                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)), query.Axis.StartDate,
+                string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)), query.Axis.StartDate,
                 query.Axis.EndDate,
                 interval,
                 countAlias,

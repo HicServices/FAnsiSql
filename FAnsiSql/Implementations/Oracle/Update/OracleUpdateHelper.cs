@@ -42,10 +42,10 @@ t1.desc = t2.desc;*/
             WHERE
             {4}
             """,
-            string.Join($", {Environment.NewLine}", lines.Where(l => l.LocationToInsert == QueryComponent.SET).Select(c => c.Text)),
+            string.Join($", {Environment.NewLine}", lines.Where(static l => l.LocationToInsert == QueryComponent.SET).Select(static c => c.Text)),
             table1.GetFullyQualifiedName(),
             table2.GetFullyQualifiedName(),
-            string.Join(" AND ", lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text)),
-            string.Join(" AND ", lines.Where(l => l.LocationToInsert == QueryComponent.WHERE).Select(c => c.Text)));
+            string.Join(" AND ", lines.Where(static l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(static c => c.Text)),
+            string.Join(" AND ", lines.Where(static l => l.LocationToInsert == QueryComponent.WHERE).Select(static c => c.Text)));
     }
 }

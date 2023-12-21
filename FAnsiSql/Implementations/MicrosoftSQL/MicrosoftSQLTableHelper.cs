@@ -13,7 +13,7 @@ using Microsoft.Data.SqlClient;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public class MicrosoftSQLTableHelper : DiscoveredTableHelper
+public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
 {
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
@@ -67,16 +67,13 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
     /// </summary>
     /// <param name="table"></param>
     /// <returns></returns>
-    private string GetObjectName(DiscoveredTable table)
+    private static string GetObjectName(DiscoveredTable table)
     {
         var syntax = table.GetQuerySyntaxHelper();
 
         var objectName = syntax.EnsureWrapped(table.GetRuntimeName());
 
-        if (table.Schema != null)
-            return $"{syntax.EnsureWrapped(table.Schema)}.{objectName}";
-
-        return objectName;
+        return table.Schema != null ? $"{syntax.EnsureWrapped(table.Schema)}.{objectName}" : objectName;
     }
 
     public override IDiscoveredColumnHelper GetColumnHelper()
@@ -179,16 +176,15 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
         {
             using var connection = args.GetManagedConnection(table);
             var columnHelper = GetColumnHelper();
-            foreach (var col in discoverColumns.Where(dc => dc.AllowNulls))
+            foreach (var alterSql in discoverColumns.Where(static dc => dc.AllowNulls).Select(col => columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false)))
             {
-                var alterSql = columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false);
                 using var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
                 args.ExecuteNonQuery(alterCmd);
             }
         }
         catch (Exception e)
         {
-            throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
+            throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(static c => c.GetRuntimeName()))), e);
         }
 
         base.CreatePrimaryKey(args,table, discoverColumns);
@@ -340,7 +336,7 @@ public class MicrosoftSQLTableHelper : DiscoveredTableHelper
         return columnType + lengthQualifier;
     }
 
-    private object AdjustForUnicodeAndNegativeOne(string columnType, int length)
+    private static object AdjustForUnicodeAndNegativeOne(string columnType, int length)
     {
         if (length == -1)
             return "max";

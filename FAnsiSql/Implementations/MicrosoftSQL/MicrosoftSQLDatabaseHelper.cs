@@ -9,7 +9,7 @@ using Microsoft.Data.SqlClient;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
+public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 {
     /// <summary>
     /// True to attempt sending "ALTER DATABASE MyDatabase SET SINGLE_USER WITH ROLLBACK IMMEDIATE"
@@ -142,7 +142,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     /// <param name="databaseToDrop"></param>
     /// <param name="server"></param>
     /// <param name="setSingleUserModeFirst"></param>
-    private void DropDatabase(string databaseToDrop, DiscoveredServer server, bool setSingleUserModeFirst)
+    private static void DropDatabase(string databaseToDrop, DiscoveredServer server, bool setSingleUserModeFirst)
     {
         var sql = setSingleUserModeFirst ? $"ALTER DATABASE {databaseToDrop} SET SINGLE_USER WITH ROLLBACK IMMEDIATE{Environment.NewLine}"
             : "";

@@ -89,6 +89,7 @@ public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType
 
         //now iterate all the keys we had before and add those too, if the key count doesn't change for any of them we know it's a duplicate semantically
         if (_builder.Keys == null) return null;
+
         foreach (var current in _keywords)
         {
             var keysBefore = _builder.Keys.Count;

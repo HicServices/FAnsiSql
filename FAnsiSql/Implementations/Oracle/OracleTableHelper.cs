@@ -147,9 +147,11 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
                     return "int";
                 if (precision != null && scale != null)
                     return "decimal";
+
                 if (dataLength == null)
                     throw new Exception(
                         $"Found Oracle NUMBER datatype with scale {(scale != null ? scale.ToString() : "DBNull.Value")} and precision {(precision != null ? precision.ToString() : "DBNull.Value")}, did not know what datatype to use to represent it");
+
                 return "double";
             case "FLOAT":
                 return "double";
@@ -191,7 +193,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
 
     public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction = null)
     {
-        var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(c => c.IsAutoIncrement);
+        var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(static c => c.IsAutoIncrement);
 
         if (autoIncrement == null)
             return Convert.ToInt32(cmd.ExecuteScalar());
@@ -301,7 +303,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
 
         //apparently * doesn't fly with Oracle DataAdapter
         var sql =
-            $"SELECT {string.Join(",", cols.Select(c => c.GetFullyQualifiedName()).ToArray())} FROM {table.GetFullyQualifiedName()} OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY";
+            $"SELECT {string.Join(",", cols.Select(static c => c.GetFullyQualifiedName()).ToArray())} FROM {table.GetFullyQualifiedName()} OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY";
 
         using var cmd = table.Database.Server.GetCommand(sql, con);
         using var da = table.Database.Server.GetDataAdapter(cmd);

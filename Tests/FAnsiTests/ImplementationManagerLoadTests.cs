@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests;
 
-internal class ImplementationManagerLoadTests
+internal sealed class ImplementationManagerLoadTests
 {
     [Test]
     public void Test_LoadAssemblies_FromDirectory()

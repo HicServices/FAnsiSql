@@ -7,7 +7,7 @@ using FAnsi.Discovery;
 
 namespace FAnsiTests.Table;
 
-internal class TopXTests :DatabaseTests
+internal sealed class TopXTests :DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void Test_TopX_OrderBy(DatabaseType type,bool asc)

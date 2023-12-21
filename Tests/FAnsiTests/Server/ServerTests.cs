@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Server;
 
-internal class ServerLevelTests:DatabaseTests
+internal sealed class ServerLevelTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Server_Exists(DatabaseType type)

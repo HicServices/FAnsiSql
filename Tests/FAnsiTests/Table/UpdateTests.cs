@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-internal class UpdateTests :DatabaseTests
+internal sealed class UpdateTests :DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_UpdateTableFromJoin(DatabaseType dbType)

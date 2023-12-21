@@ -5,11 +5,11 @@ using FAnsi.Discovery.QuerySyntax.Aggregation;
 
 namespace FAnsi.Implementations.MySql.Aggregation;
 
-public class MySqlAggregateHelper : AggregateHelper
+public sealed class MySqlAggregateHelper : AggregateHelper
 {
-    public static readonly MySqlAggregateHelper Instance=new();
-    private MySqlAggregateHelper() {}
-    private string GetDateAxisTableDeclaration(IQueryAxis axis)
+    public static readonly MySqlAggregateHelper Instance = new();
+    private MySqlAggregateHelper() { }
+    private static string GetDateAxisTableDeclaration(IQueryAxis axis)
     {
         //if the axis is days then there are likely to be thousands of them but if we start adding thousands of years
         //mysql date falls over with overflow exceptions
@@ -24,7 +24,7 @@ public class MySqlAggregateHelper : AggregateHelper
                 ) thousands
                 """ : "";
 
-        var plusThousands = axis.AxisIncrement == AxisIncrement.Day ? "+ thousands":"";
+        var plusThousands = axis.AxisIncrement == AxisIncrement.Day ? "+ thousands" : "";
 
         //QueryComponent.JoinInfoJoin
         return
@@ -88,7 +88,7 @@ public class MySqlAggregateHelper : AggregateHelper
         var countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);
         var axisColumnAlias = query.AxisSelect.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
 
-        WrapAxisColumnWithDatePartFunction(query,axisColumnAlias);
+        WrapAxisColumnWithDatePartFunction(query, axisColumnAlias);
 
 
         return string.Format(
@@ -111,14 +111,14 @@ public class MySqlAggregateHelper : AggregateHelper
 
             """
             ,
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT)),
             GetDateAxisTableDeclaration(query.Axis),
 
-            GetDatePartOfColumn(query.Axis.AxisIncrement,"dateAxis.dt"),
+            GetDatePartOfColumn(query.Axis.AxisIncrement, "dateAxis.dt"),
             countAlias,
 
             //the entire query
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
             axisColumnAlias
         ).Trim();
 
@@ -165,17 +165,17 @@ public class MySqlAggregateHelper : AggregateHelper
                              EXECUTE stmt;
                              DEALLOCATE PREPARE stmt;
                              """,
-            string.Join(Environment.NewLine, query.Lines.Where(l => l.LocationToInsert < QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static l => l.LocationToInsert < QueryComponent.SELECT)),
             GetDateAxisTableDeclaration(query.Axis),
             part1,
             query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement, "dateAxis.dt")),
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert == QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert == QueryComponent.SELECT)),
 
             //the from including all table joins and where but no calendar table join
-            query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement,axisColumnWithoutAlias)),
+            query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias)),
 
             //the order by (should be count so that heavy populated columns come first)
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.FROM and <= QueryComponent.WHERE).Select(x=> query.SyntaxHelper.Escape(x.Text)))
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.FROM and <= QueryComponent.WHERE).Select(x => query.SyntaxHelper.Escape(x.Text)))
         );
     }
 
@@ -210,17 +210,17 @@ public class MySqlAggregateHelper : AggregateHelper
                              EXECUTE stmt;
                              DEALLOCATE PREPARE stmt;
                              """,
-            string.Join(Environment.NewLine, query.Lines.Where(l => l.LocationToInsert < QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static l => l.LocationToInsert < QueryComponent.SELECT)),
             part1,
             nonPivotColumn,
 
             //everything inclusive of FROM but stopping before GROUP BY
-            query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.FROM and < QueryComponent.GroupBy))),
+            query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.FROM and < QueryComponent.GroupBy))),
 
             joinAlias,
 
             //any HAVING SQL
-            query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert == QueryComponent.Having)))
+            query.SyntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert == QueryComponent.Having)))
         );
     }
 
@@ -245,11 +245,11 @@ public class MySqlAggregateHelper : AggregateHelper
         //if there is an axis we must ensure we only pull pivot values where the values appear in that axis range
         var whereDateColumnNotNull = "";
 
-        if(query.AxisSelect != null)
+        if (query.AxisSelect != null)
         {
             var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
 
-            whereDateColumnNotNull += query.Lines.Any(l => l.LocationToInsert == QueryComponent.WHERE) ? "AND " : "WHERE ";
+            whereDateColumnNotNull += query.Lines.Any(static l => l.LocationToInsert == QueryComponent.WHERE) ? "AND " : "WHERE ";
             whereDateColumnNotNull += $"{axisColumnWithoutAlias} IS NOT NULL";
         }
 
@@ -258,17 +258,17 @@ public class MySqlAggregateHelper : AggregateHelper
 
         //theres an explicit topX so order by it verbatim instead
         var topXOrderByLine =
-            query.Lines.SingleOrDefault(c => c.LocationToInsert == QueryComponent.OrderBy && c.Role == CustomLineRole.TopX);
+            query.Lines.SingleOrDefault(static c => c.LocationToInsert == QueryComponent.OrderBy && c.Role == CustomLineRole.TopX);
         if (topXOrderByLine != null)
             orderBy = topXOrderByLine.Text;
 
         //if theres a topX limit postfix line (See MySqlQuerySyntaxHelper.HowDoWeAchieveTopX) add that too
         var topXLimitLine =
-            query.Lines.SingleOrDefault(c => c.LocationToInsert == QueryComponent.Postfix && c.Role == CustomLineRole.TopX);
+            query.Lines.SingleOrDefault(static c => c.LocationToInsert == QueryComponent.Postfix && c.Role == CustomLineRole.TopX);
         var topXLimitSqlIfAny = topXLimitLine != null ? topXLimitLine.Text : "";
 
         var havingSqlIfAny = string.Join(Environment.NewLine,
-            query.Lines.Where(l => l.LocationToInsert == QueryComponent.Having).Select(l => l.Text));
+            query.Lines.Where(static l => l.LocationToInsert == QueryComponent.Having).Select(static l => l.Text));
 
         return string.Format("""
 
@@ -318,7 +318,7 @@ public class MySqlAggregateHelper : AggregateHelper
 
             //the from including all table joins and where but no calendar table join
             string.Join(Environment.NewLine,
-                query.Lines.Where(l =>
+                query.Lines.Where(static l =>
                     l.LocationToInsert is >= QueryComponent.FROM and <= QueryComponent.WHERE &&
                     l.Role != CustomLineRole.Axis)),
             whereDateColumnNotNull,
@@ -332,109 +332,109 @@ public class MySqlAggregateHelper : AggregateHelper
 
     //so janky to double select GROUP_Concat just so we can get dataset* except join.dt -- can we do it once into @columns then again into the other
 
-//use mysql;
+    //use mysql;
 
-//    SET @startDate = '1920-01-01';
-//    SET @endDate = now();
+    //    SET @startDate = '1920-01-01';
+    //    SET @endDate = now();
 
-//    drop temporary table if exists dateAxis;
+    //    drop temporary table if exists dateAxis;
 
-//    create temporary table dateAxis
-//    (
-//        dt DATE
-//    );
+    //    create temporary table dateAxis
+    //    (
+    //        dt DATE
+    //    );
 
-//insert into dateAxis
+    //insert into dateAxis
 
-//    SELECT distinct (@startDate + INTERVAL c.number Year) AS date
-//FROM (SELECT singles + tens + hundreds number FROM
-//( SELECT 0 singles
-//UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
-//UNION ALL SELECT   4 UNION ALL SELECT   5 UNION ALL SELECT   6
-//UNION ALL SELECT   7 UNION ALL SELECT   8 UNION ALL SELECT   9
-//) singles JOIN
-//(SELECT 0 tens
-//UNION ALL SELECT  10 UNION ALL SELECT  20 UNION ALL SELECT  30
-//UNION ALL SELECT  40 UNION ALL SELECT  50 UNION ALL SELECT  60
-//UNION ALL SELECT  70 UNION ALL SELECT  80 UNION ALL SELECT  90
-//) tens  JOIN
-//(SELECT 0 hundreds
-//UNION ALL SELECT  100 UNION ALL SELECT  200 UNION ALL SELECT  300
-//UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
-//UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
-//) hundreds
-//ORDER BY number DESC) c
-//WHERE c.number BETWEEN 0 and 1000;
+    //    SELECT distinct (@startDate + INTERVAL c.number Year) AS date
+    //FROM (SELECT singles + tens + hundreds number FROM
+    //( SELECT 0 singles
+    //UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
+    //UNION ALL SELECT   4 UNION ALL SELECT   5 UNION ALL SELECT   6
+    //UNION ALL SELECT   7 UNION ALL SELECT   8 UNION ALL SELECT   9
+    //) singles JOIN
+    //(SELECT 0 tens
+    //UNION ALL SELECT  10 UNION ALL SELECT  20 UNION ALL SELECT  30
+    //UNION ALL SELECT  40 UNION ALL SELECT  50 UNION ALL SELECT  60
+    //UNION ALL SELECT  70 UNION ALL SELECT  80 UNION ALL SELECT  90
+    //) tens  JOIN
+    //(SELECT 0 hundreds
+    //UNION ALL SELECT  100 UNION ALL SELECT  200 UNION ALL SELECT  300
+    //UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
+    //UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
+    //) hundreds
+    //ORDER BY number DESC) c
+    //WHERE c.number BETWEEN 0 and 1000;
 
-//delete from dateAxis where dt > @endDate;
+    //delete from dateAxis where dt > @endDate;
 
-//SET SESSION group_concat_max_len = 1000000;
+    //SET SESSION group_concat_max_len = 1000000;
 
-//SET @columns = NULL;
-//SELECT
-//  GROUP_CONCAT(DISTINCT
-//    CONCAT(
-//      'count(case when `test`.`biochemistry`.`hb_extract` = \'',
-//      b.`Pivot`,
-//      \'' then 1 else null end) AS `',
-//      b.`Pivot`,'`'
-//    ) order by b.`CountName` desc
-//  ) INTO @columns
-//FROM
-//(
-//select `test`.`biochemistry`.`hb_extract` AS Pivot, count(*) AS CountName
-//FROM
-//`test`.`biochemistry`
-//group by `test`.`biochemistry`.`hb_extract`
-//) as b;
-
-
-//SET @columnNames = NULL;
-//SELECT
-//  GROUP_CONCAT(DISTINCT
-//    CONCAT(
-//      'dataset.`',b.`Pivot`,'`') order by b.`CountName` desc
-//  ) INTO @columnNames
-//FROM
-//(
-//select `test`.`biochemistry`.`hb_extract` AS Pivot, count(*) AS CountName
-//FROM
-//`test`.`biochemistry`
-//group by `test`.`biochemistry`.`hb_extract`
-//) as b;
+    //SET @columns = NULL;
+    //SELECT
+    //  GROUP_CONCAT(DISTINCT
+    //    CONCAT(
+    //      'count(case when `test`.`biochemistry`.`hb_extract` = \'',
+    //      b.`Pivot`,
+    //      \'' then 1 else null end) AS `',
+    //      b.`Pivot`,'`'
+    //    ) order by b.`CountName` desc
+    //  ) INTO @columns
+    //FROM
+    //(
+    //select `test`.`biochemistry`.`hb_extract` AS Pivot, count(*) AS CountName
+    //FROM
+    //`test`.`biochemistry`
+    //group by `test`.`biochemistry`.`hb_extract`
+    //) as b;
 
 
+    //SET @columnNames = NULL;
+    //SELECT
+    //  GROUP_CONCAT(DISTINCT
+    //    CONCAT(
+    //      'dataset.`',b.`Pivot`,'`') order by b.`CountName` desc
+    //  ) INTO @columnNames
+    //FROM
+    //(
+    //select `test`.`biochemistry`.`hb_extract` AS Pivot, count(*) AS CountName
+    //FROM
+    //`test`.`biochemistry`
+    //group by `test`.`biochemistry`.`hb_extract`
+    //) as b;
 
 
-//SET @sql =
 
 
-//CONCAT(
-//'
-//SELECT
-//YEAR(dateAxis.dt) AS joinDt,',@columnNames,'
-//FROM
-//dateAxis
-//LEFT JOIN
-//(
-//    /*HbsByYear*/
-//SELECT
-//    YEAR(`test`.`biochemistry`.`sample_date`) AS joinDt,
-//'
-//    ,@columns,
-//'
-//FROM
-//`test`.`biochemistry`
-//group by
-//YEAR(`test`.`biochemistry`.`sample_date`)
-//) dataset
-//ON dataset.joinDt = YEAR(dateAxis.dt)
-//ORDER BY
-//YEAR(dateAxis.dt)
-//');
+    //SET @sql =
 
-//PREPARE stmt FROM @sql;
-//EXECUTE stmt;
-//DEALLOCATE PREPARE stmt;
+
+    //CONCAT(
+    //'
+    //SELECT
+    //YEAR(dateAxis.dt) AS joinDt,',@columnNames,'
+    //FROM
+    //dateAxis
+    //LEFT JOIN
+    //(
+    //    /*HbsByYear*/
+    //SELECT
+    //    YEAR(`test`.`biochemistry`.`sample_date`) AS joinDt,
+    //'
+    //    ,@columns,
+    //'
+    //FROM
+    //`test`.`biochemistry`
+    //group by
+    //YEAR(`test`.`biochemistry`.`sample_date`)
+    //) dataset
+    //ON dataset.joinDt = YEAR(dateAxis.dt)
+    //ORDER BY
+    //YEAR(dateAxis.dt)
+    //');
+
+    //PREPARE stmt FROM @sql;
+    //EXECUTE stmt;
+    //DEALLOCATE PREPARE stmt;
 
 }

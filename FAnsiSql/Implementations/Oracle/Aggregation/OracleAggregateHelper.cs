@@ -126,13 +126,13 @@ order by dt*/
 
             """,
             //add everything pre SELECT
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT)),
             //then add the calendar
             calendar,
             GetDatePartOfColumn(query.Axis.AxisIncrement, "dt"),
             countAlias,
             //the entire query
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
             axisColumnAlias
 
         );

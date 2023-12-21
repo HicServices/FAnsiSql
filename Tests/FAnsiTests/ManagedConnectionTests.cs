@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests;
 
-internal class ManagedConnectionTests:DatabaseTests
+internal sealed class ManagedConnectionTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_GetConnection_NotOpenAtStart(DatabaseType dbType)

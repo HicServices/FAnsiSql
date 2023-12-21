@@ -3,7 +3,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.TypeTranslation;
 
-internal class DatabaseTypeRequestTests
+internal sealed class DatabaseTypeRequestTests
 {
     [Test]
     public void Test_Max_WithUnicode()

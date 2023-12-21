@@ -130,6 +130,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
         using var r = cmd.ExecuteReader();
         if(r.Read())
             return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+
         return null;
     }
 

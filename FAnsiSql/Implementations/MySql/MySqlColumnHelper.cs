@@ -4,7 +4,7 @@ using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlColumnHelper : IDiscoveredColumnHelper
+public sealed class MySqlColumnHelper : IDiscoveredColumnHelper
 {
     public static readonly MySqlColumnHelper Instance = new();
     private MySqlColumnHelper() {}

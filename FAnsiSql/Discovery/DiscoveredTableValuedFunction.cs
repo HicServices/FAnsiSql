@@ -9,7 +9,7 @@ namespace FAnsi.Discovery;
 /// Cross database type reference to a Table valued function in a Database (actually currently only supported by Microsoft Sql Server).  For views see
 /// DiscoveredTable
 /// </summary>
-public class DiscoveredTableValuedFunction(DiscoveredDatabase database, string functionName,
+public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database, string functionName,
     IQuerySyntaxHelper querySyntaxHelper, string schema = null) : DiscoveredTable(database, table: functionName, querySyntaxHelper,
     schema, TableType.TableValuedFunction)
 {

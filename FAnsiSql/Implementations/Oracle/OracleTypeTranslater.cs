@@ -70,7 +70,7 @@ public sealed partial class OracleTypeTranslater:TypeTranslater
 
     protected override bool IsInt(string sqlType) =>
         //yup you ask for one of these, you will get a NUMBER(38) https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm
-        sqlType.Equals("decimal(10,0)",StringComparison.InvariantCultureIgnoreCase)|| (sqlType.StartsWith("SMALLINT", StringComparison.InvariantCultureIgnoreCase) || base.IsInt(sqlType));
+        sqlType.Equals("decimal(10,0)",StringComparison.InvariantCultureIgnoreCase) || sqlType.StartsWith("SMALLINT", StringComparison.InvariantCultureIgnoreCase) || base.IsInt(sqlType);
 
     protected override bool IsLong(string sqlType) => sqlType.Equals("decimal(19,0)", StringComparison.InvariantCultureIgnoreCase) || base.IsLong(sqlType);
     protected override bool IsByteArray(string sqlType) => base.IsByteArray(sqlType) || AlsoByteArrayRegex.IsMatch(sqlType);

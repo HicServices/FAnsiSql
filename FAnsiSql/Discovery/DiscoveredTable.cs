@@ -440,7 +440,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
         var syntaxHelper = GetQuerySyntaxHelper();
         var server = Database.Server;
 
-        var _parameterNames = syntaxHelper.GetParameterNamesFor(toInsert.Keys.ToArray(),c=>c.GetRuntimeName());
+        var _parameterNames = syntaxHelper.GetParameterNamesFor(toInsert.Keys.ToArray(), static c=>c.GetRuntimeName());
 
         using var connection = Database.Server.GetManagedConnection(transaction);
         var sql =
@@ -543,6 +543,7 @@ public class DiscoveredTable :IHasFullyQualifiedNameToo, IMightNotExist, IHasQue
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
+
         return Equals((DiscoveredTable)obj);
     }
 

@@ -3,7 +3,6 @@ using System.Globalization;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.TypeTranslation;
@@ -15,7 +14,7 @@ namespace FAnsiTests.TypeTranslation;
 /// the final estimate should be decimal(4,1) to allow for both 100.0f and 1.1f.
 /// </para>
 /// </summary>
-public class GuesserTests
+public sealed class GuesserTests
 {
     private readonly ITypeTranslater _translater = MicrosoftSQLTypeTranslater.Instance;
 
@@ -262,7 +261,7 @@ public class GuesserTests
         });
     }
 
-    private string GetCultureSpecificDate()
+    private static string GetCultureSpecificDate()
     {
         if (CultureInfo.CurrentCulture.EnglishName.Contains("United States"))
             return "01/23/2001";

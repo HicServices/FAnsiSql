@@ -6,13 +6,9 @@ using Microsoft.Data.SqlClient;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public sealed class MicrosoftSQLImplementation : Implementation<SqlConnectionStringBuilder>
+public sealed class MicrosoftSQLImplementation()
+    : Implementation<SqlConnectionStringBuilder>(DatabaseType.MicrosoftSQLServer)
 {
-    public MicrosoftSQLImplementation():base(DatabaseType.MicrosoftSQLServer)
-    {
-
-    }
-
     public override IDiscoveredServerHelper GetServerHelper() => MicrosoftSQLServerHelper.Instance;
 
     public override bool IsFor(DbConnection conn) => conn is SqlConnection;

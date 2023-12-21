@@ -5,7 +5,7 @@ using FAnsi.Discovery.QuerySyntax.Aggregation;
 
 namespace FAnsi.Implementations.MicrosoftSQL.Aggregation;
 
-public class MicrosoftSQLAggregateHelper : AggregateHelper
+public sealed class MicrosoftSQLAggregateHelper : AggregateHelper
 {
     private string GetDateAxisTableDeclaration(IQueryAxis axis)
     {
@@ -120,14 +120,14 @@ public class MicrosoftSQLAggregateHelper : AggregateHelper
 
             """
             ,
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT)),
             GetDateAxisTableDeclaration(query.Axis),
 
             GetDatePartOfColumn(query.Axis.AxisIncrement, "axis.dt"),
             countAlias,
 
             //the entire query
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
             axisColumnAlias
         ).Trim();
     }
@@ -176,11 +176,11 @@ public class MicrosoftSQLAggregateHelper : AggregateHelper
                                   EXECUTE(@Query)
 
                                   """,
-            syntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT))),
+            syntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT))),
             syntaxHelper.Escape(GetDateAxisTableDeclaration(query.Axis)),
 
             //the entire select query up to the end of the group by (omitting any Top X)
-            syntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c =>
+            syntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(static c =>
                 c.LocationToInsert is >= QueryComponent.SELECT and < QueryComponent.OrderBy &&
                 c.Role != CustomLineRole.TopX))),
 
@@ -236,11 +236,11 @@ public class MicrosoftSQLAggregateHelper : AggregateHelper
                                   """,
             //anything before the SELECT (i.e. parameters)
             syntaxHelper.Escape(string.Join(Environment.NewLine,
-                query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT))),
+                query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT))),
             syntaxHelper.Escape(nonPivotColumnAlias),
 
-            //the entire select query up to the end of the group by (ommitting any Top X)
-            syntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(c =>
+            //the entire select query up to the end of the group by (omitting any Top X)
+            syntaxHelper.Escape(string.Join(Environment.NewLine, query.Lines.Where(static c =>
                 c.LocationToInsert is >= QueryComponent.SELECT and < QueryComponent.OrderBy &&
                 c.Role != CustomLineRole.TopX))),
 
@@ -280,7 +280,7 @@ public class MicrosoftSQLAggregateHelper : AggregateHelper
 
         //Part 1 is where we get all the unique values from the pivot column (after applying the WHERE logic)
 
-        var anyFilters = query.Lines.Any(l => l.LocationToInsert == QueryComponent.WHERE);
+        var anyFilters = query.Lines.Any(static l => l.LocationToInsert == QueryComponent.WHERE);
 
         var orderBy = $"{countSqlWithoutAlias} desc";
 
@@ -288,7 +288,7 @@ public class MicrosoftSQLAggregateHelper : AggregateHelper
             orderBy = query.TopXOrderBy.Text;
 
         var havingSqlIfAny = string.Join(Environment.NewLine,
-            query.Lines.Where(l => l.LocationToInsert == QueryComponent.Having).Select(l => l.Text));
+            query.Lines.Where(static l => l.LocationToInsert == QueryComponent.Having).Select(static l => l.Text));
 
         var part1 = string.Format(
             """
@@ -341,16 +341,16 @@ public class MicrosoftSQLAggregateHelper : AggregateHelper
 
             """,
             //select SQL and parameter declarations
-            string.Join(Environment.NewLine, query.Lines.Where(l => l.LocationToInsert < QueryComponent.SELECT)),
-            string.Join(Environment.NewLine, query.Lines.Where(l => l.LocationToInsert == QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static l => l.LocationToInsert < QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static l => l.LocationToInsert == QueryComponent.SELECT)),
             pivotSqlWithoutAlias,
 
             //FROM and JOINs that are not to the calendar table
             string.Join(Environment.NewLine,
-                query.Lines.Where(l =>
-                    l.LocationToInsert == QueryComponent.FROM || l.LocationToInsert == QueryComponent.JoinInfoJoin &&
-                    l.Role != CustomLineRole.Axis)),
-            string.Join(Environment.NewLine, query.Lines.Where(l => l.LocationToInsert == QueryComponent.WHERE)),
+                query.Lines.Where(static l =>
+                    l.LocationToInsert == QueryComponent.FROM || (l.LocationToInsert == QueryComponent.JoinInfoJoin &&
+                                                                  l.Role != CustomLineRole.Axis))),
+            string.Join(Environment.NewLine, query.Lines.Where(static l => l.LocationToInsert == QueryComponent.WHERE)),
             anyFilters ? "AND" : "WHERE",
             orderBy,
             axisColumnWithoutAlias == null ? "": $"AND  {axisColumnWithoutAlias} is not null",

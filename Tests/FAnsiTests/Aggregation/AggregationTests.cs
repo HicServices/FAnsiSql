@@ -25,10 +25,8 @@ internal class AggregationTests:DatabaseTests
     {
         try
         {
-            using var dt = new DataTable
-            {
-                TableName = name
-            };
+            using var dt = new DataTable();
+            dt.TableName = name;
 
             dt.Columns.Add("EventDate");
             dt.Columns.Add("Category");
@@ -86,7 +84,7 @@ internal class AggregationTests:DatabaseTests
         }
     }
 
-    protected void AssertHasRow(DataTable dt, params object[] cells)
+    protected static void AssertHasRow(DataTable dt, params object[] cells)
     {
         Assert.That(dt.Rows.Cast<DataRow>().Any(r => IsMatch(r, cells)),$"Did not find expected row:{string.Join("|", cells)}");
     }
@@ -127,7 +125,7 @@ internal class AggregationTests:DatabaseTests
     }
 
 
-    protected void ConsoleWriteTable(DataTable _)
+    protected static void ConsoleWriteTable(DataTable _)
     {
         /*
         TestContext.WriteLine($"--- DebugTable({dt.TableName}) ---");

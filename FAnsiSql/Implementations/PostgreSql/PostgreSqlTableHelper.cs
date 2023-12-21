@@ -12,7 +12,7 @@ using Npgsql;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlTableHelper : DiscoveredTableHelper
+public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
 {
     public static readonly PostgreSqlTableHelper Instance = new();
     private PostgreSqlTableHelper() {}
@@ -160,7 +160,7 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
     public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd,
         IManagedTransaction transaction = null)
     {
-        var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(c => c.IsAutoIncrement);
+        var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(static c => c.IsAutoIncrement);
 
         if(autoIncrement != null)
             cmd.CommandText += $" RETURNING {autoIncrement.GetFullyQualifiedName()};";

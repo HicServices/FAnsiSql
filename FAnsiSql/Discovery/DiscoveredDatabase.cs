@@ -14,7 +14,7 @@ namespace FAnsi.Discovery;
 /// <summary>
 /// Cross database type reference to a specific database on a database server.  Allows you to create tables, drop check existance etc.
 /// </summary>
-public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
+public sealed class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
 {
     private readonly string _database;
     private readonly IQuerySyntaxHelper _querySyntaxHelper;
@@ -314,7 +314,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    protected bool Equals(DiscoveredDatabase other)
+    private bool Equals(DiscoveredDatabase other)
     {
         return Equals(Server, other.Server) && string.Equals(_database, other._database,StringComparison.OrdinalIgnoreCase);
     }
@@ -329,6 +329,7 @@ public class DiscoveredDatabase :IHasRuntimeName,IMightNotExist
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
+
         return Equals((DiscoveredDatabase)obj);
     }
 

@@ -9,12 +9,11 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Exceptions;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-internal class BulkInsertTest : DatabaseTests
+internal sealed class BulkInsertTest : DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_Basic(DatabaseType type)
@@ -316,16 +315,16 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
             },
-            new("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
+            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
             {
                 Default = MandatoryScalarFunctions.GetTodaysDate
             },
-            new("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false}
+            new DatabaseColumnRequest("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false}
         ]);
 
         using (var dt = new DataTable())
@@ -371,48 +370,48 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 AllowNulls = false
             },
-            new("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
+            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
             {
                 Default = MandatoryScalarFunctions.GetTodaysDate
             },
-            new("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false},
+            new DatabaseColumnRequest("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false},
 
-            new("Column0", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column1", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column2", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column3", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column4", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column5", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column6", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column7", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column8", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column9", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column0", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column1", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column2", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column3", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column4", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column5", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column6", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column7", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column8", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column9", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
 
-            new("Column10", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column11", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column12", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column13", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column14", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column15", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column16", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column17", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column18", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column19", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column10", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column11", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column12", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column13", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column14", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column15", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column16", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column17", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column18", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column19", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
 
-            new("Column20", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column21", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column22", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column23", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column24", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column25", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column26", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column27", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column28", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column29", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false}
+            new DatabaseColumnRequest("Column20", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column21", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column22", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column23", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column24", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column25", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column26", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column27", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column28", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column29", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false}
 
         ]);
 
@@ -513,7 +512,7 @@ internal class BulkInsertTest : DatabaseTests
 
 
         //and there should not be any primary keys
-        Assert.That(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey), Is.False);
+        Assert.That(tbl.DiscoverColumns().Any(static c=>c.IsPrimaryKey), Is.False);
 
         //now give it a bit longer to create it
         using(var cts = new CancellationTokenSource(50000000))
@@ -532,7 +531,7 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
@@ -554,13 +553,13 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("bob", new DatabaseTypeRequest(typeof (int), 100))
+            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (int), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false,
                 IsAutoIncrement = true
             },
-            new("frank", new DatabaseTypeRequest(typeof (string), 100))
+            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
@@ -588,9 +587,9 @@ internal class BulkInsertTest : DatabaseTests
         });
         Assert.Multiple(() =>
         {
-            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 1), Is.EqualTo(1));
-            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 2), Is.EqualTo(1));
-            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 3), Is.EqualTo(1));
+            Assert.That(result.Rows.Cast<DataRow>().Count(static r => Convert.ToInt32(r["bob"]) == 1), Is.EqualTo(1));
+            Assert.That(result.Rows.Cast<DataRow>().Count(static r => Convert.ToInt32(r["bob"]) == 2), Is.EqualTo(1));
+            Assert.That(result.Rows.Cast<DataRow>().Count(static r => Convert.ToInt32(r["bob"]) == 3), Is.EqualTo(1));
         });
 
     }
@@ -603,7 +602,7 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("num", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(1,10)))
+            new DatabaseColumnRequest("num", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(1,10)))
             {
                 AllowNulls = false
             }

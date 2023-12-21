@@ -13,7 +13,7 @@ namespace FAnsi.Discovery;
 /// <summary>
 /// Cross database type reference to a database server.  Allows you to get connections, create commands, list databases etc.
 /// </summary>
-public class DiscoveredServer : IMightNotExist
+public sealed class DiscoveredServer : IMightNotExist
 {
     /// <summary>
     /// Stores connection string State (which server the <see cref="DiscoveredServer"/> refers to.
@@ -214,6 +214,7 @@ public class DiscoveredServer : IMightNotExist
                             FAnsiStrings
                                 .DiscoveredServer_TestConnection_Could_not_connect_to_server___0___after_timeout_of__1__milliseconds_,
                             Name, timeoutInMillis), e);
+
                 throw;
             }
         }
@@ -406,7 +407,7 @@ public class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    protected bool Equals(DiscoveredServer other)
+    private bool Equals(DiscoveredServer other)
     {
         if (Builder == null || other.Builder == null)
             return Equals(Builder, other.Builder) && DatabaseType == other.DatabaseType;
@@ -425,6 +426,7 @@ public class DiscoveredServer : IMightNotExist
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
+
         return Equals((DiscoveredServer)obj);
     }
 

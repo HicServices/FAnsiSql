@@ -1,15 +1,14 @@
 ﻿using System;
-using System.IO;
+using System.Linq;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementation;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Query;
 
-internal class QuerySyntaxHelperTests
+internal sealed class QuerySyntaxHelperTests
 {
 
 
@@ -91,7 +90,7 @@ internal class QuerySyntaxHelperTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void EnsureWrapped_MultipleCalls(DatabaseType dbType)
     {
-        var syntax = new QuerySyntaxHelperFactory().Create(dbType);
+        var syntax = QuerySyntaxHelperFactory.Create(dbType);
 
         var once = syntax.EnsureWrapped("ff");
         var twice = syntax.EnsureWrapped(once);
@@ -145,17 +144,13 @@ internal class QuerySyntaxHelperTests
     [TestCase("CAST([dave] as int)","CAST([dave] as int)",null)]
     public void SyntaxHelperTest_SplitLineIntoSelectSQLAndAlias(string line, string expectedSelectSql, string expectedAlias)
     {
-        foreach (var t in new []{DatabaseType.Oracle,DatabaseType.MySql,DatabaseType.MicrosoftSQLServer})
-        {
-            var syntaxHelper = ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper();
-
+        foreach (var syntaxHelper in new []{DatabaseType.Oracle,DatabaseType.MySql,DatabaseType.MicrosoftSQLServer}.Select(t => ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper()))
             Assert.Multiple(() =>
             {
                 Assert.That(syntaxHelper.SplitLineIntoSelectSQLAndAlias(line, out var selectSQL, out var alias), Is.EqualTo(expectedAlias != null));
                 Assert.That(selectSQL, Is.EqualTo(expectedSelectSql));
                 Assert.That(alias, Is.EqualTo(expectedAlias));
             });
-        }
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -196,7 +191,7 @@ internal class QuerySyntaxHelperTests
     [Test]
     public void Test_MakeHeaderNameSensible_Unicode()
     {
-        Assert.Multiple(() =>
+        Assert.Multiple(static () =>
         {
             //normal unicode is fine
             Assert.That(QuerySyntaxHelper.MakeHeaderNameSensible("你好"), Is.EqualTo("你好"));
@@ -236,9 +231,8 @@ internal class QuerySyntaxHelperTests
     {
         var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
 
-        foreach(var emptySchemaExpression in new [] { null,"", " ", "\t"})
+        foreach (var name in new [] { null,"", " ", "\t"}.Select(emptySchemaExpression => syntaxHelper.EnsureFullyQualified("mydb", emptySchemaExpression, "Troll", "MyCol")))
         {
-            var name = syntaxHelper.EnsureFullyQualified("mydb", emptySchemaExpression, "Troll", "MyCol");
             Assert.That(string.Equals("MyCol", syntaxHelper.GetRuntimeName(name),StringComparison.InvariantCultureIgnoreCase));
 
             switch (dbType)
@@ -259,7 +253,6 @@ internal class QuerySyntaxHelperTests
                     throw new ArgumentOutOfRangeException(nameof(dbType), dbType, null);
             }
         }
-
     }
 
     [Test]

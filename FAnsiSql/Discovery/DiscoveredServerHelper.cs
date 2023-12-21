@@ -13,12 +13,12 @@ namespace FAnsi.Discovery;
 /// <summary>
 /// DBMS specific implementation of all functionality that relates to interacting with existing server (testing connections, creating databases, etc).
 /// </summary>
-public abstract partial class DiscoveredServerHelper:IDiscoveredServerHelper
+public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) : IDiscoveredServerHelper
 {
     private static readonly Dictionary<DatabaseType,ConnectionStringKeywordAccumulator> ConnectionStringKeywordAccumulators = [];
 
     /// <summary>
-    /// Register a system wide rule that all connection strings of <paramref name="databaseType"/> should include the given <paramref name="keyword"/>.
+    /// Register a system-wide rule that all connection strings of <paramref name="databaseType"/> should include the given <paramref name="keyword"/>.
     /// </summary>
     /// <param name="databaseType"></param>
     /// <param name="keyword"></param>
@@ -138,7 +138,7 @@ public abstract partial class DiscoveredServerHelper:IDiscoveredServerHelper
         return new ManagedTransaction(con,transaction);
     }
 
-    public DatabaseType DatabaseType { get; private set; }
+    public DatabaseType DatabaseType { get; private set; } = databaseType;
     public abstract Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder);
 
     public bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds,out Exception exception)
@@ -172,7 +172,7 @@ public abstract partial class DiscoveredServerHelper:IDiscoveredServerHelper
     /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
     /// Defaults to 30.
     /// </summary>
-    public static int CreateDatabaseTimeoutInSeconds = 30;
+    public static readonly int CreateDatabaseTimeoutInSeconds = 30;
 
     /// <summary>
     /// Returns a new <see cref="Version"/> by parsing the <paramref name="versionString"/>.  If the string
@@ -190,11 +190,6 @@ public abstract partial class DiscoveredServerHelper:IDiscoveredServerHelper
         return m.Success ? Version.Parse(m.Value) :
             //whatever the string was it didn't even remotely resemble a Version
             null;
-    }
-
-    protected DiscoveredServerHelper(DatabaseType databaseType)
-    {
-        DatabaseType = databaseType;
     }
 
     [GeneratedRegex(@"\d+\.\d+(\.\d+)?(\.\d+)?", RegexOptions.Compiled | RegexOptions.CultureInvariant)]

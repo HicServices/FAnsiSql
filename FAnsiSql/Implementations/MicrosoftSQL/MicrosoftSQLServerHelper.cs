@@ -69,7 +69,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
         return toReturn;
     }
-    public string GetDatabaseNameFrom(DbConnectionStringBuilder builder)
+    public static string GetDatabaseNameFrom(DbConnectionStringBuilder builder)
     {
         return ((SqlConnectionStringBuilder) builder).InitialCatalog;
     }
@@ -134,10 +134,8 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
         using var con = new SqlConnection(b.ConnectionString);
         con.Open();
-        using var cmd = new SqlCommand($"CREATE DATABASE {syntax.EnsureWrapped(newDatabaseName.GetRuntimeName())}", con)
-            {
-                CommandTimeout = CreateDatabaseTimeoutInSeconds
-            };
+        using var cmd = new SqlCommand($"CREATE DATABASE {syntax.EnsureWrapped(newDatabaseName.GetRuntimeName())}", con);
+        cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
         cmd.ExecuteNonQuery();
     }
 
@@ -204,6 +202,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         using var r = cmd.ExecuteReader();
         if(r.Read())
             return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+
         return null;
     }
 }

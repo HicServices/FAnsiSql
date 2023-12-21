@@ -4,12 +4,11 @@ using FAnsi.Implementation;
 using NUnit.Framework;
 using System.Data;
 using System.Text;
-using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Parameters;
 
-internal class ParameterTests:DatabaseTests
+internal sealed class ParameterTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_SupportsEmbeddedParameters_DeclarationOrThrow(DatabaseType type)

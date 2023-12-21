@@ -3,7 +3,7 @@ using FAnsi.Discovery.TypeTranslation;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public partial class MicrosoftSQLTypeTranslater : TypeTranslater
+public sealed partial class MicrosoftSQLTypeTranslater : TypeTranslater
 {
     public static readonly MicrosoftSQLTypeTranslater Instance = new();
 

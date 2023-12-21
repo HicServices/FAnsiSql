@@ -5,11 +5,10 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Aggregation;
 
-internal class CalendarWithPivotAggregationTests:AggregationTests
+internal sealed class CalendarWithPivotAggregationTests:AggregationTests
 {
     [TestCase(DatabaseType.MicrosoftSQLServer,true)]
     [TestCase(DatabaseType.MySql,true)]
@@ -17,7 +16,7 @@ internal class CalendarWithPivotAggregationTests:AggregationTests
     [TestCase(DatabaseType.MySql, false)]
     public void Test_Calendar_WithPivot(DatabaseType type,bool easy)
     {
-        string sql=null!;
+        string sql=null;
         try
         {
             var tbl = GetTestTable(type,easy);

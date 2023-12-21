@@ -11,7 +11,7 @@ namespace FAnsi;
 /// <summary>
 /// Arguments for facilitating long running sql operations which the user/system might want to cancel mid way through.
 /// </summary>
-public class DatabaseOperationArgs
+public sealed class DatabaseOperationArgs
 {
     /// <summary>
     /// If using an ongoing connection/transaction.  Otherwise null.
@@ -85,6 +85,7 @@ public class DatabaseOperationArgs
         {
             if (e.InnerExceptions.Count == 1)
                 throw e.InnerExceptions[0];
+
             throw;
         }
 
@@ -92,8 +93,10 @@ public class DatabaseOperationArgs
             cmd.Cancel();
 
         if (t.Exception == null) return t.Result;
+
         if (t.Exception.InnerExceptions.Count == 1)
             throw t.Exception.InnerExceptions[0];
+
         throw t.Exception;
     }
 

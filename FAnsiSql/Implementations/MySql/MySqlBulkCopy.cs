@@ -14,11 +14,11 @@ namespace FAnsi.Implementations.MySql;
 /// Inserts rows into MySql table using extended INSERT commands.  'LOAD DATA IN FILE' is not used because it doesn't respect table constraints, can be disabled
 /// on the server and generally can go wrong in a large number of ways.
 /// </summary>
-public partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture)
+public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture)
     : BulkCopy(targetTable, connection, culture)
 {
 
-    public static int BulkInsertBatchTimeoutInSeconds = 0;
+    public static readonly int BulkInsertBatchTimeoutInSeconds = 0;
 
     public override int UploadImpl(DataTable dt)
     {
@@ -35,7 +35,7 @@ public partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnecti
             cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
 
         var commandPrefix =
-            $"INSERT INTO {TargetTable.GetFullyQualifiedName()}({string.Join(",", matchedColumns.Values.Select(c =>
+            $"INSERT INTO {TargetTable.GetFullyQualifiedName()}({string.Join(",", matchedColumns.Values.Select(static c =>
                 $"`{c.GetRuntimeName()}`"))}) VALUES ";
 
         var sb = new StringBuilder(commandPrefix,1<<22);
@@ -53,6 +53,7 @@ public partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnecti
 
             //don't let command get too long
             if (sb.Length*2<maxPacket) continue;
+
             cmd.CommandText = sb.ToString().TrimEnd(',', '\r', '\n');
             affected += cmd.ExecuteNonQuery();
             sb.Clear();

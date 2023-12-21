@@ -13,7 +13,7 @@ namespace FAnsi.Discovery;
 /// <param name="table"></param>
 /// <param name="name"></param>
 /// <param name="allowsNulls"></param>
-public class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNulls) : IHasFullyQualifiedNameToo,ISupplementalColumnInformation
+public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNulls) : IHasFullyQualifiedNameToo,ISupplementalColumnInformation
 {
     /// <summary>
     /// The <see cref="DiscoveredTable"/> on which the <see cref="DiscoveredColumn"/> was found
@@ -113,7 +113,7 @@ public class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNul
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    protected bool Equals(DiscoveredColumn other)
+    private bool Equals(DiscoveredColumn other)
     {
         return string.Equals(_name, other._name) && Equals(Table, other.Table);
     }
@@ -127,6 +127,7 @@ public class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNul
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
+
         return Equals((DiscoveredColumn)obj);
     }
 

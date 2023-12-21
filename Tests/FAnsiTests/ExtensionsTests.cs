@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests;
 
-internal class ExtensionsTests
+internal sealed class ExtensionsTests
 {
     [Test]
     public void Test_SetDoNotReType_RepeatCalls()

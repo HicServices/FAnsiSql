@@ -23,7 +23,7 @@ public sealed class PostgreSqlBulkCopy(DiscoveredTable discoveredTable, IManaged
         sb.Append("COPY ");
         sb.Append(TargetTable.GetFullyQualifiedName());
         sb.Append(" (");
-        sb.AppendJoin(",", matchedColumns.Values.Select(v => v.GetWrappedName()));
+        sb.AppendJoin(",", matchedColumns.Values.Select(static v => v.GetWrappedName()));
         sb.Append(')');
         sb.Append(" FROM STDIN (FORMAT BINARY)");
 

@@ -12,7 +12,7 @@ namespace FAnsi.Discovery.TableCreation;
 /// <remarks>
 /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
 /// </remarks>
-public class CreateTableArgs(DiscoveredDatabase database, string tableName, string schema)
+public sealed class CreateTableArgs(DiscoveredDatabase database, string tableName, string schema)
 {
     /// <summary>
     /// The destination database in which to create the table

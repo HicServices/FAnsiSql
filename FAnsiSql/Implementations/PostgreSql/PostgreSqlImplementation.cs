@@ -6,12 +6,8 @@ using Npgsql;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public sealed class PostgreSqlImplementation : Implementation<NpgsqlConnectionStringBuilder>
+public sealed class PostgreSqlImplementation() : Implementation<NpgsqlConnectionStringBuilder>(DatabaseType.PostgreSql)
 {
-    public PostgreSqlImplementation() : base(DatabaseType.PostgreSql)
-    {
-    }
-
     public override IDiscoveredServerHelper GetServerHelper() => PostgreSqlServerHelper.Instance;
 
     public override bool IsFor(DbConnection connection) => connection is NpgsqlConnection;

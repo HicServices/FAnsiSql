@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
@@ -13,7 +12,7 @@ using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql;
 
-public partial class MySqlTableHelper : DiscoveredTableHelper
+public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 {
     public static readonly MySqlTableHelper Instance = new();
 
@@ -80,7 +79,7 @@ public partial class MySqlTableHelper : DiscoveredTableHelper
 
     }
 
-    private bool YesNoToBool(object o)
+    private static bool YesNoToBool(object o)
     {
         if (o is bool b)
             return b;

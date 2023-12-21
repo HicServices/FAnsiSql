@@ -1,13 +1,10 @@
 ﻿using FAnsi;
 using FAnsi.Implementation;
-using FAnsi.Implementations.MicrosoftSQL;
-using FAnsi.Implementations.MySql;
-using FAnsi.Implementations.Oracle;
 using NUnit.Framework;
 
 namespace FAnsiTests.TypeTranslation;
 
-internal class TypeTranslaterUnitTests
+internal sealed class TypeTranslaterUnitTests
 {
     /// <summary>
     /// IsSupportedType is a support check for FAnsi not the DBMS.  This test shows that FAnsi's view of 'what is a string' is pretty

@@ -3,7 +3,7 @@
 /// <summary>
 /// Cross database type reference to a Parameter (e.g. of a Table valued function / stored procedure).
 /// </summary>
-public class DiscoveredParameter(string parameterName)
+public sealed class DiscoveredParameter(string parameterName)
 {
     /// <summary>
     /// SQL name of parameter e.g. @bob for Sql Server

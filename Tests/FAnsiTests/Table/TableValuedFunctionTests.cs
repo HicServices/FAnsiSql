@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using FAnsi;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Table;
 
-internal class TableValuedFunctionTests:DatabaseTests
+internal sealed class TableValuedFunctionTests:DatabaseTests
 {
     [TestCase("dbo")]
     [TestCase("Omg")]

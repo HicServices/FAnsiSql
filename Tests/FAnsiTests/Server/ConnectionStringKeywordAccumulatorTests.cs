@@ -8,11 +8,10 @@ using FAnsi.Implementations.MySql;
 using FAnsi.Implementations.Oracle;
 using FAnsi.Implementations.PostgreSql;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Server;
 
-public class ConnectionStringKeywordAccumulatorTests
+public sealed class ConnectionStringKeywordAccumulatorTests
 {
     private readonly Dictionary<DatabaseType, IDiscoveredServerHelper> _helpers = new()
         {

@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Query;
 
-public class ParameterNameExtractionTests
+public sealed class ParameterNameExtractionTests
 {
     [TestCase("a = wok.dbo.fish(@bobby)")]
     [TestCase("[bob]=@bobby")]

@@ -1,14 +1,10 @@
 ﻿using FAnsi;
 using FAnsi.Discovery;
-using FAnsi.Implementation;
-using FAnsi.Implementations.MicrosoftSQL;
-using FAnsi.Implementations.MySql;
-using FAnsi.Implementations.Oracle;
 using NUnit.Framework;
 
 namespace FAnsiTests.Equality;
 
-internal class EqualityTests_TableAndColumn
+internal sealed class EqualityTests_TableAndColumn
 {
     [OneTimeSetUp]
     public void SetUp()

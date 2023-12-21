@@ -20,7 +20,7 @@ namespace FAnsiTests.TypeTranslation;
 /// <para>These tests also create tables called TTT in the test database and test the systems ability to discover the column
 /// and reverse engineer the original data type from the database.</para>
 /// </summary>
-public class TypeTranslaterTests : DatabaseTests
+public sealed class TypeTranslaterTests : DatabaseTests
 {
     private readonly Dictionary<DatabaseType,ITypeTranslater> _translaters = [];
 

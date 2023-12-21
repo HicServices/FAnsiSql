@@ -64,7 +64,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             using var r = cmd.ExecuteReader();
             while (r.Read())
             {
-                //its a system table
+                //it's a system table
                 var schema = r["schemaname"] as string;
 
                 if(querySyntaxHelper.IsValidTableName((string)r["viewname"], out _))

@@ -15,7 +15,7 @@ namespace FAnsi.Discovery.Constraints;
 /// <param name="pkTable"></param>
 /// <param name="fkTable"></param>
 /// <param name="deleteRule"></param>
-public class DiscoveredRelationship(string fkName, DiscoveredTable pkTable, DiscoveredTable fkTable, CascadeRule deleteRule)
+public sealed class DiscoveredRelationship(string fkName, DiscoveredTable pkTable, DiscoveredTable fkTable, CascadeRule deleteRule)
 {
     /// <summary>
     /// The name of the foreign key constraint in the database e.g. FK_Table1_Table2

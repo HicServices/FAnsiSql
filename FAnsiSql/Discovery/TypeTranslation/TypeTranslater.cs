@@ -91,12 +91,12 @@ public abstract partial class TypeTranslater:ITypeTranslater
         throw new TypeNotMappedException(string.Format(FAnsiStrings.TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__, t.Name, GetType().Name));
     }
 
-    protected string GetByteArrayDataType()
+    private static string GetByteArrayDataType()
     {
         return "varbinary(max)";
     }
 
-    protected string GetByteDataType()
+    private static string GetByteDataType()
     {
         return "tinyint";
     }
@@ -360,17 +360,11 @@ public abstract partial class TypeTranslater:ITypeTranslater
             return null;
 
         var match = DecimalsBeforeAndAfterRe().Match(sqlType);
+        if (!match.Success) return null;
 
-        if (match.Success)
-        {
-            var precision = int.Parse(match.Groups[1].Value);
-            var scale = int.Parse(match.Groups[2].Value);
-
-            return new DecimalSize(precision - scale, scale);
-
-        }
-
-        return null;
+        var precision = int.Parse(match.Groups[1].Value);
+        var scale = int.Parse(match.Groups[2].Value);
+        return new DecimalSize(precision - scale, scale);
     }
 
     public string TranslateSQLDBType(string sqlType, ITypeTranslater destinationTypeTranslater)

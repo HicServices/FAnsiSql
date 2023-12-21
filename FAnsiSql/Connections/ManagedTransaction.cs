@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace FAnsi.Connections;
 
 /// <inheritdoc/>
-public class ManagedTransaction : IManagedTransaction
+public sealed class ManagedTransaction : IManagedTransaction
 {
     /// <inheritdoc/>
     public DbConnection Connection { get; private set; }
@@ -28,6 +28,7 @@ public class ManagedTransaction : IManagedTransaction
     {
         if(closed)
             return;
+
         closed = true;
 
         try
@@ -52,6 +53,7 @@ public class ManagedTransaction : IManagedTransaction
     {
         if(closed)
             return;
+
         closed = true;
 
         try

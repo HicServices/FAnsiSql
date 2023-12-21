@@ -15,9 +15,14 @@ using TypeGuesser;
 namespace FAnsi.Discovery;
 
 /// <inheritdoc/>
-public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
+public abstract partial class QuerySyntaxHelper(
+    ITypeTranslater translater,
+    IAggregateHelper aggregateHelper,
+    IUpdateHelper updateHelper,
+    DatabaseType databaseType)
+    : IQuerySyntaxHelper
 {
-    private static readonly System.Buffers.SearchValues<char> bracket_searcher = System.Buffers.SearchValues.Create("()");
+    private static readonly System.Buffers.SearchValues<char> BracketSearcher = System.Buffers.SearchValues.Create("()");
 
     public virtual string DatabaseTableSeparator => ".";
 
@@ -37,12 +42,12 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
     /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
     /// </summary>
     /// <returns></returns>
-    protected static Regex ParameterNamesRegex = ParameterNamesRe();
+    private static readonly Regex ParameterNamesRegex = ParameterNamesRe();
 
     /// <summary>
     /// Symbols (for all database types) which denote wrapped entity names e.g. [dbo].[mytable] contains qualifiers '[' and ']'
     /// </summary>
-    public static char[] TableNameQualifiers = ['[', ']', '`' ,'"'];
+    public static readonly char[] TableNameQualifiers = ['[', ']', '`' ,'"'];
 
     /// <inheritdoc/>
     public abstract string OpenQualifier {get;}
@@ -50,13 +55,13 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
     /// <inheritdoc/>
     public abstract string CloseQualifier {get;}
 
-    public ITypeTranslater TypeTranslater { get; private set; }
+    public ITypeTranslater TypeTranslater { get; private set; } = translater;
 
     private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = [];
 
-    public IAggregateHelper AggregateHelper { get; private set; }
-    public IUpdateHelper UpdateHelper { get; set; }
-    public DatabaseType DatabaseType { get; private set; }
+    public IAggregateHelper AggregateHelper { get; private set; } = aggregateHelper;
+    public IUpdateHelper UpdateHelper { get; set; } = updateHelper;
+    public DatabaseType DatabaseType { get; private set; } = databaseType;
 
     public virtual char ParameterSymbol => '@';
 
@@ -79,7 +84,7 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
         return AliasRegex();
     }
 
-    protected string GetAliasConst()
+    private static string GetAliasConst()
     {
         return " AS ";
     }
@@ -99,7 +104,7 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
         if (string.IsNullOrWhiteSpace(query))
             return [];
 
-        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Cast<Match>().Select(match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
+        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Cast<Match>().Select(static match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
         return toReturn;
     }
 
@@ -116,14 +121,6 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
         return ParameterNamesRegex.IsMatch(parameterSQL);
     }
 
-    protected QuerySyntaxHelper(ITypeTranslater translater, IAggregateHelper aggregateHelper, IUpdateHelper updateHelper, DatabaseType databaseType)
-    {
-        TypeTranslater = translater;
-        AggregateHelper = aggregateHelper;
-        UpdateHelper = updateHelper;
-        DatabaseType = databaseType;
-    }
-
 
     public virtual string GetRuntimeName(string s)
     {
@@ -137,7 +134,7 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
         //it doesn't have an alias, e.g. it's `MyDatabase`.`mytable` or something
 
         //if it's "count(1)" or something then that's a problem!
-        if (s.AsSpan().IndexOfAny(bracket_searcher) != -1)
+        if (s.AsSpan().IndexOfAny(BracketSearcher) != -1)
             throw new RuntimeNameException(
                 $"Could not determine runtime name for Sql:'{s}'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
 
@@ -148,7 +145,7 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
             return lastWord;
 
         //trim off any brackets e.g. return "My Table" for "[My Table]"
-        if(lastWord.StartsWith(OpenQualifier) && lastWord.EndsWith(CloseQualifier))
+        if(lastWord.StartsWith(OpenQualifier, StringComparison.Ordinal) && lastWord.EndsWith(CloseQualifier, StringComparison.Ordinal))
             return UnescapeWrappedNameBody(lastWord[1..^1]);
 
         return lastWord;
@@ -264,7 +261,7 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
                 FAnsiStrings.QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_not_be_blank,
                 nameof(lineToSplit));
 
-        if (lineToSplit.Count(c => c.Equals('(')) != lineToSplit.Count(c => c.Equals(')')))
+        if (lineToSplit.Count(static c => c.Equals('(')) != lineToSplit.Count(static c => c.Equals(')')))
             throw new ArgumentException(
                 FAnsiStrings
                     .QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_and_closing_parentheses_must_match,
@@ -518,6 +515,7 @@ public abstract partial class QuerySyntaxHelper : IQuerySyntaxHelper
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
+
         return Equals((QuerySyntaxHelper)obj);
     }
 

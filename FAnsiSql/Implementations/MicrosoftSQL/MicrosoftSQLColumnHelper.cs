@@ -4,7 +4,7 @@ using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public class MicrosoftSQLColumnHelper : IDiscoveredColumnHelper
+public sealed class MicrosoftSQLColumnHelper : IDiscoveredColumnHelper
 {
     public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table, IHasRuntimeName column, int topX, bool discardNulls)
     {

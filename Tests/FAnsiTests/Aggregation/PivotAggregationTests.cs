@@ -6,7 +6,7 @@ using System.Data;
 
 namespace FAnsiTests.Aggregation;
 
-internal class PivotAggregationTests:AggregationTests
+internal sealed class PivotAggregationTests:AggregationTests
 {
     [TestCase(DatabaseType.MicrosoftSQLServer)]
     [TestCase(DatabaseType.MySql)]

@@ -10,13 +10,12 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsiTests.TypeTranslation;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using TypeGuesser;
 using TypeGuesser.Deciders;
 
 namespace FAnsiTests;
 
-public class CrossPlatformTests:DatabaseTests
+public sealed class CrossPlatformTests:DatabaseTests
 {
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -168,7 +167,7 @@ public class CrossPlatformTests:DatabaseTests
         var resultTimeSpans =
             //Oracle is a bit special it only stores whole dates then has server side settings about how much to return (like a format string)
             type == DatabaseType.Oracle
-            ? new[] { (DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0] }.Select(dt => dt.TimeOfDay)
+            ? new[] { (DateTime)result.Rows[0][0], (DateTime)result.Rows[1][0] }.Select(static dt => dt.TimeOfDay)
                 .Cast<object>().ToArray()
             : [result.Rows[0][0], result.Rows[1][0]];
 
@@ -710,9 +709,9 @@ public class CrossPlatformTests:DatabaseTests
         dt = tbl.GetDataTable();
         Assert.Multiple(() =>
         {
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToInt32(r[0]) == 100), Is.EqualTo(1));
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToInt32(r[0]) == 105), Is.EqualTo(1));
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToInt32(r[0]) == 1), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToInt32(r[0]) == 100), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToInt32(r[0]) == 105), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToInt32(r[0]) == 1), Is.EqualTo(1));
         });
 
         var col = tbl.DiscoverColumn("MyCol");
@@ -731,9 +730,9 @@ public class CrossPlatformTests:DatabaseTests
         dt = tbl.GetDataTable();
         Assert.Multiple(() =>
         {
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(100.0f)), Is.EqualTo(1));
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(105.0f)), Is.EqualTo(1));
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(1.0f)), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToDecimal(r[0]) == new decimal(100.0f)), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToDecimal(r[0]) == new decimal(105.0f)), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToDecimal(r[0]) == new decimal(1.0f)), Is.EqualTo(1));
         });
     }
 
@@ -754,9 +753,9 @@ public class CrossPlatformTests:DatabaseTests
         dt =tbl.GetDataTable();
         Assert.Multiple(() =>
         {
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(100.0f)), Is.EqualTo(1));
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(105.0f)), Is.EqualTo(1));
-            Assert.That(dt.Rows.OfType<DataRow>().Count(r => Convert.ToDecimal(r[0]) == new decimal(2.1f)), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToDecimal(r[0]) == new decimal(100.0f)), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToDecimal(r[0]) == new decimal(105.0f)), Is.EqualTo(1));
+            Assert.That(dt.Rows.OfType<DataRow>().Count(static r => Convert.ToDecimal(r[0]) == new decimal(2.1f)), Is.EqualTo(1));
         });
 
 
@@ -883,7 +882,7 @@ public class CrossPlatformTests:DatabaseTests
             Assert.That(
                 Assert.Throws<RuntimeNameException>(() => database.CreateTable(horribleTableName,
                 [
-                    new("a", new DatabaseTypeRequest(typeof(string), 10))
+                    new DatabaseColumnRequest("a", new DatabaseTypeRequest(typeof(string), 10))
                 ]))
                     ?.Message, Does.Match("Table .* contained unsupported .* characters"));
 
@@ -891,7 +890,7 @@ public class CrossPlatformTests:DatabaseTests
             Assert.That(
                 Assert.Throws<RuntimeNameException>(() => database.CreateTable("f",
                 [
-                    new(columnName, new DatabaseTypeRequest(typeof(string), 10))
+                    new DatabaseColumnRequest(columnName, new DatabaseTypeRequest(typeof(string), 10))
                 ]))
                     ?.Message, Does.Match("Column .* contained unsupported .* characters"));
         });
@@ -1088,9 +1087,9 @@ public class CrossPlatformTests:DatabaseTests
 
         var tbl = db.CreateTable("LotsOfDatesTest",
         [
-            new("ID",new DatabaseTypeRequest(typeof(int))),
-            new("MyDate",new DatabaseTypeRequest(typeof(DateTime))),
-            new("MyString",new DatabaseTypeRequest(typeof(string),int.MaxValue))
+            new DatabaseColumnRequest("ID",new DatabaseTypeRequest(typeof(int))),
+            new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime))),
+            new DatabaseColumnRequest("MyString",new DatabaseTypeRequest(typeof(string),int.MaxValue))
         ]);
 
         //test basic insert

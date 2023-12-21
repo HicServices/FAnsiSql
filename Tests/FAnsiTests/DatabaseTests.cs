@@ -81,7 +81,7 @@ public class DatabaseTests
 
     protected IEnumerable<DiscoveredServer> TestServer()
     {
-        return TestConnectionStrings.Select(kvp => new DiscoveredServer(kvp.Value, kvp.Key));
+        return TestConnectionStrings.Select(static kvp => new DiscoveredServer(kvp.Value, kvp.Key));
     }
     protected DiscoveredServer GetTestServer(DatabaseType type)
     {
@@ -107,6 +107,7 @@ public class DatabaseTests
         else
         {
             if (!cleanDatabase) return db;
+
             IEnumerable<DiscoveredTable> deleteTableOrder;
 
             try

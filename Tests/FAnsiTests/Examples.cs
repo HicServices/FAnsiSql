@@ -2,13 +2,11 @@
 using System.Data;
 using FAnsi;
 using FAnsi.Discovery;
-using FAnsi.Implementation;
-using FAnsi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
 
 namespace FAnsiTests;
 
-internal class TestExamples : DatabaseTests
+internal sealed class TestExamples : DatabaseTests
 {
     [Ignore("Test only works when the hard coded connection strings pass,  this test is used to build clear examples in the documentation")]
     [Test]

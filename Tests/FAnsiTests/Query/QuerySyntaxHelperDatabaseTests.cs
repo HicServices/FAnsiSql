@@ -2,11 +2,10 @@
 using FAnsi;
 using FAnsi.Discovery.QuerySyntax;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Query;
 
-internal class QuerySyntaxHelperDatabaseTests : DatabaseTests
+internal sealed class QuerySyntaxHelperDatabaseTests : DatabaseTests
 {
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
