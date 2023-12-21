@@ -7,7 +7,7 @@ namespace FAnsi.Implementations.MicrosoftSQL.Aggregation;
 
 public sealed class MicrosoftSQLAggregateHelper : AggregateHelper
 {
-    private string GetDateAxisTableDeclaration(IQueryAxis axis)
+    private static string GetDateAxisTableDeclaration(IQueryAxis axis)
     {
         //if pivot dimension is set then this code appears inside dynamic SQL constant string that will be Exec'd so we have to escape single quotes
         var startDateSql = axis.StartDate;
@@ -41,12 +41,8 @@ public sealed class MicrosoftSQLAggregateHelper : AggregateHelper
 
     }
 
-    public string GetAxisTableRuntimeName() => "axis";
-
-    public string GetAxisTableNameFullyQualified() => "@dateAxis axis";
-
     /// <summary>
-    /// Takes the fieldname/transform from the dataset and wraps it with the date adjustment function specified by the AxisIncrement
+    /// Takes the field name/transform from the dataset and wraps it with the date adjustment function specified by the AxisIncrement
     /// </summary>
     /// <param name="increment"></param>
     /// <param name="columnSql"></param>

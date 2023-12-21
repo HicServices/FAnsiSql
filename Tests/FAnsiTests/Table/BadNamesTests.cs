@@ -47,7 +47,6 @@ internal sealed class BadNamesTests : DatabaseTests
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void Test_EnsureWrapped_EmptyExpressions(DatabaseType dbType)
     {
-        var factory = new QuerySyntaxHelperFactory();
         var syntax = QuerySyntaxHelperFactory.Create(dbType);
 
         Assert.Multiple(() =>

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Common;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using FAnsi.Exceptions;
@@ -35,14 +34,6 @@ public sealed class ImplementationManager
         var loading = new T();
         if (!Instance._implementations.Contains(loading))
             Instance._implementations.Add(loading);
-    }
-
-    /// <summary>
-    /// Loads all implementations found in currently loaded assemblies (in the current domain)
-    /// </summary>
-    [Obsolete("MEF is dead")]
-    public static void Load(DirectoryInfo currentDirectory=null)
-    {
     }
 
 

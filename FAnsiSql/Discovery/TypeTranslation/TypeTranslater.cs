@@ -101,7 +101,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
         return "tinyint";
     }
 
-    protected string GetFloatingPointDataType(DecimalSize decimalSize)
+    private static string GetFloatingPointDataType(DecimalSize decimalSize)
     {
         if (decimalSize == null || decimalSize.IsEmpty)
             return "decimal(20,10)";
@@ -176,7 +176,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
         return "bigint";
     }
 
-    protected string GetGuidDataType()
+    private static string GetGuidDataType()
     {
         return "uniqueidentifier";
     }
@@ -317,7 +317,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    public bool IsUnicode(string sqlType)
+    private static bool IsUnicode(string sqlType)
     {
         return sqlType != null && sqlType.StartsWith("n",StringComparison.CurrentCultureIgnoreCase);
     }
@@ -379,12 +379,12 @@ public abstract partial class TypeTranslater:ITypeTranslater
 
     /// <summary>
     /// Return the number of characters required to not truncate/lose any data when altering a column from time (e.g. TIME etc) to varchar(x).  Return
-    /// x such that the column does not loose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table.
+    /// x such that the column does not lose integrity.  This is needed when dynamically discovering what size to make a column by streaming data into a table.
     /// if we see many times and nulls we will decide to use a time column then we see strings and have to convert the column to a varchar column without loosing the
     /// currently loaded data.
     /// </summary>
     /// <returns></returns>
-    protected int GetStringLengthForTimeSpan()
+    private static int GetStringLengthForTimeSpan()
     {
         /*
          * 
@@ -415,7 +415,7 @@ select LEN(dt) from omgTimes
     /// currently loaded data.
     /// </summary>
     /// <returns></returns>
-    protected int GetStringLengthForDateTime()
+    private static int GetStringLengthForDateTime()
     {
         /*
          To determine this you can run the following SQL:
@@ -476,7 +476,8 @@ select LEN(dt) from omgdates
     {
         return FloatingPointRegex.IsMatch(sqlType);
     }
-    protected bool IsGuid(string sqlType)
+
+    private static bool IsGuid(string sqlType)
     {
         return GuidRegex.IsMatch(sqlType);
     }
