@@ -9,13 +9,13 @@ namespace FAnsi.Connections;
 public sealed class ManagedConnection : IManagedConnection
 {
     /// <inheritdoc/>
-    public DbConnection Connection { get; private set; }
+    public DbConnection Connection { get; }
 
     /// <inheritdoc/>
-    public DbTransaction Transaction { get; private set; }
+    public DbTransaction Transaction { get; }
 
     /// <inheritdoc/>
-    public IManagedTransaction ManagedTransaction { get; private set; }
+    public IManagedTransaction ManagedTransaction { get; }
 
     /// <inheritdoc/>
     public bool CloseOnDispose { get; set; }

@@ -6,6 +6,6 @@
 /// </summary>
 public sealed class TopXResponse(string sql, QueryComponent location)
 {
-    public string SQL { get; set; } = sql;
-    public QueryComponent Location { get; set; } = location;
+    public string SQL { get; } = sql;
+    public QueryComponent Location { get; } = location;
 }

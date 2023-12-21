@@ -25,12 +25,12 @@ public sealed class DiscoveredRelationship(string fkName, DiscoveredTable pkTabl
     /// <summary>
     /// The table in which the primary key is declared.  This is the parent table.
     /// </summary>
-    public DiscoveredTable PrimaryKeyTable { get; private set; } = pkTable;
+    public DiscoveredTable PrimaryKeyTable { get; } = pkTable;
 
     /// <summary>
     /// The table which contains child records.
     /// </summary>
-    public DiscoveredTable ForeignKeyTable { get; private set; } = fkTable;
+    public DiscoveredTable ForeignKeyTable { get; } = fkTable;
 
     /// <summary>
     /// Mapping of primary key column(s) in <see cref="PrimaryKeyTable"/> to foreign key column(s) in <see cref="ForeignKeyTable"/>.  If there are more than one entry
@@ -64,6 +64,5 @@ public sealed class DiscoveredRelationship(string fkName, DiscoveredTable pkTabl
             _pkColumns.Single(c=>c.GetRuntimeName().Equals(primaryKeyCol,StringComparison.CurrentCultureIgnoreCase)),
             _fkColumns.Single(c => c.GetRuntimeName().Equals(foreignKeyCol, StringComparison.CurrentCultureIgnoreCase))
         );
-
     }
 }
