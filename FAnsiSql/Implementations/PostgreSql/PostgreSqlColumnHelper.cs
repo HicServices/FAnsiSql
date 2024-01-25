@@ -4,7 +4,7 @@ using FAnsi.Naming;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlColumnHelper : IDiscoveredColumnHelper
+public sealed class PostgreSqlColumnHelper : IDiscoveredColumnHelper
 {
     public static readonly PostgreSqlColumnHelper Instance = new();
     private PostgreSqlColumnHelper(){}

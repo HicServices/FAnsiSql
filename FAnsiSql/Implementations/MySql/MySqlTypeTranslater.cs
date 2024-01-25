@@ -4,24 +4,24 @@ using FAnsi.Discovery.TypeTranslation;
 
 namespace FAnsi.Implementations.MySql;
 
-public sealed class MySqlTypeTranslater : TypeTranslater
+public sealed partial class MySqlTypeTranslater : TypeTranslater
 {
     public static readonly MySqlTypeTranslater Instance = new();
 
     //yup that's right!, long is string (MEDIUMTEXT)
     //https://dev.mysql.com/doc/refman/8.0/en/other-vendor-data-types.html
-    private static readonly Regex AlsoBitRegex = new(@"tinyint\(1\)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex AlsoStringRegex = new("(long)|(enum)|(set)|(text)|(mediumtext)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex AlsoFloatingPoint = new("^(dec)|(fixed)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex AlsoBitRegex = AlsoBitRe();
+    private static readonly Regex AlsoStringRegex = AlsoStringRe();
+    private static readonly Regex AlsoFloatingPoint = AlsoFloatingPointRe();
 
     private MySqlTypeTranslater() : base(4000, 4000)
     {
         //match bigint and bigint(20) etc
-        ByteRegex = new Regex(@"^(tinyint)|(int1)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-        SmallIntRegex = new Regex(@"^(smallint)|(int2)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-        IntRegex = new Regex(@"^(int)|(mediumint)|(middleint)|(int3)|(int4)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-        LongRegex = new Regex(@"^(bigint)|(int8)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-        DateRegex = new Regex(@"(date)|(timestamp)",RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+        ByteRegex = ByteRe();
+        SmallIntRegex = SmallIntRe();
+        IntRegex = IntRe();
+        LongRegex = LongRe();
+        DateRegex = DateRe();
     }
 
     public override int GetLengthIfString(string sqlType) =>
@@ -72,4 +72,21 @@ public sealed class MySqlTypeTranslater : TypeTranslater
     {
         return base.IsBit(sqlType) || AlsoBitRegex.IsMatch(sqlType);
     }
+
+    [GeneratedRegex(@"tinyint\(1\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex AlsoBitRe();
+    [GeneratedRegex("(long)|(enum)|(set)|(text)|(mediumtext)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex AlsoStringRe();
+    [GeneratedRegex(@"^(tinyint)|(int1)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex ByteRe();
+    [GeneratedRegex("^(dec)|(fixed)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex AlsoFloatingPointRe();
+    [GeneratedRegex(@"^(smallint)|(int2)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex SmallIntRe();
+    [GeneratedRegex(@"^(int)|(mediumint)|(middleint)|(int3)|(int4)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex IntRe();
+    [GeneratedRegex(@"^(bigint)|(int8)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex LongRe();
+    [GeneratedRegex(@"(date)|(timestamp)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex DateRe();
 }

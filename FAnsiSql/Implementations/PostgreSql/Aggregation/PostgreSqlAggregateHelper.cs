@@ -28,27 +28,29 @@ public sealed class PostgreSqlAggregateHelper : AggregateHelper
         WrapAxisColumnWithDatePartFunction(query,axisColumnAlias);
 
         var sql =
-            string.Format(@"
-{0}
-SELECT
-   {1} AS ""joinDt"",dataset.{6}
-FROM
-generate_series({3},
-             {4},
-            interval '{5}')
-LEFT JOIN
-(
-    {2}
-) dataset
-ON dataset.{7} = {1}
-ORDER BY 
-{1}
-",
+            string.Format("""
+
+                          {0}
+                          SELECT
+                             {1} AS "joinDt",dataset.{6}
+                          FROM
+                          generate_series({3},
+                                       {4},
+                                      interval '{5}')
+                          LEFT JOIN
+                          (
+                              {2}
+                          ) dataset
+                          ON dataset.{7} = {1}
+                          ORDER BY
+                          {1}
+
+                          """,
                 //Anything before the SELECT
-                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
+                string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT)),
                 GetDatePartOfColumn(query.Axis.AxisIncrement, "generate_series.date"),
                 //the entire query
-                string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)), query.Axis.StartDate,
+                string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)), query.Axis.StartDate,
                 query.Axis.EndDate,
                 interval,
                 countAlias,

@@ -35,6 +35,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
             return $"{col.ColumnName} INTEGER {syntaxHelper.GetAutoIncrementKeywordIfAny()}";
         if (datatype.Equals("bigint", StringComparison.OrdinalIgnoreCase))
             return $"{col.ColumnName} NUMBER(19,0)";
+
         return base.GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper);
     }
 
@@ -89,7 +90,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
 
     public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
     {
-        return Array.Empty<DiscoveredStoredprocedure>();
+        return [];
     }
 
     protected override Guesser GetGuesser(DatabaseTypeRequest request)

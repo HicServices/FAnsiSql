@@ -5,13 +5,13 @@ using System.Diagnostics;
 namespace FAnsi.Connections;
 
 /// <inheritdoc/>
-public class ManagedTransaction : IManagedTransaction
+public sealed class ManagedTransaction : IManagedTransaction
 {
     /// <inheritdoc/>
-    public DbConnection Connection { get; private set; }
+    public DbConnection Connection { get; }
 
     /// <inheritdoc/>
-    public DbTransaction Transaction { get; private set; }
+    public DbTransaction Transaction { get; }
 
     internal ManagedTransaction(DbConnection connection, DbTransaction transaction)
     {
@@ -19,16 +19,17 @@ public class ManagedTransaction : IManagedTransaction
         Transaction = transaction;
     }
 
-    private bool closed;
+    private bool _closed;
 
     /// <summary>
     /// Attempts to rollback the DbTransaction (swallowing any Exception) and closes/disposes the DbConnection
     /// </summary>
     public void AbandonAndCloseConnection()
     {
-        if(closed)
+        if(_closed)
             return;
-        closed = true;
+
+        _closed = true;
 
         try
         {
@@ -50,9 +51,10 @@ public class ManagedTransaction : IManagedTransaction
     /// </summary>
     public void CommitAndCloseConnection()
     {
-        if(closed)
+        if(_closed)
             return;
-        closed = true;
+
+        _closed = true;
 
         try
         {

@@ -7,7 +7,7 @@ using System.Data;
 
 namespace FAnsiTests.Aggregation;
 
-internal class BasicAggregationTests : AggregationTests
+internal sealed class BasicAggregationTests : AggregationTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_BasicCount(DatabaseType type)

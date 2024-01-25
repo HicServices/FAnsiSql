@@ -6,16 +6,16 @@ using FAnsi.Discovery;
 namespace FAnsi.Connections;
 
 /// <inheritdoc/>
-public class ManagedConnection : IManagedConnection
+public sealed class ManagedConnection : IManagedConnection
 {
     /// <inheritdoc/>
-    public DbConnection Connection { get; private set; }
+    public DbConnection Connection { get; }
 
     /// <inheritdoc/>
-    public DbTransaction Transaction { get; private set; }
+    public DbTransaction Transaction { get; }
 
     /// <inheritdoc/>
-    public IManagedTransaction ManagedTransaction { get; private set; }
+    public IManagedTransaction ManagedTransaction { get; }
 
     /// <inheritdoc/>
     public bool CloseOnDispose { get; set; }
@@ -29,13 +29,12 @@ public class ManagedConnection : IManagedConnection
         ManagedTransaction = managedTransaction;
         Transaction = managedTransaction?.Transaction;
 
-        //if there isn't a transaction then we opened a new connection so we had better remember to close it again
-        if(managedTransaction == null)
-        {
-            CloseOnDispose = true;
-            Debug.Assert(Connection.State == ConnectionState.Closed);
-            Connection.Open();
-        }
+        //if there isn't a transaction then we opened a new connection, so we had better remember to close it again
+        if (managedTransaction != null) return;
+
+        CloseOnDispose = true;
+        Debug.Assert(Connection.State == ConnectionState.Closed);
+        Connection.Open();
     }
 
     public ManagedConnection Clone()
@@ -48,7 +47,6 @@ public class ManagedConnection : IManagedConnection
     /// </summary>
     public void Dispose()
     {
-        System.GC.SuppressFinalize(this);
         if (CloseOnDispose)
             Connection.Dispose();
     }

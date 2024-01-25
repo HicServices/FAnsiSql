@@ -4,12 +4,11 @@ using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-internal class ForeignKeyTests:DatabaseTests
+internal sealed class ForeignKeyTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void TestForeignKey_OneColumnKey(DatabaseType dbType, bool cascade)
@@ -157,17 +156,17 @@ internal class ForeignKeyTests:DatabaseTests
 
         var t2 = db.CreateTable("T2",
         [
-            new("c2", new DatabaseTypeRequest(typeof(int)))
+            new DatabaseColumnRequest("c2", new DatabaseTypeRequest(typeof(int)))
         ]);
 
         var t3 = db.CreateTable("T3",
         [
-            new("c3", new DatabaseTypeRequest(typeof(int)))
+            new DatabaseColumnRequest("c3", new DatabaseTypeRequest(typeof(int)))
         ]);
 
         var t1 = db.CreateTable("T1",
         [
-            new("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            new DatabaseColumnRequest("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
         ]);
 
         var c1 = t1.DiscoverColumns().Single();
@@ -196,8 +195,11 @@ internal class ForeignKeyTests:DatabaseTests
             Assert.That(constraint2, Is.Not.Null);
         });
 
-        StringAssert.AreEqualIgnoringCase("FK_T2_T1",constraint1.Name);
-        StringAssert.AreEqualIgnoringCase("FK_Lol",constraint2.Name);
+        Assert.Multiple(() =>
+        {
+            Assert.That(constraint1.Name, Is.EqualTo("FK_T2_T1").IgnoreCase);
+            Assert.That(constraint2.Name, Is.EqualTo("FK_Lol").IgnoreCase);
+        });
 
         var sort2 = new RelationshipTopologicalSort(new[] { t1,t2,t3 });
 
@@ -221,17 +223,17 @@ internal class ForeignKeyTests:DatabaseTests
 
         var t1 = db.CreateTable("T1",
         [
-            new("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            new DatabaseColumnRequest("c1", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
         ]);
 
         var t2 = db.CreateTable("T2",
         [
-            new("c2", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
+            new DatabaseColumnRequest("c2", new DatabaseTypeRequest(typeof(int))){IsPrimaryKey = true}
         ]);
 
         var t3 = db.CreateTable("T3",
         [
-            new("c3", new DatabaseTypeRequest(typeof(int)))
+            new DatabaseColumnRequest("c3", new DatabaseTypeRequest(typeof(int)))
         ]);
 
         var c1 = t1.DiscoverColumns().Single();

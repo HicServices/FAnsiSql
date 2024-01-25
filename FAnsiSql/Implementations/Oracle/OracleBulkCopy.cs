@@ -9,15 +9,9 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Implementations.Oracle;
 
-internal class OracleBulkCopy : BulkCopy
+internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture) : BulkCopy(targetTable, connection,culture)
 {
-    private readonly DiscoveredServer _server;
-    private const char ParameterSymbol = ':';
-
-    public OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
-    {
-        _server = targetTable.Database.Server;
-    }
+    private readonly DiscoveredServer _server = targetTable.Database.Server;
 
     public override int UploadImpl(DataTable dt)
     {
@@ -29,7 +23,7 @@ internal class OracleBulkCopy : BulkCopy
         var tt = syntaxHelper.TypeTranslater;
 
         //if the column name is a reserved keyword e.g. "Comment" we need to give it a new name
-        var parameterNames = syntaxHelper.GetParameterNamesFor(dt.Columns.Cast<DataColumn>().ToArray(),c=>c.ColumnName);
+        var parameterNames = syntaxHelper.GetParameterNamesFor(dt.Columns.Cast<DataColumn>().ToArray(), static c=>c.ColumnName);
 
         var affectedRows = 0;
 
@@ -38,7 +32,7 @@ internal class OracleBulkCopy : BulkCopy
         var dateColumns = new HashSet<DataColumn>();
 
         var sql = string.Format("INSERT INTO " + TargetTable.GetFullyQualifiedName() + "({0}) VALUES ({1})",
-            string.Join(",", mapping.Values.Select(c=> c.GetWrappedName())),
+            string.Join(",", mapping.Values.Select(static c=> c.GetWrappedName())),
             string.Join(",", mapping.Keys.Select(c => parameterNames[c]))
         );
 
@@ -52,13 +46,18 @@ internal class OracleBulkCopy : BulkCopy
             var p = _server.AddParameterWithValueToCommand(parameterNames[dataColumn], cmd, DBNull.Value);
             p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
 
-            if (p.DbType == DbType.DateTime)
-                dateColumns.Add(dataColumn);
-            else if (p.DbType == DbType.Boolean)
-                p.DbType = DbType.Int32;    // JS 2023-05-11 special case since we don't have a true boolean type in Oracle, but use 0/1 instead
+            switch (p.DbType)
+            {
+                case DbType.DateTime:
+                    dateColumns.Add(dataColumn);
+                    break;
+                case DbType.Boolean:
+                    p.DbType = DbType.Int32;    // JS 2023-05-11 special case since we don't have a true boolean type in Oracle, but use 0/1 instead
+                    break;
+            }
         }
 
-        var values = mapping.Keys.ToDictionary(c => c, _ => new List<object>());
+        var values = mapping.Keys.ToDictionary(static c => c, static _ => new List<object>());
 
         foreach (DataRow dataRow in dt.Rows)
         {

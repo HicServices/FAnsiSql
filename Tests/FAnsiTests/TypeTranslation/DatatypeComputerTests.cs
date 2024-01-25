@@ -3,7 +3,6 @@ using System.Globalization;
 using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.TypeTranslation;
@@ -15,7 +14,7 @@ namespace FAnsiTests.TypeTranslation;
 /// the final estimate should be decimal(4,1) to allow for both 100.0f and 1.1f.
 /// </para>
 /// </summary>
-public class GuesserTests
+public sealed class GuesserTests
 {
     private readonly ITypeTranslater _translater = MicrosoftSQLTypeTranslater.Instance;
 
@@ -204,7 +203,7 @@ public class GuesserTests
         t.AdjustToCompensateForValue(o1);
 
         var ex = Assert.Throws<MixedTypingException>(() => t.AdjustToCompensateForValue(o2));
-        StringAssert.Contains("mixed with untyped objects",ex?.Message);
+        Assert.That(ex?.Message, Does.Contain("mixed with untyped objects"));
     }
 
     [Test]
@@ -262,7 +261,7 @@ public class GuesserTests
         });
     }
 
-    private string GetCultureSpecificDate()
+    private static string GetCultureSpecificDate()
     {
         if (CultureInfo.CurrentCulture.EnglishName.Contains("United States"))
             return "01/23/2001";
@@ -406,7 +405,7 @@ public class GuesserTests
         t.AdjustToCompensateForValue((short)5);
         var ex = Assert.Throws<MixedTypingException>(()=>t.AdjustToCompensateForValue(1000));
 
-        StringAssert.Contains("We were adjusting to compensate for object '1000' which is of Type 'System.Int32', we were previously passed a 'System.Int16' type",ex?.Message);
+        Assert.That(ex?.Message, Does.Contain("We were adjusting to compensate for object '1000' which is of Type 'System.Int32', we were previously passed a 'System.Int16' type"));
     }
     [Test]
     public void TestGuesser_Int16s()

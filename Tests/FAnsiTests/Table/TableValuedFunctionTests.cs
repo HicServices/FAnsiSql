@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using FAnsi;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Table;
 
-internal class TableValuedFunctionTests:DatabaseTests
+internal sealed class TableValuedFunctionTests:DatabaseTests
 {
     [TestCase("dbo")]
     [TestCase("Omg")]
@@ -66,9 +65,12 @@ END";
             Assert.That(tvf.Schema ?? "dbo", Is.EqualTo(schema));
         });
 
-        StringAssert.EndsWith(".MyAwesomeFunction(@startNumber,@stopNumber,@name)",tvf.GetFullyQualifiedName());
+        Assert.Multiple(() =>
+        {
+            Assert.That(tvf.GetFullyQualifiedName(), Does.EndWith(".MyAwesomeFunction(@startNumber,@stopNumber,@name)"));
 
-        Assert.That(tvf.Exists());
+            Assert.That(tvf.Exists());
+        });
 
         tvf.Drop();
 

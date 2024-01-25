@@ -6,7 +6,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Database;
 
-internal class DatabaseLevelTests : DatabaseTests
+internal sealed class DatabaseLevelTests : DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Database_Exists(DatabaseType type)
@@ -38,15 +38,14 @@ internal class DatabaseLevelTests : DatabaseTests
 
         db.Server.GetQuerySyntaxHelper().EnsureWrapped("Fr ank");
 
-        if (type is DatabaseType.MicrosoftSQLServer or DatabaseType.PostgreSql)
-        {
-            var tbl = db.CreateTable("Heyyy",
-                [new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))],"Fr ank");
+        if (type is not (DatabaseType.MicrosoftSQLServer or DatabaseType.PostgreSql)) return;
 
-            Assert.That(tbl.Exists());
+        var tbl = db.CreateTable("Heyyy",
+            [new DatabaseColumnRequest("fff", new DatabaseTypeRequest(typeof(string), 10))],"Fr ank");
 
-            if(type == DatabaseType.MicrosoftSQLServer)
-                Assert.That(tbl.Schema, Is.EqualTo("Fr ank"));
-        }
+        Assert.That(tbl.Exists());
+
+        if(type == DatabaseType.MicrosoftSQLServer)
+            Assert.That(tbl.Schema, Is.EqualTo("Fr ank"));
     }
 }

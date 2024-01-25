@@ -7,7 +7,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-internal class DataTypeAdjusterTests:DatabaseTests
+internal sealed class DataTypeAdjusterTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_WithAdjuster(DatabaseType type)
@@ -21,7 +21,7 @@ internal class DataTypeAdjusterTests:DatabaseTests
         tbl.Drop();
     }
 
-    internal class DataTypeAdjusterTestsPadder : IDatabaseColumnRequestAdjuster
+    internal sealed class DataTypeAdjusterTestsPadder : IDatabaseColumnRequestAdjuster
     {
         public void AdjustColumns(List<DatabaseColumnRequest> columns)
         {

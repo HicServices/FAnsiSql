@@ -11,7 +11,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-internal class BadNamesTests : DatabaseTests
+internal sealed class BadNamesTests : DatabaseTests
 {
     /// <summary>
     /// It would be a bad idea to name your column this but if you really wanted to...
@@ -47,8 +47,7 @@ internal class BadNamesTests : DatabaseTests
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void Test_EnsureWrapped_EmptyExpressions(DatabaseType dbType)
     {
-        var factory = new QuerySyntaxHelperFactory();
-        var syntax = factory.Create(dbType);
+        var syntax = QuerySyntaxHelperFactory.Create(dbType);
 
         Assert.Multiple(() =>
         {
@@ -201,7 +200,7 @@ internal class BadNamesTests : DatabaseTests
             new DatabaseColumnRequest("Frrrrr ##' ank",new DatabaseTypeRequest(typeof(int)))
         ]);
 
-        var pk = tbl1.DiscoverColumns().Single(c=>c.IsPrimaryKey);
+        var pk = tbl1.DiscoverColumns().Single(static c=>c.IsPrimaryKey);
         DatabaseColumnRequest fk;
 
         var tbl2 = db.CreateTable(new CreateTableArgs(db, $"{badTableName}2",null)

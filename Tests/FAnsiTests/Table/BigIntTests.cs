@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-public class BigIntTests : DatabaseTests
+public sealed class BigIntTests : DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBigInt_Insert(DatabaseType dbType)

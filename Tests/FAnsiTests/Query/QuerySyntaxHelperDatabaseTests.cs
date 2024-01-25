@@ -2,11 +2,10 @@
 using FAnsi;
 using FAnsi.Discovery.QuerySyntax;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Query;
 
-internal class QuerySyntaxHelperDatabaseTests : DatabaseTests
+internal sealed class QuerySyntaxHelperDatabaseTests : DatabaseTests
 {
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -26,7 +25,7 @@ internal class QuerySyntaxHelperDatabaseTests : DatabaseTests
 
         var result = db.Server.GetCommand(sql, con).ExecuteScalar();
 
-        StringAssert.AreEqualIgnoringCase("83E4A96AED96436C621B9809E258B309",result?.ToString());
+        Assert.That(result?.ToString(), Is.EqualTo("83E4A96AED96436C621B9809E258B309").IgnoreCase);
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]

@@ -39,34 +39,42 @@ public sealed class OracleAggregateHelper : AggregateHelper
 
         return axis.AxisIncrement switch
         {
-            AxisIncrement.Year => $@"
-with calendar as (
-        select add_months({startDateSql},12* (rownum - 1)) as dt
-        from dual
-        connect by rownum <= 1+
-floor(months_between({endDateSql}, {startDateSql}) /12)
-    )",
-            AxisIncrement.Day => $@"
-with calendar as (
-        select {startDateSql} + (rownum - 1) as dt
-        from dual
-        connect by rownum <= 1+
-floor({endDateSql} - {startDateSql})
-    )",
-            AxisIncrement.Month => $@"
-with calendar as (
-        select add_months({startDateSql},rownum - 1) as dt
-        from dual
-        connect by rownum <= 1+
-floor(months_between({endDateSql}, {startDateSql}))
-    )",
-            AxisIncrement.Quarter => $@"
-with calendar as (
-        select add_months({startDateSql},3* (rownum - 1)) as dt
-        from dual
-        connect by rownum <= 1+
-floor(months_between({endDateSql}, {startDateSql}) /3)
-    )",
+            AxisIncrement.Year => $"""
+
+                                   with calendar as (
+                                           select add_months({startDateSql},12* (rownum - 1)) as dt
+                                           from dual
+                                           connect by rownum <= 1+
+                                   floor(months_between({endDateSql}, {startDateSql}) /12)
+                                       )
+                                   """,
+            AxisIncrement.Day => $"""
+
+                                  with calendar as (
+                                          select {startDateSql} + (rownum - 1) as dt
+                                          from dual
+                                          connect by rownum <= 1+
+                                  floor({endDateSql} - {startDateSql})
+                                      )
+                                  """,
+            AxisIncrement.Month => $"""
+
+                                    with calendar as (
+                                            select add_months({startDateSql},rownum - 1) as dt
+                                            from dual
+                                            connect by rownum <= 1+
+                                    floor(months_between({endDateSql}, {startDateSql}))
+                                        )
+                                    """,
+            AxisIncrement.Quarter => $"""
+
+                                      with calendar as (
+                                              select add_months({startDateSql},3* (rownum - 1)) as dt
+                                              from dual
+                                              connect by rownum <= 1+
+                                      floor(months_between({endDateSql}, {startDateSql}) /3)
+                                          )
+                                      """,
             _ => throw new NotImplementedException()
         };
     }
@@ -100,29 +108,31 @@ order by dt*/
         var calendar = GetDateAxisTableDeclaration(query.Axis);
 
         return string.Format(
-            @"
-{0}
-{1}
-SELECT 
-{2} AS ""joinDt"",dataset.{3}
-FROM
-calendar
-LEFT JOIN
-(
-    {4}
-) dataset
-ON dataset.{5} = {2}
-ORDER BY 
-{2}
-",
+            """
+
+            {0}
+            {1}
+            SELECT
+            {2} AS "joinDt",dataset.{3}
+            FROM
+            calendar
+            LEFT JOIN
+            (
+                {4}
+            ) dataset
+            ON dataset.{5} = {2}
+            ORDER BY
+            {2}
+
+            """,
             //add everything pre SELECT
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert < QueryComponent.SELECT)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT)),
             //then add the calendar
             calendar,
             GetDatePartOfColumn(query.Axis.AxisIncrement, "dt"),
             countAlias,
             //the entire query
-            string.Join(Environment.NewLine, query.Lines.Where(c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
+            string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.SELECT and <= QueryComponent.Having)),
             axisColumnAlias
 
         );

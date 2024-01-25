@@ -2,21 +2,16 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Common;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using FAnsi.Exceptions;
-using FAnsi.Implementations.MicrosoftSQL;
-using FAnsi.Implementations.MySql;
-using FAnsi.Implementations.Oracle;
-using FAnsi.Implementations.PostgreSql;
 
 namespace FAnsi.Implementation;
 
 /// <summary>
 /// Handles detecting and loading implementations
 /// </summary>
-public class ImplementationManager
+public sealed class ImplementationManager
 {
     private static readonly ImplementationManager Instance=new();
 
@@ -39,14 +34,6 @@ public class ImplementationManager
         var loading = new T();
         if (!Instance._implementations.Contains(loading))
             Instance._implementations.Add(loading);
-    }
-
-    /// <summary>
-    /// Loads all implementations found in currently loaded assemblies (in the current domain)
-    /// </summary>
-    [Obsolete("MEF is dead")]
-    public static void Load(DirectoryInfo currentDirectory=null)
-    {
     }
 
 

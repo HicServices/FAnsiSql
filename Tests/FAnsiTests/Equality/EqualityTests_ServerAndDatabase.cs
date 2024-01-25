@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Equality;
 
-internal class EqualityTests_ServerAndDatabase
+internal sealed class EqualityTests_ServerAndDatabase
 {
     [OneTimeSetUp]
     public void SetUp()

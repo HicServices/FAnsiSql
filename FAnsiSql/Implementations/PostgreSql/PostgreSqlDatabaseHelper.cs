@@ -18,22 +18,26 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
         string database, bool includeViews, DbTransaction transaction = null)
     {
 
-        const string sqlTables = @"SELECT
-                *
-                FROM
-            pg_catalog.pg_tables
-                WHERE
-            schemaname != 'pg_catalog'
-            AND schemaname != 'information_schema';";
+        const string sqlTables = """
+                                 SELECT
+                                                 *
+                                                 FROM
+                                             pg_catalog.pg_tables
+                                                 WHERE
+                                             schemaname != 'pg_catalog'
+                                             AND schemaname != 'information_schema';
+                                 """;
 
 
-        const string sqlViews = @"SELECT
-                *
-                FROM
-            pg_catalog.pg_views
-                WHERE
-            schemaname != 'pg_catalog'
-            AND schemaname != 'information_schema';";
+        const string sqlViews = """
+                                SELECT
+                                                *
+                                                FROM
+                                            pg_catalog.pg_views
+                                                WHERE
+                                            schemaname != 'pg_catalog'
+                                            AND schemaname != 'information_schema';
+                                """;
 
         var tables = new List<DiscoveredTable>();
 
@@ -60,7 +64,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             using var r = cmd.ExecuteReader();
             while (r.Read())
             {
-                //its a system table
+                //it's a system table
                 var schema = r["schemaname"] as string;
 
                 if(querySyntaxHelper.IsValidTableName((string)r["viewname"], out _))
@@ -96,9 +100,11 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
             using(var cmd = new NpgsqlCommand($"UPDATE pg_database SET datallowconn = 'false' WHERE datname = '{database.GetRuntimeName()}';",con))
                 cmd.ExecuteNonQuery();
 
-            using(var cmd = new NpgsqlCommand($@"SELECT pg_terminate_backend(pid)
-                FROM pg_stat_activity
-                WHERE datname = '{database.GetRuntimeName()}';"
+            using(var cmd = new NpgsqlCommand($"""
+                                               SELECT pg_terminate_backend(pid)
+                                                               FROM pg_stat_activity
+                                                               WHERE datname = '{database.GetRuntimeName()}';
+                                               """
                       ,con))
                 cmd.ExecuteNonQuery();
 

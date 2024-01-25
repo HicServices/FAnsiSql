@@ -108,7 +108,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         args.Adjuster?.AdjustColumns(columns);
 
         //Get the table creation SQL
-        var bodySql = GetCreateTableSql(args.Database, args.TableName, columns.ToArray(), args.ForeignKeyPairs, args.CascadeDelete, args.Schema);
+        var bodySql = GetCreateTableSql(args.Database, args.TableName, [.. columns], args.ForeignKeyPairs, args.CascadeDelete, args.Schema);
 
         //connect to the server and send it
         var server = args.Database.Server;
@@ -137,7 +137,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         return tbl;
     }
 
-    private void CopySettings(Guesser guesser, CreateTableArgs args)
+    private static void CopySettings(Guesser guesser, CreateTableArgs args)
     {
         //cannot change the instance so have to copy across the values.  If this gets new properties that's a problem
         //See tests GuessSettings_CopyProperties
@@ -152,7 +152,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     /// <param name="dt"></param>
     public void ThrowIfObjectColumns(DataTable dt)
     {
-        var objCol = dt.Columns.Cast<DataColumn>().FirstOrDefault(c => c.DataType == typeof(object));
+        var objCol = dt.Columns.Cast<DataColumn>().FirstOrDefault(static c => c.DataType == typeof(object));
 
         if(objCol != null)
             throw new NotSupportedException(
@@ -207,15 +207,15 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
             bodySql.AppendLine($"{GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper)},");
         }
 
-        var pks = columns.Where(c => c.IsPrimaryKey).ToArray();
-        if (pks.Any())
+        var pks = columns.Where(static c => c.IsPrimaryKey).ToArray();
+        if (pks.Length != 0)
             bodySql.Append(GetPrimaryKeyDeclarationSql(tableName, pks,syntaxHelper));
 
         if (foreignKeyPairs != null)
         {
             bodySql.AppendLine();
             bodySql.AppendLine(GetForeignKeyConstraintSql(tableName, syntaxHelper,
-                foreignKeyPairs.ToDictionary(k => (IHasRuntimeName) k.Key, v => v.Value), cascadeDelete, null));
+                foreignKeyPairs.ToDictionary(static k => (IHasRuntimeName) k.Key, static v => v.Value), cascadeDelete, null));
         }
 
         var toReturn = bodySql.ToString().TrimEnd('\r', '\n', ',');
@@ -241,41 +241,41 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     public virtual string GetForeignKeyConstraintSql(string foreignTable, IQuerySyntaxHelper syntaxHelper,
         Dictionary<IHasRuntimeName, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string constraintName)
     {
-        var primaryKeyTable = foreignKeyPairs.Values.Select(v => v.Table).Distinct().Single();
+        var primaryKeyTable = foreignKeyPairs.Values.Select(static v => v.Table).Distinct().Single();
 
         constraintName ??= GetForeignKeyConstraintNameFor(foreignTable, primaryKeyTable.GetRuntimeName());
 
         //@"    CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID) REFERENCES Persons(PersonID) on delete cascade";
         return
-            $@"CONSTRAINT {constraintName} FOREIGN KEY ({string.Join(",", foreignKeyPairs.Keys.Select(k => syntaxHelper.EnsureWrapped(k.GetRuntimeName())))})
-REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKeyPairs.Values.Select(v => syntaxHelper.EnsureWrapped(v.GetRuntimeName())))}) {(cascadeDelete ? " on delete cascade" : "")}";
+            $"""
+             CONSTRAINT {constraintName} FOREIGN KEY ({string.Join(",", foreignKeyPairs.Keys.Select(k => syntaxHelper.EnsureWrapped(k.GetRuntimeName())))})
+             REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKeyPairs.Values.Select(v => syntaxHelper.EnsureWrapped(v.GetRuntimeName())))}) {(cascadeDelete ? " on delete cascade" : "")}
+             """;
     }
     public string GetForeignKeyConstraintNameFor(DiscoveredTable foreignTable, DiscoveredTable primaryTable)
     {
         return GetForeignKeyConstraintNameFor(foreignTable.GetRuntimeName(), primaryTable.GetRuntimeName());
     }
 
-    private string GetForeignKeyConstraintNameFor(string foreignTable, string primaryTable) =>
+    private static string GetForeignKeyConstraintNameFor(string foreignTable, string primaryTable) =>
         MakeSensibleConstraintName("FK_", $"{foreignTable}_{primaryTable}");
 
     public abstract DirectoryInfo Detach(DiscoveredDatabase database);
 
     public abstract void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName);
 
-    private string GetPrimaryKeyDeclarationSql(string tableName, IEnumerable<DatabaseColumnRequest> pks,
+    private static string GetPrimaryKeyDeclarationSql(string tableName, IEnumerable<DatabaseColumnRequest> pks,
         IQuerySyntaxHelper syntaxHelper) =>
         $" CONSTRAINT {MakeSensibleConstraintName("PK_", tableName)} PRIMARY KEY ({string.Join(",", pks.Select(c => syntaxHelper.EnsureWrapped(c.ColumnName)))}),{Environment.NewLine}";
 
-    private string MakeSensibleConstraintName(string prefix, string tableName)
+    private static string MakeSensibleConstraintName(string prefix, string tableName)
     {
         var constraintName = QuerySyntaxHelper.MakeHeaderNameSensible(tableName);
 
-        if (string.IsNullOrWhiteSpace(constraintName))
-        {
-            var r = new Random();
-            constraintName = $"Constraint{r.Next(10000)}";
-        }
+        if (!string.IsNullOrWhiteSpace(constraintName)) return $"{prefix}{constraintName}";
 
+        var r = new Random();
+        constraintName = $"Constraint{r.Next(10000)}";
         return $"{prefix}{constraintName}";
     }
 
@@ -283,6 +283,8 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
     {
         ExecuteBatchNonQuery(sql, conn, transaction, out _, timeout);
     }
+
+    private static readonly string[] separator = ["\n", "\r"];
 
     /// <summary>
     /// Executes the given SQL against the database + sends GO delimited statements as separate batches
@@ -315,7 +317,7 @@ REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKe
         sql += "\nGO";   // make sure last batch is executed.
         try
         {
-            foreach (var line in sql.Split(new[] { "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var line in sql.Split(separator, StringSplitOptions.RemoveEmptyEntries))
             {
                 lineNumber++;
 

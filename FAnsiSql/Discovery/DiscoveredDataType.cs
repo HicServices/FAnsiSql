@@ -12,7 +12,7 @@ namespace FAnsi.Discovery;
 /// <summary>
 /// Cross database type reference to a Data Type string (e.g. varchar(30), varbinary(100) etc) of a Column in a Table
 /// </summary>
-public class DiscoveredDataType
+public sealed class DiscoveredDataType
 {
     private readonly DiscoveredColumn Column;
 
@@ -174,7 +174,7 @@ public class DiscoveredDataType
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    protected bool Equals(DiscoveredDataType other)
+    private bool Equals(DiscoveredDataType other)
     {
         return string.Equals(SQLType, other.SQLType);
     }
@@ -197,6 +197,7 @@ public class DiscoveredDataType
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
+
         return Equals((DiscoveredDataType)obj);
     }
 

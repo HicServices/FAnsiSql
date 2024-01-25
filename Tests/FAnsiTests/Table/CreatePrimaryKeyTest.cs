@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-internal class CreatePrimaryKeyTest: DatabaseTests
+internal sealed class CreatePrimaryKeyTest: DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBasicCase_KeysCreated(DatabaseType databaseType)

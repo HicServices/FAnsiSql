@@ -9,7 +9,7 @@ using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlServerHelper : DiscoveredServerHelper
+public sealed class MySqlServerHelper : DiscoveredServerHelper
 {
     public static readonly MySqlServerHelper Instance=new();
     static MySqlServerHelper()
@@ -73,7 +73,7 @@ public class MySqlServerHelper : DiscoveredServerHelper
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
         var b = (MySqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
-        b.Database = null!;
+        b.Database = null;
 
         using var con = new MySqlConnection(b.ConnectionString);
         con.Open();
@@ -96,13 +96,14 @@ public class MySqlServerHelper : DiscoveredServerHelper
         using var r = cmd.ExecuteReader();
         if (r.Read())
             return r["Value"] == DBNull.Value ? null: CreateVersionFromString((string)r["Value"]);
+
         return null;
     }
 
     public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
         var b = (MySqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
-        b.Database = null!;
+        b.Database = null;
 
         using var con = new MySqlConnection(b.ConnectionString);
         con.Open();
@@ -112,15 +113,10 @@ public class MySqlServerHelper : DiscoveredServerHelper
     {
         var databases = new List<string>();
 
-        using(var cmd = GetCommand("show databases;", con)) //already comes as single column called Database
-        using (var r = cmd.ExecuteReader())
-        {
-            while (r.Read())
-                databases.Add((string)r["Database"]);
-
-        }
-
-        con.Close();
-        return databases.ToArray();
+        using var cmd = GetCommand("show databases;", con);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            databases.Add((string)r["Database"]);
+        return [.. databases];
     }
 }

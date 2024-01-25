@@ -5,11 +5,10 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using NUnit.Framework.Legacy;
 
 namespace FAnsiTests.Aggregation;
 
-internal class CalendarWithPivotAggregationTests:AggregationTests
+internal sealed class CalendarWithPivotAggregationTests:AggregationTests
 {
     [TestCase(DatabaseType.MicrosoftSQLServer,true)]
     [TestCase(DatabaseType.MySql,true)]
@@ -17,7 +16,7 @@ internal class CalendarWithPivotAggregationTests:AggregationTests
     [TestCase(DatabaseType.MySql, false)]
     public void Test_Calendar_WithPivot(DatabaseType type,bool easy)
     {
-        string sql=null!;
+        string sql=null;
         try
         {
             var tbl = GetTestTable(type,easy);
@@ -78,11 +77,14 @@ internal class CalendarWithPivotAggregationTests:AggregationTests
             if (easy)
                 return;
 
-            StringAssert.AreEqualIgnoringCase("joinDt", dt.Columns[0].ColumnName);
-            StringAssert.AreEqualIgnoringCase("T", dt.Columns[1].ColumnName);
-            StringAssert.AreEqualIgnoringCase("E&, %a' mp;E", dt.Columns[2].ColumnName);
-            StringAssert.AreEqualIgnoringCase("F", dt.Columns[3].ColumnName);
-            StringAssert.AreEqualIgnoringCase("G", dt.Columns[4].ColumnName);
+            Assert.Multiple(() =>
+            {
+                Assert.That(dt.Columns[0].ColumnName, Is.EqualTo("joinDt").IgnoreCase);
+                Assert.That(dt.Columns[1].ColumnName, Is.EqualTo("T").IgnoreCase);
+                Assert.That(dt.Columns[2].ColumnName, Is.EqualTo("E&, %a' mp;E").IgnoreCase);
+                Assert.That(dt.Columns[3].ColumnName, Is.EqualTo("F").IgnoreCase);
+                Assert.That(dt.Columns[4].ColumnName, Is.EqualTo("G").IgnoreCase);
+            });
 
             Assert.Multiple(() =>
             {

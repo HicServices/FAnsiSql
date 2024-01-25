@@ -13,10 +13,10 @@ using Microsoft.Data.SqlClient;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public class MicrosoftSQLBulkCopy : BulkCopy
+public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
 {
     private readonly SqlBulkCopy _bulkCopy;
-    private static readonly Regex ColumnLevelComplaint = new("bcp client for colid (\\d+)",RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex ColumnLevelComplaint = ColumnLevelComplaintRe();
 
 
     public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
@@ -83,6 +83,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
                     string.Format(
                         SR.MicrosoftSQLBulkCopy_BulkInsertWithBetterErrorMessages_Failed_to_bulk_insert__0_,
                         result1), e); //but we can still give him a better message than "bcp colid 1 was bad"!
+
             throw;
         }
     }
@@ -108,11 +109,9 @@ public class MicrosoftSQLBulkCopy : BulkCopy
         using var con = (SqlConnection)serverForLineByLineInvestigation.GetConnection();
         con.Open();
         var investigationTransaction = con.BeginTransaction("Investigate BulkCopyFailure");
-        using (var investigationOneLineAtATime = new SqlBulkCopy(con,SqlBulkCopyOptions.KeepIdentity,investigationTransaction)
-               {
-                   DestinationTableName = insert.DestinationTableName
-               })
+        using (var investigationOneLineAtATime = new SqlBulkCopy(con,SqlBulkCopyOptions.KeepIdentity,investigationTransaction))
         {
+            investigationOneLineAtATime.DestinationTableName = insert.DestinationTableName;
 
             foreach (SqlBulkCopyColumnMapping m in insert.ColumnMappings)
                 investigationOneLineAtATime.ColumnMappings.Add(m);
@@ -134,6 +133,7 @@ public class MicrosoftSQLBulkCopy : BulkCopy
                                     SR
                                         .MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_,
                                     line, result), e);
+
                         var sourceValue = dr[badMapping.SourceColumn];
                         var destColumn = TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
 
@@ -210,16 +210,13 @@ public class MicrosoftSQLBulkCopy : BulkCopy
 
     private static void EmptyStringsToNulls(DataTable dt)
     {
-        foreach (var col in dt.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(string)))
-        foreach (DataRow row in dt.Rows)
+        foreach (var col in dt.Columns.Cast<DataColumn>().Where(static c => c.DataType == typeof(string)))
+        foreach (var row in dt.Rows.Cast<DataRow>()
+                     .Select(row => new { row, o = row[col] })
+                     .Where(static t => t.o != DBNull.Value && t.o != null && string.IsNullOrWhiteSpace(t.o.ToString()))
+                     .Select(static t => t.row))
         {
-            var o = row[col];
-
-            if (o == DBNull.Value || o == null)
-                continue;
-
-            if (string.IsNullOrWhiteSpace(o.ToString()))
-                row[col] = DBNull.Value;
+            row[col] = DBNull.Value;
         }
     }
 
@@ -240,34 +237,35 @@ public class MicrosoftSQLBulkCopy : BulkCopy
                 message.Append(ExceptionToListOfInnerMessages(loaderException, includeStackTrace));
             }
 
-        if (e.InnerException != null)
-        {
-            message.AppendLine();
-            message.Append( ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace));
-        }
+        if (e.InnerException == null) return message.ToString();
 
+        message.AppendLine();
+        message.Append( ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace));
         return message.ToString();
     }
 
     private static void InspectDataTableForFloats(DataTable dt)
     {
         //are there any float or float? columns
-        var floatColumnNames = dt.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(float) || c.DataType == typeof(float?)).Select(c=>c.ColumnName).ToArray();
+        var floatColumnNames = dt.Columns.Cast<DataColumn>().Where(static c => c.DataType == typeof(float) || c.DataType == typeof(float?)).Select(static c=>c.ColumnName).ToArray();
         if (floatColumnNames.Length!=0)
             throw new NotSupportedException(
                 $"Found float column(s) in data table, SQLServer does not support floats in bulk insert, instead you should use doubles otherwise you will end up with the value 0.85 turning into :0.850000023841858 in your database.  Float column(s) were:{string.Join(",", floatColumnNames)}");
 
         //are there any object columns
-        var objectColumns = dt.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(object)).Select(col=>col.Ordinal).ToArray();
+        var objectColumns = dt.Columns.Cast<DataColumn>().Where(static c => c.DataType == typeof(object)).Select(static col=>col.Ordinal).ToArray();
 
         //do any of the object columns have floats or float? in them?
         for (var i = 0; i < Math.Min(100, dt.Rows.Count); i++)
         {
             var bad = objectColumns.Select(c => dt.Rows[i][c])
-                .FirstOrDefault(t => t is float);
+                .FirstOrDefault(static t => t is float);
             if (bad != null)
                 throw new NotSupportedException(
                 $"Found float value {bad} in data table, SQLServer does not support floats in bulk insert, instead you should use doubles otherwise you will end up with the value 0.85 turning into :0.850000023841858 in your database");
         }
     }
+
+    [GeneratedRegex("bcp client for colid (\\d+)", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex ColumnLevelComplaintRe();
 }

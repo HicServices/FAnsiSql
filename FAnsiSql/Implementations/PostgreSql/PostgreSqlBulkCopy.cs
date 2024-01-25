@@ -9,14 +9,8 @@ using Npgsql;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlBulkCopy : BulkCopy
+public sealed class PostgreSqlBulkCopy(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) : BulkCopy(discoveredTable,connection,culture)
 {
-    public PostgreSqlBulkCopy(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) :base(discoveredTable,connection,culture)
-    {
-    }
-
-
-
     public override int UploadImpl(DataTable dt)
     {
         var con = (NpgsqlConnection) Connection.Connection;
@@ -29,7 +23,7 @@ public class PostgreSqlBulkCopy : BulkCopy
         sb.Append("COPY ");
         sb.Append(TargetTable.GetFullyQualifiedName());
         sb.Append(" (");
-        sb.AppendJoin(",", matchedColumns.Values.Select(v => v.GetWrappedName()));
+        sb.AppendJoin(",", matchedColumns.Values.Select(static v => v.GetWrappedName()));
         sb.Append(')');
         sb.Append(" FROM STDIN (FORMAT BINARY)");
 

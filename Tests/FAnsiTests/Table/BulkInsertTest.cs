@@ -9,12 +9,11 @@ using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Exceptions;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-internal class BulkInsertTest : DatabaseTests
+internal sealed class BulkInsertTest : DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_Basic(DatabaseType type)
@@ -316,16 +315,16 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
             },
-            new("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
+            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
             {
                 Default = MandatoryScalarFunctions.GetTodaysDate
             },
-            new("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false}
+            new DatabaseColumnRequest("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false}
         ]);
 
         using (var dt = new DataTable())
@@ -371,48 +370,48 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 AllowNulls = false
             },
-            new("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
+            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (DateTime), 100))
             {
                 Default = MandatoryScalarFunctions.GetTodaysDate
             },
-            new("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false},
+            new DatabaseColumnRequest("peter", new DatabaseTypeRequest(typeof (string), 100)) {AllowNulls = false},
 
-            new("Column0", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column1", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column2", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column3", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column4", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column5", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column6", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column7", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column8", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column9", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column0", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column1", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column2", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column3", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column4", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column5", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column6", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column7", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column8", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column9", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
 
-            new("Column10", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column11", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column12", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column13", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column14", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column15", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column16", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column17", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column18", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column19", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column10", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column11", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column12", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column13", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column14", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column15", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column16", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column17", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column18", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column19", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
 
-            new("Column20", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column21", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column22", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column23", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column24", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column25", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column26", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column27", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column28", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
-            new("Column29", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false}
+            new DatabaseColumnRequest("Column20", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column21", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column22", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column23", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column24", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column25", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column26", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column27", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column28", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false},
+            new DatabaseColumnRequest("Column29", new DatabaseTypeRequest(typeof (int))) {AllowNulls = false}
 
         ]);
 
@@ -495,7 +494,7 @@ internal class BulkInsertTest : DatabaseTests
 
             //MySql seems to be throwing null reference inside ExecuteNonQueryAsync.  No idea why but it is still cancelled
             if(type != DatabaseType.MySql)
-                StringAssert.Contains("cancel",ex?.InnerException?.Message);
+                Assert.That(ex?.InnerException?.Message, Does.Contain("cancel"));
             else
                 TestContext.WriteLine($"MySql error was:{ex?.InnerException?.Message}");
         }
@@ -513,7 +512,7 @@ internal class BulkInsertTest : DatabaseTests
 
 
         //and there should not be any primary keys
-        Assert.That(tbl.DiscoverColumns().Any(c=>c.IsPrimaryKey), Is.False);
+        Assert.That(tbl.DiscoverColumns().Any(static c=>c.IsPrimaryKey), Is.False);
 
         //now give it a bit longer to create it
         using(var cts = new CancellationTokenSource(50000000))
@@ -532,7 +531,7 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("bob", new DatabaseTypeRequest(typeof (string), 100))
+            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
@@ -554,13 +553,13 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("bob", new DatabaseTypeRequest(typeof (int), 100))
+            new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (int), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false,
                 IsAutoIncrement = true
             },
-            new("frank", new DatabaseTypeRequest(typeof (string), 100))
+            new DatabaseColumnRequest("frank", new DatabaseTypeRequest(typeof (string), 100))
             {
                 IsPrimaryKey = true,
                 AllowNulls = false
@@ -588,9 +587,9 @@ internal class BulkInsertTest : DatabaseTests
         });
         Assert.Multiple(() =>
         {
-            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 1), Is.EqualTo(1));
-            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 2), Is.EqualTo(1));
-            Assert.That(result.Rows.Cast<DataRow>().Count(r => Convert.ToInt32(r["bob"]) == 3), Is.EqualTo(1));
+            Assert.That(result.Rows.Cast<DataRow>().Count(static r => Convert.ToInt32(r["bob"]) == 1), Is.EqualTo(1));
+            Assert.That(result.Rows.Cast<DataRow>().Count(static r => Convert.ToInt32(r["bob"]) == 2), Is.EqualTo(1));
+            Assert.That(result.Rows.Cast<DataRow>().Count(static r => Convert.ToInt32(r["bob"]) == 3), Is.EqualTo(1));
         });
 
     }
@@ -603,7 +602,7 @@ internal class BulkInsertTest : DatabaseTests
 
         var tbl = db.CreateTable("Test",
         [
-            new("num", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(1,10)))
+            new DatabaseColumnRequest("num", new DatabaseTypeRequest(typeof (decimal), null,new DecimalSize(1,10)))
             {
                 AllowNulls = false
             }
@@ -716,19 +715,19 @@ internal class BulkInsertTest : DatabaseTests
         switch (type)
         {
             case DatabaseType.MicrosoftSQLServer:
-                StringAssert.Contains("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>",ex.Message);
+                Assert.That(ex?.Message, Does.Contain("BulkInsert failed on data row 4 the complaint was about source column <<name>> which had value <<AAAAAAAAAAA>> destination data type was <<varchar(10)>>"));
                 break;
             case DatabaseType.MySql:
-                Assert.That(ex.Message, Is.EqualTo("Data too long for column 'Name' at row 4"));
+                Assert.That(ex?.Message, Is.EqualTo("Data too long for column 'Name' at row 4"));
                 break;
             case DatabaseType.Oracle:
-                StringAssert.Contains("NAME",ex.Message);
-                StringAssert.Contains("maximum: 10",ex.Message);
-                StringAssert.Contains("actual: 11",ex.Message);
+                Assert.That(ex?.Message, Does.Contain("NAME"));
+                Assert.That(ex?.Message, Does.Contain("maximum: 10"));
+                Assert.That(ex?.Message, Does.Contain("actual: 11"));
 
                 break;
             case DatabaseType.PostgreSql:
-                StringAssert.Contains("value too long for type character varying(10)",ex.Message);
+                Assert.That(ex?.Message, Does.Contain("value too long for type character varying(10)"));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -798,18 +797,18 @@ internal class BulkInsertTest : DatabaseTests
         switch (type)
         {
             case DatabaseType.MicrosoftSQLServer:
-                StringAssert.Contains("Failed to load data row 3 the following values were rejected by the database",ex.Message);
-                StringAssert.Contains("Parameter value '111111111.1' is out of range",ex.Message);
+                Assert.That(ex?.Message, Does.Contain("Failed to load data row 3 the following values were rejected by the database"));
+                Assert.That(ex?.Message, Does.Contain("Parameter value '111111111.1' is out of range"));
                 break;
             case DatabaseType.MySql:
                 Assert.That(ex?.Message, Is.EqualTo("Out of range value for column 'Score' at row 3"));
                 break;
             case DatabaseType.Oracle:
-                StringAssert.Contains("value larger than specified precision allowed for this column",ex.Message);
+                Assert.That(ex?.Message, Does.Contain("value larger than specified precision allowed for this column"));
 
                 break;
             case DatabaseType.PostgreSql:
-                StringAssert.Contains("numeric field overflow",ex.Message);
+                Assert.That(ex?.Message, Does.Contain("numeric field overflow"));
                 break;
 
             default:
@@ -864,6 +863,6 @@ internal class BulkInsertTest : DatabaseTests
             Assert.That(ex.Message, Is.EqualTo("Failed to parse value '.' in column 'score'"));
             Assert.That(ex.InnerException, Is.Not.Null, "Expected parse error to be an inner exception");
         });
-        StringAssert.Contains("Could not parse string value '.' with Decider Type:DecimalTypeDecider",ex.InnerException.Message);
+        Assert.That(ex.InnerException?.Message, Does.Contain("Could not parse string value '.' with Decider Type:DecimalTypeDecider"));
     }
 }

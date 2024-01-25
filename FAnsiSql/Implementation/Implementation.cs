@@ -4,20 +4,14 @@ using FAnsi.Discovery.QuerySyntax;
 
 namespace FAnsi.Implementation;
 
-public abstract class Implementation<T> : IImplementation where T:DbConnectionStringBuilder,new()
+public abstract class Implementation<T>(DatabaseType type) : IImplementation
+    where T : DbConnectionStringBuilder, new()
 {
-    private readonly DatabaseType _databaseType;
-
-    protected Implementation(DatabaseType databaseType)
-    {
-        _databaseType = databaseType;
-    }
-
     public virtual DbConnectionStringBuilder GetBuilder() => new T();
 
     public abstract IDiscoveredServerHelper GetServerHelper();
 
-    public virtual bool IsFor(DatabaseType databaseType) => _databaseType == databaseType;
+    public virtual bool IsFor(DatabaseType databaseType) => type == databaseType;
 
     public virtual bool IsFor(DbConnectionStringBuilder builder) => builder is T;
 

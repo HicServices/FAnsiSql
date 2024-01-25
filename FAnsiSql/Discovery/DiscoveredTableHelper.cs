@@ -116,7 +116,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
 
         var schema = toCreateTable != null ? toCreateTable.Schema : table.Schema;
 
-        return table.Database.Helper.GetCreateTableSql(destinationTable.Database, destinationTable.GetRuntimeName(), columns.ToArray(), null, false, schema);
+        return table.Database.Helper.GetCreateTableSql(destinationTable.Database, destinationTable.GetRuntimeName(), [.. columns], null, false, schema);
     }
 
     public virtual bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable)
@@ -150,7 +150,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         }
         catch (Exception e)
         {
-            throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(c => c.GetRuntimeName()))), e);
+            throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(static c => c.GetRuntimeName()))), e);
         }
     }
 
@@ -181,8 +181,8 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
     /// <inheritdoc/>
     public virtual DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args,Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string constraintName = null)
     {
-        var foreignTables = foreignKeyPairs.Select(c => c.Key.Table).Distinct().ToArray();
-        var primaryTables= foreignKeyPairs.Select(c => c.Value.Table).Distinct().ToArray();
+        var foreignTables = foreignKeyPairs.Select(static c => c.Key.Table).Distinct().ToArray();
+        var primaryTables= foreignKeyPairs.Select(static c => c.Value.Table).Distinct().ToArray();
 
         if(primaryTables.Length != 1 || foreignTables.Length != 1)
             throw new ArgumentException("Primary and foreign keys must all belong to the same table",nameof(foreignKeyPairs));
@@ -195,10 +195,12 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
 
         var constraintBit = primary.Database.Helper.GetForeignKeyConstraintSql(foreign.GetRuntimeName(), primary.GetQuerySyntaxHelper(),
             foreignKeyPairs
-                .ToDictionary(k=>(IHasRuntimeName)k.Key,v=>v.Value), cascadeDeletes, constraintName);
+                .ToDictionary(static k=>(IHasRuntimeName)k.Key, static v=>v.Value), cascadeDeletes, constraintName);
 
-        var sql = $@"ALTER TABLE {foreign.GetFullyQualifiedName()}
-                ADD {constraintBit}";
+        var sql = $"""
+                   ALTER TABLE {foreign.GetFullyQualifiedName()}
+                                   ADD {constraintBit}
+                   """;
 
         using (var con = args.GetManagedConnection(primary))
         {
@@ -225,7 +227,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         var server = discoveredTable.Database.Server;
 
         //if it's got a primary key then it's distinct! job done
-        if (discoveredTable.DiscoverColumns().Any(c => c.IsPrimaryKey))
+        if (discoveredTable.DiscoverColumns().Any(static c => c.IsPrimaryKey))
             return;
 
         var tableName = discoveredTable.GetFullyQualifiedName();

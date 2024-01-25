@@ -6,7 +6,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-internal class BasicInsertTests:DatabaseTests
+internal sealed class BasicInsertTests:DatabaseTests
 {
     [TestCase(DatabaseType.MicrosoftSQLServer,"Dave")]
     [TestCase(DatabaseType.MySql,"Dave")]

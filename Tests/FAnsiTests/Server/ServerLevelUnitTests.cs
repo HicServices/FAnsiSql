@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Server;
 
-internal class ServerLevelUnitTests
+internal sealed class ServerLevelUnitTests
 {
     [Test]
     public void ConstructionStringBuilderTest()

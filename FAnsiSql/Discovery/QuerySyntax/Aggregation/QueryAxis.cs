@@ -1,7 +1,7 @@
 namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 
 /// <inheritdoc/>
-public class QueryAxis : IQueryAxis
+public sealed class QueryAxis : IQueryAxis
 {
     /// <inheritdoc/>
     public string EndDate { get; set; }

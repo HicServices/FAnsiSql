@@ -8,7 +8,7 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 /// A collection of <see cref="CustomLine"/> which together make a GROUP BY with an optional Calendar table column
 /// and optional dynamic pivot column
 /// </summary>
-public class AggregateCustomLineCollection
+public sealed class AggregateCustomLineCollection
 {
     public List<CustomLine> Lines { get; set; }
     public IQueryAxis Axis { get; set; }
@@ -35,30 +35,30 @@ public class AggregateCustomLineCollection
     /// <summary>
     /// The single aggregate function line e.g. "count(distinct chi) as Fish,"
     /// </summary>
-    public CustomLine CountSelect => Lines.SingleOrDefault(l => l.Role == CustomLineRole.CountFunction && l.LocationToInsert == QueryComponent.QueryTimeColumn);
+    public CustomLine CountSelect => Lines.SingleOrDefault(static l => l.Role == CustomLineRole.CountFunction && l.LocationToInsert == QueryComponent.QueryTimeColumn);
 
     /// <summary>
     /// The (optional) single line of SELECT SQL which is the Axis join column e.g. "[MyDb]..[mytbl].[AdmissionDate] as Admt,"
     /// </summary>
-    public CustomLine AxisSelect => Lines.SingleOrDefault(l => l.Role == CustomLineRole.Axis && l.LocationToInsert == QueryComponent.QueryTimeColumn);
+    public CustomLine AxisSelect => Lines.SingleOrDefault(static l => l.Role == CustomLineRole.Axis && l.LocationToInsert == QueryComponent.QueryTimeColumn);
 
 
     /// <summary>
     /// The (optional) single line of GROUP BY SQL which matches exactly the SQL of <see cref="AxisSelect"/>
     /// </summary>
-    public CustomLine AxisGroupBy => Lines.SingleOrDefault(l => l.LocationToInsert == QueryComponent.GroupBy && l.Role == CustomLineRole.Axis);
+    public CustomLine AxisGroupBy => Lines.SingleOrDefault(static l => l.LocationToInsert == QueryComponent.GroupBy && l.Role == CustomLineRole.Axis);
 
     /// <summary>
     /// The (optional) single line of SELECT SQL which is the dynamic pivot column e.g. "[MyDb]..[mytbl].[Healthboard] as hb,"
     /// </summary>
-    public CustomLine PivotSelect => Lines.SingleOrDefault(l => l.Role == CustomLineRole.Pivot && l.LocationToInsert == QueryComponent.QueryTimeColumn);
+    public CustomLine PivotSelect => Lines.SingleOrDefault(static l => l.Role == CustomLineRole.Pivot && l.LocationToInsert == QueryComponent.QueryTimeColumn);
 
 
     /// <summary>
     /// The (optional) single line of ORDER BY SQL which restricts which records are returned when doing a dynamic pivot e.g. only dynamic pivot on the
     /// top 5 drugs ordered by SUM of prescriptions
     /// </summary>
-    public CustomLine TopXOrderBy => Lines.SingleOrDefault(l => l.LocationToInsert == QueryComponent.OrderBy && l.Role == CustomLineRole.TopX);
+    public CustomLine TopXOrderBy => Lines.SingleOrDefault(static l => l.LocationToInsert == QueryComponent.OrderBy && l.Role == CustomLineRole.TopX);
 
     /// <summary>
     /// Returns all concatenated SQL for all <see cref="Lines"/> between the inclusive boundaries from/to

@@ -9,7 +9,7 @@ namespace FAnsi.Discovery.Constraints;
 /// <summary>
 /// Helps resolve a dependency order between a collection of tables with interlinking foreign key constraints.  Implements Khan's algorithm.
 /// </summary>
-public class RelationshipTopologicalSort
+public sealed class RelationshipTopologicalSort
 {
     /// <summary>
     /// The dependency order from least dependent (isolated tables and parent tables) to most (child tables then grandchild tables).
@@ -35,7 +35,7 @@ public class RelationshipTopologicalSort
 
         foreach (var relationship in nodes
                      .Select(table => table.DiscoverRelationships().Where(r => nodes.Contains(r.ForeignKeyTable)))
-                     .SelectMany(relevantRelationships => relevantRelationships))
+                     .SelectMany(static relevantRelationships => relevantRelationships))
             edges.Add(Tuple.Create(relationship.PrimaryKeyTable, relationship.ForeignKeyTable));
 
         _sortedList = TopologicalSort(nodes, edges);
@@ -49,7 +49,7 @@ public class RelationshipTopologicalSort
     /// <param name="nodes">All nodes of directed acyclic graph.</param>
     /// <param name="edges">All edges of directed acyclic graph.</param>
     /// <returns>Sorted node in topological order.</returns>
-    private List<T> TopologicalSort<T>(IEnumerable<T> nodes, ICollection<Tuple<T, T>> edges) where T : IEquatable<T>
+    private static List<T> TopologicalSort<T>(IEnumerable<T> nodes, HashSet<Tuple<T, T>> edges) where T : IEquatable<T>
     {
         // Empty list that will contain the sorted elements
         var l = new List<T>();
@@ -58,7 +58,7 @@ public class RelationshipTopologicalSort
         var s = new HashSet<T>(nodes.Where(n => edges.All(e => !e.Item2.Equals(n))));
 
         // while S is non-empty do
-        while (s.Any())
+        while (s.Count != 0)
         {
 
             //  remove a node n from S
@@ -86,7 +86,7 @@ public class RelationshipTopologicalSort
         }
 
         // if graph has edges then
-        if (edges.Any())
+        if (edges.Count != 0)
             // return error (graph has at least one cycle)
             throw new CircularDependencyException(FAnsiStrings.RelationshipTopologicalSort_FoundCircularDependencies);
 

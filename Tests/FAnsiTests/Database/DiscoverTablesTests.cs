@@ -8,7 +8,7 @@ using TypeGuesser;
 
 namespace FAnsiTests.Database;
 
-internal class DiscoverTablesTests:DatabaseTests
+internal sealed class DiscoverTablesTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_DiscoverTables_Normal(DatabaseType dbType)
@@ -17,12 +17,12 @@ internal class DiscoverTablesTests:DatabaseTests
 
         db.CreateTable("AA",
             [
-                new("F",new DatabaseTypeRequest(typeof(int)))
+                new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
             ]);
 
         db.CreateTable("BB",
             [
-                new("F",new DatabaseTypeRequest(typeof(int)))
+                new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
             ]);
 
         var tbls = db.DiscoverTables(false);
@@ -30,8 +30,8 @@ internal class DiscoverTablesTests:DatabaseTests
         Assert.That(tbls, Has.Length.EqualTo(2));
         Assert.Multiple(() =>
         {
-            Assert.That(tbls.Count(t => t.GetRuntimeName().Equals("AA", StringComparison.CurrentCultureIgnoreCase)), Is.EqualTo(1));
-            Assert.That(tbls.Count(t => t.GetRuntimeName().Equals("BB", StringComparison.CurrentCultureIgnoreCase)), Is.EqualTo(1));
+            Assert.That(tbls.Count(static t => t.GetRuntimeName().Equals("AA", StringComparison.CurrentCultureIgnoreCase)), Is.EqualTo(1));
+            Assert.That(tbls.Count(static t => t.GetRuntimeName().Equals("BB", StringComparison.CurrentCultureIgnoreCase)), Is.EqualTo(1));
         });
 
     }
@@ -53,20 +53,20 @@ internal class DiscoverTablesTests:DatabaseTests
         Assert.Throws<RuntimeNameException>(() =>
             db.CreateTable("FF (troll)",
                 [
-                    new("F", new DatabaseTypeRequest(typeof(int)))
+                    new DatabaseColumnRequest("F", new DatabaseTypeRequest(typeof(int)))
                 ]));
 
         //but we can create a table "FF"
         db.CreateTable("FF",
             [
-                new("F",new DatabaseTypeRequest(typeof(int)))
+                new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
             ]);
 
         //even though there are 2 tables in the database [BB (ff)] and [FF] only [FF] should be returned
         var tbls = db.DiscoverTables(false);
 
         Assert.That(tbls, Has.Length.EqualTo(1));
-        Assert.That(tbls.Count(t => t.GetRuntimeName().Equals("FF",StringComparison.CurrentCultureIgnoreCase)), Is.EqualTo(1));
+        Assert.That(tbls.Count(static t => t.GetRuntimeName().Equals("FF",StringComparison.CurrentCultureIgnoreCase)), Is.EqualTo(1));
 
         DropBadTable(db,false);
     }
@@ -87,13 +87,13 @@ internal class DiscoverTablesTests:DatabaseTests
         Assert.Throws<RuntimeNameException>(() =>
             db.CreateTable("FF (troll)",
                 [
-                    new("F", new DatabaseTypeRequest(typeof(int)))
+                    new DatabaseColumnRequest("F", new DatabaseTypeRequest(typeof(int)))
                 ]));
 
         //but we can create a table "FF"
         db.CreateTable("FF",
             [
-                new("F",new DatabaseTypeRequest(typeof(int)))
+                new DatabaseColumnRequest("F",new DatabaseTypeRequest(typeof(int)))
             ]);
 
         //even though there are 2 tables in the database [BB (ff)] and [FF] only [FF] should be returned
@@ -105,14 +105,14 @@ internal class DiscoverTablesTests:DatabaseTests
         Assert.Multiple(() =>
         {
             //view should not be returned because it is bad
-            Assert.That(tbls.Count(t => t.TableType == TableType.View), Is.EqualTo(0));
-            Assert.That(tbls.Count(t => t.GetRuntimeName().Equals("FF", StringComparison.CurrentCultureIgnoreCase)), Is.EqualTo(1));
+            Assert.That(tbls.Count(static t => t.TableType == TableType.View), Is.EqualTo(0));
+            Assert.That(tbls.Count(static t => t.GetRuntimeName().Equals("FF", StringComparison.CurrentCultureIgnoreCase)), Is.EqualTo(1));
         });
 
         DropBadView(db,false);
     }
 
-    private void DropBadTable(DiscoveredDatabase db,bool ignoreFailure)
+    private static void DropBadTable(DiscoveredDatabase db,bool ignoreFailure)
     {
         using var con = db.Server.GetConnection();
         con.Open();
@@ -140,7 +140,7 @@ internal class DiscoverTablesTests:DatabaseTests
             _ => throw new ArgumentOutOfRangeException(nameof(db), db.Server.DatabaseType, $"Unknown database type {db.Server.DatabaseType}")
         };
 
-    private void CreateBadTable(DiscoveredDatabase db)
+    private static void CreateBadTable(DiscoveredDatabase db)
     {
         //drop it if it exists
         DropBadTable(db,true);
@@ -152,7 +152,7 @@ internal class DiscoverTablesTests:DatabaseTests
     }
 
 
-    private void DropBadView(DiscoveredDatabase db, bool ignoreFailure)
+    private static void DropBadView(DiscoveredDatabase db, bool ignoreFailure)
     {
 
         using(var con = db.Server.GetConnection())
@@ -180,12 +180,12 @@ internal class DiscoverTablesTests:DatabaseTests
     }
 
 
-    private void CreateBadView(DiscoveredDatabase db)
+    private static void CreateBadView(DiscoveredDatabase db)
     {
         //drop it if it exists
         DropBadView(db,true);
 
-        db.CreateTable("ABC",[new("A",new DatabaseTypeRequest(typeof(int)))]);
+        db.CreateTable("ABC",[new DatabaseColumnRequest("A",new DatabaseTypeRequest(typeof(int)))]);
 
         using var con = db.Server.GetConnection();
         con.Open();
