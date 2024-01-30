@@ -78,10 +78,8 @@ public sealed class RelationshipTopologicalSort
 
                 // if m has no other incoming edges then
                 if (edges.All(me => !me.Item2.Equals(m)))
-                {
                     // insert m into S
                     s.Add(m);
-                }
             }
         }
 

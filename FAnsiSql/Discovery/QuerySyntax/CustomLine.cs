@@ -24,10 +24,7 @@ public sealed class CustomLine(string text, QueryComponent locationToInsert)
     /// </summary>
     public string StackTrace { get; private set; } = Environment.StackTrace;
 
-    public override string ToString()
-    {
-        return Text;
-    }
+    public override string ToString() => Text;
 
     /// <summary>
     /// Returns the section of <see cref="Text"/> which does not include any alias e.g. returns "UPPER('a')" from "UPPER('a') as a"

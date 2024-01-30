@@ -63,19 +63,13 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// The unqualified name of the column e.g. "MyCol"
     /// </summary>
     /// <returns></returns>
-    public string GetRuntimeName()
-    {
-        return _querySyntaxHelper.GetRuntimeName(_name);
-    }
+    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_name);
 
     /// <summary>
     /// The fully qualified name of the column e.g. [MyDb].dbo.[MyTable].[MyCol] or `MyDb`.`MyCol`
     /// </summary>
     /// <returns></returns>
-    public string GetFullyQualifiedName()
-    {
-        return _querySyntaxHelper.EnsureFullyQualified(Table.Database.GetRuntimeName(),Table.Schema, Table.GetRuntimeName(), GetRuntimeName(), Table is DiscoveredTableValuedFunction);
-    }
+    public string GetFullyQualifiedName() => _querySyntaxHelper.EnsureFullyQualified(Table.Database.GetRuntimeName(),Table.Schema, Table.GetRuntimeName(), GetRuntimeName(), Table is DiscoveredTableValuedFunction);
 
 
     /// <summary>
@@ -84,39 +78,28 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// <param name="topX">The number of records to return</param>
     /// <param name="discardNulls">If true adds a WHERE statement to throw away null values</param>
     /// <returns></returns>
-    public string GetTopXSql(int topX, bool discardNulls)
-    {
-        return Helper.GetTopXSqlForColumn(Table.Database, Table, this, topX, discardNulls);
-    }
+    public string GetTopXSql(int topX, bool discardNulls) => Helper.GetTopXSqlForColumn(Table.Database, Table, this, topX, discardNulls);
 
     /// <summary>
     /// Returns the name of the column
     /// </summary>
     /// <returns></returns>
-    public override string ToString()
-    {
-        return _name;
-    }
+    public override string ToString() => _name;
 
     /// <summary>
     /// Generates a <see cref="Guesser"/> primed with the <see cref="DataType"/> of this column.  This can be used to inspect new
     /// untyped (string) data to determine whether it will fit into the column.
     /// </summary>
     /// <returns></returns>
-    public Guesser GetGuesser()
-    {
-        return Table.GetQuerySyntaxHelper().TypeTranslater.GetGuesserFor(this);
-    }
+    public Guesser GetGuesser() => Table.GetQuerySyntaxHelper().TypeTranslater.GetGuesserFor(this);
 
     /// <summary>
     /// Based on column name and Table
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    private bool Equals(DiscoveredColumn other)
-    {
-        return string.Equals(_name, other._name) && Equals(Table, other.Table);
-    }
+    private bool Equals(DiscoveredColumn other) => string.Equals(_name, other._name) && Equals(Table, other.Table);
+
     /// <summary>
     /// Based on column name and Table
     /// </summary>
@@ -147,8 +130,5 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// Returns the wrapped e.g. "[MyCol]" name of the column including escaping e.g. if you wanted to name a column "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
     /// </summary>
     /// <returns></returns>
-    public string GetWrappedName()
-    {
-        return Table.GetQuerySyntaxHelper().EnsureWrapped(GetRuntimeName());
-    }
+    public string GetWrappedName() => Table.GetQuerySyntaxHelper().EnsureWrapped(GetRuntimeName());
 }

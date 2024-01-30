@@ -100,10 +100,8 @@ public class DatabaseTests
             if(_allowDatabaseCreation)
                 db.Create();
             else
-            {
                 Assert.Inconclusive(
                     $"Database {_testScratchDatabase} did not exist on server {server} and AllowDatabaseCreation was false in {TestFilename}");
-            }
         else
         {
             if (!cleanDatabase) return db;

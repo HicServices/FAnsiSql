@@ -17,10 +17,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     public static readonly OracleTableHelper Instance=new();
     private OracleTableHelper() {}
 
-    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
-    {
-        return $"SELECT * FROM {table.GetFullyQualifiedName()} OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY";
-    }
+    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT * FROM {table.GetFullyQualifiedName()} OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY";
 
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
@@ -181,15 +178,10 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     }
 
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
-        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
-    {
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction) =>
         throw new NotImplementedException();
-    }
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture)
-    {
-        return new OracleBulkCopy(discoveredTable,connection,culture);
-    }
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture) => new OracleBulkCopy(discoveredTable,connection,culture);
 
     public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction = null)
     {
@@ -317,8 +309,5 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
         return $@"alter table {discoveredTable.GetFullyQualifiedName()} rename to {newName}";
     }
 
-    public override bool RequiresLength(string columnType)
-    {
-        return base.RequiresLength(columnType) || columnType.Equals("varchar2", StringComparison.CurrentCultureIgnoreCase);
-    }
+    public override bool RequiresLength(string columnType) => base.RequiresLength(columnType) || columnType.Equals("varchar2", StringComparison.CurrentCultureIgnoreCase);
 }

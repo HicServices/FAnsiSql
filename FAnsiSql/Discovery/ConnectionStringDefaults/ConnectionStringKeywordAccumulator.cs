@@ -50,10 +50,8 @@ public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType
 
         //if we have not got that keyword yet
         if(!_keywords.TryAdd(keyword, Tuple.Create(value, priority)) && _keywords[keyword].Item2 <= priority)
-        {
             //or the keyword that was previously specified had a lower priority
             _keywords[keyword] = Tuple.Create(value, priority); //update it with the new value
-        }
     }
 
     /// <summary>

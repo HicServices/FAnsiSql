@@ -69,7 +69,6 @@ internal sealed class QuerySyntaxHelperTests
         var currentName = runtime;
 
         for(var i=0;i<10;i++)
-        {
             if(i%2 ==0 )
             {
                 Assert.That(currentName, Is.EqualTo(runtime));
@@ -84,7 +83,6 @@ internal sealed class QuerySyntaxHelperTests
                 currentName = syntaxHelper.GetRuntimeName(currentName);
                 currentName = syntaxHelper.GetRuntimeName(currentName);
             }
-        }
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]

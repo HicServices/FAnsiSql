@@ -46,10 +46,7 @@ public sealed class DiscoveredDataType
     /// <para>Returns <see cref="int.MaxValue"/> if the string type has no real limit e.g. "text"</para>
     /// </summary>
     /// <returns></returns>
-    public int GetLengthIfString()
-    {
-        return Column.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetLengthIfString(SQLType);
-    }
+    public int GetLengthIfString() => Column.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetLengthIfString(SQLType);
 
     /// <summary>
     /// <para>Returns the Scale/Precision of the data type.  Only applies to decimal(x,y) types not basic types e.g. int.</para>
@@ -57,29 +54,20 @@ public sealed class DiscoveredDataType
     /// <para>Returns null if the datatype is not floating point</para>
     /// </summary>
     /// <returns></returns>
-    public DecimalSize GetDecimalSize()
-    {
-        return Column.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetDigitsBeforeAndAfterDecimalPointIfDecimal(SQLType);
-    }
+    public DecimalSize GetDecimalSize() => Column.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetDigitsBeforeAndAfterDecimalPointIfDecimal(SQLType);
 
     /// <summary>
     /// Returns the System.Type that should be used to store values read out of columns of this data type (See <see cref="ITypeTranslater.GetCSharpTypeForSQLDBType"/>
     /// </summary>
     /// <returns></returns>
     [return:DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties|DynamicallyAccessedMemberTypes.PublicFields)]
-    public Type GetCSharpDataType()
-    {
-        return Column.Table.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(SQLType);
-    }
+    public Type GetCSharpDataType() => Column.Table.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(SQLType);
 
     /// <summary>
     /// Returns the <see cref="SQLType"/>
     /// </summary>
     /// <returns></returns>
-    public override string ToString()
-    {
-        return SQLType;
-    }
+    public override string ToString() => SQLType;
 
     /// <summary>
     /// <para>Creates and runs an ALTER TABLE statement which will increase the size of a char column to support longer string values than it currently does.</para>
@@ -174,19 +162,13 @@ public sealed class DiscoveredDataType
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    private bool Equals(DiscoveredDataType other)
-    {
-        return string.Equals(SQLType, other.SQLType);
-    }
+    private bool Equals(DiscoveredDataType other) => string.Equals(SQLType, other.SQLType);
 
     /// <summary>
     /// Equality based on <see cref="SQLType"/>
     /// </summary>
     /// <returns></returns>
-    public override int GetHashCode()
-    {
-        return SQLType != null ? SQLType.GetHashCode() : 0;
-    }
+    public override int GetHashCode() => SQLType != null ? SQLType.GetHashCode() : 0;
 
     /// <summary>
     /// Equality based on <see cref="SQLType"/>

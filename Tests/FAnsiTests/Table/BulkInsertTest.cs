@@ -421,11 +421,7 @@ internal sealed class BulkInsertTest : DatabaseTests
             dt.Columns.Add("peter");
             dt.Columns.Add("bob");
 
-            for (var i = 0; i < 30; i++)
-            {
-                dt.Columns.Add($"Column{i}");
-            }
-
+            for (var i = 0; i < 30; i++) dt.Columns.Add($"Column{i}");
 
 
             for (var i = 0; i < numberOfRowsPerBatch; i++)

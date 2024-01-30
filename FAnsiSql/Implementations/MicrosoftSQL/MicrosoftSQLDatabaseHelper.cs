@@ -17,7 +17,7 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     /// Defaults to true.  This command makes dropping databases more robust so is recommended but
     /// is not supported by some servers (e.g. Microsoft Azure)
     /// </summary>
-    public static bool SetSingleUserWhenDroppingDatabases = true;
+    public static bool SetSingleUserWhenDroppingDatabases { get; set; } = true;
 
     public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
     {
@@ -100,10 +100,7 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         return [.. toReturn];
     }
 
-    public override IDiscoveredTableHelper GetTableHelper()
-    {
-        return new MicrosoftSQLTableHelper();
-    }
+    public override IDiscoveredTableHelper GetTableHelper() => new MicrosoftSQLTableHelper();
 
     public override void DropDatabase(DiscoveredDatabase database)
     {

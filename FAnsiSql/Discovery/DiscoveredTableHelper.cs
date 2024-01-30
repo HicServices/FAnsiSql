@@ -103,11 +103,9 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
 
             //if there is a collation
             if (!string.IsNullOrWhiteSpace(c.Collation) && (toCreateTable == null || !isToDifferentDatabaseType))
-            {
                 //if the script is to be run on a database of the same type
                 //then specify that the column should use the live collation
                 colRequest.Collation = c.Collation;
-            }
 
             columns.Add(colRequest);
         }
@@ -119,10 +117,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         return table.Database.Helper.GetCreateTableSql(destinationTable.Database, destinationTable.GetRuntimeName(), [.. columns], null, false, schema);
     }
 
-    public virtual bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable)
-    {
-        return GetRowCount(args, discoveredTable) == 0;
-    }
+    public virtual bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable) => GetRowCount(args, discoveredTable) == 0;
 
     public virtual void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection)
     {

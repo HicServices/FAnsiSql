@@ -52,10 +52,7 @@ public sealed class MySqlDatabaseHelper : DiscoveredDatabaseHelper
             $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} CHARACTER SET utf8mb4 {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} COLLATE {col.Collation ?? "utf8mb4_bin"} {(col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
     }
 
-    public override DirectoryInfo Detach(DiscoveredDatabase database)
-    {
-        throw new NotImplementedException();
-    }
+    public override DirectoryInfo Detach(DiscoveredDatabase database) => throw new NotImplementedException();
 
     public override void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName)
     {

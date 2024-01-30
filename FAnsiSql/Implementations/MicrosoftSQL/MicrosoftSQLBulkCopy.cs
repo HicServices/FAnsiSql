@@ -215,9 +215,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
                      .Select(row => new { row, o = row[col] })
                      .Where(static t => t.o != DBNull.Value && t.o != null && string.IsNullOrWhiteSpace(t.o.ToString()))
                      .Select(static t => t.row))
-        {
             row[col] = DBNull.Value;
-        }
     }
 
     [Pure]

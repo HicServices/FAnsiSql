@@ -7,8 +7,5 @@ namespace FAnsi.Discovery.QuerySyntax;
 /// </summary>
 public sealed class QuerySyntaxHelperFactory
 {
-    public static IQuerySyntaxHelper Create(DatabaseType type)
-    {
-        return ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
-    }
+    public static IQuerySyntaxHelper Create(DatabaseType type) => ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
 }

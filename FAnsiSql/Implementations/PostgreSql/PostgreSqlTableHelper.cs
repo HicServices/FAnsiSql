@@ -16,10 +16,7 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
 {
     public static readonly PostgreSqlTableHelper Instance = new();
     private PostgreSqlTableHelper() {}
-    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
-    {
-        return $"SELECT * FROM {table.GetFullyQualifiedName()} FETCH FIRST {topX} ROWS ONLY";
-    }
+    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT * FROM {table.GetFullyQualifiedName()} FETCH FIRST {topX} ROWS ONLY";
 
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
@@ -127,10 +124,7 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
         if (HasPrecisionAndScale(columnType))
             lengthQualifier = $"({r["numeric_precision"]},{r["numeric_scale"]})";
         else
-        if (r["character_maximum_length"] != DBNull.Value)
-        {
-            lengthQualifier = $"({Convert.ToInt32(r["character_maximum_length"])})";
-        }
+        if (r["character_maximum_length"] != DBNull.Value) lengthQualifier = $"({Convert.ToInt32(r["character_maximum_length"])})";
 
         return columnType + lengthQualifier;
     }

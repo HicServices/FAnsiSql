@@ -130,10 +130,7 @@ public sealed class DatabaseOperationArgs
     /// </summary>
     /// <param name="table"></param>
     /// <returns></returns>
-    public IManagedConnection GetManagedConnection(DiscoveredTable table)
-    {
-        return GetManagedConnection(table.Database.Server);
-    }
+    public IManagedConnection GetManagedConnection(DiscoveredTable table) => GetManagedConnection(table.Database.Server);
 
     /// <summary>
     /// Opens a new connection or passes back an existing opened connection (that matches
@@ -141,10 +138,7 @@ public sealed class DatabaseOperationArgs
     /// </summary>
     /// <param name="database"></param>
     /// <returns></returns>
-    public IManagedConnection GetManagedConnection(DiscoveredDatabase database)
-    {
-        return GetManagedConnection(database.Server);
-    }
+    public IManagedConnection GetManagedConnection(DiscoveredDatabase database) => GetManagedConnection(database.Server);
 
     /// <summary>
     /// Opens a new connection or passes back an existing opened connection (that matches
@@ -152,9 +146,5 @@ public sealed class DatabaseOperationArgs
     /// </summary>
     /// <param name="server"></param>
     /// <returns></returns>
-    public IManagedConnection GetManagedConnection(DiscoveredServer server)
-    {
-        return server.GetManagedConnection(TransactionIfAny);
-    }
-
+    public IManagedConnection GetManagedConnection(DiscoveredServer server) => server.GetManagedConnection(TransactionIfAny);
 }

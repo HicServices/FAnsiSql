@@ -28,15 +28,9 @@ public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "]";
 
-    public override TopXResponse HowDoWeAchieveTopX(int x)
-    {
-        return new TopXResponse($"TOP {x}", QueryComponent.SELECT);
-    }
+    public override TopXResponse HowDoWeAchieveTopX(int x) => new($"TOP {x}", QueryComponent.SELECT);
 
-    public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
-    {
-        return $"DECLARE {proposedNewParameterName} AS {sqlType};";
-    }
+    public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType) => $"DECLARE {proposedNewParameterName} AS {sqlType};";
 
     public override string GetScalarFunctionSql(MandatoryScalarFunctions function) =>
         function switch
@@ -47,10 +41,7 @@ public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
             _ => throw new ArgumentOutOfRangeException(nameof(function))
         };
 
-    public override string GetAutoIncrementKeywordIfAny()
-    {
-        return "IDENTITY(1,1)";
-    }
+    public override string GetAutoIncrementKeywordIfAny() => "IDENTITY(1,1)";
 
     public override Dictionary<string, string> GetSQLFunctionsDictionary() =>
         new()
@@ -80,41 +71,23 @@ public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
         };
     }
 
-    public override string HowDoWeAchieveMd5(string selectSql)
-    {
-        return $"CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary,{selectSql})),2)";
-    }
+    public override string HowDoWeAchieveMd5(string selectSql) => $"CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary,{selectSql})),2)";
 
-    public override string GetDefaultSchemaIfAny()
-    {
-        return "dbo";
-    }
+    public override string GetDefaultSchemaIfAny() => "dbo";
 
-    public override bool SupportsEmbeddedParameters()
-    {
-        return true;
-    }
+    public override bool SupportsEmbeddedParameters() => true;
 
-    public override string EnsureWrappedImpl(string databaseOrTableName)
-    {
-        return $"[{GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName)}]";
-    }
+    public override string EnsureWrappedImpl(string databaseOrTableName) => $"[{GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName)}]";
 
 
-    protected override string UnescapeWrappedNameBody(string name)
-    {
-        return name.Replace("]]","]");
-    }
+    protected override string UnescapeWrappedNameBody(string name) => name.Replace("]]","]");
 
     /// <summary>
     /// Returns the runtime name of the string with all ending square brackets escaped by doubling up (but resulting string is not wrapped itself)
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string GetRuntimeNameWithDoubledClosingSquareBrackets(string s)
-    {
-        return GetRuntimeName(s)?.Replace("]","]]");
-    }
+    private string GetRuntimeNameWithDoubledClosingSquareBrackets(string s) => GetRuntimeName(s)?.Replace("]","]]");
 
     public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
     {

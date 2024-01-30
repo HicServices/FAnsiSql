@@ -15,21 +15,16 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
     {
     }
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString)
-    {
-        return new NpgsqlConnectionStringBuilder(connectionString);
-    }
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) => new NpgsqlConnectionStringBuilder(connectionString);
 
     protected override string ServerKeyName => "Host";
     protected override string DatabaseKeyName => "Database";
     protected override string ConnectionTimeoutKeyName => "Timeout";
 
 
-    public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)
-    {
+    public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder) =>
         //nothing special we need to turn on
-        return builder;
-    }
+        builder;
 
     public override IDiscoveredDatabaseHelper GetDatabaseHelper() => PostgreSqlDatabaseHelper.Instance;
 
@@ -47,20 +42,11 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
         cmd.ExecuteNonQuery();
     }
 
-    public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder)
-    {
-        throw new NotImplementedException();
-    }
+    public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder) => throw new NotImplementedException();
 
-    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder)
-    {
-        return ((NpgsqlConnectionStringBuilder) builder).Username;
-    }
+    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Username;
 
-    public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder)
-    {
-        return ((NpgsqlConnectionStringBuilder) builder).Password;
-    }
+    public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Password;
 
     public override Version GetVersion(DiscoveredServer server)
     {
@@ -102,30 +88,15 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
         return [.. databases];
     }
 
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
-    {
-        return new NpgsqlCommand(s, (NpgsqlConnection) con, (NpgsqlTransaction) transaction);
-    }
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null) => new NpgsqlCommand(s, (NpgsqlConnection) con, (NpgsqlTransaction) transaction);
 
-    public override DbDataAdapter GetDataAdapter(DbCommand cmd)
-    {
-        return new NpgsqlDataAdapter((NpgsqlCommand) cmd);
-    }
+    public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new NpgsqlDataAdapter((NpgsqlCommand) cmd);
 
-    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd)
-    {
-        return new NpgsqlCommandBuilder(new NpgsqlDataAdapter((NpgsqlCommand) cmd));
-    }
+    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new NpgsqlCommandBuilder(new NpgsqlDataAdapter((NpgsqlCommand) cmd));
 
-    public override DbParameter GetParameter(string parameterName)
-    {
-        return new NpgsqlParameter {ParameterName = parameterName};
-    }
+    public override DbParameter GetParameter(string parameterName) => new NpgsqlParameter {ParameterName = parameterName};
 
-    public override DbConnection GetConnection(DbConnectionStringBuilder builder)
-    {
-        return new NpgsqlConnection(builder.ConnectionString);
-    }
+    public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new NpgsqlConnection(builder.ConnectionString);
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database,
         string username, string password)

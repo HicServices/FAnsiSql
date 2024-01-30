@@ -69,13 +69,7 @@ public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest
     /// </summary>
     /// <param name="typeTranslater"></param>
     /// <returns></returns>
-    public string GetSQLDbType(ITypeTranslater typeTranslater)
-    {
-        return ExplicitDbType??typeTranslater.GetSQLDBTypeForCSharpType(TypeRequested);
-    }
+    public string GetSQLDbType(ITypeTranslater typeTranslater) => ExplicitDbType??typeTranslater.GetSQLDBTypeForCSharpType(TypeRequested);
 
-    public string GetRuntimeName()
-    {
-        return ColumnName;
-    }
+    public string GetRuntimeName() => ColumnName;
 }

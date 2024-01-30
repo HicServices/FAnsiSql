@@ -130,7 +130,6 @@ public abstract class BulkCopy:IBulkCopy
 
 
             foreach(DataRow dr in dt.Rows)
-            {
                 try
                 {
                     //parse the value
@@ -141,7 +140,6 @@ public abstract class BulkCopy:IBulkCopy
                 {
                     throw new Exception($"Failed to parse value '{dr[dataColumn]}' in column '{dataColumn}'",ex);
                 }
-            }
 
             //if the DataColumn is part of the Primary Key of the DataTable (in memory)
             //then we need to update the primary key to include the new column not the old one
@@ -201,8 +199,5 @@ public abstract class BulkCopy:IBulkCopy
     /// </summary>
     /// <param name="inputColumns"></param>
     /// <returns></returns>
-    protected Dictionary<DataColumn,DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns)
-    {
-        return GetMapping(inputColumns, out _);
-    }
+    protected Dictionary<DataColumn,DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns) => GetMapping(inputColumns, out _);
 }

@@ -22,35 +22,18 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
     protected override string  ConnectionTimeoutKeyName => "Connection Timeout";
 
     #region Up Typing
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
-    {
-        return new OracleCommand(s, con as OracleConnection) {Transaction = transaction as OracleTransaction};
-    }
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null) => new OracleCommand(s, con as OracleConnection) {Transaction = transaction as OracleTransaction};
 
-    public override DbDataAdapter GetDataAdapter(DbCommand cmd)
-    {
-        return new OracleDataAdapter((OracleCommand) cmd);
-    }
+    public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new OracleDataAdapter((OracleCommand) cmd);
 
-    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd)
-    {
-        return new OracleCommandBuilder((OracleDataAdapter) GetDataAdapter(cmd));
-    }
+    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new OracleCommandBuilder((OracleDataAdapter) GetDataAdapter(cmd));
 
-    public override DbParameter GetParameter(string parameterName)
-    {
-        return new OracleParameter(parameterName,null);
-    }
+    public override DbParameter GetParameter(string parameterName) => new OracleParameter(parameterName,null);
 
-    public override DbConnection GetConnection(DbConnectionStringBuilder builder)
-    {
-        return new OracleConnection(builder.ConnectionString);
-    }
+    public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new OracleConnection(builder.ConnectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString)
-    {
-        return new OracleConnectionStringBuilder(connectionString);
-    }
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) => new OracleConnectionStringBuilder(connectionString);
+
     #endregion
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
@@ -68,11 +51,9 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
         return toReturn;
     }
 
-    public override DbConnectionStringBuilder ChangeDatabase(DbConnectionStringBuilder builder, string newDatabase)
-    {
+    public override DbConnectionStringBuilder ChangeDatabase(DbConnectionStringBuilder builder, string newDatabase) =>
         //does not apply to oracle since user = database but we create users with random passwords
-        return builder;
-    }
+        builder;
 
     public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder) => builder;
 

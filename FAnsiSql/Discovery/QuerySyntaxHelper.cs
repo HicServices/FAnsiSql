@@ -70,24 +70,16 @@ public abstract partial class QuerySyntaxHelper(
     /// " AS " qualifier is used explicitly.  The capture groups of this Regex must match <see cref="SplitLineIntoSelectSQLAndAlias"/>
     /// </summary>
     /// <returns></returns>
-    protected Regex GetAliasRegex()
-    {
+    protected Regex GetAliasRegex() =>
         //whitespace followed by as and more whitespace
         //Then any word (optionally bounded by a table name qualifier)
-
         //alias is a word
         //(w+)
-
         //alias is a wrapped word e.g. [hey hey].  In this case we must allow anything between the brackets that is not closing bracket
         //[[`""]([^[`""]+)[]`""]
+        AliasRegex();
 
-        return AliasRegex();
-    }
-
-    private static string GetAliasConst()
-    {
-        return " AS ";
-    }
+    private static string GetAliasConst() => " AS ";
 
     public string AliasPrefix => GetAliasConst();
 
@@ -116,10 +108,7 @@ public abstract partial class QuerySyntaxHelper(
         return ParameterNamesRegex.Match(parameterSQL).Value.Trim();
     }
 
-    public bool IsValidParameterName(string parameterSQL)
-    {
-        return ParameterNamesRegex.IsMatch(parameterSQL);
-    }
+    public bool IsValidParameterName(string parameterSQL) => ParameterNamesRegex.IsMatch(parameterSQL);
 
 
     public virtual string GetRuntimeName(string s)
@@ -158,10 +147,7 @@ public abstract partial class QuerySyntaxHelper(
     /// </summary>
     /// <param name="name">A wrapped name after it has had the opening and closing qualifiers stripped off e.g. "Fi``sh"</param>
     /// <returns>The final runtime name unescaped e.g. "Fi`sh"</returns>
-    protected virtual string UnescapeWrappedNameBody(string name)
-    {
-        return name;
-    }
+    protected virtual string UnescapeWrappedNameBody(string name) => name;
 
     public virtual bool TryGetRuntimeName(string s,out string name)
     {
@@ -205,15 +191,9 @@ public abstract partial class QuerySyntaxHelper(
     public virtual string Escape(string sql) => string.IsNullOrWhiteSpace(sql) ? sql : sql.Replace("'", "''");
     public abstract TopXResponse HowDoWeAchieveTopX(int x);
 
-    public virtual string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request)
-    {
-        return GetParameterDeclaration(proposedNewParameterName, TypeTranslater.GetSQLDBTypeForCSharpType(request));
-    }
+    public virtual string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request) => GetParameterDeclaration(proposedNewParameterName, TypeTranslater.GetSQLDBTypeForCSharpType(request));
 
-    public virtual HashSet<string> GetReservedWords()
-    {
-        return new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-    }
+    public virtual HashSet<string> GetReservedWords() => new(StringComparer.CurrentCultureIgnoreCase);
 
     public abstract string GetParameterDeclaration(string proposedNewParameterName, string sqlType);
 
@@ -300,12 +280,10 @@ public abstract partial class QuerySyntaxHelper(
 
         //Camel case after spaces
         for (var i = 0; i < sb.Length; i++)
-        {
             //if we are looking at a space
             if (sb[i] == ' ' && i + 1 < sb.Length && sb[i + 1] >= 'a' && sb[i + 1] <= 'z') //and there is another character
                 //and that character is a lower case letter
                 sb[i + 1] = char.ToUpper(sb[i + 1]);
-        }
 
         adjustedHeader = sb.ToString().Replace(" ", "");
 
@@ -342,18 +320,14 @@ public abstract partial class QuerySyntaxHelper(
         return value == null || value == DBNull.Value;
     }
 
-    public virtual bool IsTimeout(Exception exception)
-    {
-
+    public virtual bool IsTimeout(Exception exception) =>
         /*
         //todo doesn't work with .net standard 
         var oleE = exception as OleDbException;
 
         if (oleE != null && oleE.ErrorCode == -2147217871)
             return true;*/
-
-        return exception.Message.Contains("timeout", StringComparison.OrdinalIgnoreCase);
-    }
+        exception.Message.Contains("timeout", StringComparison.OrdinalIgnoreCase);
 
     public abstract string HowDoWeAchieveMd5(string selectSql);
 
@@ -380,16 +354,10 @@ public abstract partial class QuerySyntaxHelper(
                 var decider = factories[culture].Create(cSharpType);
                 var o = decider.Parse(strVal);
 
-                if(o is DateTime d)
-                {
-                    o = FormatDateTimeForDbParameter(d);
-                }
+                if(o is DateTime d) o = FormatDateTimeForDbParameter(d);
 
                 //Not all DBMS support DBParameter.Value = new TimeSpan(...);
-                if (o is TimeSpan t)
-                {
-                    o = FormatTimespanForDbParameter(t);
-                }
+                if (o is TimeSpan t) o = FormatTimespanForDbParameter(t);
 
 
                 p.Value = o;
@@ -440,10 +408,7 @@ public abstract partial class QuerySyntaxHelper(
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public virtual string GetDefaultSchemaIfAny()
-    {
-        return null;
-    }
+    public virtual string GetDefaultSchemaIfAny() => null;
 
     /// <summary>
     /// returns null if the name is valid.  Otherwise a string describing why it is invalid.
@@ -471,10 +436,7 @@ public abstract partial class QuerySyntaxHelper(
 
 
 
-    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
-    {
-        return GetParameter(p,discoveredColumn,value,null);
-    }
+    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value) => GetParameter(p,discoveredColumn,value,null);
 
     /// <summary>
     /// <para>
@@ -485,10 +447,7 @@ public abstract partial class QuerySyntaxHelper(
     /// </summary>
     /// <param name="dateTime"></param>
     /// <returns></returns>
-    protected virtual object FormatDateTimeForDbParameter(DateTime dateTime)
-    {
-        return dateTime;
-    }
+    protected virtual object FormatDateTimeForDbParameter(DateTime dateTime) => dateTime;
 
     /// <summary>
     /// Return the appropriate value such that it can be put into a DbParameter.Value field and be succesfully inserted into a
@@ -496,10 +455,7 @@ public abstract partial class QuerySyntaxHelper(
     /// </summary>
     /// <param name="timeSpan"></param>
     /// <returns></returns>
-    protected virtual object FormatTimespanForDbParameter(TimeSpan timeSpan)
-    {
-        return timeSpan;
-    }
+    protected virtual object FormatTimespanForDbParameter(TimeSpan timeSpan) => timeSpan;
 
     #region Equality Members
     protected bool Equals(QuerySyntaxHelper other)
@@ -519,10 +475,8 @@ public abstract partial class QuerySyntaxHelper(
         return Equals((QuerySyntaxHelper)obj);
     }
 
-    public override int GetHashCode()
-    {
-        return GetType().GetHashCode();
-    }
+    public override int GetHashCode() => GetType().GetHashCode();
+
     #endregion
 
     public Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T,string> toStringFunc)

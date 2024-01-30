@@ -58,7 +58,6 @@ internal class AggregationTests:DatabaseTests
 
 
             foreach (var (key, _) in TestConnectionStrings)
-            {
                 try
                 {
                     var db = GetTestDatabase(key);
@@ -74,8 +73,6 @@ internal class AggregationTests:DatabaseTests
                     TestContext.WriteLine(e);
 
                 }
-
-            }
         }
         catch (Exception e)
         {

@@ -76,10 +76,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         return table.Schema != null ? $"{syntax.EnsureWrapped(table.Schema)}.{objectName}" : objectName;
     }
 
-    public override IDiscoveredColumnHelper GetColumnHelper()
-    {
-        return new MicrosoftSQLColumnHelper();
-    }
+    public override IDiscoveredColumnHelper GetColumnHelper() => new MicrosoftSQLColumnHelper();
 
     public override void DropTable(DbConnection connection, DiscoveredTable tableToDrop)
     {
@@ -165,10 +162,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         return toReturn.ToArray();
     }
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture)
-    {
-        return new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
-    }
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture) => new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
 
     public override void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
     {
@@ -312,10 +306,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
     }
 
 
-    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
-    {
-        return $"SELECT TOP {topX} * FROM {table.GetFullyQualifiedName()}";
-    }
+    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT TOP {topX} * FROM {table.GetFullyQualifiedName()}";
 
     private string GetSQLType_FromSpColumnsResult(DbDataReader r)
     {
@@ -325,10 +316,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         if (HasPrecisionAndScale(columnType))
             lengthQualifier = $"({r["PRECISION"]},{r["SCALE"]})";
         else
-        if (RequiresLength(columnType))
-        {
-            lengthQualifier = $"({AdjustForUnicodeAndNegativeOne(columnType, Convert.ToInt32(r["LENGTH"]))})";
-        }
+        if (RequiresLength(columnType)) lengthQualifier = $"({AdjustForUnicodeAndNegativeOne(columnType, Convert.ToInt32(r["LENGTH"]))})";
 
         if (columnType == "text")
             return "varchar(max)";

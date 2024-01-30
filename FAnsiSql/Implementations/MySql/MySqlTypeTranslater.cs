@@ -34,26 +34,15 @@ public sealed partial class MySqlTypeTranslater : TypeTranslater
             _ => AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType)
         };
 
-    public override string GetStringDataTypeWithUnlimitedWidth()
-    {
-        return "longtext";
-    }
+    public override string GetStringDataTypeWithUnlimitedWidth() => "longtext";
 
-    public override string GetUnicodeStringDataTypeWithUnlimitedWidth()
-    {
-        return "longtext";
-    }
+    public override string GetUnicodeStringDataTypeWithUnlimitedWidth() => "longtext";
 
-    protected override string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth)
-    {
-        return $"varchar({maxExpectedStringWidth})";
-    }
+    protected override string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth) => $"varchar({maxExpectedStringWidth})";
 
-    protected override bool IsInt(string sqlType)
-    {
+    protected override bool IsInt(string sqlType) =>
         //not an int
-        return !sqlType.StartsWith("int8", StringComparison.InvariantCultureIgnoreCase) && base.IsInt(sqlType);
-    }
+        !sqlType.StartsWith("int8", StringComparison.InvariantCultureIgnoreCase) && base.IsInt(sqlType);
 
     protected override bool IsString(string sqlType)
     {
@@ -63,15 +52,9 @@ public sealed partial class MySqlTypeTranslater : TypeTranslater
         return base.IsString(sqlType) || AlsoStringRegex.IsMatch(sqlType);
     }
 
-    protected override bool IsFloatingPoint(string sqlType)
-    {
-        return base.IsFloatingPoint(sqlType) || AlsoFloatingPoint.IsMatch(sqlType);
-    }
+    protected override bool IsFloatingPoint(string sqlType) => base.IsFloatingPoint(sqlType) || AlsoFloatingPoint.IsMatch(sqlType);
 
-    protected override bool IsBit(string sqlType)
-    {
-        return base.IsBit(sqlType) || AlsoBitRegex.IsMatch(sqlType);
-    }
+    protected override bool IsBit(string sqlType) => base.IsBit(sqlType) || AlsoBitRegex.IsMatch(sqlType);
 
     [GeneratedRegex(@"tinyint\(1\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex AlsoBitRe();
