@@ -38,7 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="HIC.TypeGuesser" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.4" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.5" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
