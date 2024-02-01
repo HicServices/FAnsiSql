@@ -243,12 +243,13 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
              REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKeyPairs.Values.Select(v => syntaxHelper.EnsureWrapped(v.GetRuntimeName())))}) {(cascadeDelete ? " on delete cascade" : "")}
              """;
     }
+
     public string GetForeignKeyConstraintNameFor(DiscoveredTable foreignTable, DiscoveredTable primaryTable) => GetForeignKeyConstraintNameFor(foreignTable.GetRuntimeName(), primaryTable.GetRuntimeName());
 
     private static string GetForeignKeyConstraintNameFor(string foreignTable, string primaryTable) =>
         MakeSensibleConstraintName("FK_", $"{foreignTable}_{primaryTable}");
 
-    public abstract DirectoryInfo Detach(DiscoveredDatabase database);
+    public abstract DirectoryInfo? Detach(DiscoveredDatabase database);
 
     public abstract void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName);
 

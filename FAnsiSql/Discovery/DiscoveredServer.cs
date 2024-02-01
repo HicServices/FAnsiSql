@@ -43,12 +43,12 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <summary>
     /// Returns the username portion of <cref name="Builder"/> if specified
     /// </summary>
-    public string ExplicitUsernameIfAny => Helper.GetExplicitUsernameIfAny(Builder);
+    public string? ExplicitUsernameIfAny => Helper.GetExplicitUsernameIfAny(Builder);
 
     /// <summary>
     /// Returns the password portion of <cref name="Builder"/> if specified
     /// </summary>
-    public string ExplicitPasswordIfAny => Helper.GetExplicitPasswordIfAny(Builder);
+    public string? ExplicitPasswordIfAny => Helper.GetExplicitPasswordIfAny(Builder);
 
     /// <summary>
     /// <para>Creates a new server pointed at the <paramref name="builder"/> server. </para>

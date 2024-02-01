@@ -69,7 +69,6 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
 
         ourTrans?.Commit();
         return affected;
-
     }
 
     private string ConstructIndividualValue(string dataType, object value)
@@ -91,7 +90,7 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
         if(value == null || value == DBNull.Value)
             return "NULL";
 
-        return ConstructIndividualValue(dataType,  value.ToString());
+        return ConstructIndividualValue(dataType, value.ToString());
     }
 
     private string ConstructIndividualValue(string dataType, string value)

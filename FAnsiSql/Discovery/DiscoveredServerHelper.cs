@@ -83,10 +83,10 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     protected abstract string DatabaseKeyName { get; }
     protected virtual string ConnectionTimeoutKeyName => "ConnectionTimeout";
 
-    public string GetServerName(DbConnectionStringBuilder builder)
+    public string? GetServerName(DbConnectionStringBuilder builder)
     {
-        var s = (string) builder[ServerKeyName];
-        return string.IsNullOrWhiteSpace(s)?null:s;
+        var s = (string)builder[ServerKeyName];
+        return string.IsNullOrWhiteSpace(s) ? null : s;
     }
 
     public DbConnectionStringBuilder ChangeServer(DbConnectionStringBuilder builder, string newServer)
@@ -159,11 +159,12 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
             return false;
         }
     }
-    public abstract string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
-    public abstract string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
-    public abstract Version GetVersion(DiscoveredServer server);
 
-    private readonly Regex rVagueVersion = rVagueVersionRe();
+    public abstract string? GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
+    public abstract string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
+    public abstract Version? GetVersion(DiscoveredServer server);
+
+    private static readonly Regex _rVagueVersion = RVagueVersionRe();
 
     /// <summary>
     /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
@@ -178,17 +179,17 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     /// </summary>
     /// <param name="versionString"></param>
     /// <returns></returns>
-    protected Version CreateVersionFromString(string versionString)
+    protected static Version? CreateVersionFromString(string versionString)
     {
         if (Version.TryParse(versionString, out var result))
             return result;
 
-        var m = rVagueVersion.Match(versionString);
+        var m = _rVagueVersion.Match(versionString);
         return m.Success ? Version.Parse(m.Value) :
             //whatever the string was it didn't even remotely resemble a Version
             null;
     }
 
     [GeneratedRegex(@"\d+\.\d+(\.\d+)?(\.\d+)?", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
-    private static partial Regex rVagueVersionRe();
+    private static partial Regex RVagueVersionRe();
 }

@@ -87,12 +87,12 @@ public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string GetRuntimeNameWithDoubledClosingSquareBrackets(string s) => GetRuntimeName(s)?.Replace("]","]]");
+    private string? GetRuntimeNameWithDoubledClosingSquareBrackets(string s) => GetRuntimeName(s)?.Replace("]","]]");
 
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
+    public override string EnsureFullyQualified(string databaseName, string? schema, string tableName)
     {
         //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
-        if(string.IsNullOrWhiteSpace(schema))
+        if (string.IsNullOrWhiteSpace(schema))
             return EnsureWrapped( GetRuntimeName(databaseName)) + DatabaseTableSeparator + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(tableName));
 
         //there is a schema so add it in

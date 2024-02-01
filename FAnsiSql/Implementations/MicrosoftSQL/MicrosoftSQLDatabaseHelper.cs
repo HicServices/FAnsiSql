@@ -163,17 +163,17 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         using (var da = new SqlDataAdapter(cmd))
             da.Fill(ds);
 
-        toReturn.Add(ds.Tables[0].Columns[0].ColumnName, ds.Tables[0].Rows[0][0].ToString());
-        toReturn.Add(ds.Tables[0].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
+        toReturn.Add(ds.Tables[0].Columns[0].ColumnName, ds.Tables[0].Rows[0][0].ToString() ?? string.Empty);
+        toReturn.Add(ds.Tables[0].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString() ?? string.Empty);
 
-        toReturn.Add(ds.Tables[1].Columns[0].ColumnName, ds.Tables[1].Rows[0][0].ToString());
-        toReturn.Add(ds.Tables[1].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
-        toReturn.Add(ds.Tables[1].Columns[2].ColumnName, ds.Tables[1].Rows[0][2].ToString());
+        toReturn.Add(ds.Tables[1].Columns[0].ColumnName, ds.Tables[1].Rows[0][0].ToString() ?? string.Empty);
+        toReturn.Add(ds.Tables[1].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString() ?? string.Empty);
+        toReturn.Add(ds.Tables[1].Columns[2].ColumnName, ds.Tables[1].Rows[0][2].ToString() ?? string.Empty);
 
         return toReturn;
     }
 
-    public override DirectoryInfo Detach(DiscoveredDatabase database)
+    public override DirectoryInfo? Detach(DiscoveredDatabase database)
     {
         const string getDefaultSqlServerDatabaseDirectory = """
                                                             SELECT LEFT(physical_name,LEN(physical_name)-CHARINDEX('\',REVERSE(physical_name))+1)
@@ -233,7 +233,7 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         cmd.ExecuteNonQuery();
     }
 
-    public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
+    public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string? name)
     {
         var syntax = discoveredDatabase.Server.GetQuerySyntaxHelper();
         var runtimeName = syntax.GetRuntimeName(name);

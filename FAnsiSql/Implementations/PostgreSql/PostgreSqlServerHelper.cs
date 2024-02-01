@@ -44,11 +44,11 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder) => throw new NotImplementedException();
 
-    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Username;
+    public override string? GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Username;
 
-    public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Password;
+    public override string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Password;
 
-    public override Version GetVersion(DiscoveredServer server)
+    public override Version? GetVersion(DiscoveredServer server)
     {
         using var con = server.GetConnection();
         con.Open();

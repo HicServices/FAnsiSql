@@ -78,13 +78,13 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// Returns the name of the database without any qualifiers
     /// </summary>
     /// <returns></returns>
-    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_database);
+    public string? GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_database);
 
     /// <summary>
     /// Returns the wrapped e.g. "[MyDatabase]" name of the database including escaping e.g. if you wanted to name a database "][nquisitor" (which would return "[]][nquisitor]").
     /// </summary>
     /// <returns></returns>
-    public string GetWrappedName() => _querySyntaxHelper.EnsureWrapped(GetRuntimeName());
+    public string? GetWrappedName() => _querySyntaxHelper.EnsureWrapped(GetRuntimeName());
 
     /// <summary>
     /// <para>Creates an expectation (See <see cref="IMightNotExist"/>) that there is a table with the given name in the database.
@@ -127,7 +127,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <returns></returns>
     public bool Exists(IManagedTransaction? transaction = null)
     {
-        return Server.DiscoverDatabases().Any(db => db.GetRuntimeName().Equals(GetRuntimeName(),StringComparison.InvariantCultureIgnoreCase));
+        return Server.DiscoverDatabases().Any(db => db.GetRuntimeName()?.Equals(GetRuntimeName(), StringComparison.InvariantCultureIgnoreCase) == true);
     }
 
     /// <summary>
@@ -266,7 +266,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <para>NOTE: you must know how to map this data path to a shared path you can access!</para>
     /// </summary>
     /// <returns>Local drive data path where the files are stored</returns>
-    public DirectoryInfo Detach() => Helper.Detach(this);
+    public DirectoryInfo? Detach() => Helper.Detach(this);
 
     /// <summary>
     /// Creates a local (to the DBMS server) backup of the database.  Implementations may vary but should be the simplest database type

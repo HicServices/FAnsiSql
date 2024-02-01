@@ -13,5 +13,5 @@ public interface IHasRuntimeName
     /// Returns the name of a table/column without qualifiers e.g. returns "Name" for the column "[MyDatabase]..[MyTable].[Name]"
     /// </summary>
     /// <returns></returns>
-    string GetRuntimeName();
+    string? GetRuntimeName();
 }

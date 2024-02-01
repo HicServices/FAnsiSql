@@ -46,7 +46,7 @@ public interface IDiscoveredDatabaseHelper
     string GetForeignKeyConstraintSql(string foreignTable, IQuerySyntaxHelper syntaxHelper,
         Dictionary<IHasRuntimeName, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string? constraintName = null);
 
-    DirectoryInfo Detach(DiscoveredDatabase database);
+    DirectoryInfo? Detach(DiscoveredDatabase database);
     void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName);
 
     /// <summary>

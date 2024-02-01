@@ -163,7 +163,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    public Type TryGetCSharpTypeForSQLDBType(string sqlType)
+    public Type? TryGetCSharpTypeForSQLDBType(string sqlType)
     {
         if (IsBit(sqlType))
             return typeof(bool);
@@ -310,7 +310,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
         return -1;
     }
 
-    public DecimalSize GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType)
+    public DecimalSize? GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType)
     {
         if (string.IsNullOrWhiteSpace(sqlType))
             return null;

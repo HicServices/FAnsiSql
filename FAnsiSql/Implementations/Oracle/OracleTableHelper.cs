@@ -123,7 +123,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
         cmd.ExecuteNonQuery();
     }
 
-    private string GetBasicTypeFromOracleType(DbDataReader r)
+    private static string GetBasicTypeFromOracleType(IDataRecord r)
     {
         int? precision = null;
         int? scale = null;
@@ -146,14 +146,14 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
                     return "decimal";
 
                 if (dataLength == null)
-                    throw new Exception(
+                    throw new InvalidOperationException(
                         $"Found Oracle NUMBER datatype with scale {(scale != null ? scale.ToString() : "DBNull.Value")} and precision {(precision != null ? precision.ToString() : "DBNull.Value")}, did not know what datatype to use to represent it");
 
                 return "double";
             case "FLOAT":
                 return "double";
             default:
-                return r["DATA_TYPE"].ToString()?.ToLower();
+                return r["DATA_TYPE"].ToString()?.ToLower() ?? throw new InvalidOperationException("Null DATA_TYPE in db");
         }
     }
 

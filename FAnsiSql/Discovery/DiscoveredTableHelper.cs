@@ -277,7 +277,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             _ => false
         };
 
-    public bool HasPrecisionAndScale(string columnType) =>
+    public static bool HasPrecisionAndScale(string columnType) =>
         columnType.ToLowerInvariant() switch
         {
             "decimal" => true,

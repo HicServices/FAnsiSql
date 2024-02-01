@@ -45,7 +45,7 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// <summary>
     /// The DBMS proprietary column specific collation e.g. "Latin1_General_CS_AS_KS_WS"
     /// </summary>
-    public string Collation { get; set; }
+    public string? Collation { get; set; }
 
     /// <summary>
     /// The data type of the column found (includes String Length and Scale/Precision).
@@ -64,7 +64,7 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// The unqualified name of the column e.g. "MyCol"
     /// </summary>
     /// <returns></returns>
-    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_name);
+    public string? GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_name);
 
     /// <summary>
     /// The fully qualified name of the column e.g. [MyDb].dbo.[MyTable].[MyCol] or `MyDb`.`MyCol`

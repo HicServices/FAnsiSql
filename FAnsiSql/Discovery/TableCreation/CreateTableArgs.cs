@@ -33,12 +33,12 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// Optional - Columns are normally created based on supplied DataTable data rows.  If this is set then the Type specified here will
     /// be used instead.
     /// </summary>
-    public DatabaseColumnRequest[] ExplicitColumnDefinitions { get; set; }
+    public DatabaseColumnRequest[]? ExplicitColumnDefinitions { get; set; }
 
     /// <summary>
     /// Set this to make last minute changes to column datatypes before table creation
     /// </summary>
-    public IDatabaseColumnRequestAdjuster Adjuster { get; set; }
+    public IDatabaseColumnRequestAdjuster? Adjuster { get; set; }
 
     /// <summary>
     /// Link between columns that you want to create in your table <see cref="DatabaseColumnRequest"/> and existing columns (<see cref="DiscoveredColumn"/>) that

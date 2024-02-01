@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -70,7 +71,7 @@ public abstract partial class QuerySyntaxHelper(
     /// " AS " qualifier is used explicitly.  The capture groups of this Regex must match <see cref="SplitLineIntoSelectSQLAndAlias"/>
     /// </summary>
     /// <returns></returns>
-    protected Regex GetAliasRegex() =>
+    private Regex GetAliasRegex() =>
         //whitespace followed by as and more whitespace
         //Then any word (optionally bounded by a table name qualifier)
         //alias is a word
@@ -111,7 +112,7 @@ public abstract partial class QuerySyntaxHelper(
     public bool IsValidParameterName(string parameterSQL) => ParameterNamesRegex.IsMatch(parameterSQL);
 
 
-    public virtual string GetRuntimeName(string s)
+    public virtual string? GetRuntimeName(string? s)
     {
         if (string.IsNullOrWhiteSpace(s))
             return s;
@@ -291,13 +292,13 @@ public abstract partial class QuerySyntaxHelper(
         return adjustedHeader;
     }
 
-    public string GetSensibleEntityNameFromString(string potentiallyDodgyName)
+    public string GetSensibleEntityNameFromString(string? potentiallyDodgyName)
     {
         potentiallyDodgyName = GetRuntimeName(potentiallyDodgyName);
 
         //replace anything that isn't a digit, letter or underscore with underscores
         var r = NotAlphaNumRe();
-        var adjustedHeader = r.Replace(potentiallyDodgyName, "_");
+        var adjustedHeader = r.Replace(potentiallyDodgyName ?? string.Empty, "_");
 
         //if it starts with a digit (illegal) put an underscore before it
         if (StartsDigitsRe().IsMatch(adjustedHeader))
@@ -384,25 +385,25 @@ public abstract partial class QuerySyntaxHelper(
             throw new RuntimeNameException(reason);
     }
 
-    public bool IsValidDatabaseName(string? databaseName, out string? reason)
+    public bool IsValidDatabaseName(string? databaseName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(databaseName, "Database", MaximumDatabaseLength);
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public bool IsValidTableName(string tableName,out string reason)
+    public bool IsValidTableName(string tableName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(tableName, "Table", MaximumTableLength);
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public bool IsValidColumnName(string columnName,out string reason)
+    public bool IsValidColumnName(string columnName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(columnName, "Column", MaximumColumnLength);
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public virtual string GetDefaultSchemaIfAny() => null;
+    public virtual string? GetDefaultSchemaIfAny() => null;
 
     /// <summary>
     /// returns null if the name is valid.  Otherwise a string describing why it is invalid.

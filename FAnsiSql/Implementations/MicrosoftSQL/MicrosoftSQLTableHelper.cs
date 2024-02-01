@@ -67,7 +67,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
     /// </summary>
     /// <param name="table"></param>
     /// <returns></returns>
-    private static string GetObjectName(DiscoveredTable table)
+    private static string? GetObjectName(DiscoveredTable table)
     {
         var syntax = table.GetQuerySyntaxHelper();
 
@@ -80,7 +80,6 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
 
     public override void DropTable(DbConnection connection, DiscoveredTable tableToDrop)
     {
-
         SqlCommand cmd;
 
         switch (tableToDrop.TableType)
@@ -89,7 +88,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
                 if (connection.Database != tableToDrop.Database.GetRuntimeName())
                     connection.ChangeDatabase(tableToDrop.GetRuntimeName());
 
-                if(!connection.Database.ToLower().Equals(tableToDrop.Database.GetRuntimeName().ToLower()))
+                if (!connection.Database.ToLower().Equals(tableToDrop.Database.GetRuntimeName().ToLower()))
                     throw new NotSupportedException(
                         $"Cannot drop view {tableToDrop} because it exists in database {tableToDrop.Database.GetRuntimeName()} while the current current database connection is pointed at database:{connection.Database} (use .ChangeDatabase on the connection first) - SQL Server does not support cross database view dropping");
 
@@ -105,7 +104,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
                 throw new ArgumentOutOfRangeException(nameof(tableToDrop),$"Unknown table type {tableToDrop.TableType}");
         }
 
-        using(cmd)
+        using (cmd)
             cmd.ExecuteNonQuery();
     }
 

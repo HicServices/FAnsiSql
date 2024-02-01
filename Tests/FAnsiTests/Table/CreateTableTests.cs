@@ -50,7 +50,6 @@ internal sealed class CreateTableTests:DatabaseTests
             new DatabaseColumnRequest("dob", new DatabaseTypeRequest(typeof (DateTime)),false),
             new DatabaseColumnRequest("score",
                 new DatabaseTypeRequest(typeof (decimal), null, new DecimalSize(5, 3))) //<- e.g. 12345.123
-
         ]);
 
         Assert.That(tbl.Exists());

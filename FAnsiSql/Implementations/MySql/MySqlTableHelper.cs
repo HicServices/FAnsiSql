@@ -68,7 +68,6 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
                 toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
                 columns.Add(toAdd);
-
             }
 
             r.Close();
@@ -76,7 +75,6 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
 
         return [.. columns];
-
     }
 
     private static bool YesNoToBool(object o)

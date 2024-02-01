@@ -41,7 +41,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// 
     /// <para>Null if not supported by the DBMS (e.g. MySql)</para>
     /// </summary>
-    public readonly string Schema;
+    public readonly string? Schema;
 
     /// <summary>
     /// Whether the table referenced is a normal table, view or table valued function (see derived class <see cref="DiscoveredTableValuedFunction"/>)
@@ -88,7 +88,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// Returns the unqualified name of the table e.g. "MyTable"
     /// </summary>
     /// <returns></returns>
-    public virtual string GetRuntimeName() => QuerySyntaxHelper.GetRuntimeName(TableName);
+    public virtual string? GetRuntimeName() => QuerySyntaxHelper.GetRuntimeName(TableName);
 
     /// <summary>
     /// Returns the fully qualified (including schema if appropriate) name of the table e.g. [MyDb].dbo.[MyTable] or `MyDb`.`MyTable`
@@ -100,7 +100,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// Returns the wrapped e.g. "[MyTbl]" name of the table including escaping e.g. if you wanted to name a table "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
     /// </summary>
     /// <returns></returns>
-    public string GetWrappedName() => QuerySyntaxHelper.EnsureWrapped(GetRuntimeName());
+    public string? GetWrappedName() => QuerySyntaxHelper.EnsureWrapped(GetRuntimeName());
 
     /// <summary>
     /// Connects to the server and returns a list of columns found in the table as <see cref="DiscoveredColumn"/>.
@@ -394,12 +394,12 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="culture"></param>
     /// <param name="transaction"></param>
     /// <returns></returns>
-    public int Insert(Dictionary<DiscoveredColumn,object> toInsert, CultureInfo? culture, IManagedTransaction? transaction=null)
+    public int Insert(Dictionary<DiscoveredColumn, object> toInsert, CultureInfo? culture, IManagedTransaction? transaction = null)
     {
         var syntaxHelper = GetQuerySyntaxHelper();
         var server = Database.Server;
 
-        var _parameterNames = syntaxHelper.GetParameterNamesFor(toInsert.Keys.ToArray(), static c=>c.GetRuntimeName());
+        var _parameterNames = syntaxHelper.GetParameterNamesFor(toInsert.Keys.ToArray(), static c => c.GetRuntimeName());
 
         using var connection = Database.Server.GetManagedConnection(transaction);
         var sql =
@@ -481,7 +481,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
             && Equals(Database, other.Database) && TableType == other.TableType;
     }
 
-    private string GetSchemaWithDefaultForNull() =>
+    private string? GetSchemaWithDefaultForNull() =>
         //for "dbo, "" and null are all considered the same
         string.IsNullOrWhiteSpace(Schema) ? GetQuerySyntaxHelper().GetDefaultSchemaIfAny() : Schema;
 
