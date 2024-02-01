@@ -14,7 +14,8 @@ namespace FAnsi.Discovery;
 public interface IDiscoveredServerHelper
 {
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
-    DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null);
+    DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null);
+
     DbDataAdapter GetDataAdapter(DbCommand cmd);
     DbCommandBuilder GetCommandBuilder(DbCommand cmd);
     DbParameter GetParameter(string parameterName);
@@ -32,7 +33,7 @@ public interface IDiscoveredServerHelper
     /// <param name="username">Optional username to set in connection string (otherwise integrated security will be used - if supported)</param>
     /// <param name="password">Optional password to set in connection string (otherwise integrated security will be used - if supported)</param>
     /// <returns></returns>
-    DbConnectionStringBuilder GetConnectionStringBuilder(string server, string database, string username, string password);
+    DbConnectionStringBuilder GetConnectionStringBuilder(string server, string? database, string username, string password);
 
     string GetServerName(DbConnectionStringBuilder builder);
     DbConnectionStringBuilder ChangeServer(DbConnectionStringBuilder builder, string newServer);
@@ -53,7 +54,7 @@ public interface IDiscoveredServerHelper
     ManagedTransaction BeginTransaction(DbConnectionStringBuilder builder);
     DatabaseType DatabaseType { get; }
     Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder);
-    bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds, out Exception exception);
+    bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds, out Exception? exception);
 
     string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
     string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);

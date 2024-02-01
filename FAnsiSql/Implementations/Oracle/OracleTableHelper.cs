@@ -63,7 +63,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
                    "select table_name,column_name from ALL_TAB_IDENTITY_COLS WHERE table_name = :table_name AND owner =:owner",
                    (OracleConnection) connection.Connection))
         {
-            cmd.Transaction = (OracleTransaction) connection.Transaction;
+            cmd.Transaction = (OracleTransaction?)connection.Transaction;
             cmd.Parameters.Add(new OracleParameter("table_name", OracleDbType.Varchar2)
             {
                 Value = tableName
@@ -94,7 +94,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
                                           ORDER BY cols.table_name, cols.position
                                           """, (OracleConnection) connection.Connection))
         {
-            cmd.Transaction = (OracleTransaction) connection.Transaction;
+            cmd.Transaction = (OracleTransaction?)connection.Transaction;
             cmd.Parameters.Add(new OracleParameter("table_name", OracleDbType.Varchar2)
             {
                 Value = tableName
@@ -183,7 +183,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
 
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture) => new OracleBulkCopy(discoveredTable,connection,culture);
 
-    public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction = null)
+    public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction = null)
     {
         var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(static c => c.IsAutoIncrement);
 
@@ -208,7 +208,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     }
 
     public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
-        IManagedTransaction transaction = null)
+        IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string, DiscoveredRelationship>();
 
@@ -303,7 +303,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     }
 
 
-    protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
+    protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string? newName)
     {
         newName = discoveredTable.GetQuerySyntaxHelper().EnsureWrapped(newName);
         return $@"alter table {discoveredTable.GetFullyQualifiedName()} rename to {newName}";

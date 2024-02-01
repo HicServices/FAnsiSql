@@ -19,5 +19,5 @@ public interface IAggregateHelper
     /// <param name="queryLines"></param>
     /// <param name="axisIfAny"></param>
     /// <returns></returns>
-    string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny);
+    string BuildAggregate(List<CustomLine> queryLines, IQueryAxis? axisIfAny);
 }

@@ -31,7 +31,7 @@ public interface IQuerySyntaxHelper
     /// <param name="columns"></param>
     /// <param name="toStringFunc">Function to convert the <typeparamref name="T"/> to a string e.g. c.ColumnName if DataColumn</param>
     /// <returns></returns>
-    Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T,string> toStringFunc);
+    Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T, string> toStringFunc) where T : notnull;
 
     IAggregateHelper AggregateHelper { get; }
     IUpdateHelper UpdateHelper { get; set; }
@@ -50,6 +50,7 @@ public interface IQuerySyntaxHelper
     /// Separator between table and column names (and database, schema etc).  Usually "."
     /// </summary>
     string DatabaseTableSeparator {get; }
+
     /// <summary>
     /// Characters which are not permitted in column names by FAnsi
     /// </summary>
@@ -59,9 +60,9 @@ public interface IQuerySyntaxHelper
 
     string GetRuntimeName(string s);
 
-    bool TryGetRuntimeName(string s, out string name);
+    bool TryGetRuntimeName(string s, out string? name);
 
-    DatabaseType DatabaseType {get;}
+    DatabaseType DatabaseType { get; }
 
     /// <summary>
     /// True if the DBMS supports SQL declared parameters (e.g. "DECLARE @bob varchar(10)") whose values can be changed in SQL.  False if the only way to
@@ -76,10 +77,10 @@ public interface IQuerySyntaxHelper
     /// </summary>
     /// <param name="databaseOrTableName"></param>
     /// <returns></returns>
-    string EnsureWrapped(string databaseOrTableName);
+    string? EnsureWrapped(string? databaseOrTableName);
 
-    string EnsureFullyQualified(string databaseName,string schemaName, string tableName);
-    string EnsureFullyQualified(string databaseName, string schemaName,string tableName, string columnName, bool isTableValuedFunction = false);
+    string EnsureFullyQualified(string databaseName, string? schemaName, string tableName);
+    string EnsureFullyQualified(string databaseName, string? schemaName, string tableName, string columnName, bool isTableValuedFunction = false);
 
     /// <summary>
     /// Returns the given <paramref name="sql"/> escaped e.g. doubling up single quotes.  Does not add any wrapping.
@@ -112,7 +113,7 @@ public interface IQuerySyntaxHelper
     int MaximumColumnLength { get; }
 
 
-    bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string alias);
+    bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string? alias);
 
     string GetScalarFunctionSql(MandatoryScalarFunctions function);
     string GetSensibleEntityNameFromString(string potentiallyDodgyName);
@@ -178,7 +179,7 @@ public interface IQuerySyntaxHelper
     /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
     /// </summary>
     /// <param name="database"></param>
-    void ValidateDatabaseName(string database);
+    void ValidateDatabaseName(string? database);
 
     /// <summary>
     /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
@@ -193,7 +194,7 @@ public interface IQuerySyntaxHelper
     /// <summary>
     /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
     /// </summary>
-    bool IsValidDatabaseName(string databaseName, out string reason);
+    bool IsValidDatabaseName(string databaseName, out string? reason);
 
     /// <summary>
     /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)

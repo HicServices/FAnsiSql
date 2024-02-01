@@ -21,7 +21,9 @@ internal sealed class ServerLevelTests:DatabaseTests
     public void Server_Constructors(DatabaseType dbType)
     {
         var helper = ImplementationManager.GetImplementation(dbType).GetServerHelper();
-        var server = new DiscoveredServer(helper.GetConnectionStringBuilder("localhost", null,"franko","wacky").ConnectionString,dbType);
+        var server =
+            new DiscoveredServer(
+                helper.GetConnectionStringBuilder("localhost", null, "franko", "wacky").ConnectionString, dbType);
 
         Assert.That(server.Name, Is.EqualTo("localhost"));
     }

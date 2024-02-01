@@ -19,12 +19,13 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
     private static readonly Regex ColumnLevelComplaint = ColumnLevelComplaintRe();
 
 
-    public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
+    public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture) : base(targetTable, connection,
+        culture)
     {
-        var options=SqlBulkCopyOptions.KeepIdentity|SqlBulkCopyOptions.TableLock;
+        var options = SqlBulkCopyOptions.KeepIdentity | SqlBulkCopyOptions.TableLock;
         if (connection.Transaction == null)
             options |= SqlBulkCopyOptions.UseInternalTransaction;
-        _bulkCopy = new SqlBulkCopy((SqlConnection)connection.Connection, options, (SqlTransaction)connection.Transaction)
+        _bulkCopy = new SqlBulkCopy((SqlConnection)connection.Connection, options, (SqlTransaction?)connection.Transaction)
         {
             BulkCopyTimeout = 50000,
             DestinationTableName = targetTable.GetFullyQualifiedName()
@@ -125,9 +126,9 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
                 }
                 catch (Exception exception)
                 {
-                    if (BcpColIdToString(investigationOneLineAtATime,exception as SqlException,out var result, out var badMapping))
+                    if (BcpColIdToString(investigationOneLineAtATime, exception as SqlException, out var result, out var badMapping))
                     {
-                        if (!dt.Columns.Contains(badMapping.SourceColumn))
+                        if (badMapping is null || !dt.Columns.Contains(badMapping.SourceColumn))
                             return new Exception(
                                 string.Format(
                                     SR
@@ -137,14 +138,14 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
                         var sourceValue = dr[badMapping.SourceColumn];
                         var destColumn = TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
 
-                        if(destColumn != null)
+                        if (destColumn != null)
                             return new FileLoadException(
                                 string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0__the_complaint_was_about_source_column____1____which_had_value____2____destination_data_type_was____3____4__5_, line, badMapping.SourceColumn, sourceValue, destColumn.DataType, Environment.NewLine, result), exception);
 
                         return new Exception(string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_, line, result), e);
                     }
 
-                    return  new FileLoadException(
+                    return new FileLoadException(
                         string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_, line, Environment.NewLine, string.Join(Environment.NewLine,dr.ItemArray), firstPass),
                         exception);
                 }
@@ -165,7 +166,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
     /// <param name="newMessage"></param>
     /// <param name="badMapping"></param>
     /// <returns></returns>
-    private bool BcpColIdToString(SqlBulkCopy insert, SqlException ex, out string newMessage, out SqlBulkCopyColumnMapping badMapping)
+    private bool BcpColIdToString(SqlBulkCopy insert, SqlException? ex, out string? newMessage, out SqlBulkCopyColumnMapping? badMapping)
     {
         var match = ColumnLevelComplaint.Match(ex?.Message ?? "");
         if (ex == null || !match.Success)
@@ -176,18 +177,18 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
         }
 
         //it counts from 1 not 0.  Also it isn't an index into insert.ColumnMappings.  It's an index into a private field!
-        var columnItHates = Convert.ToInt32(match.Groups[1].Value) -1;
+        var columnItHates = Convert.ToInt32(match.Groups[1].Value) - 1;
 
         try
         {
             var fi = typeof(SqlBulkCopy).GetField("_sortedColumnMappings", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new NullReferenceException();
             var sortedColumns = fi.GetValue(insert);
-            var items = (object[])sortedColumns?.GetType().GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(sortedColumns) ?? throw new NullReferenceException();
+            var items = (object[])(sortedColumns?.GetType().GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(sortedColumns) ?? throw new NullReferenceException());
 
             var itemData = items[columnItHates].GetType().GetField("_metadata", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new NullReferenceException();
             var metadata = itemData.GetValue(items[columnItHates]) ?? throw new NullReferenceException();
 
-            var destinationColumn = (string)metadata.GetType().GetField("column", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata) ?? throw new NullReferenceException();
+            var destinationColumn = (string?)metadata.GetType().GetField("column", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata) ?? throw new NullReferenceException();
 
             var length = metadata.GetType().GetField("length", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(metadata);
 

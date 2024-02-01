@@ -11,10 +11,10 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 public sealed class AggregateCustomLineCollection
 {
     public List<CustomLine> Lines { get; set; }
-    public IQueryAxis Axis { get; set; }
+    public IQueryAxis? Axis { get; set; }
     public IQuerySyntaxHelper SyntaxHelper { get; }
 
-    public AggregateCustomLineCollection(List<CustomLine> queryLines, IQueryAxis axisIfAny, IQuerySyntaxHelper querySyntaxHelper)
+    public AggregateCustomLineCollection(List<CustomLine> queryLines, IQueryAxis? axisIfAny, IQuerySyntaxHelper querySyntaxHelper)
     {
         Lines = queryLines;
         Axis = axisIfAny;

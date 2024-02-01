@@ -140,9 +140,10 @@ internal sealed class QuerySyntaxHelperTests
     [TestCase("count(*) as Frank32","count(*)","Frank32")]
     [TestCase("CAST([dave] as int) as [number]","CAST([dave] as int)","number")]
     [TestCase("CAST([dave] as int)","CAST([dave] as int)",null)]
-    public void SyntaxHelperTest_SplitLineIntoSelectSQLAndAlias(string line, string expectedSelectSql, string expectedAlias)
+    public void SyntaxHelperTest_SplitLineIntoSelectSQLAndAlias(string line, string expectedSelectSql, string? expectedAlias)
     {
-        foreach (var syntaxHelper in new []{DatabaseType.Oracle,DatabaseType.MySql,DatabaseType.MicrosoftSQLServer}.Select(t => ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper()))
+        foreach (var syntaxHelper in new[] { DatabaseType.Oracle, DatabaseType.MySql, DatabaseType.MicrosoftSQLServer }
+                     .Select(static t => ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper()))
             Assert.Multiple(() =>
             {
                 Assert.That(syntaxHelper.SplitLineIntoSelectSQLAndAlias(line, out var selectSQL, out var alias), Is.EqualTo(expectedAlias != null));
@@ -176,14 +177,14 @@ internal sealed class QuerySyntaxHelperTests
     {
         var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
 
-        Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName(null));
-        Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName("  "));
-        Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName("db.table"));
-        Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName("db(lol)"));
-        Assert.Throws<RuntimeNameException>(()=>syntaxHelper.ValidateDatabaseName(new string('A', syntaxHelper.MaximumDatabaseLength+1)));
+        Assert.Throws<RuntimeNameException>(() => syntaxHelper.ValidateDatabaseName(null));
+        Assert.Throws<RuntimeNameException>(() => syntaxHelper.ValidateDatabaseName("  "));
+        Assert.Throws<RuntimeNameException>(() => syntaxHelper.ValidateDatabaseName("db.table"));
+        Assert.Throws<RuntimeNameException>(() => syntaxHelper.ValidateDatabaseName("db(lol)"));
+        Assert.Throws<RuntimeNameException>(() => syntaxHelper.ValidateDatabaseName(new string('A', syntaxHelper.MaximumDatabaseLength+1)));
 
-        Assert.DoesNotThrow(()=>syntaxHelper.ValidateDatabaseName("A"));
-        Assert.DoesNotThrow(()=>syntaxHelper.ValidateDatabaseName(new string('A', syntaxHelper.MaximumDatabaseLength)));
+        Assert.DoesNotThrow(() =>syntaxHelper.ValidateDatabaseName("A"));
+        Assert.DoesNotThrow(() =>syntaxHelper.ValidateDatabaseName(new string('A', syntaxHelper.MaximumDatabaseLength)));
     }
 
     [Test]

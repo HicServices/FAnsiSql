@@ -61,7 +61,7 @@ public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType
     /// <param name="keyword"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    private string GetCollisionWithKeyword(string keyword, string value)
+    private string? GetCollisionWithKeyword(string keyword, string value)
     {
         ArgumentNullException.ThrowIfNull(keyword);
         ArgumentNullException.ThrowIfNull(value);

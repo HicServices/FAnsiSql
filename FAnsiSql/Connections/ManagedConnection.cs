@@ -12,7 +12,7 @@ public sealed class ManagedConnection : IManagedConnection
     public DbConnection Connection { get; }
 
     /// <inheritdoc/>
-    public DbTransaction Transaction { get; }
+    public DbTransaction? Transaction { get; }
 
     /// <inheritdoc/>
     public IManagedTransaction ManagedTransaction { get; }

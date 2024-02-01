@@ -13,13 +13,13 @@ public sealed class PostgreSqlAggregateHelper : AggregateHelper
 
     protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
     {
-        var interval = query.Axis.AxisIncrement switch
+        var interval = query.Axis?.AxisIncrement switch
         {
             AxisIncrement.Day => "1 day",
             AxisIncrement.Month => "1 month",
             AxisIncrement.Year => "1 year",
             AxisIncrement.Quarter => "3 months",
-            _ => throw new ArgumentOutOfRangeException(nameof(query),$"Invalid AxisIncrement {query.Axis.AxisIncrement}")
+            _ => throw new ArgumentOutOfRangeException(nameof(query),$"Invalid AxisIncrement {query.Axis?.AxisIncrement}")
         };
 
         var countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);

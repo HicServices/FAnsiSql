@@ -17,20 +17,19 @@ namespace FAnsi.Implementations.MySql;
 public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture)
     : BulkCopy(targetTable, connection, culture)
 {
-
     public static readonly int BulkInsertBatchTimeoutInSeconds = 0;
 
     public override int UploadImpl(DataTable dt)
     {
-        var ourTrans = Connection.Transaction==null?Connection.Connection.BeginTransaction(IsolationLevel.ReadUncommitted):null;
+        var ourTrans = Connection.Transaction == null ? Connection.Connection.BeginTransaction(IsolationLevel.ReadUncommitted) : null;
         var matchedColumns = GetMapping(dt.Columns.Cast<DataColumn>());
         var affected = 0;
 
         int maxPacket;
-        using (var packetQ = new MySqlCommand("select @@max_allowed_packet", (MySqlConnection)Connection.Connection,(MySqlTransaction)(Connection.Transaction ?? ourTrans)))
+        using (var packetQ = new MySqlCommand("select @@max_allowed_packet", (MySqlConnection)Connection.Connection, (MySqlTransaction?)(Connection.Transaction ?? ourTrans)))
             maxPacket = Convert.ToInt32(packetQ.ExecuteScalar());
         using var cmd = new MySqlCommand("", (MySqlConnection) Connection.Connection,
-            (MySqlTransaction)(Connection.Transaction ?? ourTrans));
+            (MySqlTransaction?)(Connection.Transaction ?? ourTrans));
         if (BulkInsertBatchTimeoutInSeconds != 0)
             cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
 

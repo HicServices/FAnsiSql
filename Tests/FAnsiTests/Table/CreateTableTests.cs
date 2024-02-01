@@ -567,7 +567,7 @@ internal sealed class CreateTableTests:DatabaseTests
         dt.Rows.Add("T");
         dt.Rows.Add("F");
 
-        var args = new CreateTableArgs(db,"Hb",null,dt,false);
+        var args = new CreateTableArgs(db, "Hb", null, dt, false);
         Assert.Multiple(() =>
         {
             Assert.That(GuessSettingsFactory.Defaults.CharCanBeBoolean, Is.EqualTo(args.GuessSettings.CharCanBeBoolean), "Default should match the static default");

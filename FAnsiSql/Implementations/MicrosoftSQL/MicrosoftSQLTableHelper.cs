@@ -184,7 +184,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         base.CreatePrimaryKey(args,table, discoverColumns);
     }
 
-    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null)
+    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string,DiscoveredRelationship>();
 

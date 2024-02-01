@@ -33,7 +33,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     }
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
-    public abstract DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null);
+    public abstract DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null);
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetDataAdapter"]'/>
     public abstract DbDataAdapter GetDataAdapter(DbCommand cmd);
@@ -55,9 +55,9 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     }
 
     /// <inheritdoc/>
-    public DbConnectionStringBuilder GetConnectionStringBuilder(string server, string database, string username, string password)
+    public DbConnectionStringBuilder GetConnectionStringBuilder(string server, string? database, string username, string password)
     {
-        var builder = GetConnectionStringBuilderImpl(server,database,username,password);
+        var builder = GetConnectionStringBuilderImpl(server, database, username, password);
         EnforceKeywords(builder);
         return builder;
     }
@@ -74,9 +74,9 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
         if (ConnectionStringKeywordAccumulators.TryGetValue(DatabaseType, out var accumulator))
             accumulator.EnforceOptions(builder);
     }
-    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString, string database, string username, string password);
-    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString);
 
+    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString, string? database, string username, string password);
+    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString);
 
 
     protected abstract string ServerKeyName { get; }
@@ -138,7 +138,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     public DatabaseType DatabaseType { get; private set; } = databaseType;
     public abstract Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder);
 
-    public bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds,out Exception exception)
+    public bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds, out Exception? exception)
     {
         try
         {
