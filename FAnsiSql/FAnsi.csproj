@@ -45,7 +45,7 @@
     </PackageReference>
     <PackageReference Include="MySqlConnector" Version="2.3.5" />
     <PackageReference Include="Npgsql" Version="8.0.1" />
-    <PackageReference Include="NUnit.Analyzers" Version="4.0.0">
+    <PackageReference Include="NUnit.Analyzers" Version="4.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
