@@ -22,10 +22,10 @@ namespace FAnsi.Discovery;
 public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
 {
     public abstract IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection,
-        string database, bool includeViews, DbTransaction transaction = null);
+        string database, bool includeViews, DbTransaction? transaction = null);
 
     public abstract IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null);
+        DbConnection connection, string database, DbTransaction? transaction = null);
 
     public abstract DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database);
     public abstract IDiscoveredTableHelper GetTableHelper();
@@ -61,8 +61,8 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
                     //Type requested is a proper FAnsi type (e.g. string, at least 5 long)
                     var request = overriding.TypeRequested;
 
-                    if(request == null)
-                        if(!string.IsNullOrWhiteSpace(overriding.ExplicitDbType))
+                    if (request is null)
+                        if (!string.IsNullOrWhiteSpace(overriding.ExplicitDbType))
                         {
                             //Type is for an explicit SQL Type e.g. varchar(5)
 
@@ -70,7 +70,6 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
                             var tt = args.Database.Server.GetQuerySyntaxHelper().TypeTranslater;
 
                             request = tt.GetDataTypeRequestForSQLDBType(overriding.ExplicitDbType);
-
                         }
                         else
                             throw new Exception(string.Format(FAnsiStrings.DiscoveredDatabaseHelper_CreateTable_DatabaseColumnRequestMustHaveEitherTypeRequestedOrExplicitDbType, column));
@@ -166,17 +165,13 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     /// <inheritdoc/>
     public abstract void CreateSchema(DiscoveredDatabase discoveredDatabase, string name);
 
-    protected virtual Guesser GetGuesser(DataColumn column)
-    {
-        return new Guesser();
-    }
+    protected virtual Guesser GetGuesser(DataColumn column) => new();
 
-    protected virtual Guesser GetGuesser(DatabaseTypeRequest request)
-    {
-        return new Guesser(request);
-    }
+    protected virtual Guesser GetGuesser(DatabaseTypeRequest request) => new(request);
 
-    public virtual string GetCreateTableSql(DiscoveredDatabase database, string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string schema)
+    public virtual string GetCreateTableSql(DiscoveredDatabase database, string tableName,
+        DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn>? foreignKeyPairs,
+        bool cascadeDelete, string? schema)
     {
         if (string.IsNullOrWhiteSpace(tableName))
             throw new ArgumentNullException(nameof(tableName),FAnsiStrings.DiscoveredDatabaseHelper_GetCreateTableSql_Table_name_cannot_be_null);
@@ -215,7 +210,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         {
             bodySql.AppendLine();
             bodySql.AppendLine(GetForeignKeyConstraintSql(tableName, syntaxHelper,
-                foreignKeyPairs.ToDictionary(static k => (IHasRuntimeName) k.Key, static v => v.Value), cascadeDelete, null));
+                foreignKeyPairs.ToDictionary(static k => (IHasRuntimeName)k.Key, static v => v.Value), cascadeDelete, null));
         }
 
         var toReturn = bodySql.ToString().TrimEnd('\r', '\n', ',');
@@ -232,14 +227,10 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     /// <param name="datatype"></param>
     /// <param name="syntaxHelper"></param>
     /// <returns></returns>
-    protected virtual string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
-    {
-        return
-            $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} {(string.IsNullOrWhiteSpace(col.Collation) ? "" : $"COLLATE {col.Collation}")} {(col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
-    }
+    protected virtual string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper) => $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} {(string.IsNullOrWhiteSpace(col.Collation) ? "" : $"COLLATE {col.Collation}")} {(col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
 
     public virtual string GetForeignKeyConstraintSql(string foreignTable, IQuerySyntaxHelper syntaxHelper,
-        Dictionary<IHasRuntimeName, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string constraintName)
+        Dictionary<IHasRuntimeName, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string? constraintName)
     {
         var primaryKeyTable = foreignKeyPairs.Values.Select(static v => v.Table).Distinct().Single();
 
@@ -252,15 +243,13 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
              REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKeyPairs.Values.Select(v => syntaxHelper.EnsureWrapped(v.GetRuntimeName())))}) {(cascadeDelete ? " on delete cascade" : "")}
              """;
     }
-    public string GetForeignKeyConstraintNameFor(DiscoveredTable foreignTable, DiscoveredTable primaryTable)
-    {
-        return GetForeignKeyConstraintNameFor(foreignTable.GetRuntimeName(), primaryTable.GetRuntimeName());
-    }
+
+    public string GetForeignKeyConstraintNameFor(DiscoveredTable foreignTable, DiscoveredTable primaryTable) => GetForeignKeyConstraintNameFor(foreignTable.GetRuntimeName(), primaryTable.GetRuntimeName());
 
     private static string GetForeignKeyConstraintNameFor(string foreignTable, string primaryTable) =>
         MakeSensibleConstraintName("FK_", $"{foreignTable}_{primaryTable}");
 
-    public abstract DirectoryInfo Detach(DiscoveredDatabase database);
+    public abstract DirectoryInfo? Detach(DiscoveredDatabase database);
 
     public abstract void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName);
 
@@ -279,7 +268,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
         return $"{prefix}{constraintName}";
     }
 
-    public void ExecuteBatchNonQuery(string sql, DbConnection conn, DbTransaction transaction = null, int timeout = 30)
+    public void ExecuteBatchNonQuery(string sql, DbConnection conn, DbTransaction? transaction = null, int timeout = 30)
     {
         ExecuteBatchNonQuery(sql, conn, transaction, out _, timeout);
     }

@@ -67,7 +67,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
     /// </summary>
     /// <param name="table"></param>
     /// <returns></returns>
-    private static string GetObjectName(DiscoveredTable table)
+    private static string? GetObjectName(DiscoveredTable table)
     {
         var syntax = table.GetQuerySyntaxHelper();
 
@@ -76,14 +76,10 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         return table.Schema != null ? $"{syntax.EnsureWrapped(table.Schema)}.{objectName}" : objectName;
     }
 
-    public override IDiscoveredColumnHelper GetColumnHelper()
-    {
-        return new MicrosoftSQLColumnHelper();
-    }
+    public override IDiscoveredColumnHelper GetColumnHelper() => new MicrosoftSQLColumnHelper();
 
     public override void DropTable(DbConnection connection, DiscoveredTable tableToDrop)
     {
-
         SqlCommand cmd;
 
         switch (tableToDrop.TableType)
@@ -92,7 +88,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
                 if (connection.Database != tableToDrop.Database.GetRuntimeName())
                     connection.ChangeDatabase(tableToDrop.GetRuntimeName());
 
-                if(!connection.Database.ToLower().Equals(tableToDrop.Database.GetRuntimeName().ToLower()))
+                if (!connection.Database.ToLower().Equals(tableToDrop.Database.GetRuntimeName().ToLower()))
                     throw new NotSupportedException(
                         $"Cannot drop view {tableToDrop} because it exists in database {tableToDrop.Database.GetRuntimeName()} while the current current database connection is pointed at database:{connection.Database} (use .ChangeDatabase on the connection first) - SQL Server does not support cross database view dropping");
 
@@ -108,7 +104,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
                 throw new ArgumentOutOfRangeException(nameof(tableToDrop),$"Unknown table type {tableToDrop.TableType}");
         }
 
-        using(cmd)
+        using (cmd)
             cmd.ExecuteNonQuery();
     }
 
@@ -165,10 +161,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         return toReturn.ToArray();
     }
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture)
-    {
-        return new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
-    }
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture) => new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
 
     public override void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
     {
@@ -190,7 +183,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         base.CreatePrimaryKey(args,table, discoverColumns);
     }
 
-    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null)
+    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string,DiscoveredRelationship>();
 
@@ -312,10 +305,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
     }
 
 
-    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
-    {
-        return $"SELECT TOP {topX} * FROM {table.GetFullyQualifiedName()}";
-    }
+    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT TOP {topX} * FROM {table.GetFullyQualifiedName()}";
 
     private string GetSQLType_FromSpColumnsResult(DbDataReader r)
     {
@@ -325,10 +315,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         if (HasPrecisionAndScale(columnType))
             lengthQualifier = $"({r["PRECISION"]},{r["SCALE"]})";
         else
-        if (RequiresLength(columnType))
-        {
-            lengthQualifier = $"({AdjustForUnicodeAndNegativeOne(columnType, Convert.ToInt32(r["LENGTH"]))})";
-        }
+        if (RequiresLength(columnType)) lengthQualifier = $"({AdjustForUnicodeAndNegativeOne(columnType, Convert.ToInt32(r["LENGTH"]))})";
 
         if (columnType == "text")
             return "varchar(max)";

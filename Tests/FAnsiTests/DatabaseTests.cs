@@ -100,10 +100,8 @@ public class DatabaseTests
             if(_allowDatabaseCreation)
                 db.Create();
             else
-            {
                 Assert.Inconclusive(
                     $"Database {_testScratchDatabase} did not exist on server {server} and AllowDatabaseCreation was false in {TestFilename}");
-            }
         else
         {
             if (!cleanDatabase) return db;
@@ -137,24 +135,24 @@ public class DatabaseTests
             Assert.Inconclusive("Test cannot run when AllowDatabaseCreation is false");
     }
 
-    private static bool AreBasicallyEquals(object o, object o2, bool handleSlashRSlashN = true)
+    private static bool AreBasicallyEquals(object? o, object? o2, bool handleSlashRSlashN = true)
     {
         //if they are legit equals
         if (Equals(o, o2))
             return true;
 
         //if they are null but basically the same
-        var oIsNull = o == null || o == DBNull.Value || o.ToString()?.Equals("0")==true;
-        var o2IsNull = o2 == null || o2 == DBNull.Value || o2.ToString()?.Equals("0")==true;
+        var oIsNull = o == null || o == DBNull.Value || o.ToString()?.Equals("0") == true;
+        var o2IsNull = o2 == null || o2 == DBNull.Value || o2.ToString()?.Equals("0") == true;
 
         if (oIsNull || o2IsNull)
             return oIsNull == o2IsNull;
 
         //they are not null so tostring them deals with int vs long etc that DbDataAdapters can be a bit flaky on
         if (handleSlashRSlashN)
-            return string.Equals(o.ToString()?.Replace("\r", "").Replace("\n", ""), o2.ToString()?.Replace("\r", "").Replace("\n", ""));
+            return string.Equals(o?.ToString()?.Replace("\r", "").Replace("\n", ""), o2?.ToString()?.Replace("\r", "").Replace("\n", ""));
 
-        return string.Equals(o.ToString(), o2.ToString());
+        return string.Equals(o?.ToString(), o2?.ToString());
     }
 
     protected static void AssertAreEqual(DataTable dt1, DataTable dt2)

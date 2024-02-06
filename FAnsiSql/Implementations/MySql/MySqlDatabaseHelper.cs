@@ -13,7 +13,7 @@ namespace FAnsi.Implementations.MySql;
 public sealed class MySqlDatabaseHelper : DiscoveredDatabaseHelper
 {
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null) =>
+        DbConnection connection, string database, DbTransaction? transaction = null) =>
         Enumerable.Empty<DiscoveredTableValuedFunction>();
 
     public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database) => throw new NotImplementedException();
@@ -40,22 +40,13 @@ public sealed class MySqlDatabaseHelper : DiscoveredDatabaseHelper
         };
     }
 
-    protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
-    {
+    protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper) =>
         //if it is not unicode then that's fine
-        if(col.TypeRequested == null || !col.TypeRequested.Unicode)
-            return base.GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper);
+        col.TypeRequested?.Unicode != true ? base.GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper) :
+            //MySql unicode is not a data type it's a character set/collation only
+            $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} CHARACTER SET utf8mb4 {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} COLLATE {col.Collation ?? "utf8mb4_bin"} {(col is { AllowNulls: true, IsPrimaryKey: false } ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
 
-        //MySql unicode is not a data type it's a character set/collation only
-
-        return
-            $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} CHARACTER SET utf8mb4 {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} COLLATE {col.Collation ?? "utf8mb4_bin"} {(col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
-    }
-
-    public override DirectoryInfo Detach(DiscoveredDatabase database)
-    {
-        throw new NotImplementedException();
-    }
+    public override DirectoryInfo Detach(DiscoveredDatabase database) => throw new NotImplementedException();
 
     public override void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName)
     {
@@ -67,7 +58,7 @@ public sealed class MySqlDatabaseHelper : DiscoveredDatabaseHelper
 
     }
 
-    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null)
     {
         if (connection.State == ConnectionState.Closed)
             throw new InvalidOperationException("Expected connection to be open");

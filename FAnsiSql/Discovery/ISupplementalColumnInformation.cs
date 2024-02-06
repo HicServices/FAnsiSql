@@ -19,5 +19,5 @@ public interface ISupplementalColumnInformation
     /// <summary>
     /// Records the collation of the column in the underlying database table this record points at if explicitly declared by dbms (only applicable for char datatypes)
     /// </summary>
-    string Collation { get; set; }
+    string? Collation { get; set; }
 }

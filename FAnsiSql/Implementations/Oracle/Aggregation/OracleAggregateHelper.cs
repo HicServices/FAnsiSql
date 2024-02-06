@@ -139,13 +139,7 @@ order by dt*/
 
     }
 
-    protected override string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn)
-    {
-        throw new NotImplementedException();
-    }
+    protected override string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn) => throw new NotImplementedException();
 
-    protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query)
-    {
-        throw new NotImplementedException();
-    }
+    protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query) => throw new NotImplementedException();
 }

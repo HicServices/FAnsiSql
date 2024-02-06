@@ -17,10 +17,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     public static readonly OracleTableHelper Instance=new();
     private OracleTableHelper() {}
 
-    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
-    {
-        return $"SELECT * FROM {table.GetFullyQualifiedName()} OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY";
-    }
+    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT * FROM {table.GetFullyQualifiedName()} OFFSET 0 ROWS FETCH NEXT {topX} ROWS ONLY";
 
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
@@ -66,7 +63,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
                    "select table_name,column_name from ALL_TAB_IDENTITY_COLS WHERE table_name = :table_name AND owner =:owner",
                    (OracleConnection) connection.Connection))
         {
-            cmd.Transaction = (OracleTransaction) connection.Transaction;
+            cmd.Transaction = (OracleTransaction?)connection.Transaction;
             cmd.Parameters.Add(new OracleParameter("table_name", OracleDbType.Varchar2)
             {
                 Value = tableName
@@ -97,7 +94,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
                                           ORDER BY cols.table_name, cols.position
                                           """, (OracleConnection) connection.Connection))
         {
-            cmd.Transaction = (OracleTransaction) connection.Transaction;
+            cmd.Transaction = (OracleTransaction?)connection.Transaction;
             cmd.Parameters.Add(new OracleParameter("table_name", OracleDbType.Varchar2)
             {
                 Value = tableName
@@ -126,7 +123,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
         cmd.ExecuteNonQuery();
     }
 
-    private string GetBasicTypeFromOracleType(DbDataReader r)
+    private static string GetBasicTypeFromOracleType(IDataRecord r)
     {
         int? precision = null;
         int? scale = null;
@@ -149,14 +146,14 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
                     return "decimal";
 
                 if (dataLength == null)
-                    throw new Exception(
+                    throw new InvalidOperationException(
                         $"Found Oracle NUMBER datatype with scale {(scale != null ? scale.ToString() : "DBNull.Value")} and precision {(precision != null ? precision.ToString() : "DBNull.Value")}, did not know what datatype to use to represent it");
 
                 return "double";
             case "FLOAT":
                 return "double";
             default:
-                return r["DATA_TYPE"].ToString()?.ToLower();
+                return r["DATA_TYPE"].ToString()?.ToLower() ?? throw new InvalidOperationException("Null DATA_TYPE in db");
         }
     }
 
@@ -181,17 +178,12 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     }
 
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
-        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
-    {
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction) =>
         throw new NotImplementedException();
-    }
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture)
-    {
-        return new OracleBulkCopy(discoveredTable,connection,culture);
-    }
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture) => new OracleBulkCopy(discoveredTable,connection,culture);
 
-    public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction = null)
+    public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction = null)
     {
         var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(static c => c.IsAutoIncrement);
 
@@ -216,7 +208,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     }
 
     public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
-        IManagedTransaction transaction = null)
+        IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string, DiscoveredRelationship>();
 
@@ -311,14 +303,11 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     }
 
 
-    protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
+    protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string? newName)
     {
         newName = discoveredTable.GetQuerySyntaxHelper().EnsureWrapped(newName);
         return $@"alter table {discoveredTable.GetFullyQualifiedName()} rename to {newName}";
     }
 
-    public override bool RequiresLength(string columnType)
-    {
-        return base.RequiresLength(columnType) || columnType.Equals("varchar2", StringComparison.CurrentCultureIgnoreCase);
-    }
+    public override bool RequiresLength(string columnType) => base.RequiresLength(columnType) || columnType.Equals("varchar2", StringComparison.CurrentCultureIgnoreCase);
 }

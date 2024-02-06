@@ -34,15 +34,10 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
             answer.Trim('"').ToUpper();
     }
 
-    public override bool SupportsEmbeddedParameters()
-    {
-        return false;
-    }
+    public override bool SupportsEmbeddedParameters() => false;
 
-    public override string EnsureWrappedImpl(string databaseOrTableName)
-    {
-        return $"\"{GetRuntimeName(databaseOrTableName)}\"";
-    }
+    public override string EnsureWrappedImpl(string databaseOrTableName) => $"\"{GetRuntimeName(databaseOrTableName)}\"";
+
     public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
     {
         //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
@@ -52,24 +47,13 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
         return $"\"{GetRuntimeName(databaseName)}\"{DatabaseTableSeparator}\"{GetRuntimeName(tableName)}\"";
     }
 
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false)
-    {
-        return $"{EnsureFullyQualified(databaseName, schema, tableName)}.\"{GetRuntimeName(columnName)}\"";
-    }
-    public override TopXResponse HowDoWeAchieveTopX(int x)
-    {
-        return new TopXResponse($"OFFSET 0 ROWS FETCH NEXT {x} ROWS ONLY", QueryComponent.Postfix);
-    }
+    public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false) => $"{EnsureFullyQualified(databaseName, schema, tableName)}.\"{GetRuntimeName(columnName)}\"";
 
-    public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
-    {
-        throw new NotSupportedException();
-    }
+    public override TopXResponse HowDoWeAchieveTopX(int x) => new($"OFFSET 0 ROWS FETCH NEXT {x} ROWS ONLY", QueryComponent.Postfix);
 
-    public override HashSet<string> GetReservedWords()
-    {
-        return ReservedWords;
-    }
+    public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType) => throw new NotSupportedException();
+
+    public override HashSet<string> GetReservedWords() => ReservedWords;
 
     public override string GetScalarFunctionSql(MandatoryScalarFunctions function) =>
         function switch
@@ -84,27 +68,17 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
     /// Works in Oracle 12c+ only https://oracle-base.com/articles/12c/identity-columns-in-oracle-12cr1
     /// </summary>
     /// <returns></returns>
-    public override string GetAutoIncrementKeywordIfAny()
-    {
+    public override string GetAutoIncrementKeywordIfAny() =>
         //this is handled in
-        return " GENERATED ALWAYS AS IDENTITY";
-    }
+        " GENERATED ALWAYS AS IDENTITY";
 
-    public override Dictionary<string, string> GetSQLFunctionsDictionary()
-    {
-        return [];
-    }
+    public override Dictionary<string, string> GetSQLFunctionsDictionary() => [];
 
-    public override string HowDoWeAchieveMd5(string selectSql)
-    {
-        return $"RAWTOHEX(standard_hash({selectSql}, 'MD5'))";
-    }
+    public override string HowDoWeAchieveMd5(string selectSql) => $"RAWTOHEX(standard_hash({selectSql}, 'MD5'))";
 
-    protected override object FormatTimespanForDbParameter(TimeSpan timeSpan)
-    {
+    protected override object FormatTimespanForDbParameter(TimeSpan timeSpan) =>
         //Value must be a DateTime even if DBParameter is of Type DbType.Time
-        return Convert.ToDateTime(timeSpan.ToString());
-    }
+        Convert.ToDateTime(timeSpan.ToString());
 
     private static readonly HashSet<string> ReservedWords = new( new []
     {

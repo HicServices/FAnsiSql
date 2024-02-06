@@ -43,12 +43,12 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <summary>
     /// Returns the username portion of <cref name="Builder"/> if specified
     /// </summary>
-    public string ExplicitUsernameIfAny => Helper.GetExplicitUsernameIfAny(Builder);
+    public string? ExplicitUsernameIfAny => Helper.GetExplicitUsernameIfAny(Builder);
 
     /// <summary>
     /// Returns the password portion of <cref name="Builder"/> if specified
     /// </summary>
-    public string ExplicitPasswordIfAny => Helper.GetExplicitPasswordIfAny(Builder);
+    public string? ExplicitPasswordIfAny => Helper.GetExplicitPasswordIfAny(Builder);
 
     /// <summary>
     /// <para>Creates a new server pointed at the <paramref name="builder"/> server. </para>
@@ -73,7 +73,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="connectionString"></param>
     /// <param name="databaseType"></param>
     /// <exception cref="ImplementationNotFoundException"></exception>
-    public DiscoveredServer(string connectionString, DatabaseType databaseType)
+    public DiscoveredServer(string? connectionString, DatabaseType databaseType)
     {
         Helper = ImplementationManager.GetImplementation(databaseType).GetServerHelper();
         Builder = Helper.GetConnectionStringBuilder(connectionString);
@@ -107,10 +107,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - when provided returns the <see cref="IManagedTransaction.Connection"/> instead of opening a new one </param>
     /// <returns></returns>
-    public DbConnection GetConnection(IManagedTransaction transaction = null)
-    {
-        return transaction != null ? transaction.Connection : Helper.GetConnection(Builder);
-    }
+    public DbConnection GetConnection(IManagedTransaction? transaction = null) => transaction != null ? transaction.Connection : Helper.GetConnection(Builder);
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
     public DbCommand GetCommand(string sql, IManagedConnection managedConnection)
@@ -127,7 +124,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="con">Correctly typed connection for the <see cref="DatabaseType"/>.  (See <see cref="GetConnection"/>)</param>
     /// <param name="transaction">Optional - if provided the <see cref="DbCommand.Transaction"/> will be set to the <paramref name="transaction"/></param>
     /// <returns></returns>
-    public DbCommand GetCommand(string sql, DbConnection con, IManagedTransaction transaction = null)
+    public DbCommand GetCommand(string sql, DbConnection con, IManagedTransaction? transaction = null)
     {
         var cmd = Helper.GetCommand(sql, con);
 
@@ -143,10 +140,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="parameterName"></param>
     /// <returns></returns>
-    private DbParameter GetParameter(string parameterName)
-    {
-        return Helper.GetParameter(parameterName);
-    }
+    private DbParameter GetParameter(string parameterName) => Helper.GetParameter(parameterName);
 
     /// <summary>
     /// Returns a new <see cref="DbParameter"/> of the correct <see cref="DatabaseType"/> of the server.  Also adds it
@@ -232,10 +226,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="timeoutInSeconds"></param>
     /// <param name="exception"></param>
     /// <returns></returns>
-    public bool RespondsWithinTime(int timeoutInSeconds, out Exception exception)
-    {
-        return Helper.RespondsWithinTime(Builder, timeoutInSeconds, out exception);
-    }
+    public bool RespondsWithinTime(int timeoutInSeconds, out Exception exception) => Helper.RespondsWithinTime(Builder, timeoutInSeconds, out exception);
 
     /// <summary>
     /// Connects to the server and returns a list of databases found as <see cref="DiscoveredDatabase"/> objects
@@ -251,7 +242,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - if provided this method returns true (existence cannot be checked mid transaction).</param>
     /// <returns></returns>
-    public bool Exists(IManagedTransaction transaction = null)
+    public bool Exists(IManagedTransaction? transaction = null)
     {
         if (transaction != null)
             return true;
@@ -276,19 +267,13 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="cmd"></param>
     /// <returns></returns>
-    public DbDataAdapter GetDataAdapter(DbCommand cmd)
-    {
-        return Helper.GetDataAdapter(cmd);
-    }
+    public DbDataAdapter GetDataAdapter(DbCommand cmd) => Helper.GetDataAdapter(cmd);
 
     /// <summary>
     /// Returns a new correctly Typed <see cref="DbDataAdapter"/> for the <see cref="DatabaseType"/>
     /// </summary>
     /// <returns></returns>
-    public DbDataAdapter GetDataAdapter(string command, DbConnection con)
-    {
-        return GetDataAdapter(GetCommand(command, con));
-    }
+    public DbDataAdapter GetDataAdapter(string command, DbConnection con) => GetDataAdapter(GetCommand(command, con));
 
     /// <summary>
     /// Returns the database that <see cref="Builder"/> is currently pointed at.
@@ -336,10 +321,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// Returns the server <see cref="Name"/>
     /// </summary>
     /// <returns></returns>
-    public override string ToString()
-    {
-        return Name ;
-    }
+    public override string ToString() => Name;
 
     /// <summary>
     /// <para>Creates a new database with the given <paramref name="newDatabaseName"/>.</para>
@@ -366,10 +348,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// should be wrapped with a using statement since it is <see cref="IDisposable"/>.
     /// </summary>
     /// <returns></returns>
-    public IManagedConnection BeginNewTransactedConnection()
-    {
-        return new ManagedConnection(this, Helper.BeginTransaction(Builder)){CloseOnDispose = true};
-    }
+    public IManagedConnection BeginNewTransactedConnection() => new ManagedConnection(this, Helper.BeginTransaction(Builder)){CloseOnDispose = true};
 
     /// <summary>
     /// <para>Opens a new <see cref="DbConnection"/> or reuses an existing one (if <paramref name="transaction"/> is provided).</para>
@@ -378,29 +357,20 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction"></param>
     /// <returns></returns>
-    public IManagedConnection GetManagedConnection(IManagedTransaction transaction = null)
-    {
-        return new ManagedConnection(this, transaction);
-    }
+    public IManagedConnection GetManagedConnection(IManagedTransaction? transaction = null) => new ManagedConnection(this, transaction);
 
     /// <summary>
     /// Returns helper for generating queries compatible with the DBMS (See <see cref="DatabaseType"/>) e.g. TOP X, column qualifiers, what the parameter
     /// symbol is etc.
     /// </summary>
     /// <returns></returns>
-    public IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return Helper.GetQuerySyntaxHelper();
-    }
+    public IQuerySyntaxHelper GetQuerySyntaxHelper() => Helper.GetQuerySyntaxHelper();
 
     /// <summary>
     /// Return key value pairs which describe attributes of the server e.g. version, available drive space etc
     /// </summary>
     /// <returns></returns>
-    public Dictionary<string, string> DescribeServer()
-    {
-        return Helper.DescribeServer(Builder);
-    }
+    public Dictionary<string, string> DescribeServer() => Helper.DescribeServer(Builder);
 
     /// <summary>
     /// Equality based on Builder.ConnectionString and DatabaseType
@@ -421,7 +391,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
@@ -434,17 +404,11 @@ public sealed class DiscoveredServer : IMightNotExist
     /// Hashcode built from DatabaseType
     /// </summary>
     /// <returns></returns>
-    public override int GetHashCode()
-    {
-        return DatabaseType.GetHashCode();
-    }
+    public override int GetHashCode() => DatabaseType.GetHashCode();
 
     /// <summary>
     /// Returns the version number of the DBMS e.g. MySql 5.7
     /// </summary>
     /// <returns></returns>
-    public Version GetVersion()
-    {
-        return Helper.GetVersion(this);
-    }
+    public Version GetVersion() => Helper.GetVersion(this);
 }

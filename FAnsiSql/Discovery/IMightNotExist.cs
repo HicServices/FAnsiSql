@@ -15,5 +15,5 @@ public interface IMightNotExist
     /// </summary>
     /// <param name="transaction"></param>
     /// <returns></returns>
-    bool Exists(IManagedTransaction transaction = null);
+    bool Exists(IManagedTransaction? transaction = null);
 }

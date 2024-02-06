@@ -6,7 +6,7 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 
 public abstract class AggregateHelper:IAggregateHelper
 {
-    public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny)
+    public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis? axisIfAny)
     {
         var lines = new AggregateCustomLineCollection(queryLines, axisIfAny, GetQuerySyntaxHelper());
 
@@ -70,7 +70,7 @@ public abstract class AggregateHelper:IAggregateHelper
 
         var axisColumnEndedWithComma = query.AxisSelect.Text.EndsWith(',');
         query.AxisSelect.Text =
-            $"{GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias)} AS {axisColumnAlias}{(axisColumnEndedWithComma ? "," : "")}";
+            $"{GetDatePartOfColumn(query.Axis?.AxisIncrement ?? throw new InvalidOperationException("No axis in query"), axisColumnWithoutAlias)} AS {axisColumnAlias}{(axisColumnEndedWithComma ? "," : "")}";
 
         var groupByEndedWithComma = axisGroupBy.Text.EndsWith(',');
         axisGroupBy.Text = GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias) + (groupByEndedWithComma ? "," : "");

@@ -70,7 +70,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
     }
 
     /// <inheritdoc/>
-    public string ScriptTableCreation(DiscoveredTable table, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable toCreateTable = null)
+    public string ScriptTableCreation(DiscoveredTable table, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable? toCreateTable = null)
     {
         var columns = new List<DatabaseColumnRequest>();
 
@@ -88,26 +88,24 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             if (isToDifferentDatabaseType)
             {
                 var fromtt = table.Database.Server.GetQuerySyntaxHelper().TypeTranslater;
-                var tott = toCreateTable.Database.Server.GetQuerySyntaxHelper().TypeTranslater;
+                var tott = toCreateTable?.Database.Server.GetQuerySyntaxHelper().TypeTranslater ?? throw new InvalidOperationException($"Unable to retrieve type translator for {toCreateTable}");
 
                 sqlType = fromtt.TranslateSQLDBType(c.DataType.SQLType, tott);
             }
 
-            var colRequest = new DatabaseColumnRequest(c.GetRuntimeName(),sqlType , c.AllowNulls || dropNullability)
-                {
-                    IsPrimaryKey = c.IsPrimaryKey && !dropPrimaryKeys,
-                    IsAutoIncrement = c.IsAutoIncrement && !convertIdentityToInt
-                };
+            var colRequest = new DatabaseColumnRequest(c.GetRuntimeName(), sqlType, c.AllowNulls || dropNullability)
+            {
+                IsPrimaryKey = c.IsPrimaryKey && !dropPrimaryKeys,
+                IsAutoIncrement = c.IsAutoIncrement && !convertIdentityToInt
+            };
 
             colRequest.AllowNulls = colRequest.AllowNulls && !colRequest.IsAutoIncrement;
 
             //if there is a collation
             if (!string.IsNullOrWhiteSpace(c.Collation) && (toCreateTable == null || !isToDifferentDatabaseType))
-            {
                 //if the script is to be run on a database of the same type
                 //then specify that the column should use the live collation
                 colRequest.Collation = c.Collation;
-            }
 
             columns.Add(colRequest);
         }
@@ -119,10 +117,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         return table.Database.Helper.GetCreateTableSql(destinationTable.Database, destinationTable.GetRuntimeName(), [.. columns], null, false, schema);
     }
 
-    public virtual bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable)
-    {
-        return GetRowCount(args, discoveredTable) == 0;
-    }
+    public virtual bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable) => GetRowCount(args, discoveredTable) == 0;
 
     public virtual void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection)
     {
@@ -154,7 +149,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         }
     }
 
-    public virtual int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null)
+    public virtual int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction=null)
     {
         cmd.CommandText += ";SELECT @@IDENTITY";
 
@@ -166,7 +161,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         return Convert.ToInt32(result);
     }
 
-    public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction transaction = null);
+    public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction? transaction = null);
 
     public virtual void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt)
     {
@@ -179,7 +174,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
     }
 
     /// <inheritdoc/>
-    public virtual DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args,Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string constraintName = null)
+    public virtual DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args,Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string? constraintName = null)
     {
         var foreignTables = foreignKeyPairs.Select(static c => c.Key.Table).Distinct().ToArray();
         var primaryTables= foreignKeyPairs.Select(static c => c.Value.Table).Distinct().ToArray();
@@ -282,7 +277,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             _ => false
         };
 
-    public bool HasPrecisionAndScale(string columnType) =>
+    public static bool HasPrecisionAndScale(string columnType) =>
         columnType.ToLowerInvariant() switch
         {
             "decimal" => true,

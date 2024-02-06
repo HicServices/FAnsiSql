@@ -15,8 +15,8 @@ namespace FAnsi.Discovery;
 public interface IDiscoveredDatabaseHelper
 {
 
-    IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null);
-    IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction transaction = null);
+    IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null);
+    IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction? transaction = null);
 
     DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database);
 
@@ -27,7 +27,8 @@ public interface IDiscoveredDatabaseHelper
 
     DiscoveredTable CreateTable(CreateTableArgs args);
 
-    string GetCreateTableSql(DiscoveredDatabase database, string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete,string schema = null);
+    string GetCreateTableSql(DiscoveredDatabase database, string tableName, DatabaseColumnRequest[] columns,
+        Dictionary<DatabaseColumnRequest, DiscoveredColumn>? foreignKeyPairs, bool cascadeDelete, string? schema = null);
 
     /// <summary>
     /// Generates foreign key creation SQL such that it can be slotted into either a CREATE TABLE statement OR a ALTER TABLE statement
@@ -43,9 +44,9 @@ public interface IDiscoveredDatabaseHelper
     /// <param name="constraintName">The name of the new constraint to create or null to use default</param>
     /// <returns></returns>
     string GetForeignKeyConstraintSql(string foreignTable, IQuerySyntaxHelper syntaxHelper,
-        Dictionary<IHasRuntimeName, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string constraintName = null);
+        Dictionary<IHasRuntimeName, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, string? constraintName = null);
 
-    DirectoryInfo Detach(DiscoveredDatabase database);
+    DirectoryInfo? Detach(DiscoveredDatabase database);
     void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName);
 
     /// <summary>

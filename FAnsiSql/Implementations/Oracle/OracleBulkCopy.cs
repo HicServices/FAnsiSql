@@ -52,7 +52,7 @@ internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnec
                     dateColumns.Add(dataColumn);
                     break;
                 case DbType.Boolean:
-                    p.DbType = DbType.Int32;    // JS 2023-05-11 special case since we don't have a true boolean type in Oracle, but use 0/1 instead
+                    p.DbType = DbType.Int32; // JS 2023-05-11 special case since we don't have a true boolean type in Oracle, but use 0/1 instead
                     break;
             }
         }
@@ -60,25 +60,23 @@ internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnec
         var values = mapping.Keys.ToDictionary(static c => c, static _ => new List<object>());
 
         foreach (DataRow dataRow in dt.Rows)
-        {
             //populate parameters for current row
-            foreach (var col in mapping.Keys)
-            {
-                var val = dataRow[col];
+        foreach (var col in mapping.Keys)
+        {
+            var val = dataRow[col];
 
-                if (val is string stringVal && string.IsNullOrWhiteSpace(stringVal))
-                    val = null;
-                else
-                if (val == DBNull.Value)
-                    val = null;
-                else if (dateColumns.Contains(col))
-                    val = val is string s ? (DateTime)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
+            if (val is string stringVal && string.IsNullOrWhiteSpace(stringVal))
+                val = null;
+            else
+            if (val == DBNull.Value)
+                val = null;
+            else if (dateColumns.Contains(col))
+                val = val is string s ? (DateTime)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
 
-                if (col.DataType == typeof(bool) && val is bool b)
-                    values[col].Add(b?1:0);
-                else
-                    values[col].Add(val);
-            }
+            if (col.DataType == typeof(bool) && val is bool b)
+                values[col].Add(b?1:0);
+            else
+                values[col].Add(val);
         }
 
         foreach (var col in mapping.Keys)

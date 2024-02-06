@@ -91,15 +91,9 @@ public abstract partial class TypeTranslater:ITypeTranslater
         throw new TypeNotMappedException(string.Format(FAnsiStrings.TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__, t.Name, GetType().Name));
     }
 
-    private static string GetByteArrayDataType()
-    {
-        return "varbinary(max)";
-    }
+    private static string GetByteArrayDataType() => "varbinary(max)";
 
-    private static string GetByteDataType()
-    {
-        return "tinyint";
-    }
+    private static string GetByteDataType() => "tinyint";
 
     private static string GetFloatingPointDataType(DecimalSize decimalSize)
     {
@@ -109,10 +103,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
         return $"decimal({decimalSize.Precision},{decimalSize.Scale})";
     }
 
-    protected virtual string GetDateDateTimeDataType()
-    {
-        return "datetime";
-    }
+    protected virtual string GetDateDateTimeDataType() => "datetime";
 
     protected string GetStringDataType(int? maxExpectedStringWidth)
     {
@@ -125,10 +116,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
         return GetStringDataTypeImpl(maxExpectedStringWidth.Value);
     }
 
-    protected virtual string GetStringDataTypeImpl(int maxExpectedStringWidth)
-    {
-        return $"varchar({maxExpectedStringWidth})";
-    }
+    protected virtual string GetStringDataTypeImpl(int maxExpectedStringWidth) => $"varchar({maxExpectedStringWidth})";
 
     public abstract string GetStringDataTypeWithUnlimitedWidth();
 
@@ -144,61 +132,38 @@ public abstract partial class TypeTranslater:ITypeTranslater
         return GetUnicodeStringDataTypeImpl(maxExpectedStringWidth.Value);
     }
 
-    protected virtual string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth)
-    {
-        return $"nvarchar({maxExpectedStringWidth})";
-    }
+    protected virtual string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth) => $"nvarchar({maxExpectedStringWidth})";
 
     public abstract string GetUnicodeStringDataTypeWithUnlimitedWidth();
 
-    protected virtual string GetTimeDataType()
-    {
-        return "time";
-    }
+    protected virtual string GetTimeDataType() => "time";
 
-    protected virtual string GetBoolDataType()
-    {
-        return "bit";
-    }
+    protected virtual string GetBoolDataType() => "bit";
 
-    protected virtual string GetSmallIntDataType()
-    {
-        return "smallint";
-    }
+    protected virtual string GetSmallIntDataType() => "smallint";
 
-    protected virtual string GetIntDataType()
-    {
-        return "int";
-    }
+    protected virtual string GetIntDataType() => "int";
 
-    protected virtual string GetBigIntDataType()
-    {
-        return "bigint";
-    }
+    protected virtual string GetBigIntDataType() => "bigint";
 
-    private static string GetGuidDataType()
-    {
-        return "uniqueidentifier";
-    }
+    private static string GetGuidDataType() => "uniqueidentifier";
 
     /// <inheritdoc/>
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    public Type GetCSharpTypeForSQLDBType(string sqlType)
-    {
-        return TryGetCSharpTypeForSQLDBType(sqlType) ??
-            throw new TypeNotMappedException(string.Format(
-                FAnsiStrings
-                    .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
-                sqlType, GetType().Name));
-    }
+    public Type GetCSharpTypeForSQLDBType(string sqlType) =>
+        TryGetCSharpTypeForSQLDBType(sqlType) ??
+        throw new TypeNotMappedException(string.Format(
+            FAnsiStrings
+                .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
+            sqlType, GetType().Name));
 
     /// <inheritdoc/>
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    public Type TryGetCSharpTypeForSQLDBType(string sqlType)
+    public Type? TryGetCSharpTypeForSQLDBType(string sqlType)
     {
         if (IsBit(sqlType))
             return typeof(bool);
@@ -237,10 +202,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
     }
 
     /// <inheritdoc/>
-    public bool IsSupportedSQLDBType(string sqlType)
-    {
-        return TryGetCSharpTypeForSQLDBType(sqlType) != null;
-    }
+    public bool IsSupportedSQLDBType(string sqlType) => TryGetCSharpTypeForSQLDBType(sqlType) != null;
 
     /// <inheritdoc/>
     public DbType GetDbTypeForSQLDBType(string sqlType)
@@ -317,15 +279,9 @@ public abstract partial class TypeTranslater:ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    private static bool IsUnicode(string sqlType)
-    {
-        return sqlType != null && sqlType.StartsWith("n",StringComparison.CurrentCultureIgnoreCase);
-    }
+    private static bool IsUnicode(string sqlType) => sqlType != null && sqlType.StartsWith("n",StringComparison.CurrentCultureIgnoreCase);
 
-    public virtual Guesser GetGuesserFor(DiscoveredColumn discoveredColumn)
-    {
-        return GetGuesserFor(discoveredColumn, 0);
-    }
+    public virtual Guesser GetGuesserFor(DiscoveredColumn discoveredColumn) => GetGuesserFor(discoveredColumn, 0);
 
     protected Guesser GetGuesserFor(DiscoveredColumn discoveredColumn, int extraLengthPerNonAsciiCharacter)
     {
@@ -354,7 +310,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
         return -1;
     }
 
-    public DecimalSize GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType)
+    public DecimalSize? GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType)
     {
         if (string.IsNullOrWhiteSpace(sqlType))
             return null;
@@ -384,8 +340,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
     /// currently loaded data.
     /// </summary>
     /// <returns></returns>
-    private static int GetStringLengthForTimeSpan()
-    {
+    private static int GetStringLengthForTimeSpan() =>
         /*
          * 
          * To determine this you can run the following SQL:
@@ -405,8 +360,7 @@ select LEN(dt) from omgTimes
 
          * 
          * */
-        return 16; //e.g. "13:10:58.2300000"
-    }
+        16; //e.g. "13:10:58.2300000"
 
     /// <summary>
     /// Return the number of characters required to not truncate/loose any data when altering a column from datetime (e.g. datetime2, DATE etc) to varchar(x).  Return
@@ -415,8 +369,7 @@ select LEN(dt) from omgTimes
     /// currently loaded data.
     /// </summary>
     /// <returns></returns>
-    private static int GetStringLengthForDateTime()
-    {
+    private static int GetStringLengthForDateTime() =>
         /*
          To determine this you can run the following SQL:
 
@@ -432,55 +385,29 @@ alter table omgdates alter column dt varchar(100)
 
 select LEN(dt) from omgdates
          */
+        Guesser.MinimumLengthRequiredForDateStringRepresentation; //e.g. "2018-01-30 13:05:45.1266667"
 
-        return Guesser.MinimumLengthRequiredForDateStringRepresentation; //e.g. "2018-01-30 13:05:45.1266667"
-    }
+    protected virtual bool IsBit(string sqlType) => BitRegex.IsMatch(sqlType);
 
-    protected virtual bool IsBit(string sqlType)
-    {
-        return BitRegex.IsMatch(sqlType);
-    }
-    protected bool IsByte(string sqlType)
-    {
-        return ByteRegex.IsMatch(sqlType);
-    }
-    protected virtual bool IsSmallInt(string sqlType)
-    {
-        return SmallIntRegex.IsMatch(sqlType);
-    }
-    protected virtual bool IsInt(string sqlType)
-    {
-        return IntRegex.IsMatch(sqlType);
-    }
-    protected virtual bool IsLong(string sqlType)
-    {
-        return LongRegex.IsMatch(sqlType);
-    }
-    protected bool IsDate(string sqlType)
-    {
-        return DateRegex.IsMatch(sqlType);
-    }
-    protected bool IsTime(string sqlType)
-    {
-        return TimeRegex.IsMatch(sqlType);
-    }
-    protected virtual bool IsString(string sqlType)
-    {
-        return StringRegex.IsMatch(sqlType);
-    }
-    protected virtual bool IsByteArray(string sqlType)
-    {
-        return ByteArrayRegex.IsMatch(sqlType);
-    }
-    protected virtual bool IsFloatingPoint(string sqlType)
-    {
-        return FloatingPointRegex.IsMatch(sqlType);
-    }
+    protected bool IsByte(string sqlType) => ByteRegex.IsMatch(sqlType);
 
-    private static bool IsGuid(string sqlType)
-    {
-        return GuidRegex.IsMatch(sqlType);
-    }
+    protected virtual bool IsSmallInt(string sqlType) => SmallIntRegex.IsMatch(sqlType);
+
+    protected virtual bool IsInt(string sqlType) => IntRegex.IsMatch(sqlType);
+
+    protected virtual bool IsLong(string sqlType) => LongRegex.IsMatch(sqlType);
+
+    protected bool IsDate(string sqlType) => DateRegex.IsMatch(sqlType);
+
+    protected bool IsTime(string sqlType) => TimeRegex.IsMatch(sqlType);
+
+    protected virtual bool IsString(string sqlType) => StringRegex.IsMatch(sqlType);
+
+    protected virtual bool IsByteArray(string sqlType) => ByteArrayRegex.IsMatch(sqlType);
+
+    protected virtual bool IsFloatingPoint(string sqlType) => FloatingPointRegex.IsMatch(sqlType);
+
+    private static bool IsGuid(string sqlType) => GuidRegex.IsMatch(sqlType);
 
     [GeneratedRegex(StringSizeRegexPattern)]
     private static partial Regex StringSizeRegex();

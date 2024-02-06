@@ -50,10 +50,8 @@ public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType
 
         //if we have not got that keyword yet
         if(!_keywords.TryAdd(keyword, Tuple.Create(value, priority)) && _keywords[keyword].Item2 <= priority)
-        {
             //or the keyword that was previously specified had a lower priority
             _keywords[keyword] = Tuple.Create(value, priority); //update it with the new value
-        }
     }
 
     /// <summary>
@@ -63,7 +61,7 @@ public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType
     /// <param name="keyword"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    private string GetCollisionWithKeyword(string keyword, string value)
+    private string? GetCollisionWithKeyword(string keyword, string value)
     {
         ArgumentNullException.ThrowIfNull(keyword);
         ArgumentNullException.ThrowIfNull(value);

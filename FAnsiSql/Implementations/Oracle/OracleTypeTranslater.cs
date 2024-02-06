@@ -53,11 +53,9 @@ public sealed partial class OracleTypeTranslater:TypeTranslater
     /// <returns></returns>
     protected override bool IsBit(string sqlType) => sqlType.Equals("decimal(1,0)",StringComparison.InvariantCultureIgnoreCase);
 
-    protected override bool IsString(string sqlType)
-    {
-        return !sqlType.Contains("RAW", StringComparison.InvariantCultureIgnoreCase) &&
-               (base.IsString(sqlType) || AlsoStringRegex.IsMatch(sqlType));
-    }
+    protected override bool IsString(string sqlType) =>
+        !sqlType.Contains("RAW", StringComparison.InvariantCultureIgnoreCase) &&
+        (base.IsString(sqlType) || AlsoStringRegex.IsMatch(sqlType));
 
     protected override bool IsFloatingPoint(string sqlType) => base.IsFloatingPoint(sqlType) || AlsoFloatingPointRegex.IsMatch(sqlType);
 
@@ -77,10 +75,7 @@ public sealed partial class OracleTypeTranslater:TypeTranslater
 
     protected override string GetDateDateTimeDataType() => "DATE";
 
-    public override Guesser GetGuesserFor(DiscoveredColumn discoveredColumn)
-    {
-        return base.GetGuesserFor(discoveredColumn, ExtraLengthPerNonAsciiCharacter);
-    }
+    public override Guesser GetGuesserFor(DiscoveredColumn discoveredColumn) => base.GetGuesserFor(discoveredColumn, ExtraLengthPerNonAsciiCharacter);
 
     [GeneratedRegex("^([N]?CLOB)|(LONG)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex AlsoStringRegexImpl();

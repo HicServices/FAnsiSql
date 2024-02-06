@@ -11,7 +11,7 @@ namespace FAnsi.Discovery;
 /// 
 /// <para>Type specification is defined in the DatabaseTypeRequest but can also be specified explicitly (e.g. 'varchar(10)').</para>
 /// </summary>
-public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest typeRequested, bool allowNulls = true)
+public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest? typeRequested, bool allowNulls = true)
     : ISupplementalColumnInformation, IHasRuntimeName
 {
     /// <summary>
@@ -19,7 +19,7 @@ public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest
     ///
     /// <para>See also <see cref="GetSQLDbType"/></para>
     /// </summary>
-    public string ExplicitDbType { get; set; }
+    public string? ExplicitDbType { get; set; }
 
 
     public string ColumnName { get; set; } = columnName;
@@ -31,7 +31,7 @@ public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest
     /// 
     /// <para>See also <see cref="GetSQLDbType"/></para>
     /// </summary>
-    public DatabaseTypeRequest TypeRequested { get; set; } = typeRequested;
+    public DatabaseTypeRequest? TypeRequested { get; set; } = typeRequested;
 
     /// <summary>
     /// True to create a column which is nullable
@@ -59,7 +59,7 @@ public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest
     /// </summary>
     public string Collation { get; set; }
 
-    public DatabaseColumnRequest(string columnName, string explicitDbType, bool allowNulls = true) : this(columnName, (DatabaseTypeRequest)null, allowNulls)
+    public DatabaseColumnRequest(string columnName, string explicitDbType, bool allowNulls = true) : this(columnName, (DatabaseTypeRequest?)null, allowNulls)
     {
         ExplicitDbType = explicitDbType;
     }
@@ -69,13 +69,7 @@ public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest
     /// </summary>
     /// <param name="typeTranslater"></param>
     /// <returns></returns>
-    public string GetSQLDbType(ITypeTranslater typeTranslater)
-    {
-        return ExplicitDbType??typeTranslater.GetSQLDBTypeForCSharpType(TypeRequested);
-    }
+    public string GetSQLDbType(ITypeTranslater typeTranslater) => ExplicitDbType??typeTranslater.GetSQLDBTypeForCSharpType(TypeRequested);
 
-    public string GetRuntimeName()
-    {
-        return ColumnName;
-    }
+    public string GetRuntimeName() => ColumnName;
 }

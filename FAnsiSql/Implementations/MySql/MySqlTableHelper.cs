@@ -68,7 +68,6 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
                 toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
                 columns.Add(toAdd);
-
             }
 
             r.Close();
@@ -76,7 +75,6 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
 
         return [.. columns];
-
     }
 
     private static bool YesNoToBool(object o)
@@ -124,17 +122,12 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
 
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
-        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
-    {
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction) =>
         throw new NotImplementedException();
-    }
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture)
-    {
-        return new MySqlBulkCopy(discoveredTable, connection,culture);
-    }
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture) => new MySqlBulkCopy(discoveredTable, connection,culture);
 
-    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
+    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string,DiscoveredRelationship>();
 
@@ -157,7 +150,7 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
                              u.REFERENCED_TABLE_NAME = @tbl
                            """;
 
-        using (var cmd = new MySqlCommand(sql, (MySqlConnection) connection,(MySqlTransaction) transaction?.Transaction))
+        using (var cmd = new MySqlCommand(sql, (MySqlConnection)connection, (MySqlTransaction?)transaction?.Transaction))
         {
             var p = new MySqlParameter("@db", MySqlDbType.String)
             {
@@ -222,10 +215,7 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
         return $"RENAME TABLE {discoveredTable.GetWrappedName()} TO {syntax.EnsureWrapped(newName)};";
     }
 
-    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
-    {
-        return $"SELECT * FROM {table.GetFullyQualifiedName()} LIMIT {topX}";
-    }
+    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT * FROM {table.GetFullyQualifiedName()} LIMIT {topX}";
 
 
     public override void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop)

@@ -28,7 +28,6 @@ public sealed class TypeTranslaterTests : DatabaseTests
     public void SetupDatabases()
     {
         foreach (DatabaseType type in Enum.GetValues(typeof(DatabaseType)))
-        {
             try
             {
                 var tt = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper().TypeTranslater;
@@ -38,7 +37,6 @@ public sealed class TypeTranslaterTests : DatabaseTests
             {
                 //no implementation for this Type
             }
-        }
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer,"varchar(10)")]

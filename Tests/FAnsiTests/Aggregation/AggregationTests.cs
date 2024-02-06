@@ -58,7 +58,6 @@ internal class AggregationTests:DatabaseTests
 
 
             foreach (var (key, _) in TestConnectionStrings)
-            {
                 try
                 {
                     var db = GetTestDatabase(key);
@@ -74,8 +73,6 @@ internal class AggregationTests:DatabaseTests
                     TestContext.WriteLine(e);
 
                 }
-
-            }
         }
         catch (Exception e)
         {
@@ -84,7 +81,7 @@ internal class AggregationTests:DatabaseTests
         }
     }
 
-    protected static void AssertHasRow(DataTable dt, params object[] cells)
+    protected static void AssertHasRow(DataTable dt, params object?[] cells)
     {
         Assert.That(dt.Rows.Cast<DataRow>().Any(r => IsMatch(r, cells)),$"Did not find expected row:{string.Join("|", cells)}");
     }
@@ -95,9 +92,9 @@ internal class AggregationTests:DatabaseTests
     /// <param name="r"></param>
     /// <param name="cells"></param>
     /// <returns></returns>
-    private static bool IsMatch(DataRow r, object[] cells)
+    private static bool IsMatch(DataRow r, object?[] cells)
     {
-        for(var i = 0 ; i<cells.Length ;i++)
+        for (var i = 0; i < cells.Length; i++)
         {
             var a = r[i];
             var b = cells[i] ?? DBNull.Value; //null means dbnull

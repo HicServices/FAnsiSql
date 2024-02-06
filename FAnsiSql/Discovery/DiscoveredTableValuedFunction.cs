@@ -9,16 +9,18 @@ namespace FAnsi.Discovery;
 /// Cross database type reference to a Table valued function in a Database (actually currently only supported by Microsoft Sql Server).  For views see
 /// DiscoveredTable
 /// </summary>
-public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database, string functionName,
-    IQuerySyntaxHelper querySyntaxHelper, string schema = null) : DiscoveredTable(database, table: functionName, querySyntaxHelper,
+public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database,
+    string functionName,
+    IQuerySyntaxHelper querySyntaxHelper,
+    string? schema = null) : DiscoveredTable(database, functionName, querySyntaxHelper,
     schema, TableType.TableValuedFunction)
 {
-    public override bool Exists(IManagedTransaction transaction = null)
+    public override bool Exists(IManagedTransaction? transaction = null)
     {
-        return Database.DiscoverTableValuedFunctions(transaction).Any(f=>f.GetRuntimeName().Equals(GetRuntimeName()));
+        return Database.DiscoverTableValuedFunctions(transaction).Any(f => f.GetRuntimeName().Equals(GetRuntimeName()));
     }
 
-    public override string GetRuntimeName() => QuerySyntaxHelper.GetRuntimeName(functionName);
+    public override string GetRuntimeName() => QuerySyntaxHelper.GetRuntimeName(TableName);
 
     public override string GetFullyQualifiedName()
     {
@@ -29,7 +31,7 @@ public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database, s
         return $"{Database.GetRuntimeName()}..{GetRuntimeName()}({parameters})";
     }
 
-    public override string ToString() => functionName;
+    public override string ToString() => TableName;
 
     public override void Drop()
     {
@@ -37,7 +39,7 @@ public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database, s
         Helper.DropFunction(connection.Connection, this);
     }
 
-    public IEnumerable<DiscoveredParameter> DiscoverParameters(ManagedTransaction transaction = null)
+    public IEnumerable<DiscoveredParameter> DiscoverParameters(ManagedTransaction? transaction = null)
     {
         using var connection = Database.Server.GetManagedConnection(transaction);
         return Helper.DiscoverTableValuedFunctionParameters(connection.Connection, this, connection.Transaction);

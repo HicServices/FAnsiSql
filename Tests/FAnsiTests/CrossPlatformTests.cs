@@ -1094,7 +1094,6 @@ public sealed class CrossPlatformTests:DatabaseTests
 
         //test basic insert
         foreach(var s in someDates)
-        {
             tbl.Insert(new Dictionary<string,object>
                 {
                     {"ID",1},
@@ -1102,7 +1101,6 @@ public sealed class CrossPlatformTests:DatabaseTests
                     {"MyString",Guid.NewGuid().ToString()}
                 },culture
             );
-        }
 
 
         using var dt = new DataTable();

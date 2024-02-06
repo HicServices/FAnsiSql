@@ -23,35 +23,17 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
     protected override string ConnectionTimeoutKeyName => "Connect Timeout";
 
     #region Up Typing
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
-    {
-        return new SqlCommand(s, (SqlConnection)con, transaction as SqlTransaction);
-    }
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) => new SqlCommand(s, (SqlConnection)con, transaction as SqlTransaction);
 
-    public override DbDataAdapter GetDataAdapter(DbCommand cmd)
-    {
-        return new SqlDataAdapter((SqlCommand) cmd);
-    }
+    public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new SqlDataAdapter((SqlCommand) cmd);
 
-    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd)
-    {
-        return new SqlCommandBuilder((SqlDataAdapter) GetDataAdapter(cmd));
-    }
+    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new SqlCommandBuilder((SqlDataAdapter) GetDataAdapter(cmd));
 
-    public override DbParameter GetParameter(string parameterName)
-    {
-        return new SqlParameter(parameterName,null);
-    }
+    public override DbParameter GetParameter(string parameterName) => new SqlParameter(parameterName,null);
 
-    public override DbConnection GetConnection(DbConnectionStringBuilder builder)
-    {
-        return new SqlConnection(builder.ConnectionString);
-    }
+    public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new SqlConnection(builder.ConnectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString)
-    {
-        return new SqlConnectionStringBuilder(connectionString);
-    }
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) => new SqlConnectionStringBuilder(connectionString);
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
     {
@@ -69,10 +51,8 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
         return toReturn;
     }
-    public static string GetDatabaseNameFrom(DbConnectionStringBuilder builder)
-    {
-        return ((SqlConnectionStringBuilder) builder).InitialCatalog;
-    }
+    public static string GetDatabaseNameFrom(DbConnectionStringBuilder builder) => ((SqlConnectionStringBuilder) builder).InitialCatalog;
+
     #endregion
 
 
@@ -112,15 +92,9 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         return b;
     }
 
-    public override IDiscoveredDatabaseHelper GetDatabaseHelper()
-    {
-        return new MicrosoftSQLDatabaseHelper();
-    }
+    public override IDiscoveredDatabaseHelper GetDatabaseHelper() => new MicrosoftSQLDatabaseHelper();
 
-    public override IQuerySyntaxHelper GetQuerySyntaxHelper()
-    {
-        return MicrosoftQuerySyntaxHelper.Instance;
-    }
+    public override IQuerySyntaxHelper GetQuerySyntaxHelper() => MicrosoftQuerySyntaxHelper.Instance;
 
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
@@ -188,10 +162,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
         // if user has specified a keyword that indicates Azure authentication
         // then disable IntegratedSecurity
-        if (msb.Authentication != SqlAuthenticationMethod.NotSpecified)
-        {
-            msb.IntegratedSecurity = false;
-        }
+        if (msb.Authentication != SqlAuthenticationMethod.NotSpecified) msb.IntegratedSecurity = false;
     }
 
     public override Version GetVersion(DiscoveredServer server)

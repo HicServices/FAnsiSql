@@ -24,10 +24,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
         cmd.ExecuteNonQuery();
     }
 
-    public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
-    {
-        throw new NotImplementedException();
-    }
+    public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database) => throw new NotImplementedException();
 
     protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
     {
@@ -39,17 +36,14 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
         return base.GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper);
     }
 
-    public override DirectoryInfo Detach(DiscoveredDatabase database)
-    {
-        throw new NotImplementedException();
-    }
+    public override DirectoryInfo Detach(DiscoveredDatabase database) => throw new NotImplementedException();
 
     public override void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName)
     {
         throw new NotImplementedException();
     }
 
-    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null)
     {
         var tables = new List<DiscoveredTable>();
 
@@ -83,31 +77,19 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
     }
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null)
-    {
-        return Array.Empty<DiscoveredTableValuedFunction>();
-    }
+        DbConnection connection, string database, DbTransaction? transaction = null) =>
+        Array.Empty<DiscoveredTableValuedFunction>();
 
-    public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
-    {
-        return [];
-    }
+    public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database) => [];
 
-    protected override Guesser GetGuesser(DatabaseTypeRequest request)
-    {
-        return new Guesser(request)
+    protected override Guesser GetGuesser(DatabaseTypeRequest request) =>
+        new(request)
             {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
-    }
 
     public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
     {
         //Oracle doesn't really have schemas especially since a User is a Database
     }
 
-    protected override Guesser GetGuesser(DataColumn column)
-    {
-        return new Guesser {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
-    }
-
-
+    protected override Guesser GetGuesser(DataColumn column) => new() {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
 }

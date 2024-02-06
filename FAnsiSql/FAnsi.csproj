@@ -16,19 +16,16 @@
     <Company>Health Informatics Centre, University of Dundee</Company>
     <Product>HIC.FAnsiSql</Product>
     <Description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</Description>
-    <Copyright>Copyright ©  2019-2023</Copyright>
+    <Copyright>Copyright ©  2019-2024</Copyright>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible>true</IsAotCompatible>
     <NoWarn>CS1591</NoWarn>
     <NeutralLanguage>en-GB</NeutralLanguage>
+	<DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <WarningLevel>1</WarningLevel>
-    <DebugType>embedded</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
@@ -37,7 +34,7 @@
     <None Include="Discovery\TypeTranslation\TypeTranslation.cd" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.TypeGuesser" Version="1.1.0" />
+    <PackageReference Include="HIC.TypeGuesser" Version="1.2.3" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.5" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -45,10 +42,6 @@
     </PackageReference>
     <PackageReference Include="MySqlConnector" Version="2.3.5" />
     <PackageReference Include="Npgsql" Version="8.0.1" />
-    <PackageReference Include="NUnit.Analyzers" Version="4.0.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.130" />
   </ItemGroup>
   <ItemGroup>
