@@ -66,7 +66,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - if provided the database query will be sent using the connection/transaction provided</param>
     /// <returns></returns>
-    public IEnumerable<DiscoveredTableValuedFunction> DiscoverTableValuedFunctions(IManagedTransaction transaction = null)
+    public IEnumerable<DiscoveredTableValuedFunction> DiscoverTableValuedFunctions(IManagedTransaction? transaction = null)
     {
         using var managedConnection = Server.GetManagedConnection(transaction);
         return
@@ -125,7 +125,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// </summary>
     /// <param name="transaction">Database level operations are usually not transaction bound so be very careful about setting a parameter for this</param>
     /// <returns></returns>
-    public bool Exists(IManagedTransaction transaction = null)
+    public bool Exists(IManagedTransaction? transaction = null)
     {
         return Server.DiscoverDatabases().Any(db => db.GetRuntimeName().Equals(GetRuntimeName(),StringComparison.InvariantCultureIgnoreCase));
     }
@@ -146,7 +146,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// Return key value pairs which describe attributes of the database e.g. available space, physical location etc.
     /// </summary>
     /// <returns></returns>
-    public Dictionary<string,string> DescribeDatabase() => Helper.DescribeDatabase(Server.Builder, GetRuntimeName());
+    public Dictionary<string, string?> DescribeDatabase() => Helper.DescribeDatabase(Server.Builder, GetRuntimeName());
 
     /// <summary>
     /// Creates the database referenced by this object.
@@ -169,8 +169,8 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// If in doubt leave blank</param>
     /// <param name="adjuster">Last minute delegate class for modifying the <paramref name="columns"/> data types prior to executing SQL</param>
     /// <returns>The table created</returns>
-    public DiscoveredTable CreateTable(string tableName, DatabaseColumnRequest[] columns, string schema = null, IDatabaseColumnRequestAdjuster adjuster = null) =>
-        CreateTable(new CreateTableArgs(this,tableName, schema)
+    public DiscoveredTable CreateTable(string tableName, DatabaseColumnRequest[] columns, string? schema = null, IDatabaseColumnRequestAdjuster? adjuster = null) =>
+        CreateTable(new CreateTableArgs(this, tableName, schema)
         {
             Adjuster = adjuster,
             ExplicitColumnDefinitions = columns
@@ -191,7 +191,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// </param>
     /// <param name="cascadeDelete">True to set CASCADE DELETE on the foreign key created by <paramref name="foreignKeyPairs"/></param>
     /// <returns>The table created</returns>
-    public DiscoveredTable CreateTable(string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, IDatabaseColumnRequestAdjuster adjuster = null) =>
+    public DiscoveredTable CreateTable(string tableName, DatabaseColumnRequest[] columns, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete, IDatabaseColumnRequestAdjuster? adjuster = null) =>
         CreateTable(new CreateTableArgs(this, tableName, null, foreignKeyPairs, cascadeDelete)
         {
             Adjuster = adjuster,
@@ -209,7 +209,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <param name="adjuster">Last minute delegate class for modifying the table columns data types prior to executing SQL</param>
     /// <param name="explicitColumnDefinitions">Optional - Override descisions made about columns in the <paramref name="dt"/> by specify an explicit type etc</param>
     /// <returns>The table created</returns>
-    public DiscoveredTable CreateTable(string tableName, DataTable dt, DatabaseColumnRequest[] explicitColumnDefinitions = null, bool createEmpty = false,IDatabaseColumnRequestAdjuster adjuster = null) =>
+    public DiscoveredTable CreateTable(string tableName, DataTable dt, DatabaseColumnRequest[]? explicitColumnDefinitions = null, bool createEmpty = false,IDatabaseColumnRequestAdjuster? adjuster = null) =>
         CreateTable(new CreateTableArgs(this, tableName, null,dt,createEmpty)
         {
             ExplicitColumnDefinitions = explicitColumnDefinitions,
@@ -231,7 +231,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <param name="createEmpty"></param>
     /// <param name="adjuster"></param>
     /// <returns></returns>
-    public DiscoveredTable CreateTable(out Dictionary<string, Guesser> typeDictionary, string tableName, DataTable dt, DatabaseColumnRequest[] explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster adjuster = null)
+    public DiscoveredTable CreateTable(out Dictionary<string, Guesser> typeDictionary, string tableName, DataTable dt, DatabaseColumnRequest[]? explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster? adjuster = null)
     {
         var args = new CreateTableArgs(this, tableName, null, dt, createEmpty)
         {
@@ -290,7 +290,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;

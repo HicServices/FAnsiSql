@@ -27,7 +27,7 @@ public sealed class TableTypeTests:DatabaseTests
         var syntax = tbl.GetQuerySyntaxHelper();
 
         //oracle likes to create stuff under your user account not the database your actually using!
-        if(dbType == DatabaseType.Oracle) viewName = syntax.EnsureFullyQualified(tbl.Database.GetRuntimeName(),null,"MyView");
+        if(dbType == DatabaseType.Oracle) viewName = syntax.EnsureFullyQualified(tbl.Database.GetRuntimeName(), null,"MyView");
 
         var sql = string.Format(@"CREATE VIEW {0} AS
 SELECT {2}

@@ -19,7 +19,7 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     /// </summary>
     public static bool SetSingleUserWhenDroppingDatabases { get; set; } = true;
 
-    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null)
     {
         if (connection.State == ConnectionState.Closed)
             throw new InvalidOperationException("Expected connection to be open");
@@ -55,7 +55,7 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         return tables.ToArray();
     }
 
-    public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction? transaction = null)
     {
         var functionsToReturn = new List<DiscoveredTableValuedFunction>();
 

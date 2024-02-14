@@ -105,7 +105,7 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;

@@ -183,7 +183,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
 
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture) => new OracleBulkCopy(discoveredTable,connection,culture);
 
-    public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction = null)
+    public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction = null)
     {
         var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(static c => c.IsAutoIncrement);
 
@@ -208,7 +208,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     }
 
     public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
-        IManagedTransaction transaction = null)
+        IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string, DiscoveredRelationship>();
 

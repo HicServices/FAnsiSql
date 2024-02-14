@@ -33,7 +33,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     }
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
-    public abstract DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null);
+    public abstract DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null);
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetDataAdapter"]'/>
     public abstract DbDataAdapter GetDataAdapter(DbCommand cmd);
@@ -138,7 +138,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     public DatabaseType DatabaseType { get; private set; } = databaseType;
     public abstract Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder);
 
-    public bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds,out Exception exception)
+    public bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds, out Exception? exception)
     {
         try
         {

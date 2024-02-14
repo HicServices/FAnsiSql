@@ -22,7 +22,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
     protected override string  ConnectionTimeoutKeyName => "Connection Timeout";
 
     #region Up Typing
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null) => new OracleCommand(s, con as OracleConnection) {Transaction = transaction as OracleTransaction};
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) => new OracleCommand(s, con as OracleConnection) {Transaction = transaction as OracleTransaction};
 
     public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new OracleDataAdapter((OracleCommand) cmd);
 

@@ -37,12 +37,12 @@ public interface IDiscoveredTableHelper
     void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable);
 
     /// <inheritdoc cref="DiscoveredTable.ScriptTableCreation"/>
-    string ScriptTableCreation(DiscoveredTable constraints, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable toCreateTable = null);
+    string ScriptTableCreation(DiscoveredTable constraints, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable? toCreateTable = null);
     bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable);
     void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection);
     void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable columns, DiscoveredColumn[] discoverColumns);
-    int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction transaction=null);
-    DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction transaction = null);
+    int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction=null);
+    DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction? transaction = null);
     void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt);
 
 
@@ -58,5 +58,5 @@ public interface IDiscoveredTableHelper
     /// <param name="constraintName">The name to give the foreign key constraint created, if null then a default name will be picked e.g. FK_Tbl1_Tbl2</param>
     /// <param name="args">Options for timeout, transaction etc</param>
     /// <returns></returns>
-    DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args, Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes,string constraintName =null);
+    DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args, Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes,string? constraintName =null);
 }

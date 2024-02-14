@@ -16,7 +16,7 @@ public sealed class DatabaseOperationArgs
     /// <summary>
     /// If using an ongoing connection/transaction.  Otherwise null.
     /// </summary>
-    public IManagedTransaction TransactionIfAny{ get; set; }
+    public IManagedTransaction? TransactionIfAny { get; set; }
 
     /// <summary>
     /// Time to allow <see cref="DbCommand"/> to run before cancelling (this is db timeout and doesn't affect <see cref="CancellationToken"/>)

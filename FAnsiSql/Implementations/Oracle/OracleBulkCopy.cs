@@ -57,7 +57,7 @@ internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnec
             }
         }
 
-        var values = mapping.Keys.ToDictionary(static c => c, static _ => new List<object>());
+        var values = mapping.Keys.ToDictionary(static c => c, static _ => new List<object?>());
 
         foreach (DataRow dataRow in dt.Rows)
             //populate parameters for current row
@@ -67,14 +67,13 @@ internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnec
 
             if (val is string stringVal && string.IsNullOrWhiteSpace(stringVal))
                 val = null;
-            else
-            if (val == DBNull.Value)
+            else if (val == DBNull.Value)
                 val = null;
             else if (dateColumns.Contains(col))
-                val = val is string s ? (DateTime)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
+                val = val is string s ? (DateTime?)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
 
             if (col.DataType == typeof(bool) && val is bool b)
-                values[col].Add(b?1:0);
+                values[col].Add(b ? 1 : 0);
             else
                 values[col].Add(val);
         }

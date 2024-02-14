@@ -23,7 +23,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
     protected override string ConnectionTimeoutKeyName => "Connect Timeout";
 
     #region Up Typing
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null) => new SqlCommand(s, (SqlConnection)con, transaction as SqlTransaction);
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) => new SqlCommand(s, (SqlConnection)con, transaction as SqlTransaction);
 
     public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new SqlDataAdapter((SqlCommand) cmd);
 

@@ -163,7 +163,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    public Type TryGetCSharpTypeForSQLDBType(string sqlType)
+    public Type? TryGetCSharpTypeForSQLDBType(string sqlType)
     {
         if (IsBit(sqlType))
             return typeof(bool);
@@ -310,7 +310,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
         return -1;
     }
 
-    public DecimalSize GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType)
+    public DecimalSize? GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType)
     {
         if (string.IsNullOrWhiteSpace(sqlType))
             return null;
@@ -411,26 +411,37 @@ select LEN(dt) from omgdates
 
     [GeneratedRegex(StringSizeRegexPattern)]
     private static partial Regex StringSizeRegex();
+
     [GeneratedRegex("^(bit)|(bool)|(boolean)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex BitRegexImpl();
+
     [GeneratedRegex("^tinyint", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex ByteRegexImpl();
+
     [GeneratedRegex("^uniqueidentifier", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex GuidRe();
+
     [GeneratedRegex("^smallint", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex SmallIntRe();
+
     [GeneratedRegex("^(int)|(integer)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex IntRe();
+
     [GeneratedRegex("^bigint", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex LongRe();
+
     [GeneratedRegex("^time$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex TimeRe();
+
     [GeneratedRegex("(char)|(text)|(xml)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex StringRe();
+
     [GeneratedRegex("(binary)|(blob)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex ByteArrayRe();
+
     [GeneratedRegex("^(float)|(decimal)|(numeric)|(real)|(money)|(smallmoney)|(double)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex FloatingPointRe();
+
     [GeneratedRegex(DecimalsBeforeAndAfterPattern)]
     private static partial Regex DecimalsBeforeAndAfterRe();
 }

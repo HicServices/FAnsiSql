@@ -15,7 +15,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
     private PostgreSqlDatabaseHelper(){}
 
     public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection,
-        string database, bool includeViews, DbTransaction transaction = null)
+        string database, bool includeViews, DbTransaction? transaction = null)
     {
 
         const string sqlTables = """
@@ -76,7 +76,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
     }
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null) =>
+        DbConnection connection, string database, DbTransaction? transaction = null) =>
         Enumerable.Empty<DiscoveredTableValuedFunction>();
 
     public override DiscoveredStoredprocedure[]

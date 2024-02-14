@@ -12,7 +12,7 @@ namespace FAnsi.Discovery.TableCreation;
 /// <remarks>
 /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
 /// </remarks>
-public sealed class CreateTableArgs(DiscoveredDatabase database, string tableName, string schema)
+public sealed class CreateTableArgs(DiscoveredDatabase database, string tableName, string? schema)
 {
     /// <summary>
     /// The destination database in which to create the table
@@ -88,8 +88,8 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// <summary>
     /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
     /// </summary>
-    public CreateTableArgs(DiscoveredDatabase database,string tableName,string schema,Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs,bool cascadeDelete)
-        :this(database,tableName,schema)
+    public CreateTableArgs(DiscoveredDatabase database, string tableName, string? schema, Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete)
+        : this(database, tableName, schema)
     {
         ForeignKeyPairs = foreignKeyPairs;
         CascadeDelete = cascadeDelete;
@@ -99,8 +99,8 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// Create a table with the given name based on the columns and data in the provided <paramref name="dataTable"/>.  If you want to override the
     /// data type of a given column set <see cref="ExplicitColumnDefinitions"/>
     /// </summary>
-    public CreateTableArgs(DiscoveredDatabase database, string tableName, string schema,DataTable dataTable, bool createEmpty)
-        :this(database,tableName,schema)
+    public CreateTableArgs(DiscoveredDatabase database, string tableName, string? schema, DataTable dataTable, bool createEmpty)
+        : this(database, tableName, schema)
     {
         DataTable = dataTable;
         CreateEmpty = createEmpty;

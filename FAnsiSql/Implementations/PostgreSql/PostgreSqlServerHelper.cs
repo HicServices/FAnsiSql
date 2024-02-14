@@ -88,7 +88,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
         return [.. databases];
     }
 
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null) => new NpgsqlCommand(s, (NpgsqlConnection) con, (NpgsqlTransaction) transaction);
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) => new NpgsqlCommand(s, (NpgsqlConnection) con, (NpgsqlTransaction) transaction);
 
     public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new NpgsqlDataAdapter((NpgsqlCommand) cmd);
 

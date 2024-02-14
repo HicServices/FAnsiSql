@@ -124,7 +124,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="con">Correctly typed connection for the <see cref="DatabaseType"/>.  (See <see cref="GetConnection"/>)</param>
     /// <param name="transaction">Optional - if provided the <see cref="DbCommand.Transaction"/> will be set to the <paramref name="transaction"/></param>
     /// <returns></returns>
-    public DbCommand GetCommand(string sql, DbConnection con, IManagedTransaction transaction = null)
+    public DbCommand GetCommand(string sql, DbConnection con, IManagedTransaction? transaction = null)
     {
         var cmd = Helper.GetCommand(sql, con);
 
@@ -242,7 +242,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - if provided this method returns true (existence cannot be checked mid transaction).</param>
     /// <returns></returns>
-    public bool Exists(IManagedTransaction transaction = null)
+    public bool Exists(IManagedTransaction? transaction = null)
     {
         if (transaction != null)
             return true;
@@ -391,7 +391,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;

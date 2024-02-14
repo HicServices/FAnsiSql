@@ -13,7 +13,7 @@ namespace FAnsi.Implementations.MySql;
 public sealed class MySqlDatabaseHelper : DiscoveredDatabaseHelper
 {
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null) =>
+        DbConnection connection, string database, DbTransaction? transaction = null) =>
         Enumerable.Empty<DiscoveredTableValuedFunction>();
 
     public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database) => throw new NotImplementedException();
@@ -64,7 +64,7 @@ public sealed class MySqlDatabaseHelper : DiscoveredDatabaseHelper
 
     }
 
-    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null)
     {
         if (connection.State == ConnectionState.Closed)
             throw new InvalidOperationException("Expected connection to be open");

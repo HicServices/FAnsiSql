@@ -52,7 +52,7 @@ public interface ITypeTranslater
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    Type TryGetCSharpTypeForSQLDBType(string sqlType);
+    Type? TryGetCSharpTypeForSQLDBType(string sqlType);
 
     /// <summary>
     /// Returns true if the <paramref name="sqlType"/> string could be reconciled into a known C# Type.  Do not use this
@@ -70,7 +70,7 @@ public interface ITypeTranslater
     Guesser GetGuesserFor(DiscoveredColumn discoveredColumn);
 
     int GetLengthIfString(string sqlType);
-    DecimalSize GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType);
+    DecimalSize? GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType);
 
     /// <summary>
     /// Translates the given sqlType which must be an SQL string compatible with this TypeTranslater e.g. varchar(10) into the destination ITypeTranslater

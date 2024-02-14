@@ -22,15 +22,15 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
 
     public override int UploadImpl(DataTable dt)
     {
-        var ourTrans = Connection.Transaction==null?Connection.Connection.BeginTransaction(IsolationLevel.ReadUncommitted):null;
+        var ourTrans = Connection.Transaction == null ? Connection.Connection.BeginTransaction(IsolationLevel.ReadUncommitted) : null;
         var matchedColumns = GetMapping(dt.Columns.Cast<DataColumn>());
         var affected = 0;
 
         int maxPacket;
-        using (var packetQ = new MySqlCommand("select @@max_allowed_packet", (MySqlConnection)Connection.Connection,(MySqlTransaction)(Connection.Transaction ?? ourTrans)))
+        using (var packetQ = new MySqlCommand("select @@max_allowed_packet", (MySqlConnection)Connection.Connection,(MySqlTransaction?)(Connection.Transaction ?? ourTrans)))
             maxPacket = Convert.ToInt32(packetQ.ExecuteScalar());
-        using var cmd = new MySqlCommand("", (MySqlConnection) Connection.Connection,
-            (MySqlTransaction)(Connection.Transaction ?? ourTrans));
+        using var cmd = new MySqlCommand("", (MySqlConnection)Connection.Connection,
+            (MySqlTransaction?)(Connection.Transaction ?? ourTrans));
         if (BulkInsertBatchTimeoutInSeconds != 0)
             cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
 
@@ -122,12 +122,12 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
             "LONGTEXT" => $"'{MySqlHelper.EscapeString(value)}'",
             "ENUM" => $"'{MySqlHelper.EscapeString(value)}'",
             //Dates/times
-            "DATE" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd}'",
-            "TIMESTAMP" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
-            "DATETIME" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
-            "TIME" => $"'{(DateTime)DateTimeDecider.Parse(value):HH:mm:ss}'",
-            "YEAR2" => $"'{(DateTime)DateTimeDecider.Parse(value):yy}'",
-            "YEAR4" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy}'",
+            "DATE" => $"'{(DateTime?)DateTimeDecider.Parse(value):yyyy-MM-dd}'",
+            "TIMESTAMP" => $"'{(DateTime?)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
+            "DATETIME" => $"'{(DateTime?)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
+            "TIME" => $"'{(DateTime?)DateTimeDecider.Parse(value):HH:mm:ss}'",
+            "YEAR2" => $"'{(DateTime?)DateTimeDecider.Parse(value):yy}'",
+            "YEAR4" => $"'{(DateTime?)DateTimeDecider.Parse(value):yyyy}'",
             _ => $"'{MySqlHelper.EscapeString(value)}'"
         };
     }

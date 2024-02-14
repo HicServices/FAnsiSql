@@ -129,7 +129,7 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture) => new MySqlBulkCopy(discoveredTable, connection,culture);
 
-    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
+    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string,DiscoveredRelationship>();
 

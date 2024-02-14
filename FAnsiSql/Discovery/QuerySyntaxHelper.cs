@@ -111,7 +111,7 @@ public abstract partial class QuerySyntaxHelper(
     public bool IsValidParameterName(string parameterSQL) => ParameterNamesRegex.IsMatch(parameterSQL);
 
 
-    public virtual string GetRuntimeName(string s)
+    public virtual string? GetRuntimeName(string s)
     {
         if (string.IsNullOrWhiteSpace(s))
             return s;
@@ -149,7 +149,7 @@ public abstract partial class QuerySyntaxHelper(
     /// <returns>The final runtime name unescaped e.g. "Fi`sh"</returns>
     protected virtual string UnescapeWrappedNameBody(string name) => name;
 
-    public virtual bool TryGetRuntimeName(string s,out string name)
+    public virtual bool TryGetRuntimeName(string s, out string? name)
     {
         try
         {
@@ -178,9 +178,9 @@ public abstract partial class QuerySyntaxHelper(
 
     public abstract string EnsureWrappedImpl(string databaseOrTableName);
 
-    public abstract string EnsureFullyQualified(string databaseName, string schema, string tableName);
+    public abstract string EnsureFullyQualified(string databaseName, string? schema, string tableName);
 
-    public virtual string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false)
+    public virtual string EnsureFullyQualified(string databaseName, string? schema, string tableName, string columnName, bool isTableValuedFunction = false)
     {
         if (isTableValuedFunction)
             return $"{GetRuntimeName(tableName)}.{GetRuntimeName(columnName)}";//table valued functions do not support database name being in the column level selection list area of sql queries
@@ -204,7 +204,7 @@ public abstract partial class QuerySyntaxHelper(
     /// <param name="selectSQL"></param>
     /// <param name="alias"></param>
     /// <returns></returns>
-    public virtual bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string alias)
+    public virtual bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string? alias)
     {
         //Ths line is expected to be some SELECT sql so remove trailing whitespace and commas etc
         lineToSplit = lineToSplit.TrimEnd(',', ' ', '\n', '\r');
@@ -332,8 +332,7 @@ public abstract partial class QuerySyntaxHelper(
     public abstract string HowDoWeAchieveMd5(string selectSql);
 
 
-
-    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value,CultureInfo culture)
+    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value, CultureInfo? culture)
     {
         try
         {
@@ -408,7 +407,7 @@ public abstract partial class QuerySyntaxHelper(
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public virtual string GetDefaultSchemaIfAny() => null;
+    public virtual string? GetDefaultSchemaIfAny() => null;
 
     /// <summary>
     /// returns null if the name is valid.  Otherwise a string describing why it is invalid.
@@ -417,16 +416,16 @@ public abstract partial class QuerySyntaxHelper(
     /// <param name="objectType">Type of object being validated e.g. "Database", "Table" etc</param>
     /// <param name="maximumLengthAllowed"></param>
     /// <returns></returns>
-    private string ValidateName(string candidate, string objectType, int maximumLengthAllowed)
+    private string? ValidateName(string? candidate, string objectType, int maximumLengthAllowed)
     {
-        if(string.IsNullOrWhiteSpace(candidate))
+        if (string.IsNullOrWhiteSpace(candidate))
             return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name_cannot_be_blank, objectType);
 
-        if(candidate.Length > maximumLengthAllowed)
+        if (candidate.Length > maximumLengthAllowed)
             return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__supports_maximum_length_of__3__,
                 objectType, candidate[..maximumLengthAllowed], DatabaseType, maximumLengthAllowed);
 
-        if(candidate.IndexOfAny(IllegalNameChars) != -1)
+        if (candidate.IndexOfAny(IllegalNameChars) != -1)
             return string.Format(
                 FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___contained_unsupported__by_FAnsi__characters___Unsupported_characters_are__2_,
                 objectType, candidate, new string(IllegalNameChars));
@@ -435,8 +434,7 @@ public abstract partial class QuerySyntaxHelper(
     }
 
 
-
-    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value) => GetParameter(p,discoveredColumn,value,null);
+    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value) => GetParameter(p, discoveredColumn, value,null);
 
     /// <summary>
     /// <para>
@@ -466,7 +464,7 @@ public abstract partial class QuerySyntaxHelper(
         return GetType() == other.GetType();
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;

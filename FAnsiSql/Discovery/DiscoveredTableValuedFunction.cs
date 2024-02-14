@@ -15,7 +15,7 @@ public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database,
     string? schema = null) : DiscoveredTable(database, functionName, querySyntaxHelper,
     schema, TableType.TableValuedFunction)
 {
-    public override bool Exists(IManagedTransaction transaction = null)
+    public override bool Exists(IManagedTransaction? transaction = null)
     {
         return Database.DiscoverTableValuedFunctions(transaction).Any(f => f.GetRuntimeName().Equals(GetRuntimeName()));
     }
@@ -39,7 +39,7 @@ public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database,
         Helper.DropFunction(connection.Connection, this);
     }
 
-    public IEnumerable<DiscoveredParameter> DiscoverParameters(ManagedTransaction transaction = null)
+    public IEnumerable<DiscoveredParameter> DiscoverParameters(ManagedTransaction? transaction = null)
     {
         using var connection = Database.Server.GetManagedConnection(transaction);
         return Helper.DiscoverTableValuedFunctionParameters(connection.Connection, this, connection.Transaction);
