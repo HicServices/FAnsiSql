@@ -185,7 +185,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
             syntaxHelper.ValidateColumnName(c.ColumnName);
 
         //the name sans brackets (hopefully they didn't pass any brackets)
-        tableName = syntaxHelper.GetRuntimeName(tableName);
+        tableName = syntaxHelper.GetRuntimeName(tableName) ?? throw new InvalidOperationException($"Unable to get table name for {tableName}");
 
         //the name fully specified e.g. [db]..[tbl] or `db`.`tbl` - See Test HorribleColumnNames
         var fullyQualifiedName = syntaxHelper.EnsureFullyQualified(database.GetRuntimeName(), schema, tableName);
@@ -241,9 +241,10 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
              REFERENCES {primaryKeyTable.GetFullyQualifiedName()}({string.Join(",", foreignKeyPairs.Values.Select(v => syntaxHelper.EnsureWrapped(v.GetRuntimeName())))}) {(cascadeDelete ? " on delete cascade" : "")}
              """;
     }
+
     public string GetForeignKeyConstraintNameFor(DiscoveredTable foreignTable, DiscoveredTable primaryTable) => GetForeignKeyConstraintNameFor(foreignTable.GetRuntimeName(), primaryTable.GetRuntimeName());
 
-    private static string GetForeignKeyConstraintNameFor(string foreignTable, string primaryTable) =>
+    private static string GetForeignKeyConstraintNameFor(string? foreignTable, string? primaryTable) =>
         MakeSensibleConstraintName("FK_", $"{foreignTable}_{primaryTable}");
 
     public abstract DirectoryInfo Detach(DiscoveredDatabase database);

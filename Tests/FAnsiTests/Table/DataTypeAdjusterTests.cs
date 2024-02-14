@@ -25,7 +25,9 @@ internal sealed class DataTypeAdjusterTests:DatabaseTests
     {
         public void AdjustColumns(List<DatabaseColumnRequest> columns)
         {
-            columns[0].TypeRequested.Width = 12;
+            var databaseTypeRequest = columns[0].TypeRequested;
+            if (databaseTypeRequest is not null)
+                databaseTypeRequest.Width = 12;
         }
     }
 }

@@ -20,9 +20,8 @@ public sealed partial class OracleTypeTranslater:TypeTranslater
     private static readonly Regex AlsoStringRegex = AlsoStringRegexImpl();
 
 
-    private OracleTypeTranslater(): base(4000, 4000)
+    private OracleTypeTranslater() : base(DateRegexImpl(), 4000, 4000)
     {
-        DateRegex = DateRegexImpl();
     }
     protected override string GetStringDataTypeImpl(int maxExpectedStringWidth) => $"varchar2({maxExpectedStringWidth})";
 

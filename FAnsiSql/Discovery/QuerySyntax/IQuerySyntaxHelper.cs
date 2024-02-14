@@ -32,7 +32,7 @@ public interface IQuerySyntaxHelper
     /// <param name="columns"></param>
     /// <param name="toStringFunc">Function to convert the <typeparamref name="T"/> to a string e.g. c.ColumnName if DataColumn</param>
     /// <returns></returns>
-    Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T, string> toStringFunc) where T : notnull;
+    Dictionary<T, string?> GetParameterNamesFor<T>(T[] columns, Func<T, string?> toStringFunc) where T : notnull;
 
     IAggregateHelper AggregateHelper { get; }
     IUpdateHelper UpdateHelper { get; set; }
@@ -59,7 +59,7 @@ public interface IQuerySyntaxHelper
 
     char ParameterSymbol { get; }
 
-    string? GetRuntimeName(string s);
+    string? GetRuntimeName(string? s);
 
     bool TryGetRuntimeName(string s, out string? name);
 
@@ -81,8 +81,8 @@ public interface IQuerySyntaxHelper
     [return: NotNullIfNotNull(nameof(databaseOrTableName))]
     string? EnsureWrapped(string? databaseOrTableName);
 
-    string EnsureFullyQualified(string databaseName, string? schemaName, string tableName);
-    string EnsureFullyQualified(string databaseName, string? schemaName, string tableName, string columnName, bool isTableValuedFunction = false);
+    string? EnsureFullyQualified(string? databaseName, string? schemaName, string? tableName);
+    string? EnsureFullyQualified(string? databaseName, string? schemaName, string? tableName, string? columnName, bool isTableValuedFunction = false);
 
     /// <summary>
     /// Returns the given <paramref name="sql"/> escaped e.g. doubling up single quotes.  Does not add any wrapping.
@@ -175,7 +175,7 @@ public interface IQuerySyntaxHelper
     /// <param name="value">The value to populate into the command, this will be converted to DBNull.Value if the value is nullish</param>
     /// <param name="culture"></param>
     /// <returns></returns>
-    DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn,object value,CultureInfo culture);
+    DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value, CultureInfo? culture);
 
     /// <summary>
     /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
@@ -196,17 +196,17 @@ public interface IQuerySyntaxHelper
     /// <summary>
     /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
     /// </summary>
-    bool IsValidDatabaseName(string databaseName, out string reason);
+    bool IsValidDatabaseName(string databaseName, [NotNullWhen(false)] out string? reason);
 
     /// <summary>
     /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
     /// </summary>
-    bool IsValidTableName(string tableName, out string reason);
+    bool IsValidTableName([NotNullWhen(true)] string? tableName, [NotNullWhen(false)] out string? reason);
 
     /// <summary>
     /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
     /// </summary>
-    bool IsValidColumnName(string columnName, out string reason);
+    bool IsValidColumnName(string columnName, [NotNullWhen(false)] out string? reason);
 
 
     /// <summary>
@@ -214,7 +214,7 @@ public interface IQuerySyntaxHelper
     /// If schemas are not supported (e.g. MySql) then null is returned
     /// </summary>
     /// <returns></returns>
-    string GetDefaultSchemaIfAny();
+    string? GetDefaultSchemaIfAny();
 }
 
 public enum MandatoryScalarFunctions

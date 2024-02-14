@@ -56,7 +56,8 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     {
         using var managedConnection = Server.GetManagedConnection(transaction);
         return
-            Helper.ListTables(this, _querySyntaxHelper, managedConnection.Connection, GetRuntimeName(),
+            Helper.ListTables(this, _querySyntaxHelper, managedConnection.Connection,
+                GetRuntimeName() ?? throw new InvalidOperationException($"Null database name passed to {nameof(DiscoverTables)}"),
                 includeViews, managedConnection.Transaction).ToArray();
     }
 
@@ -71,20 +72,23 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
         using var managedConnection = Server.GetManagedConnection(transaction);
         return
             Helper.ListTableValuedFunctions(this, _querySyntaxHelper, managedConnection.Connection,
-                GetRuntimeName(), managedConnection.Transaction).ToArray();
+                GetRuntimeName() ??
+                throw new InvalidOperationException(
+                    $"Null database name passed to {nameof(DiscoverTableValuedFunctions)}"),
+                managedConnection.Transaction).ToArray();
     }
 
     /// <summary>
     /// Returns the name of the database without any qualifiers
     /// </summary>
     /// <returns></returns>
-    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_database);
+    public string? GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_database);
 
     /// <summary>
     /// Returns the wrapped e.g. "[MyDatabase]" name of the database including escaping e.g. if you wanted to name a database "][nquisitor" (which would return "[]][nquisitor]").
     /// </summary>
     /// <returns></returns>
-    public string GetWrappedName() => _querySyntaxHelper.EnsureWrapped(GetRuntimeName());
+    public string? GetWrappedName() => _querySyntaxHelper.EnsureWrapped(GetRuntimeName());
 
     /// <summary>
     /// <para>Creates an expectation (See <see cref="IMightNotExist"/>) that there is a table with the given name in the database.
@@ -112,7 +116,8 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// Connects to the database and returns a list of stored proceedures found as <see cref="DiscoveredStoredprocedure"/> objects
     /// </summary>
     /// <returns></returns>
-    public DiscoveredStoredprocedure[] DiscoverStoredprocedures() => Helper.ListStoredprocedures(Server.Builder,GetRuntimeName());
+    public DiscoveredStoredprocedure[] DiscoverStoredprocedures() => Helper.ListStoredprocedures(Server.Builder,
+        GetRuntimeName() ?? throw new InvalidOperationException($"Null database name passed to {nameof(DiscoverStoredprocedures)}"));
 
     /// <summary>
     /// Returns the name of the database
@@ -127,7 +132,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <returns></returns>
     public bool Exists(IManagedTransaction? transaction = null)
     {
-        return Server.DiscoverDatabases().Any(db => db.GetRuntimeName().Equals(GetRuntimeName(),StringComparison.InvariantCultureIgnoreCase));
+        return Server.DiscoverDatabases().Any(db => db.GetRuntimeName()?.Equals(GetRuntimeName(), StringComparison.InvariantCultureIgnoreCase) == true);
     }
 
     /// <summary>
@@ -157,7 +162,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
         if (dropFirst && Exists())
             Drop();
 
-        Server.CreateDatabase(GetRuntimeName());
+        Server.CreateDatabase(GetRuntimeName() ?? throw new InvalidOperationException("No database name set"));
     }
 
     /// <summary>
@@ -209,8 +214,8 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <param name="adjuster">Last minute delegate class for modifying the table columns data types prior to executing SQL</param>
     /// <param name="explicitColumnDefinitions">Optional - Override descisions made about columns in the <paramref name="dt"/> by specify an explicit type etc</param>
     /// <returns>The table created</returns>
-    public DiscoveredTable CreateTable(string tableName, DataTable dt, DatabaseColumnRequest[]? explicitColumnDefinitions = null, bool createEmpty = false,IDatabaseColumnRequestAdjuster? adjuster = null) =>
-        CreateTable(new CreateTableArgs(this, tableName, null,dt,createEmpty)
+    public DiscoveredTable CreateTable(string tableName, DataTable dt, DatabaseColumnRequest[]? explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster? adjuster = null) =>
+        CreateTable(new CreateTableArgs(this, tableName, null, dt, createEmpty)
         {
             ExplicitColumnDefinitions = explicitColumnDefinitions,
             Adjuster = adjuster
@@ -240,7 +245,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
         };
         var table = Helper.CreateTable(args);
 
-        if(!args.TableCreated)
+        if (!args.TableCreated)
             throw new Exception(FAnsiStrings.DiscoveredDatabase_CreateTableDidNotPopulateTableCreatedProperty);
 
         typeDictionary = args.ColumnCreationLogic;
@@ -257,7 +262,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <returns></returns>
     public void CreateSchema(string name)
     {
-        Helper.CreateSchema(this,name);
+        Helper.CreateSchema(this, name);
     }
 
     /// <summary>
@@ -275,7 +280,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <param name="backupName"></param>
     public void CreateBackup(string backupName)
     {
-        Helper.CreateBackup(this,backupName);
+        Helper.CreateBackup(this, backupName);
     }
 
     /// <summary>
@@ -283,7 +288,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    private bool Equals(DiscoveredDatabase other) => Equals(Server, other.Server) && string.Equals(_database, other._database,StringComparison.OrdinalIgnoreCase);
+    private bool Equals(DiscoveredDatabase other) => Equals(Server, other.Server) && string.Equals(_database, other._database, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Equality based on Server and database name

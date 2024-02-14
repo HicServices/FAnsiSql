@@ -11,18 +11,18 @@ internal sealed class ExtensionsTests
     {
         using var dt = new DataTable();
 
-        Assert.DoesNotThrow(()=>dt.SetDoNotReType(true));
+        Assert.DoesNotThrow(() => dt.SetDoNotReType(true));
 
         dt.Columns.Add("FFF");
 
-        Assert.That(dt.Columns["FFF"].GetDoNotReType(), Is.False);
+        Assert.That(dt.Columns["FFF"]?.GetDoNotReType(), Is.False);
 
-        Assert.DoesNotThrow(()=>dt.SetDoNotReType(true));
+        Assert.DoesNotThrow(() => dt.SetDoNotReType(true));
 
-        Assert.That(dt.Columns["FFF"].GetDoNotReType());
+        Assert.That(dt.Columns["FFF"]?.GetDoNotReType(), Is.True);
 
-        Assert.DoesNotThrow(()=>dt.SetDoNotReType(false));
+        Assert.DoesNotThrow(() => dt.SetDoNotReType(false));
 
-        Assert.That(dt.Columns["FFF"].GetDoNotReType(), Is.False);
+        Assert.That(dt.Columns["FFF"]?.GetDoNotReType(), Is.False);
     }
 }

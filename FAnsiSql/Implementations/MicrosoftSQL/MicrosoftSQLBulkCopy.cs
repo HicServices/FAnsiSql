@@ -20,9 +20,9 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
     private static readonly Regex ColumnLevelComplaint = ColumnLevelComplaintRe();
 
 
-    public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture): base(targetTable, connection,culture)
+    public MicrosoftSQLBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture) : base(targetTable, connection, culture)
     {
-        var options=SqlBulkCopyOptions.KeepIdentity|SqlBulkCopyOptions.TableLock;
+        var options = SqlBulkCopyOptions.KeepIdentity | SqlBulkCopyOptions.TableLock;
         if (connection.Transaction == null)
             options |= SqlBulkCopyOptions.UseInternalTransaction;
         _bulkCopy = new SqlBulkCopy((SqlConnection)connection.Connection, options, (SqlTransaction?)connection.Transaction)
@@ -110,7 +110,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
         using var con = (SqlConnection)serverForLineByLineInvestigation.GetConnection();
         con.Open();
         var investigationTransaction = con.BeginTransaction("Investigate BulkCopyFailure");
-        using (var investigationOneLineAtATime = new SqlBulkCopy(con,SqlBulkCopyOptions.KeepIdentity,investigationTransaction))
+        using (var investigationOneLineAtATime = new SqlBulkCopy(con, SqlBulkCopyOptions.KeepIdentity, investigationTransaction))
         {
             investigationOneLineAtATime.DestinationTableName = insert.DestinationTableName;
 
@@ -137,7 +137,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
                                     line, result), e);
 
                         var sourceValue = dr[sourceColumn];
-                        var destColumn = TargetTableColumns.SingleOrDefault(c => c.GetRuntimeName().Equals(badMapping.DestinationColumn));
+                        var destColumn = TargetTableColumns?.SingleOrDefault(c => c.GetRuntimeName()?.Equals(badMapping.DestinationColumn) == true);
 
                         if (destColumn != null)
                             return new FileLoadException(
@@ -147,7 +147,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
                     }
 
                     return new FileLoadException(
-                        string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_, line, Environment.NewLine, string.Join(Environment.NewLine,dr.ItemArray), firstPass),
+                        string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_, line, Environment.NewLine, string.Join(Environment.NewLine, dr.ItemArray), firstPass),
                         exception);
                 }
 
@@ -156,7 +156,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
             con.Close();
         }
 
-        return new Exception(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Bulk_insert_failed_but_when_we_tried_to_repeat_it_a_line_at_a_time_it_worked + firstPass , e);
+        return new Exception(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Bulk_insert_failed_but_when_we_tried_to_repeat_it_a_line_at_a_time_it_worked + firstPass, e);
     }
 
     /// <summary>
@@ -178,7 +178,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
         }
 
         //it counts from 1 not 0.  Also it isn't an index into insert.ColumnMappings.  It's an index into a private field!
-        var columnItHates = Convert.ToInt32(match.Groups[1].Value) -1;
+        var columnItHates = Convert.ToInt32(match.Groups[1].Value) - 1;
 
         try
         {
@@ -213,11 +213,11 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
     private static void EmptyStringsToNulls(DataTable dt)
     {
         foreach (var col in dt.Columns.Cast<DataColumn>().Where(static c => c.DataType == typeof(string)))
-        foreach (var row in dt.Rows.Cast<DataRow>()
-                     .Select(row => new { row, o = row[col] })
-                     .Where(static t => t.o != DBNull.Value && t.o != null && string.IsNullOrWhiteSpace(t.o.ToString()))
-                     .Select(static t => t.row))
-            row[col] = DBNull.Value;
+            foreach (var row in dt.Rows.Cast<DataRow>()
+                         .Select(row => new { row, o = row[col] })
+                         .Where(static t => t.o != DBNull.Value && t.o != null && string.IsNullOrWhiteSpace(t.o.ToString()))
+                         .Select(static t => t.row))
+                row[col] = DBNull.Value;
     }
 
     [Pure]
@@ -231,29 +231,27 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
         }
 
         if (e is ReflectionTypeLoadException reflectionTypeLoadException)
-            foreach (var loaderException in reflectionTypeLoadException.LoaderExceptions)
-            {
-                message.AppendLine();
-                message.Append(ExceptionToListOfInnerMessages(loaderException, includeStackTrace));
-            }
+            message.AppendJoin(Environment.NewLine,
+                reflectionTypeLoadException.LoaderExceptions.OfType<Exception>()
+                    .Select(ex => ExceptionToListOfInnerMessages(ex, includeStackTrace)).Prepend(""));
 
         if (e.InnerException == null) return message.ToString();
 
         message.AppendLine();
-        message.Append( ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace));
+        message.Append(ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace));
         return message.ToString();
     }
 
     private static void InspectDataTableForFloats(DataTable dt)
     {
         //are there any float or float? columns
-        var floatColumnNames = dt.Columns.Cast<DataColumn>().Where(static c => c.DataType == typeof(float) || c.DataType == typeof(float?)).Select(static c=>c.ColumnName).ToArray();
-        if (floatColumnNames.Length!=0)
+        var floatColumnNames = dt.Columns.Cast<DataColumn>().Where(static c => c.DataType == typeof(float) || c.DataType == typeof(float?)).Select(static c => c.ColumnName).ToArray();
+        if (floatColumnNames.Length != 0)
             throw new NotSupportedException(
                 $"Found float column(s) in data table, SQLServer does not support floats in bulk insert, instead you should use doubles otherwise you will end up with the value 0.85 turning into :0.850000023841858 in your database.  Float column(s) were:{string.Join(",", floatColumnNames)}");
 
         //are there any object columns
-        var objectColumns = dt.Columns.Cast<DataColumn>().Where(static c => c.DataType == typeof(object)).Select(static col=>col.Ordinal).ToArray();
+        var objectColumns = dt.Columns.Cast<DataColumn>().Where(static c => c.DataType == typeof(object)).Select(static col => col.Ordinal).ToArray();
 
         //do any of the object columns have floats or float? in them?
         for (var i = 0; i < Math.Min(100, dt.Rows.Count); i++)

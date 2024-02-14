@@ -4,9 +4,11 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 public sealed class QueryAxis : IQueryAxis
 {
     /// <inheritdoc/>
-    public string EndDate { get; set; }
+    public string? EndDate { get; set; }
+
     /// <inheritdoc/>
-    public string StartDate { get; set; }
+    public string? StartDate { get; set; }
+
     /// <inheritdoc/>
     public AxisIncrement AxisIncrement { get; set; }
 }

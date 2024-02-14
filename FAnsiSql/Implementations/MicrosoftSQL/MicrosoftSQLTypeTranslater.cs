@@ -9,9 +9,8 @@ public sealed partial class MicrosoftSQLTypeTranslater : TypeTranslater
 
     private static readonly Regex AlsoBinaryRegex = AlsoBinaryRe();
 
-    private MicrosoftSQLTypeTranslater() : base(8000, 4000)
+    private MicrosoftSQLTypeTranslater() : base(DateRe(), 8000, 4000)
     {
-        DateRegex = DateRe();
     }
 
     protected override string GetDateDateTimeDataType() => "datetime2";

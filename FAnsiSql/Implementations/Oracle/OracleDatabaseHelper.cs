@@ -24,7 +24,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
         cmd.ExecuteNonQuery();
     }
 
-    public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database) => throw new NotImplementedException();
+    public override Dictionary<string, string?> DescribeDatabase(DbConnectionStringBuilder builder, string database) => throw new NotImplementedException();
 
     protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
     {
@@ -56,8 +56,8 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
 
             while (r.Read())
                 //skip invalid table names
-                if(querySyntaxHelper.IsValidTableName((string)r["table_name"],out _))
-                    tables.Add(new DiscoveredTable(parent,r["table_name"].ToString(),querySyntaxHelper));
+                if (querySyntaxHelper.IsValidTableName((string)r["table_name"], out _))
+                    tables.Add(new DiscoveredTable(parent, (string)r["table_name"], querySyntaxHelper));
         }
 
         //find all the views
@@ -68,8 +68,8 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
             var r = cmd.ExecuteReader();
 
             while (r.Read())
-                if(querySyntaxHelper.IsValidTableName((string)r["view_name"],out _))
-                    tables.Add(new DiscoveredTable(parent,r["view_name"].ToString(),querySyntaxHelper,null,TableType.View));
+                if (querySyntaxHelper.IsValidTableName((string)r["view_name"], out _))
+                    tables.Add(new DiscoveredTable(parent, (string)r["view_name"],querySyntaxHelper, null, TableType.View));
         }
 
 

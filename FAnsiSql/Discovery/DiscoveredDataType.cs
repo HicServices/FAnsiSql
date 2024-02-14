@@ -54,7 +54,7 @@ public sealed class DiscoveredDataType
     /// <para>Returns null if the datatype is not floating point</para>
     /// </summary>
     /// <returns></returns>
-    public DecimalSize GetDecimalSize() => Column.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetDigitsBeforeAndAfterDecimalPointIfDecimal(SQLType);
+    public DecimalSize? GetDecimalSize() => Column.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetDigitsBeforeAndAfterDecimalPointIfDecimal(SQLType);
 
     /// <summary>
     /// Returns the System.Type that should be used to store values read out of columns of this data type (See <see cref="ITypeTranslater.GetCSharpTypeForSQLDBType"/>

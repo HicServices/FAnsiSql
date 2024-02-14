@@ -22,7 +22,7 @@ public interface IDiscoveredDatabaseHelper
     IDiscoveredTableHelper GetTableHelper();
     void DropDatabase(DiscoveredDatabase database);
 
-    Dictionary<string, string?> DescribeDatabase(DbConnectionStringBuilder builder, string database);
+    Dictionary<string, string?> DescribeDatabase(DbConnectionStringBuilder builder, string? database);
 
     DiscoveredTable CreateTable(CreateTableArgs args);
 

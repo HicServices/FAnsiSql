@@ -21,7 +21,7 @@ public interface ITypeTranslater
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    string GetSQLDBTypeForCSharpType(DatabaseTypeRequest request);
+    string GetSQLDBTypeForCSharpType(DatabaseTypeRequest? request);
 
     /// <summary>
     /// Returns the System.Data.DbType (e.g. DbType.String) for the specified proprietary database type (e.g. "varchar(max)")
@@ -29,7 +29,7 @@ public interface ITypeTranslater
     /// <exception cref="NotSupportedException"></exception>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    DbType GetDbTypeForSQLDBType(string sqlType);
+    DbType GetDbTypeForSQLDBType(string? sqlType);
 
 
     /// <summary>
@@ -40,7 +40,7 @@ public interface ITypeTranslater
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    Type GetCSharpTypeForSQLDBType(string sqlType);
+    Type GetCSharpTypeForSQLDBType(string? sqlType);
 
     /// <summary>
     /// Translates a database proprietary type e.g. 'decimal(10,2)' into a C# type e.g. 'typeof(decimal)'
@@ -65,7 +65,7 @@ public interface ITypeTranslater
     /// <returns>True if FAnsi has a C# Type representation for the supplied <paramref name="sqlType"/></returns>
     bool IsSupportedSQLDBType(string sqlType);
 
-    DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string sqlType);
+    DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string? sqlType);
 
     Guesser GetGuesserFor(DiscoveredColumn discoveredColumn);
 

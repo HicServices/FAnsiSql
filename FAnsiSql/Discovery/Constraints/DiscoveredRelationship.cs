@@ -54,15 +54,15 @@ public sealed class DiscoveredRelationship(string fkName, DiscoveredTable pkTabl
     /// <param name="transaction"></param>
     public void AddKeys(string primaryKeyCol, string foreignKeyCol, IManagedTransaction? transaction = null)
     {
-        if (_pkColumns == null)
+        if (_pkColumns == null || _fkColumns == null)
         {
             _pkColumns = PrimaryKeyTable.DiscoverColumns(transaction);
             _fkColumns = ForeignKeyTable.DiscoverColumns(transaction);
         }
 
         Keys.Add(
-            _pkColumns.Single(c=>c.GetRuntimeName().Equals(primaryKeyCol,StringComparison.CurrentCultureIgnoreCase)),
-            _fkColumns.Single(c => c.GetRuntimeName().Equals(foreignKeyCol, StringComparison.CurrentCultureIgnoreCase))
+            _pkColumns.Single(c => c.GetRuntimeName()?.Equals(primaryKeyCol, StringComparison.CurrentCultureIgnoreCase) == true),
+            _fkColumns.Single(c => c.GetRuntimeName()?.Equals(foreignKeyCol, StringComparison.CurrentCultureIgnoreCase) == true)
         );
     }
 }

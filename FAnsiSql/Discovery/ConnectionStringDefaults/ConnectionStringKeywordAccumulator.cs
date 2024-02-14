@@ -61,7 +61,7 @@ public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType
     /// <param name="keyword"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    private string GetCollisionWithKeyword(string keyword, string value)
+    private string? GetCollisionWithKeyword(string keyword, string value)
     {
         ArgumentNullException.ThrowIfNull(keyword);
         ArgumentNullException.ThrowIfNull(value);
@@ -82,7 +82,7 @@ public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType
         catch (NotSupportedException ex)
         {
             //don't output the value since that could be a password
-            throw new ArgumentException(string.Format(FAnsiStrings.ConnectionStringKeyword_ValueNotSupported, keyword),ex);
+            throw new ArgumentException(string.Format(FAnsiStrings.ConnectionStringKeyword_ValueNotSupported, keyword), ex);
         }
 
         //now iterate all the keys we had before and add those too, if the key count doesn't change for any of them we know it's a duplicate semantically

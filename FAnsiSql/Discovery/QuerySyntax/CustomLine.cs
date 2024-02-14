@@ -42,7 +42,7 @@ public sealed class CustomLine(string text, QueryComponent locationToInsert)
     /// </summary>
     /// <param name="syntaxHelper"></param>
     /// <returns></returns>
-    public string GetAliasFromText(IQuerySyntaxHelper syntaxHelper)
+    public string? GetAliasFromText(IQuerySyntaxHelper syntaxHelper)
     {
         syntaxHelper.SplitLineIntoSelectSQLAndAlias(Text, out _, out var alias);
         return string.IsNullOrWhiteSpace(alias) ? null : alias;

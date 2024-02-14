@@ -21,7 +21,7 @@ public interface IDiscoveredServerHelper
     DbParameter GetParameter(string parameterName);
     DbConnection GetConnection(DbConnectionStringBuilder builder);
 
-    DbConnectionStringBuilder GetConnectionStringBuilder(string connectionString);
+    DbConnectionStringBuilder GetConnectionStringBuilder(string? connectionString);
 
     /// <summary>
     /// Returns a new connection string builder with the supplied parameters.  Note that if a concept is not supported in the
@@ -35,7 +35,7 @@ public interface IDiscoveredServerHelper
     /// <returns></returns>
     DbConnectionStringBuilder GetConnectionStringBuilder(string server, string? database, string username, string password);
 
-    string GetServerName(DbConnectionStringBuilder builder);
+    string? GetServerName(DbConnectionStringBuilder builder);
     DbConnectionStringBuilder ChangeServer(DbConnectionStringBuilder builder, string newServer);
 
     string GetCurrentDatabase(DbConnectionStringBuilder builder);
@@ -58,5 +58,5 @@ public interface IDiscoveredServerHelper
 
     string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
     string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
-    Version GetVersion(DiscoveredServer server);
+    Version? GetVersion(DiscoveredServer server);
 }

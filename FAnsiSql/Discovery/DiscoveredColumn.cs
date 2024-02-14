@@ -13,7 +13,7 @@ namespace FAnsi.Discovery;
 /// <param name="table"></param>
 /// <param name="name"></param>
 /// <param name="allowsNulls"></param>
-public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNulls) : IHasFullyQualifiedNameToo,ISupplementalColumnInformation
+public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNulls) : IHasFullyQualifiedNameToo, ISupplementalColumnInformation
 {
     /// <summary>
     /// The <see cref="DiscoveredTable"/> on which the <see cref="DiscoveredColumn"/> was found
@@ -44,17 +44,17 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// <summary>
     /// The DBMS proprietary column specific collation e.g. "Latin1_General_CS_AS_KS_WS"
     /// </summary>
-    public string Collation { get; set; }
+    public string? Collation { get; set; }
 
     /// <summary>
     /// The data type of the column found (includes String Length and Scale/Precision).
     /// </summary>
-    public DiscoveredDataType DataType { get; set; }
+    public DiscoveredDataType? DataType { get; set; }
 
     /// <summary>
     /// The character set of the column (if char)
     /// </summary>
-    public string Format { get; set; }
+    public string? Format { get; set; }
 
     private readonly string _name = name;
     private readonly IQuerySyntaxHelper _querySyntaxHelper = table.Database.Server.GetQuerySyntaxHelper();
@@ -63,13 +63,14 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// The unqualified name of the column e.g. "MyCol"
     /// </summary>
     /// <returns></returns>
-    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_name);
+    public string? GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_name);
 
     /// <summary>
     /// The fully qualified name of the column e.g. [MyDb].dbo.[MyTable].[MyCol] or `MyDb`.`MyCol`
     /// </summary>
     /// <returns></returns>
-    public string GetFullyQualifiedName() => _querySyntaxHelper.EnsureFullyQualified(Table.Database.GetRuntimeName(),Table.Schema, Table.GetRuntimeName(), GetRuntimeName(), Table is DiscoveredTableValuedFunction);
+    public string? GetFullyQualifiedName() => _querySyntaxHelper.EnsureFullyQualified(Table.Database.GetRuntimeName(),
+        Table.Schema, Table.GetRuntimeName(), GetRuntimeName(), Table is DiscoveredTableValuedFunction);
 
 
     /// <summary>
@@ -130,5 +131,5 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// Returns the wrapped e.g. "[MyCol]" name of the column including escaping e.g. if you wanted to name a column "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
     /// </summary>
     /// <returns></returns>
-    public string GetWrappedName() => Table.GetQuerySyntaxHelper().EnsureWrapped(GetRuntimeName());
+    public string? GetWrappedName() => Table.GetQuerySyntaxHelper().EnsureWrapped(GetRuntimeName());
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -36,7 +37,7 @@ public abstract partial class QuerySyntaxHelper(
     public abstract int MaximumColumnLength { get; }
 
     /// <inheritdoc/>
-    public virtual char[] IllegalNameChars { get; } = ['.','(',')'];
+    public virtual char[] IllegalNameChars { get; } = ['.', '(', ')'];
 
     /// <summary>
     /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
@@ -47,17 +48,17 @@ public abstract partial class QuerySyntaxHelper(
     /// <summary>
     /// Symbols (for all database types) which denote wrapped entity names e.g. [dbo].[mytable] contains qualifiers '[' and ']'
     /// </summary>
-    public static readonly char[] TableNameQualifiers = ['[', ']', '`' ,'"'];
+    public static readonly char[] TableNameQualifiers = ['[', ']', '`', '"'];
 
     /// <inheritdoc/>
-    public abstract string OpenQualifier {get;}
+    public abstract string OpenQualifier { get; }
 
     /// <inheritdoc/>
-    public abstract string CloseQualifier {get;}
+    public abstract string CloseQualifier { get; }
 
     public ITypeTranslater TypeTranslater { get; private set; } = translater;
 
-    private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = [];
+    private readonly Dictionary<CultureInfo, TypeDeciderFactory> factories = [];
 
     public IAggregateHelper AggregateHelper { get; private set; } = aggregateHelper;
     public IUpdateHelper UpdateHelper { get; set; } = updateHelper;
@@ -84,7 +85,7 @@ public abstract partial class QuerySyntaxHelper(
     public string AliasPrefix => GetAliasConst();
 
     //Only look at the start of the string or following an equals or white space and stop at word boundaries
-    private static readonly Regex ParameterNameRegex = new ($@"(?:^|[\s+\-*/\\=(,])+{ParameterNamesRegex}\b");
+    private static readonly Regex ParameterNameRegex = new($@"(?:^|[\s+\-*/\\=(,])+{ParameterNamesRegex}\b");
 
     /// <summary>
     /// Lists the names of all parameters required by the supplied whereSql e.g. @bob = 'bob' would return "@bob"
@@ -110,8 +111,8 @@ public abstract partial class QuerySyntaxHelper(
 
     public bool IsValidParameterName(string parameterSQL) => ParameterNamesRegex.IsMatch(parameterSQL);
 
-
-    public virtual string? GetRuntimeName(string s)
+    [return: NotNullIfNotNull(nameof(s))]
+    public virtual string? GetRuntimeName(string? s)
     {
         if (string.IsNullOrWhiteSpace(s))
             return s;
@@ -130,11 +131,11 @@ public abstract partial class QuerySyntaxHelper(
         //Last symbol with no whitespace
         var lastWord = s[(s.LastIndexOf('.') + 1)..].Trim();
 
-        if(string.IsNullOrWhiteSpace(lastWord) || lastWord.Length<2)
+        if (string.IsNullOrWhiteSpace(lastWord) || lastWord.Length < 2)
             return lastWord;
 
         //trim off any brackets e.g. return "My Table" for "[My Table]"
-        if(lastWord.StartsWith(OpenQualifier, StringComparison.Ordinal) && lastWord.EndsWith(CloseQualifier, StringComparison.Ordinal))
+        if (lastWord.StartsWith(OpenQualifier, StringComparison.Ordinal) && lastWord.EndsWith(CloseQualifier, StringComparison.Ordinal))
             return UnescapeWrappedNameBody(lastWord[1..^1]);
 
         return lastWord;
@@ -165,22 +166,23 @@ public abstract partial class QuerySyntaxHelper(
 
     public abstract bool SupportsEmbeddedParameters();
 
-    public string EnsureWrapped(string databaseOrTableName)
+    [return: NotNullIfNotNull(nameof(databaseOrTableName))]
+    public string? EnsureWrapped([NotNullIfNotNull(nameof(databaseOrTableName))] string? databaseOrTableName)
     {
         if (string.IsNullOrWhiteSpace(databaseOrTableName))
             return databaseOrTableName;
 
         if (databaseOrTableName.Contains(DatabaseTableSeparator))
-            throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__,databaseOrTableName, DatabaseTableSeparator));
+            throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_EnsureWrapped_String_passed_to_EnsureWrapped___0___contained_separators__not_allowed____Prohibited_Separator_is___1__, databaseOrTableName, DatabaseTableSeparator));
 
         return EnsureWrappedImpl(databaseOrTableName);
     }
 
     public abstract string EnsureWrappedImpl(string databaseOrTableName);
 
-    public abstract string EnsureFullyQualified(string databaseName, string? schema, string tableName);
+    public abstract string EnsureFullyQualified(string? databaseName, string? schema, string? tableName);
 
-    public virtual string EnsureFullyQualified(string databaseName, string? schema, string tableName, string columnName, bool isTableValuedFunction = false)
+    public virtual string EnsureFullyQualified(string? databaseName, string? schema, string? tableName, string? columnName, bool isTableValuedFunction = false)
     {
         if (isTableValuedFunction)
             return $"{GetRuntimeName(tableName)}.{GetRuntimeName(columnName)}";//table valued functions do not support database name being in the column level selection list area of sql queries
@@ -204,7 +206,7 @@ public abstract partial class QuerySyntaxHelper(
     /// <param name="selectSQL"></param>
     /// <param name="alias"></param>
     /// <returns></returns>
-    public virtual bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string? alias)
+    public virtual bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, [NotNullWhen(true)] out string? alias)
     {
         //Ths line is expected to be some SELECT sql so remove trailing whitespace and commas etc
         lineToSplit = lineToSplit.TrimEnd(',', ' ', '\n', '\r');
@@ -214,7 +216,7 @@ public abstract partial class QuerySyntaxHelper(
         switch (matches.Count)
         {
             case > 1:
-                throw new SyntaxErrorException(string.Format(FAnsiStrings.QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_,matches.Count,lineToSplit));
+                throw new SyntaxErrorException(string.Format(FAnsiStrings.QuerySyntaxHelper_SplitLineIntoSelectSQLAndAlias_, matches.Count, lineToSplit));
             case 0:
                 selectSQL = lineToSplit;
                 alias = null;
@@ -338,12 +340,12 @@ public abstract partial class QuerySyntaxHelper(
         {
             culture ??= CultureInfo.InvariantCulture;
 
-            if(!factories.ContainsKey(culture))
-                factories.Add(culture,new TypeDeciderFactory(culture));
+            if (!factories.ContainsKey(culture))
+                factories.Add(culture, new TypeDeciderFactory(culture));
 
             var tt = TypeTranslater;
-            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
-            var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType.SQLType);
+            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn?.DataType?.SQLType);
+            var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn?.DataType?.SQLType);
 
             if (IsBasicallyNull(value))
                 p.Value = DBNull.Value;
@@ -353,7 +355,7 @@ public abstract partial class QuerySyntaxHelper(
                 var decider = factories[culture].Create(cSharpType);
                 var o = decider.Parse(strVal);
 
-                if(o is DateTime d) o = FormatDateTimeForDbParameter(d);
+                if (o is DateTime d) o = FormatDateTimeForDbParameter(d);
 
                 //Not all DBMS support DBParameter.Value = new TimeSpan(...);
                 if (o is TimeSpan t) o = FormatTimespanForDbParameter(t);
@@ -365,43 +367,43 @@ public abstract partial class QuerySyntaxHelper(
             else
                 p.Value = value;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__, discoveredColumn.GetFullyQualifiedName()),ex);
+            throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__, discoveredColumn.GetFullyQualifiedName()), ex);
         }
 
         return p;
     }
 
-    public void ValidateDatabaseName(string databaseName)
+    public void ValidateDatabaseName(string? databaseName)
     {
-        if(!IsValidDatabaseName(databaseName,out var reason))
+        if (!IsValidDatabaseName(databaseName, out var reason))
             throw new RuntimeNameException(reason);
     }
     public void ValidateTableName(string tableName)
     {
-        if(!IsValidTableName(tableName,out var reason))
+        if (!IsValidTableName(tableName, out var reason))
             throw new RuntimeNameException(reason);
     }
     public void ValidateColumnName(string columnName)
     {
-        if(!IsValidColumnName(columnName,out var reason))
+        if (!IsValidColumnName(columnName, out var reason))
             throw new RuntimeNameException(reason);
     }
 
-    public bool IsValidDatabaseName(string databaseName,out string reason)
+    public bool IsValidDatabaseName([NotNullWhen(true)] string? databaseName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(databaseName, "Database", MaximumDatabaseLength);
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public bool IsValidTableName(string tableName,out string reason)
+    public bool IsValidTableName([NotNullWhen(true)] string? tableName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(tableName, "Table", MaximumTableLength);
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public bool IsValidColumnName(string columnName,out string reason)
+    public bool IsValidColumnName(string columnName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(columnName, "Column", MaximumColumnLength);
         return string.IsNullOrWhiteSpace(reason);
@@ -434,7 +436,7 @@ public abstract partial class QuerySyntaxHelper(
     }
 
 
-    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value) => GetParameter(p, discoveredColumn, value,null);
+    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value) => GetParameter(p, discoveredColumn, value, null);
 
     /// <summary>
     /// <para>
@@ -477,9 +479,9 @@ public abstract partial class QuerySyntaxHelper(
 
     #endregion
 
-    public Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T, string> toStringFunc) where T : notnull
+    public Dictionary<T, string?> GetParameterNamesFor<T>(T[] columns, Func<T, string?> toStringFunc) where T : notnull
     {
-        var toReturn = new Dictionary<T, string>();
+        var toReturn = new Dictionary<T, string?>();
 
         var reservedKeywords = GetReservedWords();
 
@@ -492,10 +494,10 @@ public abstract partial class QuerySyntaxHelper(
             var c = columns[i];
             var columnName = toStringFunc(c);
 
-            if(!sensibleParameterNamesInclude.IsMatch(columnName)) //if column name is "_:_" or something
+            if (columnName is null || !sensibleParameterNamesInclude.IsMatch(columnName)) //if column name is "_:_" or something
                 toReturn.Add(c, $"{ParameterSymbol}p{i}");
             else
-                toReturn.Add(c,ParameterSymbol + (reservedKeywords.Contains(columnName)? $"{columnName}1" :columnName)); //if column is reserved keyword or normal name
+                toReturn.Add(c, ParameterSymbol + (reservedKeywords.Contains(columnName) ? $"{columnName}1" : columnName)); //if column is reserved keyword or normal name
         }
 
         return toReturn;
