@@ -10,8 +10,8 @@ namespace FAnsiTests.Aggregation;
 
 internal class AggregationTests:DatabaseTests
 {
-    private readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = new();
-    private readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = new();
+    private readonly Dictionary<DatabaseType, DiscoveredTable> _easyTables = [];
+    private readonly Dictionary<DatabaseType, DiscoveredTable> _hardTables = [];
 
     [OneTimeSetUp]
     public void Setup()
@@ -25,10 +25,8 @@ internal class AggregationTests:DatabaseTests
     {
         try
         {
-            using var dt = new DataTable
-            {
-                TableName = name
-            };
+            using var dt = new DataTable();
+            dt.TableName = name;
 
             dt.Columns.Add("EventDate");
             dt.Columns.Add("Category");
@@ -60,7 +58,6 @@ internal class AggregationTests:DatabaseTests
 
 
             foreach (var (key, _) in TestConnectionStrings)
-            {
                 try
                 {
                     var db = GetTestDatabase(key);
@@ -76,8 +73,6 @@ internal class AggregationTests:DatabaseTests
                     TestContext.WriteLine(e);
 
                 }
-
-            }
         }
         catch (Exception e)
         {
@@ -86,9 +81,9 @@ internal class AggregationTests:DatabaseTests
         }
     }
 
-    protected void AssertHasRow(DataTable dt, params object[] cells)
+    protected static void AssertHasRow(DataTable dt, params object?[] cells)
     {
-        Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r=>IsMatch(r,cells)),"Did not find expected row:{0}", string.Join("|",cells));
+        Assert.That(dt.Rows.Cast<DataRow>().Any(r => IsMatch(r, cells)),$"Did not find expected row:{string.Join("|", cells)}");
     }
 
     /// <summary>
@@ -97,9 +92,9 @@ internal class AggregationTests:DatabaseTests
     /// <param name="r"></param>
     /// <param name="cells"></param>
     /// <returns></returns>
-    private static bool IsMatch(DataRow r, object[] cells)
+    private static bool IsMatch(DataRow r, object?[] cells)
     {
-        for(var i = 0 ; i<cells.Length ;i++)
+        for (var i = 0; i < cells.Length; i++)
         {
             var a = r[i];
             var b = cells[i] ?? DBNull.Value; //null means dbnull
@@ -121,13 +116,13 @@ internal class AggregationTests:DatabaseTests
 
             if (!a.Equals(b))
                 return false;
-        }                
-            
+        }
+
         return true;
     }
 
 
-    protected void ConsoleWriteTable(DataTable _)
+    protected static void ConsoleWriteTable(DataTable _)
     {
         /*
         TestContext.WriteLine($"--- DebugTable({dt.TableName}) ---");
@@ -173,8 +168,8 @@ internal class AggregationTests:DatabaseTests
         var dic = easy ? _easyTables : _hardTables;
 
         if (!dic.ContainsKey(type))
-            Assert.Inconclusive("No connection string found for Test database type {0}", type);
-            
+            Assert.Inconclusive($"No connection string found for Test database type {type}");
+
         return dic[type];
     }
 

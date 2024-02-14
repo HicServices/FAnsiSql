@@ -7,7 +7,7 @@ using System.Data;
 
 namespace FAnsiTests.Aggregation;
 
-internal class BasicAggregationTests : AggregationTests
+internal sealed class BasicAggregationTests : AggregationTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_BasicCount(DatabaseType type)
@@ -28,7 +28,7 @@ internal class BasicAggregationTests : AggregationTests
         con.Open();
 
         var cmd = svr.GetCommand(sql, con);
-        Assert.AreEqual(14, Convert.ToInt32(cmd.ExecuteScalar()));
+        Assert.That(Convert.ToInt32(cmd.ExecuteScalar()), Is.EqualTo(14));
     }
 
 
@@ -61,11 +61,15 @@ internal class BasicAggregationTests : AggregationTests
         using var dt = new DataTable();
         da.Fill(dt);
 
-        Assert.AreEqual(4, dt.Rows.Count);
-        Assert.AreEqual("E&, %a' mp;E", dt.Rows[0][1]);
-        Assert.AreEqual(3, dt.Rows[0][0]);
+        Assert.Multiple(() =>
+        {
+            Assert.That(dt.Rows, Has.Count.EqualTo(4));
 
-        Assert.AreEqual("F", dt.Rows[1][1]);
-        Assert.AreEqual(2, dt.Rows[1][0]);
+            Assert.That(dt.Rows[0][1], Is.EqualTo("E&, %a' mp;E"));
+            Assert.That(dt.Rows[0][0], Is.EqualTo(3));
+
+            Assert.That(dt.Rows[1][1], Is.EqualTo("F"));
+            Assert.That(dt.Rows[1][0], Is.EqualTo(2));
+        });
     }
 }

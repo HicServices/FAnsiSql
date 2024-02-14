@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -15,8 +16,15 @@ using TypeGuesser;
 namespace FAnsi.Discovery;
 
 /// <inheritdoc/>
-public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
+public abstract partial class QuerySyntaxHelper(
+    ITypeTranslater translater,
+    IAggregateHelper aggregateHelper,
+    IUpdateHelper updateHelper,
+    DatabaseType databaseType)
+    : IQuerySyntaxHelper
 {
+    private static readonly System.Buffers.SearchValues<char> BracketSearcher = System.Buffers.SearchValues.Create("()");
+
     public virtual string DatabaseTableSeparator => ".";
 
     /// <inheritdoc/>
@@ -29,18 +37,18 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public abstract int MaximumColumnLength { get; }
 
     /// <inheritdoc/>
-    public virtual char[] IllegalNameChars { get; } = {'.','(',')'};
+    public virtual char[] IllegalNameChars { get; } = ['.','(',')'];
 
     /// <summary>
     /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
     /// </summary>
     /// <returns></returns>
-    protected static Regex ParameterNamesRegex = new("([@:][A-Za-z0-9_]*)\\s?", RegexOptions.IgnoreCase);
+    private static readonly Regex ParameterNamesRegex = ParameterNamesRe();
 
     /// <summary>
     /// Symbols (for all database types) which denote wrapped entity names e.g. [dbo].[mytable] contains qualifiers '[' and ']'
     /// </summary>
-    public static char[] TableNameQualifiers = { '[', ']', '`' ,'"'};
+    public static readonly char[] TableNameQualifiers = ['[', ']', '`' ,'"'];
 
     /// <inheritdoc/>
     public abstract string OpenQualifier {get;}
@@ -48,13 +56,13 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// <inheritdoc/>
     public abstract string CloseQualifier {get;}
 
-    public ITypeTranslater TypeTranslater { get; private set; }
+    public ITypeTranslater TypeTranslater { get; private set; } = translater;
 
-    private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = new();
+    private readonly Dictionary<CultureInfo,TypeDeciderFactory> factories = [];
 
-    public IAggregateHelper AggregateHelper { get; private set; }
-    public IUpdateHelper UpdateHelper { get; set; }
-    public DatabaseType DatabaseType { get; private set; }
+    public IAggregateHelper AggregateHelper { get; private set; } = aggregateHelper;
+    public IUpdateHelper UpdateHelper { get; set; } = updateHelper;
+    public DatabaseType DatabaseType { get; private set; } = databaseType;
 
     public virtual char ParameterSymbol => '@';
 
@@ -63,24 +71,16 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// " AS " qualifier is used explicitly.  The capture groups of this Regex must match <see cref="SplitLineIntoSelectSQLAndAlias"/>
     /// </summary>
     /// <returns></returns>
-    protected Regex GetAliasRegex()
-    {
+    private Regex GetAliasRegex() =>
         //whitespace followed by as and more whitespace
         //Then any word (optionally bounded by a table name qualifier)
-
         //alias is a word
         //(w+)
-            
         //alias is a wrapped word e.g. [hey hey].  In this case we must allow anything between the brackets that is not closing bracket
         //[[`""]([^[`""]+)[]`""]
+        AliasRegex();
 
-        return new Regex(@"\s+as\s+((\w+)|([[`""]([^[`""]+)[]`""]))$", RegexOptions.IgnoreCase);
-    }
-
-    protected string GetAliasConst()
-    {
-        return " AS ";
-    }
+    private static string GetAliasConst() => " AS ";
 
     public string AliasPrefix => GetAliasConst();
 
@@ -95,9 +95,9 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     public static HashSet<string> GetAllParameterNamesFromQuery(string query)
     {
         if (string.IsNullOrWhiteSpace(query))
-            return new HashSet<string>();
+            return [];
 
-        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Cast<Match>().Select(match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
+        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Cast<Match>().Select(static match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
         return toReturn;
     }
 
@@ -109,21 +109,10 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         return ParameterNamesRegex.Match(parameterSQL).Value.Trim();
     }
 
-    public bool IsValidParameterName(string parameterSQL)
-    {
-        return ParameterNamesRegex.IsMatch(parameterSQL);
-    }
-
-    protected QuerySyntaxHelper(ITypeTranslater translater, IAggregateHelper aggregateHelper, IUpdateHelper updateHelper, DatabaseType databaseType)
-    {
-        TypeTranslater = translater;
-        AggregateHelper = aggregateHelper;
-        UpdateHelper = updateHelper;
-        DatabaseType = databaseType;
-    }
+    public bool IsValidParameterName(string parameterSQL) => ParameterNamesRegex.IsMatch(parameterSQL);
 
 
-    public virtual string GetRuntimeName(string s)
+    public virtual string? GetRuntimeName(string? s)
     {
         if (string.IsNullOrWhiteSpace(s))
             return s;
@@ -135,18 +124,18 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         //it doesn't have an alias, e.g. it's `MyDatabase`.`mytable` or something
 
         //if it's "count(1)" or something then that's a problem!
-        if (s.IndexOfAny(new[]{'(',')' }) != -1)
+        if (s.AsSpan().IndexOfAny(BracketSearcher) != -1)
             throw new RuntimeNameException(
                 $"Could not determine runtime name for Sql:'{s}'.  It had brackets and no alias.  Try adding ' as mycol' to the end.");
 
         //Last symbol with no whitespace
-        var lastWord = s[(s.LastIndexOf(".", StringComparison.Ordinal) + 1)..].Trim();
+        var lastWord = s[(s.LastIndexOf('.') + 1)..].Trim();
 
         if(string.IsNullOrWhiteSpace(lastWord) || lastWord.Length<2)
             return lastWord;
 
         //trim off any brackets e.g. return "My Table" for "[My Table]"
-        if(lastWord.StartsWith(OpenQualifier) && lastWord.EndsWith(CloseQualifier))
+        if(lastWord.StartsWith(OpenQualifier, StringComparison.Ordinal) && lastWord.EndsWith(CloseQualifier, StringComparison.Ordinal))
             return UnescapeWrappedNameBody(lastWord[1..^1]);
 
         return lastWord;
@@ -159,12 +148,9 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// </summary>
     /// <param name="name">A wrapped name after it has had the opening and closing qualifiers stripped off e.g. "Fi``sh"</param>
     /// <returns>The final runtime name unescaped e.g. "Fi`sh"</returns>
-    protected virtual string UnescapeWrappedNameBody(string name)
-    {
-        return name;
-    }
+    protected virtual string UnescapeWrappedNameBody(string name) => name;
 
-    public virtual bool TryGetRuntimeName(string s,out string name)
+    public virtual bool TryGetRuntimeName(string s, out string? name)
     {
         try
         {
@@ -180,7 +166,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     public abstract bool SupportsEmbeddedParameters();
 
-    public string EnsureWrapped(string databaseOrTableName)
+    public string? EnsureWrapped(string? databaseOrTableName)
     {
         if (string.IsNullOrWhiteSpace(databaseOrTableName))
             return databaseOrTableName;
@@ -193,28 +179,19 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
     public abstract string EnsureWrappedImpl(string databaseOrTableName);
 
-    public abstract string EnsureFullyQualified(string databaseName, string schema, string tableName);
+    public abstract string EnsureFullyQualified(string databaseName, string? schema, string tableName);
 
-    public virtual string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false)
-    {
-        if (isTableValuedFunction)
-            return $"{GetRuntimeName(tableName)}.{GetRuntimeName(columnName)}";//table valued functions do not support database name being in the column level selection list area of sql queries
-
-        return $"{EnsureFullyQualified(databaseName, schema, tableName)}.{EnsureWrapped(GetRuntimeName(columnName))}";
-    }
+    public virtual string EnsureFullyQualified(string databaseName, string? schema, string tableName, string columnName, bool isTableValuedFunction = false) =>
+        isTableValuedFunction ? $"{GetRuntimeName(tableName)}.{GetRuntimeName(columnName)}"
+            : //table valued functions do not support database name being in the column level selection list area of sql queries
+            $"{EnsureFullyQualified(databaseName, schema, tableName)}.{EnsureWrapped(GetRuntimeName(columnName))}";
 
     public virtual string Escape(string sql) => string.IsNullOrWhiteSpace(sql) ? sql : sql.Replace("'", "''");
     public abstract TopXResponse HowDoWeAchieveTopX(int x);
 
-    public virtual string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request)
-    {
-        return GetParameterDeclaration(proposedNewParameterName, TypeTranslater.GetSQLDBTypeForCSharpType(request));
-    }
+    public virtual string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request) => GetParameterDeclaration(proposedNewParameterName, TypeTranslater.GetSQLDBTypeForCSharpType(request));
 
-    public virtual HashSet<string> GetReservedWords()
-    {
-        return new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-    }
+    public virtual HashSet<string> GetReservedWords() => new(StringComparer.CurrentCultureIgnoreCase);
 
     public abstract string GetParameterDeclaration(string proposedNewParameterName, string sqlType);
 
@@ -225,7 +202,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// <param name="selectSQL"></param>
     /// <param name="alias"></param>
     /// <returns></returns>
-    public virtual bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string alias)
+    public virtual bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string? alias)
     {
         //Ths line is expected to be some SELECT sql so remove trailing whitespace and commas etc
         lineToSplit = lineToSplit.TrimEnd(',', ' ', '\n', '\r');
@@ -262,7 +239,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
                 FAnsiStrings.QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_Line_must_not_be_blank,
                 nameof(lineToSplit));
 
-        if (lineToSplit.Count(c => c.Equals('(')) != lineToSplit.Count(c => c.Equals(')')))
+        if (lineToSplit.Count(static c => c.Equals('(')) != lineToSplit.Count(static c => c.Equals(')')))
             throw new ArgumentException(
                 FAnsiStrings
                     .QuerySyntaxHelper_SplitLineIntoOuterMostMethodAndContents_The_number_of_opening_and_closing_parentheses_must_match,
@@ -293,7 +270,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         //replace anything that isn't a digit, letter or underscore with emptiness (except spaces - these will go but first...)
         //also accept anything above ASCII 256
-        var r = new Regex("[^A-Za-z0-9_ \u0101-\uFFFF]");
+        var r = HeaderNameCharRegex();
 
         var adjustedHeader = r.Replace(header, "");
 
@@ -301,32 +278,30 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         //Camel case after spaces
         for (var i = 0; i < sb.Length; i++)
-        {
             //if we are looking at a space
             if (sb[i] == ' ' && i + 1 < sb.Length && sb[i + 1] >= 'a' && sb[i + 1] <= 'z') //and there is another character
                 //and that character is a lower case letter
                 sb[i + 1] = char.ToUpper(sb[i + 1]);
-        }
 
         adjustedHeader = sb.ToString().Replace(" ", "");
 
         //if it starts with a digit (illegal) put an underscore before it
-        if (Regex.IsMatch(adjustedHeader, "^[0-9]"))
+        if (StartsDigitsRe().IsMatch(adjustedHeader))
             adjustedHeader = $"_{adjustedHeader}";
 
         return adjustedHeader;
     }
 
-    public string GetSensibleEntityNameFromString(string potentiallyDodgyName)
+    public string GetSensibleEntityNameFromString(string? potentiallyDodgyName)
     {
         potentiallyDodgyName = GetRuntimeName(potentiallyDodgyName);
 
         //replace anything that isn't a digit, letter or underscore with underscores
-        var r = new Regex("[^A-Za-z0-9_]");
-        var adjustedHeader = r.Replace(potentiallyDodgyName, "_");
+        var r = NotAlphaNumRe();
+        var adjustedHeader = r.Replace(potentiallyDodgyName ?? string.Empty, "_");
 
         //if it starts with a digit (illegal) put an underscore before it
-        if (Regex.IsMatch(adjustedHeader, "^[0-9]"))
+        if (StartsDigitsRe().IsMatch(adjustedHeader))
             adjustedHeader = $"_{adjustedHeader}";
 
         return adjustedHeader;
@@ -343,31 +318,26 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         return value == null || value == DBNull.Value;
     }
 
-    public virtual bool IsTimeout(Exception exception)
-    {
-
+    public virtual bool IsTimeout(Exception exception) =>
         /*
         //todo doesn't work with .net standard 
         var oleE = exception as OleDbException;
 
         if (oleE != null && oleE.ErrorCode == -2147217871)
             return true;*/
-
-        return exception.Message.ToLower().Contains("timeout");
-    }
+        exception.Message.Contains("timeout", StringComparison.OrdinalIgnoreCase);
 
     public abstract string HowDoWeAchieveMd5(string selectSql);
 
 
-
-    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value,CultureInfo culture)
+    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value, CultureInfo? culture)
     {
         try
         {
             culture ??= CultureInfo.InvariantCulture;
 
-            if(!factories.ContainsKey(culture))
-                factories.Add(culture,new TypeDeciderFactory(culture));
+            if (!factories.ContainsKey(culture))
+                factories.Add(culture, new TypeDeciderFactory(culture));
 
             var tt = TypeTranslater;
             p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
@@ -375,26 +345,18 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
             if (IsBasicallyNull(value))
                 p.Value = DBNull.Value;
-            else
-            if (value is string strVal && factories[culture].IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan
+            else if (value is string strVal && factories[culture].IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan
             {
                 var decider = factories[culture].Create(cSharpType);
                 var o = decider.Parse(strVal);
 
-                if(o is DateTime d)
-                {
-                    o = FormatDateTimeForDbParameter(d);
-                }
+                if (o is DateTime d) o = FormatDateTimeForDbParameter(d);
 
                 //Not all DBMS support DBParameter.Value = new TimeSpan(...);
-                if (o is TimeSpan t)
-                {
-                    o = FormatTimespanForDbParameter(t);
-                }
+                if (o is TimeSpan t) o = FormatTimespanForDbParameter(t);
 
 
                 p.Value = o;
-
             }
             else
                 p.Value = value;
@@ -402,14 +364,14 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         catch(Exception ex)
         {
             throw new Exception(string.Format(FAnsiStrings.QuerySyntaxHelper_GetParameter_Could_not_GetParameter_for_column___0__, discoveredColumn.GetFullyQualifiedName()),ex);
-        }            
+        }
 
         return p;
     }
 
-    public void ValidateDatabaseName(string databaseName)
+    public void ValidateDatabaseName(string? databaseName)
     {
-        if(!IsValidDatabaseName(databaseName,out var reason))
+        if (!IsValidDatabaseName(databaseName, out var reason))
             throw new RuntimeNameException(reason);
     }
     public void ValidateTableName(string tableName)
@@ -423,28 +385,25 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
             throw new RuntimeNameException(reason);
     }
 
-    public bool IsValidDatabaseName(string databaseName,out string reason)
+    public bool IsValidDatabaseName(string? databaseName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(databaseName, "Database", MaximumDatabaseLength);
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public bool IsValidTableName(string tableName,out string reason)
+    public bool IsValidTableName(string tableName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(tableName, "Table", MaximumTableLength);
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public bool IsValidColumnName(string columnName,out string reason)
+    public bool IsValidColumnName(string columnName, [NotNullWhen(false)] out string? reason)
     {
         reason = ValidateName(columnName, "Column", MaximumColumnLength);
         return string.IsNullOrWhiteSpace(reason);
     }
 
-    public virtual string GetDefaultSchemaIfAny()
-    {
-        return null;
-    }
+    public virtual string? GetDefaultSchemaIfAny() => null;
 
     /// <summary>
     /// returns null if the name is valid.  Otherwise a string describing why it is invalid.
@@ -453,16 +412,16 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// <param name="objectType">Type of object being validated e.g. "Database", "Table" etc</param>
     /// <param name="maximumLengthAllowed"></param>
     /// <returns></returns>
-    private string ValidateName(string candidate, string objectType, int maximumLengthAllowed)
+    private string? ValidateName(string? candidate, string objectType, int maximumLengthAllowed)
     {
-        if(string.IsNullOrWhiteSpace(candidate))
+        if (string.IsNullOrWhiteSpace(candidate))
             return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name_cannot_be_blank, objectType);
 
-        if(candidate.Length > maximumLengthAllowed)
+        if (candidate.Length > maximumLengthAllowed)
             return string.Format(FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___is_too_long_for_the_DBMS___2__supports_maximum_length_of__3__,
                 objectType, candidate[..maximumLengthAllowed], DatabaseType, maximumLengthAllowed);
 
-        if(candidate.IndexOfAny(IllegalNameChars) != -1)
+        if (candidate.IndexOfAny(IllegalNameChars) != -1)
             return string.Format(
                 FAnsiStrings.QuerySyntaxHelper_ValidateName__0__name___1___contained_unsupported__by_FAnsi__characters___Unsupported_characters_are__2_,
                 objectType, candidate, new string(IllegalNameChars));
@@ -471,11 +430,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     }
 
 
-
-    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value)
-    {
-        return GetParameter(p,discoveredColumn,value,null);
-    }
+    public DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value) => GetParameter(p, discoveredColumn, value, null);
 
     /// <summary>
     /// <para>
@@ -486,10 +441,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// </summary>
     /// <param name="dateTime"></param>
     /// <returns></returns>
-    protected virtual object FormatDateTimeForDbParameter(DateTime dateTime)
-    {
-        return dateTime;
-    }
+    protected virtual object FormatDateTimeForDbParameter(DateTime dateTime) => dateTime;
 
     /// <summary>
     /// Return the appropriate value such that it can be put into a DbParameter.Value field and be succesfully inserted into a
@@ -497,10 +449,7 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
     /// </summary>
     /// <param name="timeSpan"></param>
     /// <returns></returns>
-    protected virtual object FormatTimespanForDbParameter(TimeSpan timeSpan)
-    {
-        return timeSpan;
-    }
+    protected virtual object FormatTimespanForDbParameter(TimeSpan timeSpan) => timeSpan;
 
     #region Equality Members
     protected bool Equals(QuerySyntaxHelper other)
@@ -511,29 +460,28 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
         return GetType() == other.GetType();
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != GetType()) return false;
+
         return Equals((QuerySyntaxHelper)obj);
     }
 
-    public override int GetHashCode()
-    {
-        return GetType().GetHashCode();
-    }
+    public override int GetHashCode() => GetType().GetHashCode();
+
     #endregion
 
-    public Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T,string> toStringFunc)
+    public Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T, string> toStringFunc) where T : notnull
     {
         var toReturn = new Dictionary<T, string>();
-            
+
         var reservedKeywords = GetReservedWords();
-                       
+
 
         //sensible parameter names have no spaces or symbols!
-        var sensibleParameterNamesInclude = new Regex(@"^\w*$");
+        var sensibleParameterNamesInclude = sensibleParameterNamesIncludeRe();
 
         for (var i = 0; i < columns.Length; i++)
         {
@@ -548,4 +496,17 @@ public abstract class QuerySyntaxHelper : IQuerySyntaxHelper
 
         return toReturn;
     }
+
+    [GeneratedRegex(@"^\w*$")]
+    private static partial Regex sensibleParameterNamesIncludeRe();
+    [GeneratedRegex("""\s+as\s+((\w+)|([[`"]([^[`"]+)[]`"]))$""", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex AliasRegex();
+    [GeneratedRegex("([@:][A-Za-z0-9_]*)\\s?", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex ParameterNamesRe();
+    [GeneratedRegex("[^A-Za-z0-9_ \u0101-\uFFFF]")]
+    private static partial Regex HeaderNameCharRegex();
+    [GeneratedRegex("^[0-9]")]
+    private static partial Regex StartsDigitsRe();
+    [GeneratedRegex("[^A-Za-z0-9_]")]
+    private static partial Regex NotAlphaNumRe();
 }

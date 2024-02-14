@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
@@ -13,15 +12,15 @@ using MySqlConnector;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlTableHelper : DiscoveredTableHelper
+public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 {
     public static readonly MySqlTableHelper Instance = new();
 
     private MySqlTableHelper() {}
 
-    private static readonly Regex IntParentheses = new(@"^int\(\d+\)", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
-    private static readonly Regex SmallintParentheses = new(@"^smallint\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    private static readonly Regex BitParentheses = new(@"^bit\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex IntParentheses = IntParenthesesRe();
+    private static readonly Regex SmallintParentheses = SmallintParenthesesRe();
+    private static readonly Regex BitParentheses = BitParenthesesRe();
 
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection,
         string database)
@@ -30,9 +29,11 @@ public class MySqlTableHelper : DiscoveredTableHelper
         var tableName = discoveredTable.GetRuntimeName();
 
         using (var cmd = discoveredTable.Database.Server.Helper.GetCommand(
-                   @"SELECT * FROM information_schema.`COLUMNS` 
-WHERE table_schema = @db
-  AND table_name = @tbl", connection.Connection))
+                   """
+                   SELECT * FROM information_schema.`COLUMNS`
+                   WHERE table_schema = @db
+                     AND table_name = @tbl
+                   """, connection.Connection))
         {
             cmd.Transaction = connection.Transaction;
 
@@ -67,18 +68,16 @@ WHERE table_schema = @db
 
                 toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
                 columns.Add(toAdd);
-
             }
 
             r.Close();
         }
-            
 
-        return columns.ToArray();
-            
+
+        return [.. columns];
     }
 
-    private bool YesNoToBool(object o)
+    private static bool YesNoToBool(object o)
     {
         if (o is bool b)
             return b;
@@ -123,38 +122,35 @@ WHERE table_schema = @db
 
 
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
-        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
-    {
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction) =>
         throw new NotImplementedException();
-    }
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture)
-    {
-        return new MySqlBulkCopy(discoveredTable, connection,culture);
-    }
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture) => new MySqlBulkCopy(discoveredTable, connection,culture);
 
-    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
+    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string,DiscoveredRelationship>();
 
-        const string sql = @"SELECT DISTINCT
-u.CONSTRAINT_NAME,
-u.TABLE_SCHEMA,
-u.TABLE_NAME,
-u.COLUMN_NAME,
-u.REFERENCED_TABLE_SCHEMA,
-u.REFERENCED_TABLE_NAME,
-u.REFERENCED_COLUMN_NAME,
-c.DELETE_RULE
-FROM
-    INFORMATION_SCHEMA.KEY_COLUMN_USAGE u
-INNER JOIN
-    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS c ON c.CONSTRAINT_NAME = u.CONSTRAINT_NAME
-WHERE
-  u.REFERENCED_TABLE_SCHEMA = @db AND
-  u.REFERENCED_TABLE_NAME = @tbl";
+        const string sql = """
+                           SELECT DISTINCT
+                           u.CONSTRAINT_NAME,
+                           u.TABLE_SCHEMA,
+                           u.TABLE_NAME,
+                           u.COLUMN_NAME,
+                           u.REFERENCED_TABLE_SCHEMA,
+                           u.REFERENCED_TABLE_NAME,
+                           u.REFERENCED_COLUMN_NAME,
+                           c.DELETE_RULE
+                           FROM
+                               INFORMATION_SCHEMA.KEY_COLUMN_USAGE u
+                           INNER JOIN
+                               INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS c ON c.CONSTRAINT_NAME = u.CONSTRAINT_NAME
+                           WHERE
+                             u.REFERENCED_TABLE_SCHEMA = @db AND
+                             u.REFERENCED_TABLE_NAME = @tbl
+                           """;
 
-        using (var cmd = new MySqlCommand(sql, (MySqlConnection) connection,(MySqlTransaction) transaction?.Transaction))
+        using (var cmd = new MySqlCommand(sql, (MySqlConnection)connection, (MySqlTransaction?)transaction?.Transaction))
         {
             var p = new MySqlParameter("@db", MySqlDbType.String)
             {
@@ -208,8 +204,8 @@ WHERE
                 current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
             }
         }
-            
-        return toReturn.Values.ToArray();
+
+        return [.. toReturn.Values];
     }
 
     protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
@@ -219,14 +215,18 @@ WHERE
         return $"RENAME TABLE {discoveredTable.GetWrappedName()} TO {syntax.EnsureWrapped(newName)};";
     }
 
-    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
-    {
-        return $"SELECT * FROM {table.GetFullyQualifiedName()} LIMIT {topX}";
-    }
+    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT * FROM {table.GetFullyQualifiedName()} LIMIT {topX}";
 
 
     public override void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop)
     {
         throw new NotImplementedException();
     }
+
+    [GeneratedRegex(@"^int\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex IntParenthesesRe();
+    [GeneratedRegex(@"^smallint\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex SmallintParenthesesRe();
+    [GeneratedRegex(@"^bit\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex BitParenthesesRe();
 }

@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-internal class CreatePrimaryKeyTest: DatabaseTests
+internal sealed class CreatePrimaryKeyTest: DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBasicCase_KeysCreated(DatabaseType databaseType)
@@ -34,18 +34,24 @@ internal class CreatePrimaryKeyTest: DatabaseTests
 
             tbl = db.CreateTable("Fish", dt);
         }
-            
+
         var col = tbl.DiscoverColumn("A");
 
-        Assert.IsTrue(col.AllowNulls);
-        Assert.IsFalse(col.IsPrimaryKey);
+        Assert.Multiple(() =>
+        {
+            Assert.That(col.AllowNulls);
+            Assert.That(col.IsPrimaryKey, Is.False);
+        });
 
         tbl.CreatePrimaryKey(col);
-            
+
         col = tbl.DiscoverColumn("A");
 
-        Assert.IsFalse(col.AllowNulls);
-        Assert.IsTrue(col.IsPrimaryKey);
+        Assert.Multiple(() =>
+        {
+            Assert.That(col.AllowNulls, Is.False);
+            Assert.That(col.IsPrimaryKey);
+        });
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -69,26 +75,35 @@ internal class CreatePrimaryKeyTest: DatabaseTests
 
             tbl = db.CreateTable("Fish", dt);
         }
-            
+
         var colA = tbl.DiscoverColumn("A");
         var colB = tbl.DiscoverColumn("B");
 
-        //Pre state
-        Assert.IsTrue(colA.AllowNulls);
-        Assert.IsFalse(colA.IsPrimaryKey);
-        Assert.IsTrue(colB.AllowNulls);
-        Assert.IsFalse(colB.IsPrimaryKey);
+        Assert.Multiple(() =>
+        {
+            //Pre state
+            Assert.That(colA.AllowNulls);
+            Assert.That(colA.IsPrimaryKey, Is.False);
+            Assert.That(colB.AllowNulls);
+            Assert.That(colB.IsPrimaryKey, Is.False);
+        });
 
         var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(colA, colB));
-        Assert.IsTrue(ex?.Message.Contains("Failed to create primary key on table"));
-        Assert.IsNotInstanceOf(typeof(AggregateException), ex?.InnerException);
-        Assert.IsInstanceOf<DbException>(ex?.InnerException);
+        Assert.Multiple(() =>
+        {
+            Assert.That(ex?.Message.Contains("Failed to create primary key on table") ?? false);
+            Assert.That(ex?.InnerException, Is.Not.InstanceOf(typeof(AggregateException)));
+            Assert.That(ex?.InnerException, Is.InstanceOf<DbException>());
+        });
 
         colA = tbl.DiscoverColumn("A");
         colB = tbl.DiscoverColumn("B");
 
-        //Post state should exactly match
-        Assert.IsFalse(colA.IsPrimaryKey);
-        Assert.IsFalse(colB.IsPrimaryKey);
+        Assert.Multiple(() =>
+        {
+            //Post state should exactly match
+            Assert.That(colA.IsPrimaryKey, Is.False);
+            Assert.That(colB.IsPrimaryKey, Is.False);
+        });
     }
 }

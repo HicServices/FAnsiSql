@@ -22,35 +22,18 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
     protected override string  ConnectionTimeoutKeyName => "Connection Timeout";
 
     #region Up Typing
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null)
-    {
-        return new OracleCommand(s, con as OracleConnection) {Transaction = transaction as OracleTransaction};
-    }
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) => new OracleCommand(s, con as OracleConnection) {Transaction = transaction as OracleTransaction};
 
-    public override DbDataAdapter GetDataAdapter(DbCommand cmd)
-    {
-        return new OracleDataAdapter((OracleCommand) cmd);
-    }
+    public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new OracleDataAdapter((OracleCommand) cmd);
 
-    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd)
-    {
-        return new OracleCommandBuilder((OracleDataAdapter) GetDataAdapter(cmd));
-    }
+    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new OracleCommandBuilder((OracleDataAdapter) GetDataAdapter(cmd));
 
-    public override DbParameter GetParameter(string parameterName)
-    {
-        return new OracleParameter(parameterName,null);
-    }
+    public override DbParameter GetParameter(string parameterName) => new OracleParameter(parameterName,null);
 
-    public override DbConnection GetConnection(DbConnectionStringBuilder builder)
-    {
-        return new OracleConnection(builder.ConnectionString);
-    }
+    public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new OracleConnection(builder.ConnectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString)
-    {
-        return new OracleConnectionStringBuilder(connectionString);
-    }
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) => new OracleConnectionStringBuilder(connectionString);
+
     #endregion
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
@@ -64,15 +47,13 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
             toReturn.UserID = username;
             toReturn.Password = password;
         }
-            
+
         return toReturn;
     }
 
-    public override DbConnectionStringBuilder ChangeDatabase(DbConnectionStringBuilder builder, string newDatabase)
-    {
+    public override DbConnectionStringBuilder ChangeDatabase(DbConnectionStringBuilder builder, string newDatabase) =>
         //does not apply to oracle since user = database but we create users with random passwords
-        return builder;
-    }
+        builder;
 
     public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder) => builder;
 
@@ -97,7 +78,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
             cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
             cmd.ExecuteNonQuery();
         }
-                    
+
 
         using(var cmd = new OracleCommand(
                   $"ALTER USER \"{newDatabaseName.GetRuntimeName()}\" quota unlimited on system", con))
@@ -123,14 +104,14 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
 
     public override Version GetVersion(DiscoveredServer server)
     {
-        using var con = server.GetConnection() as OracleConnection;
+        using var tcon = server.GetConnection();
+        if (tcon is not OracleConnection con) throw new ArgumentException("Oracle helped called on non-Oracle server",nameof(server));
+
         con.UseHourOffsetForUnsupportedTimezone = true;
         con.Open();
         using var cmd = server.GetCommand("SELECT * FROM v$version WHERE BANNER like 'Oracle Database%'",con);
         using var r = cmd.ExecuteReader();
-        if(r.Read())
-            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
-        return null;
+        return !r.Read() || r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
     }
 
     public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
@@ -150,7 +131,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
         using (var r = cmd.ExecuteReader())
             while (r.Read())
                 databases.Add((string) r["username"]);
-            
-        return databases.ToArray();
+
+        return [.. databases];
     }
 }

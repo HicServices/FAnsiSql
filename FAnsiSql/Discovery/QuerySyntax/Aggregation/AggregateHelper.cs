@@ -6,18 +6,18 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 
 public abstract class AggregateHelper:IAggregateHelper
 {
-    public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis axisIfAny)
+    public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis? axisIfAny)
     {
         var lines = new AggregateCustomLineCollection(queryLines, axisIfAny, GetQuerySyntaxHelper());
-            
+
         //no axis no pivot
         if (lines.AxisSelect == null  && lines.PivotSelect == null)
-            return BuildBasicAggregate(lines);  
+            return BuildBasicAggregate(lines);
 
         //axis (no pivot)
         if (lines.PivotSelect == null)
             return BuildAxisAggregate(lines);
-            
+
         //pivot (no axis)
         if (lines.AxisSelect == null)
             return BuildPivotOnlyAggregate(lines,GetPivotOnlyNonPivotColumn(lines));
@@ -26,9 +26,9 @@ public abstract class AggregateHelper:IAggregateHelper
         return BuildPivotAndAxisAggregate(lines);
     }
 
-    private CustomLine GetPivotOnlyNonPivotColumn(AggregateCustomLineCollection query)
+    private static CustomLine GetPivotOnlyNonPivotColumn(AggregateCustomLineCollection query)
     {
-        var nonPivotColumn = query.Lines.Where(l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.None).ToArray();
+        var nonPivotColumn = query.Lines.Where(static l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.None).ToArray();
         if(nonPivotColumn.Length != 1)
             throw new Exception("Pivot is only valid when there are 3 SELECT columns, an aggregate (e.g. count(*)), a pivot and a final column");
 
@@ -37,7 +37,7 @@ public abstract class AggregateHelper:IAggregateHelper
 
     protected abstract IQuerySyntaxHelper GetQuerySyntaxHelper();
 
-    protected string BuildBasicAggregate(AggregateCustomLineCollection query) => string.Join(Environment.NewLine, query.Lines);
+    protected static string BuildBasicAggregate(AggregateCustomLineCollection query) => string.Join(Environment.NewLine, query.Lines);
 
     /// <summary>
     /// Builds an SQL GROUP BY query in from the lines in <paramref name="query"/> where records are counted and put into
@@ -68,11 +68,11 @@ public abstract class AggregateHelper:IAggregateHelper
         var axisGroupBy = query.AxisGroupBy;
         var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
 
-        var axisColumnEndedWithComma = query.AxisSelect.Text.EndsWith(",");
+        var axisColumnEndedWithComma = query.AxisSelect.Text.EndsWith(',');
         query.AxisSelect.Text =
-            $"{GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias)} AS {axisColumnAlias}{(axisColumnEndedWithComma ? "," : "")}";
+            $"{GetDatePartOfColumn(query.Axis?.AxisIncrement ?? throw new InvalidOperationException("No axis in query"), axisColumnWithoutAlias)} AS {axisColumnAlias}{(axisColumnEndedWithComma ? "," : "")}";
 
-        var groupByEndedWithComma = axisGroupBy.Text.EndsWith(",");
+        var groupByEndedWithComma = axisGroupBy.Text.EndsWith(',');
         axisGroupBy.Text = GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias) + (groupByEndedWithComma ? "," : "");
     }
 

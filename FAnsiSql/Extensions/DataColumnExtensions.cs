@@ -33,11 +33,7 @@ public static class DataColumnExtensions
     /// </summary>
     /// <param name="dc"></param>
     /// <returns></returns>
-    public static bool GetDoNotReType(this DataColumn dc)
-    {
-        return
-            dc.DataType == typeof(string) &&
-            dc.ExtendedProperties[DoNotReTypeExtendedProperty] is true;
-    }
-
+    public static bool GetDoNotReType(this DataColumn dc) =>
+        dc.DataType == typeof(string) &&
+        dc.ExtendedProperties[DoNotReTypeExtendedProperty] is true;
 }

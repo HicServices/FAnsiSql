@@ -7,7 +7,7 @@ using FAnsi.Discovery.QuerySyntax.Update;
 
 namespace FAnsi.Implementations.PostgreSql.Update;
 
-public class PostgreSqlUpdateHelper : UpdateHelper
+public sealed class PostgreSqlUpdateHelper : UpdateHelper
 {
     public static readonly PostgreSqlUpdateHelper Instance = new();
     private PostgreSqlUpdateHelper(){}
@@ -16,25 +16,27 @@ public class PostgreSqlUpdateHelper : UpdateHelper
     {
         //https://stackoverflow.com/a/7869611
         var joinSql = string.Join(" AND ",
-            lines.Where(l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(c => c.Text));
+            lines.Where(static l => l.LocationToInsert == QueryComponent.JoinInfoJoin).Select(static c => c.Text));
 
         var whereSql = string.Join(" AND ",
-            lines.Where(l => l.LocationToInsert == QueryComponent.WHERE).Select(c => c.Text));
+            lines.Where(static l => l.LocationToInsert == QueryComponent.WHERE).Select(static c => c.Text));
 
         return string.Format(
-            @"UPDATE {1} AS t1
-SET 
-    {0}
-FROM
- {2} AS t2 
-WHERE
-{3}
-{4}
-{5}
-",
+            """
+            UPDATE {1} AS t1
+            SET
+                {0}
+            FROM
+             {2} AS t2
+            WHERE
+            {3}
+            {4}
+            {5}
 
-            string.Join($", {Environment.NewLine}",lines.Where(l=>l.LocationToInsert == QueryComponent.SET)
-                .Select(c =>
+            """,
+
+            string.Join($", {Environment.NewLine}",lines.Where(static l=>l.LocationToInsert == QueryComponent.SET)
+                .Select(static c =>
                     //seems like you cant specify the table alias in the SET section of the query
                     c.Text.Replace("t1.",""))),
             table1.GetFullyQualifiedName(),

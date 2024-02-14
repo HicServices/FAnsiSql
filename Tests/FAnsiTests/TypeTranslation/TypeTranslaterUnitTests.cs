@@ -1,13 +1,10 @@
 ﻿using FAnsi;
 using FAnsi.Implementation;
-using FAnsi.Implementations.MicrosoftSQL;
-using FAnsi.Implementations.MySql;
-using FAnsi.Implementations.Oracle;
 using NUnit.Framework;
 
 namespace FAnsiTests.TypeTranslation;
 
-internal class TypeTranslaterUnitTests
+internal sealed class TypeTranslaterUnitTests
 {
     /// <summary>
     /// IsSupportedType is a support check for FAnsi not the DBMS.  This test shows that FAnsi's view of 'what is a string' is pretty
@@ -21,6 +18,6 @@ internal class TypeTranslaterUnitTests
     public void Test_IsSupportedType(DatabaseType dbType,string sqlDbType,bool expectedOutcome)
     {
         var tt = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper().TypeTranslater;
-        Assert.AreEqual(expectedOutcome,tt.IsSupportedSQLDBType(sqlDbType),$"Unexpected result for IsSupportedSQLDBType with {dbType}.  Input was '{sqlDbType}' expected {expectedOutcome}");
+        Assert.That(tt.IsSupportedSQLDBType(sqlDbType), Is.EqualTo(expectedOutcome), $"Unexpected result for IsSupportedSQLDBType with {dbType}.  Input was '{sqlDbType}' expected {expectedOutcome}");
     }
 }

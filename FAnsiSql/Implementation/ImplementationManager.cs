@@ -2,21 +2,16 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Common;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using FAnsi.Exceptions;
-using FAnsi.Implementations.MicrosoftSQL;
-using FAnsi.Implementations.MySql;
-using FAnsi.Implementations.Oracle;
-using FAnsi.Implementations.PostgreSql;
 
 namespace FAnsi.Implementation;
 
 /// <summary>
 /// Handles detecting and loading implementations
 /// </summary>
-public class ImplementationManager
+public sealed class ImplementationManager
 {
     private static readonly ImplementationManager Instance=new();
 
@@ -27,7 +22,7 @@ public class ImplementationManager
 
     private ImplementationManager()
     {
-        _implementations = new List<IImplementation>();
+        _implementations = [];
     }
 
     /// <summary>
@@ -39,14 +34,6 @@ public class ImplementationManager
         var loading = new T();
         if (!Instance._implementations.Contains(loading))
             Instance._implementations.Add(loading);
-    }
-
-    /// <summary>
-    /// Loads all implementations found in currently loaded assemblies (in the current domain)
-    /// </summary>
-    [Obsolete("MEF is dead")]
-    public static void Load(DirectoryInfo currentDirectory=null)
-    {
     }
 
 
@@ -75,19 +62,13 @@ public class ImplementationManager
                     .ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_,
                 connection.GetType()));
     }
-    private static IImplementation GetImplementation(Func<IImplementation,bool> condition, string errorIfNotFound)
-    {
-        return Instance?._implementations.FirstOrDefault(condition)??throw new ImplementationNotFoundException(errorIfNotFound);
-    }
+    private static IImplementation GetImplementation(Func<IImplementation,bool> condition, string errorIfNotFound) => Instance?._implementations.FirstOrDefault(condition)??throw new ImplementationNotFoundException(errorIfNotFound);
 
     /// <summary>
     /// Returns all currently loaded implementations or null if no implementations have been loaded
     /// </summary>
     /// <returns></returns>
-    public static ReadOnlyCollection<IImplementation> GetImplementations()
-    {
-        return Instance._implementations.AsReadOnly();
-    }
+    public static ReadOnlyCollection<IImplementation> GetImplementations() => Instance._implementations.AsReadOnly();
 
     /// <summary>
     /// Clears all currently loaded <see cref="IImplementation"/>

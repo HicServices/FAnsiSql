@@ -9,7 +9,7 @@ using Microsoft.Data.SqlClient;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
+public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 {
     /// <summary>
     /// True to attempt sending "ALTER DATABASE MyDatabase SET SINGLE_USER WITH ROLLBACK IMMEDIATE"
@@ -17,9 +17,9 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     /// Defaults to true.  This command makes dropping databases more robust so is recommended but
     /// is not supported by some servers (e.g. Microsoft Azure)
     /// </summary>
-    public static bool SetSingleUserWhenDroppingDatabases = true;
+    public static bool SetSingleUserWhenDroppingDatabases { get; set; } = true;
 
-    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null)
     {
         if (connection.State == ConnectionState.Closed)
             throw new InvalidOperationException("Expected connection to be open");
@@ -55,7 +55,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         return tables.ToArray();
     }
 
-    public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction? transaction = null)
     {
         var functionsToReturn = new List<DiscoveredTableValuedFunction>();
 
@@ -76,7 +76,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
             }
         }
-            
+
 
         return functionsToReturn.ToArray();
     }
@@ -97,13 +97,10 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
                 toReturn.Add(new DiscoveredStoredprocedure((string)result["name"]));
         }
 
-        return toReturn.ToArray();
+        return [.. toReturn];
     }
 
-    public override IDiscoveredTableHelper GetTableHelper()
-    {
-        return new MicrosoftSQLTableHelper();
-    }
+    public override IDiscoveredTableHelper GetTableHelper() => new MicrosoftSQLTableHelper();
 
     public override void DropDatabase(DiscoveredDatabase database)
     {
@@ -131,7 +128,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
             else
                 throw;
         }
-            
+
         SqlConnection.ClearAllPools();
     }
 
@@ -142,7 +139,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
     /// <param name="databaseToDrop"></param>
     /// <param name="server"></param>
     /// <param name="setSingleUserModeFirst"></param>
-    private void DropDatabase(string databaseToDrop, DiscoveredServer server, bool setSingleUserModeFirst)
+    private static void DropDatabase(string databaseToDrop, DiscoveredServer server, bool setSingleUserModeFirst)
     {
         var sql = setSingleUserModeFirst ? $"ALTER DATABASE {databaseToDrop} SET SINGLE_USER WITH ROLLBACK IMMEDIATE{Environment.NewLine}"
             : "";
@@ -166,23 +163,25 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         using (var da = new SqlDataAdapter(cmd))
             da.Fill(ds);
 
-        toReturn.Add(ds.Tables[0].Columns[0].ColumnName, ds.Tables[0].Rows[0][0].ToString());
-        toReturn.Add(ds.Tables[0].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
+        toReturn.Add(ds.Tables[0].Columns[0].ColumnName, ds.Tables[0].Rows[0][0].ToString() ?? string.Empty);
+        toReturn.Add(ds.Tables[0].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString() ?? string.Empty);
 
-        toReturn.Add(ds.Tables[1].Columns[0].ColumnName, ds.Tables[1].Rows[0][0].ToString());
-        toReturn.Add(ds.Tables[1].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString());
-        toReturn.Add(ds.Tables[1].Columns[2].ColumnName, ds.Tables[1].Rows[0][2].ToString());
+        toReturn.Add(ds.Tables[1].Columns[0].ColumnName, ds.Tables[1].Rows[0][0].ToString() ?? string.Empty);
+        toReturn.Add(ds.Tables[1].Columns[1].ColumnName, ds.Tables[1].Rows[0][1].ToString() ?? string.Empty);
+        toReturn.Add(ds.Tables[1].Columns[2].ColumnName, ds.Tables[1].Rows[0][2].ToString() ?? string.Empty);
 
         return toReturn;
     }
 
-    public override DirectoryInfo Detach(DiscoveredDatabase database)
+    public override DirectoryInfo? Detach(DiscoveredDatabase database)
     {
-        const string getDefaultSqlServerDatabaseDirectory = @"SELECT LEFT(physical_name,LEN(physical_name)-CHARINDEX('\',REVERSE(physical_name))+1) 
-                        FROM sys.master_files mf   
-                        INNER JOIN sys.[databases] d   
-                        ON mf.[database_id] = d.[database_id]   
-                        WHERE d.[name] = 'master' AND type = 0";
+        const string getDefaultSqlServerDatabaseDirectory = """
+                                                            SELECT LEFT(physical_name,LEN(physical_name)-CHARINDEX('\',REVERSE(physical_name))+1)
+                                                                                    FROM sys.master_files mf
+                                                                                    INNER JOIN sys.[databases] d
+                                                                                    ON mf.[database_id] = d.[database_id]
+                                                                                    WHERE d.[name] = 'master' AND type = 0
+                                                            """;
 
         string dataFolder;
 
@@ -200,7 +199,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
         // other operations must be done on master
         server.ChangeDatabase("master");
-            
+
         // set single user before detaching
         sql = $"ALTER DATABASE {databaseToDetach} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
         using (var cmd = new SqlCommand(sql, con))
@@ -234,7 +233,7 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         cmd.ExecuteNonQuery();
     }
 
-    public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
+    public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string? name)
     {
         var syntax = discoveredDatabase.Server.GetQuerySyntaxHelper();
         var runtimeName = syntax.GetRuntimeName(name);
@@ -243,8 +242,10 @@ public class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         using var con = discoveredDatabase.Server.GetConnection();
         con.Open();
 
-        var sql = $@"if not exists (select 1 from sys.schemas where name = '{runtimeName}')
-	    EXEC('CREATE SCHEMA {name}')";
+        var sql = $"""
+                   if not exists (select 1 from sys.schemas where name = '{runtimeName}')
+                   	    EXEC('CREATE SCHEMA {name}')
+                   """;
 
         using var cmd = discoveredDatabase.Server.GetCommand(sql, con);
         cmd.ExecuteNonQuery();

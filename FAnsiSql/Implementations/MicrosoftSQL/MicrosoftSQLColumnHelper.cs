@@ -4,7 +4,7 @@ using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public class MicrosoftSQLColumnHelper : IDiscoveredColumnHelper
+public sealed class MicrosoftSQLColumnHelper : IDiscoveredColumnHelper
 {
     public string GetTopXSqlForColumn(IHasRuntimeName database, IHasFullyQualifiedNameToo table, IHasRuntimeName column, int topX, bool discardNulls)
     {
@@ -39,7 +39,7 @@ public class MicrosoftSQLColumnHelper : IDiscoveredColumnHelper
             $"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {column.GetWrappedName()} varchar(4000) {(allowNulls ? "NULL" : "NOT NULL")}");
         sb.AppendLine(
             $"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {column.GetWrappedName()} {newType} {(allowNulls ? "NULL" : "NOT NULL")}");
-                
+
         return sb.ToString();
     }
 }

@@ -12,25 +12,19 @@ namespace FAnsi.Discovery.ConnectionStringDefaults;
 /// 
 /// <para>Also handles connection string keyword aliases (where two words mean the same thing)</para>
 /// </summary>
-public class ConnectionStringKeywordAccumulator
+/// <remarks>
+/// Initialises a new blank instance that does nothing.  Call <see cref="AddOrUpdateKeyword"/> to adjust the template connection string options.
+/// </remarks>
+/// <param name="databaseType"></param>
+public sealed class ConnectionStringKeywordAccumulator(DatabaseType databaseType)
 {
     /// <summary>
-    /// <see cref="DatabaseType"/> describing what implmentation of DbConnectionStringBuilder is being manipulated
+    /// <see cref="DatabaseType"/> describing what implementation of DbConnectionStringBuilder is being manipulated
     /// </summary>
-    public DatabaseType DatabaseType { get; private set; }
+    public DatabaseType DatabaseType { get; private set; } = databaseType;
 
     private readonly Dictionary<string, Tuple<string, ConnectionStringKeywordPriority>> _keywords = new(StringComparer.CurrentCultureIgnoreCase);
-    private readonly DbConnectionStringBuilder _builder;
-
-    /// <summary>
-    /// Initialises a new blank instance that does nothing.  Call <see cref="AddOrUpdateKeyword"/> to adjust the template connection string options.
-    /// </summary>
-    /// <param name="databaseType"></param>
-    public ConnectionStringKeywordAccumulator(DatabaseType databaseType)
-    {
-        DatabaseType = databaseType;
-        _builder = ImplementationManager.GetImplementation(databaseType).GetBuilder();
-    }
+    private readonly DbConnectionStringBuilder _builder = ImplementationManager.GetImplementation(databaseType).GetBuilder();
 
     /// <summary>
     /// Adds a new connection string option (which must be compatible with <see cref="DatabaseType"/>)
@@ -56,10 +50,8 @@ public class ConnectionStringKeywordAccumulator
 
         //if we have not got that keyword yet
         if(!_keywords.TryAdd(keyword, Tuple.Create(value, priority)) && _keywords[keyword].Item2 <= priority)
-        {
             //or the keyword that was previously specified had a lower priority
             _keywords[keyword] = Tuple.Create(value, priority); //update it with the new value
-        }
     }
 
     /// <summary>
@@ -69,7 +61,7 @@ public class ConnectionStringKeywordAccumulator
     /// <param name="keyword"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    private string GetCollisionWithKeyword(string keyword, string value)
+    private string? GetCollisionWithKeyword(string keyword, string value)
     {
         ArgumentNullException.ThrowIfNull(keyword);
         ArgumentNullException.ThrowIfNull(value);
@@ -91,10 +83,11 @@ public class ConnectionStringKeywordAccumulator
         {
             //don't output the value since that could be a password
             throw new ArgumentException(string.Format(FAnsiStrings.ConnectionStringKeyword_ValueNotSupported, keyword),ex);
-        }            
+        }
 
         //now iterate all the keys we had before and add those too, if the key count doesn't change for any of them we know it's a duplicate semantically
         if (_builder.Keys == null) return null;
+
         foreach (var current in _keywords)
         {
             var keysBefore = _builder.Keys.Count;

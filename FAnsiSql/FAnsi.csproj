@@ -10,17 +10,19 @@
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</description>
-    <copyright>Copyright 2019</copyright>
     <PackageTags>Ansi,SQL</PackageTags>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyTitle>HIC.FAnsiSql</AssemblyTitle>
     <Company>Health Informatics Centre, University of Dundee</Company>
     <Product>HIC.FAnsiSql</Product>
     <Description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</Description>
-    <Copyright>Copyright ©  2019</Copyright>
+    <Copyright>Copyright ©  2019-2024</Copyright>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsAotCompatible>true</IsAotCompatible>
     <NoWarn>CS1591</NoWarn>
+    <NeutralLanguage>en-GB</NeutralLanguage>
+	<DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <WarningLevel>1</WarningLevel>
@@ -32,15 +34,15 @@
     <None Include="Discovery\TypeTranslation\TypeTranslation.cd" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.TypeGuesser" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.3" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+    <PackageReference Include="HIC.TypeGuesser" Version="1.2.3" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.5" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="MySqlConnector" Version="2.2.7" />
-    <PackageReference Include="Npgsql" Version="7.0.4" />
-    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.110" />
+    <PackageReference Include="MySqlConnector" Version="2.3.5" />
+    <PackageReference Include="Npgsql" Version="8.0.2" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.130" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="FAnsiStrings.Designer.cs">

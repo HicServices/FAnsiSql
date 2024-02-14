@@ -19,23 +19,21 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        language: [ csharp ]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
-          languages: ${{ matrix.language }}
+          languages: csharp
           queries: +security-and-quality
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
+      - name: Build
+        run: dotnet build -c Debug
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{ matrix.language }}"
+          category: "/language:csharp"

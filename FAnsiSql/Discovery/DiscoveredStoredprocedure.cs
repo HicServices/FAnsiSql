@@ -1,14 +1,9 @@
 ﻿namespace FAnsi.Discovery;
 
 /// <summary>
-/// Cross database type reference to a stored proceedure (function) on a database.
+/// Cross database type reference to a stored procedure (function) on a database.
 /// </summary>
-public class DiscoveredStoredprocedure
+public sealed class DiscoveredStoredprocedure(string name)
 {
-    public string Name { get; set; }
-
-    public DiscoveredStoredprocedure(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; set; } = name;
 }

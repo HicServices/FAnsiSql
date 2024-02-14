@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using TypeGuesser;
 
 namespace FAnsi.Discovery.TypeTranslation;
@@ -36,6 +37,9 @@ public interface ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns>The C# Type which can be used to store values of this database type</returns>
+    [return:
+        DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                   DynamicallyAccessedMemberTypes.PublicFields)]
     Type GetCSharpTypeForSQLDBType(string sqlType);
 
     /// <summary>
@@ -45,7 +49,10 @@ public interface ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns>The C# Type which can be used to store values of this database type</returns>
-    Type TryGetCSharpTypeForSQLDBType(string sqlType);
+    [return:
+        DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                   DynamicallyAccessedMemberTypes.PublicFields)]
+    Type? TryGetCSharpTypeForSQLDBType(string sqlType);
 
     /// <summary>
     /// Returns true if the <paramref name="sqlType"/> string could be reconciled into a known C# Type.  Do not use this
@@ -63,7 +70,7 @@ public interface ITypeTranslater
     Guesser GetGuesserFor(DiscoveredColumn discoveredColumn);
 
     int GetLengthIfString(string sqlType);
-    DecimalSize GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType);
+    DecimalSize? GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType);
 
     /// <summary>
     /// Translates the given sqlType which must be an SQL string compatible with this TypeTranslater e.g. varchar(10) into the destination ITypeTranslater

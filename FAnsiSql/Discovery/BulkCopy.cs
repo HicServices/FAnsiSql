@@ -40,7 +40,7 @@ public abstract class BulkCopy:IBulkCopy
     public bool AllowUnmatchedInputColumns { get; private set; }
 
     /// <inheritdoc/>
-    public DateTimeTypeDecider DateTimeDecider {get; protected set; }
+    public DateTimeTypeDecider DateTimeDecider { get; protected set; }
 
     /// <summary>
     /// Begins a new bulk copy operation in which one or more data tables are uploaded to the <paramref name="targetTable"/>.  The API entrypoint for this is
@@ -50,7 +50,7 @@ public abstract class BulkCopy:IBulkCopy
     /// <param name="targetTable"></param>
     /// <param name="connection"></param>
     /// <param name="culture">For parsing string date expressions etc</param>
-    protected BulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture)
+    protected BulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture)
     {
         Culture = culture;
         TargetTable = targetTable;
@@ -77,6 +77,7 @@ public abstract class BulkCopy:IBulkCopy
     /// </summary>
     public virtual void Dispose()
     {
+        GC.SuppressFinalize(this);
         Connection.Dispose();
     }
 
@@ -86,7 +87,7 @@ public abstract class BulkCopy:IBulkCopy
         TargetTable.Database.Helper.ThrowIfObjectColumns(dt);
 
         ConvertStringTypesToHardTypes(dt);
-            
+
         return UploadImpl(dt);
     }
 
@@ -102,58 +103,55 @@ public abstract class BulkCopy:IBulkCopy
         var dict = GetMapping(dt.Columns.Cast<DataColumn>(),out _);
 
         var factory = new TypeDeciderFactory(Culture);
-            
+
         //These are the problematic Types
         var deciders = factory.Dictionary;
-            
+
         //for each column in the destination
-        foreach(var kvp in dict)
+        foreach(var (dataColumn, discoveredColumn) in dict)
         {
             //if the destination column is a problematic type
-            var dataType = kvp.Value.DataType.GetCSharpDataType();
+            var dataType = discoveredColumn.DataType.GetCSharpDataType();
             if (!deciders.TryGetValue(dataType, out var decider)) continue;
-            //if it's already not a string then that's fine (hopefully its a legit Type e.g. DateTime!)
-            if(kvp.Key.DataType != typeof(string))
+            //if it's already not a string then that's fine (hopefully it's a legit Type e.g. DateTime!)
+            if(dataColumn.DataType != typeof(string))
                 continue;
 
             //create a new column hard typed to DateTime
-            var newColumn = dt.Columns.Add($"{kvp.Key.ColumnName}_{Guid.NewGuid()}",dataType);
+            var newColumn = dt.Columns.Add($"{dataColumn.ColumnName}_{Guid.NewGuid()}",dataType);
 
             //if it's a DateTime decider then guess DateTime culture based on values in the table
-            if(decider is DateTimeTypeDecider)
+            if (decider is DateTimeTypeDecider)
             {
                 //also use this one in case the user has set up explicit stuff on it e.g. Culture/Settings
                 decider = DateTimeDecider;
-                DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[kvp.Key] as string));
+                DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r => r[dataColumn] as string).OfType<string>());
             }
 
 
             foreach(DataRow dr in dt.Rows)
-            {
                 try
                 {
                     //parse the value
-                    dr[newColumn] = decider.Parse(dr[kvp.Key] as string)??DBNull.Value;
-
+                    dr[newColumn] = decider.Parse(dr[dataColumn] as string)??DBNull.Value;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    throw new Exception($"Failed to parse value '{dr[kvp.Key]}' in column '{kvp.Key}'",ex);
+                    throw new Exception($"Failed to parse value '{dr[dataColumn]}' in column '{dataColumn}'",ex);
                 }
-            }
 
             //if the DataColumn is part of the Primary Key of the DataTable (in memory)
             //then we need to update the primary key to include the new column not the old one
-            if(dt.PrimaryKey != null && dt.PrimaryKey.Contains(kvp.Key))
-                dt.PrimaryKey = dt.PrimaryKey.Except(new []{kvp.Key }).Union(new []{newColumn }).ToArray();
+            if(dt.PrimaryKey != null && dt.PrimaryKey.Contains(dataColumn))
+                dt.PrimaryKey = dt.PrimaryKey.Except(new [] { dataColumn }).Union(new []{newColumn }).ToArray();
 
-            var oldOrdinal  = kvp.Key.Ordinal;
+            var oldOrdinal  = dataColumn.Ordinal;
 
             //drop the original column
-            dt.Columns.Remove(kvp.Key);
+            dt.Columns.Remove(dataColumn);
 
             //rename the hard typed column to match the old column name
-            newColumn.ColumnName = kvp.Key.ColumnName;
+            newColumn.ColumnName = dataColumn.ColumnName;
             if(oldOrdinal != -1)
                 newColumn.SetOrdinal(oldOrdinal);
         }
@@ -200,8 +198,5 @@ public abstract class BulkCopy:IBulkCopy
     /// </summary>
     /// <param name="inputColumns"></param>
     /// <returns></returns>
-    protected Dictionary<DataColumn,DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns)
-    {
-        return GetMapping(inputColumns, out _);
-    }
+    protected Dictionary<DataColumn,DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns) => GetMapping(inputColumns, out _);
 }

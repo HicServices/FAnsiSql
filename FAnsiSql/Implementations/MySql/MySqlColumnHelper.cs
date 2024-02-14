@@ -4,7 +4,7 @@ using FAnsi.Naming;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlColumnHelper : IDiscoveredColumnHelper
+public sealed class MySqlColumnHelper : IDiscoveredColumnHelper
 {
     public static readonly MySqlColumnHelper Instance = new();
     private MySqlColumnHelper() {}
@@ -14,7 +14,7 @@ public class MySqlColumnHelper : IDiscoveredColumnHelper
         var syntax = MySqlQuerySyntaxHelper.Instance;
 
         var sql = new StringBuilder();
-        
+
         sql.Append($"SELECT {syntax.EnsureWrapped(column.GetRuntimeName())} FROM {table.GetFullyQualifiedName()}");
 
         if (discardNulls)

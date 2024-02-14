@@ -24,10 +24,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
         cmd.ExecuteNonQuery();
     }
 
-    public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
-    {
-        throw new NotImplementedException();
-    }
+    public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database) => throw new NotImplementedException();
 
     protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper)
     {
@@ -35,23 +32,21 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
             return $"{col.ColumnName} INTEGER {syntaxHelper.GetAutoIncrementKeywordIfAny()}";
         if (datatype.Equals("bigint", StringComparison.OrdinalIgnoreCase))
             return $"{col.ColumnName} NUMBER(19,0)";
+
         return base.GetCreateTableSqlLineForColumn(col, datatype, syntaxHelper);
     }
 
-    public override DirectoryInfo Detach(DiscoveredDatabase database)
-    {
-        throw new NotImplementedException();
-    }
+    public override DirectoryInfo Detach(DiscoveredDatabase database) => throw new NotImplementedException();
 
     public override void CreateBackup(DiscoveredDatabase discoveredDatabase, string backupName)
     {
         throw new NotImplementedException();
     }
 
-    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null)
     {
         var tables = new List<DiscoveredTable>();
-            
+
         //find all the tables
         using(var cmd = new OracleCommand($"SELECT table_name FROM all_tables where owner='{database}'", (OracleConnection) connection))
         {
@@ -64,7 +59,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
                 if(querySyntaxHelper.IsValidTableName((string)r["table_name"],out _))
                     tables.Add(new DiscoveredTable(parent,r["table_name"].ToString(),querySyntaxHelper));
         }
-            
+
         //find all the views
         if(includeViews)
         {
@@ -82,31 +77,19 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
     }
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null)
-    {
-        return Array.Empty<DiscoveredTableValuedFunction>();
-    }
+        DbConnection connection, string database, DbTransaction? transaction = null) =>
+        Array.Empty<DiscoveredTableValuedFunction>();
 
-    public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
-    {
-        return Array.Empty<DiscoveredStoredprocedure>();
-    }
+    public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database) => [];
 
-    protected override Guesser GetGuesser(DatabaseTypeRequest request)
-    {
-        return new Guesser(request)
+    protected override Guesser GetGuesser(DatabaseTypeRequest request) =>
+        new(request)
             {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
-    }
 
     public override void CreateSchema(DiscoveredDatabase discoveredDatabase, string name)
     {
         //Oracle doesn't really have schemas especially since a User is a Database
     }
 
-    protected override Guesser GetGuesser(DataColumn column)
-    {
-        return new Guesser {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
-    }
-
-
+    protected override Guesser GetGuesser(DataColumn column) => new() {ExtraLengthPerNonAsciiCharacter = OracleTypeTranslater.ExtraLengthPerNonAsciiCharacter};
 }

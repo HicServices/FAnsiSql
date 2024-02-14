@@ -36,9 +36,9 @@ jobs:
       run: sudo apt-get install -y libeatmydata1 apt-transport-https curl
     - uses: actions/checkout@v4
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 8.0.x
     - name: Install Sql Server
       run: |
         wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
@@ -58,7 +58,7 @@ jobs:
       if: contains(github.ref,'refs/tags/')
       run: dotnet nuget push HIC.FAnsiSql.*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_KEY }} --skip-duplicate
     - name: Store created nupkg files
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: '*.nupkg'
         retention-days: 1

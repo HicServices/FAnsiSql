@@ -9,7 +9,7 @@ using Microsoft.Data.SqlClient;
 namespace FAnsi.Implementations.MicrosoftSQL;
 
 /// <inheritdoc/>
-public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
+public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 {
     public static readonly MicrosoftQuerySyntaxHelper Instance=new();
     private MicrosoftQuerySyntaxHelper() : base(MicrosoftSQLTypeTranslater.Instance,new MicrosoftSQLAggregateHelper(),new MicrosoftSQLUpdateHelper(),DatabaseType.MicrosoftSQLServer)
@@ -28,15 +28,9 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "]";
 
-    public override TopXResponse HowDoWeAchieveTopX(int x)
-    {
-        return new TopXResponse($"TOP {x}", QueryComponent.SELECT);
-    }
+    public override TopXResponse HowDoWeAchieveTopX(int x) => new($"TOP {x}", QueryComponent.SELECT);
 
-    public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
-    {
-        return $"DECLARE {proposedNewParameterName} AS {sqlType};";
-    }
+    public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType) => $"DECLARE {proposedNewParameterName} AS {sqlType};";
 
     public override string GetScalarFunctionSql(MandatoryScalarFunctions function) =>
         function switch
@@ -47,10 +41,7 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
             _ => throw new ArgumentOutOfRangeException(nameof(function))
         };
 
-    public override string GetAutoIncrementKeywordIfAny()
-    {
-        return "IDENTITY(1,1)";
-    }
+    public override string GetAutoIncrementKeywordIfAny() => "IDENTITY(1,1)";
 
     public override Dictionary<string, string> GetSQLFunctionsDictionary() =>
         new()
@@ -69,59 +60,39 @@ public class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 
     public override bool IsTimeout(Exception exception)
     {
-        if (exception is SqlException sqlE)
+        if (exception is not SqlException sqlE) return base.IsTimeout(exception);
+
+        return sqlE.Number switch
         {
-            if (sqlE.Number is -2 or 11 or 1205)
-                return true;
-
+            -2 or 11 or 1205 => true,
             //yup, I've seen this behaviour from Sql Server.  ExceptionMessage of " " and .Number of
-            if (string.IsNullOrWhiteSpace(sqlE.Message) && sqlE.Number == 3617)
-                return true;
-        }
-
-        return base.IsTimeout(exception);
+            3617 when string.IsNullOrWhiteSpace(sqlE.Message) => true,
+            _ => base.IsTimeout(exception)
+        };
     }
 
-    public override string HowDoWeAchieveMd5(string selectSql)
-    {
-        return $"CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary,{selectSql})),2)";
-    }
+    public override string HowDoWeAchieveMd5(string selectSql) => $"CONVERT(NVARCHAR(32),HASHBYTES('MD5', CONVERT(varbinary,{selectSql})),2)";
 
-    public override string GetDefaultSchemaIfAny()
-    {
-        return "dbo";
-    }
+    public override string GetDefaultSchemaIfAny() => "dbo";
 
-    public override bool SupportsEmbeddedParameters()
-    {
-        return true;
-    }
+    public override bool SupportsEmbeddedParameters() => true;
 
-    public override string EnsureWrappedImpl(string databaseOrTableName)
-    {
-        return $"[{GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName)}]";
-    }
+    public override string EnsureWrappedImpl(string databaseOrTableName) => $"[{GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName)}]";
 
 
-    protected override string UnescapeWrappedNameBody(string name)
-    {
-        return name.Replace("]]","]");
-    }
+    protected override string UnescapeWrappedNameBody(string name) => name.Replace("]]","]");
 
     /// <summary>
     /// Returns the runtime name of the string with all ending square brackets escaped by doubling up (but resulting string is not wrapped itself)
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string GetRuntimeNameWithDoubledClosingSquareBrackets(string s)
-    {
-        return GetRuntimeName(s)?.Replace("]","]]");
-    }
+    private string? GetRuntimeNameWithDoubledClosingSquareBrackets(string s) => GetRuntimeName(s)?.Replace("]","]]");
 
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
+    public override string EnsureFullyQualified(string databaseName, string? schema, string tableName)
     {
         //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
-        if(string.IsNullOrWhiteSpace(schema))
+        if (string.IsNullOrWhiteSpace(schema))
             return EnsureWrapped( GetRuntimeName(databaseName)) + DatabaseTableSeparator + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(tableName));
 
         //there is a schema so add it in

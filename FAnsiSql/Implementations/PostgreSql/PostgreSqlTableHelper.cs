@@ -12,23 +12,22 @@ using Npgsql;
 
 namespace FAnsi.Implementations.PostgreSql;
 
-public class PostgreSqlTableHelper : DiscoveredTableHelper
+public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
 {
     public static readonly PostgreSqlTableHelper Instance = new();
     private PostgreSqlTableHelper() {}
-    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX)
-    {
-        return $"SELECT * FROM {table.GetFullyQualifiedName()} FETCH FIRST {topX} ROWS ONLY";
-    }
+    public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT * FROM {table.GetFullyQualifiedName()} FETCH FIRST {topX} ROWS ONLY";
 
     public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
         var toReturn = new List<DiscoveredColumn>();
 
-        const string sqlColumns = @"SELECT *
-                FROM information_schema.columns
-            WHERE table_schema = @schemaName
-            AND table_name   = @tableName;";
+        const string sqlColumns = """
+                                  SELECT *
+                                                  FROM information_schema.columns
+                                              WHERE table_schema = @schemaName
+                                              AND table_name   = @tableName;
+                                  """;
 
         using (var cmd =
                discoveredTable.GetCommand(sqlColumns, connection.Connection, connection.Transaction))
@@ -64,35 +63,37 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
             }
         }
 
-            
 
-        if(!toReturn.Any())
+
+        if(toReturn.Count == 0)
             throw new Exception($"Could not find any columns in table {discoveredTable}");
-            
+
         //don't bother looking for pks if it is a table valued function
         if (discoveredTable is DiscoveredTableValuedFunction)
-            return toReturn.ToArray();
-            
+            return [.. toReturn];
+
         var pks = ListPrimaryKeys(connection, discoveredTable);
 
         foreach (var c in toReturn.Where(c => pks.Any(pk=>pk.Equals(c.GetRuntimeName()))))
             c.IsPrimaryKey = true;
 
-        return toReturn.ToArray();
+        return [.. toReturn];
     }
 
     private string[] ListPrimaryKeys(IManagedConnection con, DiscoveredTable table)
     {
-        const string query = @"SELECT               
-            pg_attribute.attname, 
-            format_type(pg_attribute.atttypid, pg_attribute.atttypmod) 
-            FROM pg_index, pg_class, pg_attribute 
-            WHERE 
-            pg_class.oid = @tableName::regclass AND 
-                indrelid = pg_class.oid AND  
-            pg_attribute.attrelid = pg_class.oid AND 
-            pg_attribute.attnum = any(pg_index.indkey)
-            AND indisprimary";
+        const string query = """
+                             SELECT
+                                         pg_attribute.attname,
+                                         format_type(pg_attribute.atttypid, pg_attribute.atttypmod)
+                                         FROM pg_index, pg_class, pg_attribute
+                                         WHERE
+                                         pg_class.oid = @tableName::regclass AND
+                                             indrelid = pg_class.oid AND
+                                         pg_attribute.attrelid = pg_class.oid AND
+                                         pg_attribute.attnum = any(pg_index.indkey)
+                                         AND indisprimary
+                             """;
 
         var toReturn = new List<string>();
 
@@ -112,22 +113,18 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
             r.Close();
         }
 
-        return toReturn.ToArray();
+        return [.. toReturn];
     }
 
-    private string GetSQLType_FromSpColumnsResult(DbDataReader r)
+    private static string GetSQLType_FromSpColumnsResult(DbDataReader r)
     {
         var columnType = r["data_type"] as string;
         var lengthQualifier = "";
-            
-        if (HasPrecisionAndScale(columnType))
+
+        if (HasPrecisionAndScale(columnType ?? string.Empty))
             lengthQualifier = $"({r["numeric_precision"]},{r["numeric_scale"]})";
-        else
-        if (r["character_maximum_length"] != DBNull.Value)
-        {
-            lengthQualifier = $"({Convert.ToInt32(r["character_maximum_length"])})";
-        }
-            
+        else if (r["character_maximum_length"] != DBNull.Value) lengthQualifier = $"({Convert.ToInt32(r["character_maximum_length"])})";
+
         return columnType + lengthQualifier;
     }
 
@@ -140,8 +137,10 @@ public class PostgreSqlTableHelper : DiscoveredTableHelper
     public override void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop)
     {
         using var cmd = new NpgsqlCommand(
-            $@"ALTER TABLE {columnToDrop.Table.GetFullyQualifiedName()} 
-DROP COLUMN {columnToDrop.GetWrappedName()};",(NpgsqlConnection) connection);
+            $"""
+             ALTER TABLE {columnToDrop.Table.GetFullyQualifiedName()}
+             DROP COLUMN {columnToDrop.GetWrappedName()};
+             """,(NpgsqlConnection) connection);
         cmd.ExecuteNonQuery();
     }
 
@@ -152,9 +151,9 @@ DROP COLUMN {columnToDrop.GetWrappedName()};",(NpgsqlConnection) connection);
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) => new PostgreSqlBulkCopy(discoveredTable, connection,culture);
 
     public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd,
-        IManagedTransaction transaction = null)
+        IManagedTransaction? transaction = null)
     {
-        var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(c => c.IsAutoIncrement);
+        var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(static c => c.IsAutoIncrement);
 
         if(autoIncrement != null)
             cmd.CommandText += $" RETURNING {autoIncrement.GetFullyQualifiedName()};";
@@ -168,28 +167,30 @@ DROP COLUMN {columnToDrop.GetWrappedName()};",(NpgsqlConnection) connection);
     }
 
     public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
-        IManagedTransaction transaction = null)
+        IManagedTransaction? transaction = null)
     {
-        const string sql = @"select c.constraint_name
-    , x.table_schema as foreign_table_schema
-    , x.table_name as foreign_table_name
-    , x.column_name as foreign_column_name
-    , y.table_schema 
-    , y.table_name 
-    , y.column_name 
-    , delete_rule
-from information_schema.referential_constraints c
-join information_schema.key_column_usage x
-    on x.constraint_name = c.constraint_name
-join information_schema.key_column_usage y
-    on y.ordinal_position = x.position_in_unique_constraint
-    and y.constraint_name = c.unique_constraint_name
-where 
-    y.table_name=@tableName AND
-    y.table_schema=@schema
-order by c.constraint_name, x.ordinal_position";
+        const string sql = """
+                           select c.constraint_name
+                               , x.table_schema as foreign_table_schema
+                               , x.table_name as foreign_table_name
+                               , x.column_name as foreign_column_name
+                               , y.table_schema
+                               , y.table_name
+                               , y.column_name
+                               , delete_rule
+                           from information_schema.referential_constraints c
+                           join information_schema.key_column_usage x
+                               on x.constraint_name = c.constraint_name
+                           join information_schema.key_column_usage y
+                               on y.ordinal_position = x.position_in_unique_constraint
+                               and y.constraint_name = c.unique_constraint_name
+                           where
+                               y.table_name=@tableName AND
+                               y.table_schema=@schema
+                           order by c.constraint_name, x.ordinal_position
+                           """;
 
-            
+
         var toReturn = new Dictionary<string, DiscoveredRelationship>();
 
         using (var cmd = table.GetCommand(sql, connection, transaction?.Transaction))
@@ -245,15 +246,13 @@ order by c.constraint_name, x.ordinal_position";
                 current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
             }
         }
-            
-        return toReturn.Values.ToArray();
+
+        return [.. toReturn.Values];
     }
 
     protected override string GetRenameTableSql(DiscoveredTable discoveredTable, string newName)
     {
         var syntax = PostgreSqlSyntaxHelper.Instance;
-
-        return $@"ALTER TABLE {discoveredTable.GetFullyQualifiedName()}
-                RENAME TO {syntax.EnsureWrapped(newName)}";
+        return $"ALTER TABLE {discoveredTable.GetFullyQualifiedName()} RENAME TO {syntax.EnsureWrapped(newName)}";
     }
 }

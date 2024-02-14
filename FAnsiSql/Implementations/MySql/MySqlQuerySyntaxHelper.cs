@@ -8,7 +8,7 @@ using FAnsi.Implementations.MySql.Update;
 
 namespace FAnsi.Implementations.MySql;
 
-public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
+public sealed class MySqlQuerySyntaxHelper : QuerySyntaxHelper
 {
     public static readonly MySqlQuerySyntaxHelper Instance = new();
     public override int MaximumDatabaseLength => 64;
@@ -49,18 +49,15 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
 
     public override TopXResponse HowDoWeAchieveTopX(int x) => new($"LIMIT {x}",QueryComponent.Postfix);
 
-    public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType)
-    {
+    public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType) =>
         //MySql doesn't require parameter declaration you just start using it like javascript
-        return $"/* {proposedNewParameterName} */";
-    }
+        $"/* {proposedNewParameterName} */";
 
     public override string Escape(string sql)
     {
         // https://dev.mysql.com/doc/refman/8.0/en/string-literals.html
         var r = new StringBuilder(sql.Length);
         foreach (var c in sql)
-        {
             r.Append(c switch
             {
                 '\0'    => "\\0",
@@ -72,12 +69,11 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
                 '\t'    => "\\t",
                 '\u001a'    => "\\Z",
                 '\\' => "\\",
-// Pattern matching only:
-// '%' => "\\%",
-// '_' => "\\_",
+                // Pattern matching only:
+                // '%' => "\\%",
+                // '_' => "\\_",
                 _   => $"{c}"
             });
-        }
         return r.ToString();
     }
 
@@ -94,10 +90,7 @@ public class MySqlQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string GetAutoIncrementKeywordIfAny() => "AUTO_INCREMENT";
 
-    public override Dictionary<string, string> GetSQLFunctionsDictionary()
-    {
-        return Functions;
-    }
+    public override Dictionary<string, string> GetSQLFunctionsDictionary() => Functions;
 
     private static readonly Dictionary<string, string> Functions = new()
     {

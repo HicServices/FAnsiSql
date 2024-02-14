@@ -2,13 +2,11 @@
 using System.Data;
 using FAnsi;
 using FAnsi.Discovery;
-using FAnsi.Implementation;
-using FAnsi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
 
 namespace FAnsiTests;
 
-internal class TestExamples : DatabaseTests
+internal sealed class TestExamples : DatabaseTests
 {
     [Ignore("Test only works when the hard coded connection strings pass,  this test is used to build clear examples in the documentation")]
     [Test]
@@ -26,22 +24,25 @@ internal class TestExamples : DatabaseTests
             @"server=localhost\sqlexpress;Trusted_Connection=True;", DatabaseType.MicrosoftSQLServer);
         var database = server.ExpectDatabase("test");
         var table = database.ExpectTable("MyTable");
-            
+
         //Throw out whatever was there before
         if(table.Exists())
             table.Drop();
 
         //Create the table
         database.CreateTable("MyTable",dt);
-            
-        //Database types are compatible with all the data
-        Assert.AreEqual("datetime2",table.DiscoverColumn("Date of Birth").DataType.SQLType);
-        Assert.AreEqual("varchar(25)",table.DiscoverColumn("Name").DataType.SQLType);
 
-        //And the (string) data is now properly typed and sat in our DBMS
-        Assert.AreEqual(2,table.GetRowCount());    
-        Assert.AreEqual(new DateTime(1920,1,1),table.GetDataTable().Rows[0][1]);
-        Assert.AreEqual(new DateTime(1910,5,22),table.GetDataTable().Rows[1][1]);
+        Assert.Multiple(() =>
+        {
+            //Database types are compatible with all the data
+            Assert.That(table.DiscoverColumn("Date of Birth").DataType.SQLType, Is.EqualTo("datetime2"));
+            Assert.That(table.DiscoverColumn("Name").DataType.SQLType, Is.EqualTo("varchar(25)"));
+
+            //And the (string) data is now properly typed and sat in our DBMS
+            Assert.That(table.GetRowCount(), Is.EqualTo(2));
+            Assert.That(table.GetDataTable().Rows[0][1], Is.EqualTo(new DateTime(1920, 1, 1)));
+            Assert.That(table.GetDataTable().Rows[1][1], Is.EqualTo(new DateTime(1910, 5, 22)));
+        });
     }
 
     [Test]
@@ -62,7 +63,7 @@ internal class TestExamples : DatabaseTests
 
         //Find the database
         var database = server.ExpectDatabase("FAnsiTests");
-            
+
         //Or create it
         if(!database.Exists())
             database.Create();

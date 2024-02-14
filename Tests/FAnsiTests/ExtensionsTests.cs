@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace FAnsiTests;
 
-internal class ExtensionsTests
+internal sealed class ExtensionsTests
 {
     [Test]
     public void Test_SetDoNotReType_RepeatCalls()
@@ -15,14 +15,14 @@ internal class ExtensionsTests
 
         dt.Columns.Add("FFF");
 
-        Assert.IsFalse(dt.Columns["FFF"].GetDoNotReType());
+        Assert.That(dt.Columns["FFF"].GetDoNotReType(), Is.False);
 
         Assert.DoesNotThrow(()=>dt.SetDoNotReType(true));
 
-        Assert.IsTrue(dt.Columns["FFF"].GetDoNotReType());
+        Assert.That(dt.Columns["FFF"].GetDoNotReType());
 
         Assert.DoesNotThrow(()=>dt.SetDoNotReType(false));
 
-        Assert.IsFalse(dt.Columns["FFF"].GetDoNotReType());
+        Assert.That(dt.Columns["FFF"].GetDoNotReType(), Is.False);
     }
 }

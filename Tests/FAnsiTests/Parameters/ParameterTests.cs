@@ -8,15 +8,15 @@ using TypeGuesser;
 
 namespace FAnsiTests.Parameters;
 
-internal class ParameterTests:DatabaseTests
+internal sealed class ParameterTests:DatabaseTests
 {
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_SupportsEmbeddedParameters_DeclarationOrThrow(DatabaseType type)
     {
         var syntax = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
-                        
+
         if(syntax.SupportsEmbeddedParameters())
-            Assert.IsNotEmpty(syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)));
+            Assert.That(syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)), Is.Not.Empty);
         else
             Assert.Throws<NotSupportedException>(() =>syntax.GetParameterDeclaration("@bob", new DatabaseTypeRequest(typeof(string), 10)));
     }
@@ -27,10 +27,10 @@ internal class ParameterTests:DatabaseTests
     public void CreateParameter(DatabaseType type)
     {
         var syntax = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper();
-                        
+
         var declaration = syntax.GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10));
-            
-        StringAssert.Contains("@bob",declaration);
+
+        Assert.That(declaration, Does.Contain("@bob"));
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer)]
@@ -41,15 +41,15 @@ internal class ParameterTests:DatabaseTests
         var db = GetTestDatabase(type);
 
         var dt = new DataTable();
-            
+
         dt.Columns.Add("FF");
         dt.Rows.Add("armag");
         dt.Rows.Add("geddon");
 
         var tbl = db.CreateTable("ParameterUseTest",dt);
-            
+
         var sb = new StringBuilder();
-                        
+
         //declare the variable
         sb.AppendLine(tbl.GetQuerySyntaxHelper().GetParameterDeclaration("@bob",new DatabaseTypeRequest(typeof(string),10)));
 
@@ -62,7 +62,7 @@ internal class ParameterTests:DatabaseTests
         con.Open();
         var r = db.Server.GetCommand(sb.ToString(),con).ExecuteReader();
 
-        Assert.IsTrue(r.Read());
-        Assert.IsFalse(r.Read());
+        Assert.That(r.Read());
+        Assert.That(r.Read(), Is.False);
     }
 }
