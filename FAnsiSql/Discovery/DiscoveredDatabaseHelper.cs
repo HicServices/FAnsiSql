@@ -30,7 +30,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     public abstract DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database);
     public abstract IDiscoveredTableHelper GetTableHelper();
     public abstract void DropDatabase(DiscoveredDatabase database);
-    public abstract Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database);
+    public abstract Dictionary<string, string?> DescribeDatabase(DbConnectionStringBuilder builder, string database);
 
     public DiscoveredTable CreateTable(CreateTableArgs args)
     {

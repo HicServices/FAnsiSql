@@ -73,12 +73,12 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
 
     }
 
-    private string ConstructIndividualValue(string dataType, object value)
+    private string ConstructIndividualValue(string dataType, object? value)
     {
         dataType = dataType.ToUpper();
         dataType = BracketsRe().Replace(dataType, "").Trim();
 
-        if(value is DateTime valueDateTime)
+        if (value is DateTime valueDateTime)
             switch (dataType)
             {
                 case "DATE":
@@ -89,10 +89,10 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
                     return $"'{valueDateTime:HH:mm:ss}'";
             }
 
-        if(value == null || value == DBNull.Value)
+        if (value == null || value == DBNull.Value)
             return "NULL";
 
-        return ConstructIndividualValue(dataType,  value.ToString());
+        return ConstructIndividualValue(dataType, value.ToString() ?? "NULL");
     }
 
     private string ConstructIndividualValue(string dataType, string value)

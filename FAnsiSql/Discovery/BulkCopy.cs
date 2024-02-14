@@ -129,14 +129,13 @@ public abstract class BulkCopy:IBulkCopy
             }
 
 
-            foreach(DataRow dr in dt.Rows)
+            foreach (DataRow dr in dt.Rows)
                 try
                 {
                     //parse the value
-                    dr[newColumn] = decider.Parse(dr[dataColumn] as string)??DBNull.Value;
-
+                    dr[newColumn] = decider.Parse(dr[dataColumn] as string) ?? DBNull.Value;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw new Exception($"Failed to parse value '{dr[dataColumn]}' in column '{dataColumn}'",ex);
                 }

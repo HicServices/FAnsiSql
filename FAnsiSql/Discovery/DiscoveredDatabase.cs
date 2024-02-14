@@ -52,7 +52,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <param name="includeViews">true to also return views (See <see cref="DiscoveredTable.TableType"/>)</param>
     /// <param name="transaction">Optional - if provided the database query will be sent using the connection/transaction provided</param>
     /// <returns></returns>
-    public DiscoveredTable[] DiscoverTables(bool includeViews, IManagedTransaction transaction = null)
+    public DiscoveredTable[] DiscoverTables(bool includeViews, IManagedTransaction? transaction = null)
     {
         using var managedConnection = Server.GetManagedConnection(transaction);
         return

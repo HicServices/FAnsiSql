@@ -20,7 +20,7 @@ public sealed class ManagedConnection : IManagedConnection
     /// <inheritdoc/>
     public bool CloseOnDispose { get; set; }
 
-    internal ManagedConnection(DiscoveredServer discoveredServer, IManagedTransaction managedTransaction)
+    internal ManagedConnection(DiscoveredServer discoveredServer, IManagedTransaction? managedTransaction)
     {
         //get a new connection or use the existing one within the transaction
         Connection = discoveredServer.GetConnection(managedTransaction);

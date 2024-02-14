@@ -151,9 +151,9 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         cmd.ExecuteNonQuery();
     }
 
-    public override Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database)
+    public override Dictionary<string, string?> DescribeDatabase(DbConnectionStringBuilder builder, string database)
     {
-        var toReturn = new Dictionary<string, string>();
+        var toReturn = new Dictionary<string, string?>();
 
         using var con = new SqlConnection(builder.ConnectionString);
         con.Open();

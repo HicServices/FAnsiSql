@@ -14,7 +14,6 @@ namespace FAnsi.Discovery;
 /// </summary>
 public interface IDiscoveredDatabaseHelper
 {
-
     IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null);
     IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction transaction = null);
 
@@ -23,7 +22,7 @@ public interface IDiscoveredDatabaseHelper
     IDiscoveredTableHelper GetTableHelper();
     void DropDatabase(DiscoveredDatabase database);
 
-    Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database);
+    Dictionary<string, string?> DescribeDatabase(DbConnectionStringBuilder builder, string database);
 
     DiscoveredTable CreateTable(CreateTableArgs args);
 

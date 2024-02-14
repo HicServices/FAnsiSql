@@ -66,9 +66,9 @@ public class DatabaseTests
                     throw new Exception($"Could not parse DatabaseType {type}");
 
 
-                var constr = element.Element("ConnectionString")?.Value;
+                var constr = element.Element("ConnectionString")?.Value ?? throw new NullReferenceException("Missing ConnectionString");
 
-                TestConnectionStrings.Add(databaseType,constr);
+                TestConnectionStrings.Add(databaseType, constr);
             }
         }
         catch (Exception exception)

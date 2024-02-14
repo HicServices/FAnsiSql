@@ -107,7 +107,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - when provided returns the <see cref="IManagedTransaction.Connection"/> instead of opening a new one </param>
     /// <returns></returns>
-    public DbConnection GetConnection(IManagedTransaction transaction = null) => transaction != null ? transaction.Connection : Helper.GetConnection(Builder);
+    public DbConnection GetConnection(IManagedTransaction? transaction = null) => transaction != null ? transaction.Connection : Helper.GetConnection(Builder);
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
     public DbCommand GetCommand(string sql, IManagedConnection managedConnection)
@@ -357,7 +357,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction"></param>
     /// <returns></returns>
-    public IManagedConnection GetManagedConnection(IManagedTransaction transaction = null) => new ManagedConnection(this, transaction);
+    public IManagedConnection GetManagedConnection(IManagedTransaction? transaction = null) => new ManagedConnection(this, transaction);
 
     /// <summary>
     /// Returns helper for generating queries compatible with the DBMS (See <see cref="DatabaseType"/>) e.g. TOP X, column qualifiers, what the parameter

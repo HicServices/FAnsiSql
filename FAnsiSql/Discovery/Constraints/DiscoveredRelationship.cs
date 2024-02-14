@@ -43,8 +43,8 @@ public sealed class DiscoveredRelationship(string fkName, DiscoveredTable pkTabl
     /// </summary>
     public CascadeRule CascadeDelete { get; private set; } = deleteRule;
 
-    private DiscoveredColumn[] _pkColumns;
-    private DiscoveredColumn[] _fkColumns;
+    private DiscoveredColumn[]? _pkColumns;
+    private DiscoveredColumn[]? _fkColumns;
 
     /// <summary>
     /// Discovers and adds the provided pair to <see cref="Keys"/>.  Column names must be members of <see cref="PrimaryKeyTable"/> and <see cref="ForeignKeyTable"/> (respectively)
@@ -52,7 +52,7 @@ public sealed class DiscoveredRelationship(string fkName, DiscoveredTable pkTabl
     /// <param name="primaryKeyCol"></param>
     /// <param name="foreignKeyCol"></param>
     /// <param name="transaction"></param>
-    public void AddKeys(string primaryKeyCol, string foreignKeyCol,IManagedTransaction transaction = null)
+    public void AddKeys(string primaryKeyCol, string foreignKeyCol, IManagedTransaction? transaction = null)
     {
         if (_pkColumns == null)
         {
