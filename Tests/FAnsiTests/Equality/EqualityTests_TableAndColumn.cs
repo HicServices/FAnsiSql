@@ -17,7 +17,7 @@ internal sealed class EqualityTests_TableAndColumn
     [TestCase("MyTable", null, "MyTable", "dBo")]
     [TestCase("MyTable", null, "MyTable", "")]
     [TestCase("MyTable", "", "MyTable", "dbo")]
-    public void EqualityTest_DiscoveredTable_AreEqual(string table1, string schema1, string table2, string schema2)
+    public void EqualityTest_DiscoveredTable_AreEqual(string table1, string? schema1, string table2, string? schema2)
     {
         var s = new DiscoveredServer("Server=fish", DatabaseType.MicrosoftSQLServer);
 

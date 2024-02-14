@@ -140,7 +140,7 @@ internal sealed class QuerySyntaxHelperTests
     [TestCase("count(*) as Frank32","count(*)","Frank32")]
     [TestCase("CAST([dave] as int) as [number]","CAST([dave] as int)","number")]
     [TestCase("CAST([dave] as int)","CAST([dave] as int)",null)]
-    public void SyntaxHelperTest_SplitLineIntoSelectSQLAndAlias(string line, string expectedSelectSql, string expectedAlias)
+    public void SyntaxHelperTest_SplitLineIntoSelectSQLAndAlias(string line, string expectedSelectSql, string? expectedAlias)
     {
         foreach (var syntaxHelper in new []{DatabaseType.Oracle,DatabaseType.MySql,DatabaseType.MicrosoftSQLServer}.Select(t => ImplementationManager.GetImplementation(t).GetQuerySyntaxHelper()))
             Assert.Multiple(() =>

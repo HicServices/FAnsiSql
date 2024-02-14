@@ -41,7 +41,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// 
     /// <para>Null if not supported by the DBMS (e.g. MySql)</para>
     /// </summary>
-    public readonly string Schema;
+    public readonly string? Schema;
 
     /// <summary>
     /// Whether the table referenced is a normal table, view or table valued function (see derived class <see cref="DiscoveredTableValuedFunction"/>)
@@ -56,7 +56,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="querySyntaxHelper"></param>
     /// <param name="schema"></param>
     /// <param name="tableType"></param>
-    public DiscoveredTable(DiscoveredDatabase database, string table, IQuerySyntaxHelper querySyntaxHelper, string schema = null, TableType tableType = TableType.Table)
+    public DiscoveredTable(DiscoveredDatabase database, string table, IQuerySyntaxHelper querySyntaxHelper, string? schema = null, TableType tableType = TableType.Table)
     {
         TableName = table;
         Helper = database.Helper.GetTableHelper();

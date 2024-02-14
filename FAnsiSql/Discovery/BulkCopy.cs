@@ -125,7 +125,7 @@ public abstract class BulkCopy:IBulkCopy
             {
                 //also use this one in case the user has set up explicit stuff on it e.g. Culture/Settings
                 decider = DateTimeDecider;
-                DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[dataColumn] as string));
+                DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r => r[dataColumn] as string).OfType<string>());
             }
 
 

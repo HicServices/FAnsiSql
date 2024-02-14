@@ -247,17 +247,16 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
             using var r = cmd.ExecuteReader();
             while (r.Read())
             {
-                var fkName = r["constraint_name"].ToString();
+                var fkName = r["constraint_name"].ToString() ?? throw new NullReferenceException();
 
                 //could be a 2+ columns foreign key?
                 if (!toReturn.TryGetValue(fkName, out var current))
                 {
+                    var pkDb = r["r_owner"].ToString() ?? throw new NullReferenceException();
+                    var pkTableName = r["r_table_name"].ToString() ?? throw new NullReferenceException();
 
-                    var pkDb = r["r_owner"].ToString();
-                    var pkTableName = r["r_table_name"].ToString();
-
-                    var fkDb = r["owner"].ToString();
-                    var fkTableName = r["table_name"].ToString();
+                    var fkDb = r["owner"].ToString() ?? throw new NullReferenceException();
+                    var fkTableName = r["table_name"].ToString() ?? throw new NullReferenceException();
 
                     var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
                     var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);

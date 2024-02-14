@@ -479,7 +479,7 @@ public abstract partial class QuerySyntaxHelper(
 
     #endregion
 
-    public Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T,string> toStringFunc)
+    public Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T, string> toStringFunc) where T : notnull
     {
         var toReturn = new Dictionary<T, string>();
 

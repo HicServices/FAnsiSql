@@ -413,7 +413,7 @@ internal sealed class CreateTableTests:DatabaseTests
         dt.Rows.Add("F");
 
         //do not retype string to bool
-        dt.Columns["Hb"].SetDoNotReType(true);
+        dt.Columns["Hb"]?.SetDoNotReType(true);
 
         var tbl = db.CreateTable("T1", dt);
 

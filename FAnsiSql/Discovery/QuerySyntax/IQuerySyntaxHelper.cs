@@ -31,7 +31,7 @@ public interface IQuerySyntaxHelper
     /// <param name="columns"></param>
     /// <param name="toStringFunc">Function to convert the <typeparamref name="T"/> to a string e.g. c.ColumnName if DataColumn</param>
     /// <returns></returns>
-    Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T,string> toStringFunc);
+    Dictionary<T, string> GetParameterNamesFor<T>(T[] columns, Func<T, string> toStringFunc) where T : notnull;
 
     IAggregateHelper AggregateHelper { get; }
     IUpdateHelper UpdateHelper { get; set; }

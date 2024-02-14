@@ -97,7 +97,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// If in doubt leave blank</param>
     /// <param name="tableType">What you are looking for (normal table, view or table valued function)</param>
     /// <returns></returns>
-    public DiscoveredTable ExpectTable(string tableName, string schema = null, TableType tableType = TableType.Table)
+    public DiscoveredTable ExpectTable(string tableName, string? schema = null, TableType tableType = TableType.Table)
     {
         if (tableType == TableType.TableValuedFunction)
             return ExpectTableValuedFunction(tableName, schema);
@@ -106,7 +106,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     }
 
     /// <inheritdoc cref="ExpectTable"/>
-    public DiscoveredTableValuedFunction ExpectTableValuedFunction(string tableName,string schema = null) => new(this, tableName, _querySyntaxHelper, schema);
+    public DiscoveredTableValuedFunction ExpectTableValuedFunction(string tableName, string? schema = null) => new(this, tableName, _querySyntaxHelper, schema);
 
     /// <summary>
     /// Connects to the database and returns a list of stored proceedures found as <see cref="DiscoveredStoredprocedure"/> objects

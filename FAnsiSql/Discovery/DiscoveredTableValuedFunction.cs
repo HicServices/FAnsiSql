@@ -12,7 +12,7 @@ namespace FAnsi.Discovery;
 public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database,
     string functionName,
     IQuerySyntaxHelper querySyntaxHelper,
-    string schema = null) : DiscoveredTable(database, functionName, querySyntaxHelper,
+    string? schema = null) : DiscoveredTable(database, functionName, querySyntaxHelper,
     schema, TableType.TableValuedFunction)
 {
     public override bool Exists(IManagedTransaction transaction = null)
