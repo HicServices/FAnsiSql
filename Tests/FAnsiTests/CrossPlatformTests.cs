@@ -40,7 +40,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         var tbl = db.CreateTable("MyTable",[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyDate", input } });
-
+            
         using (var blk = tbl.BeginBulkInsert())
         {
             using var dt = new DataTable();
@@ -76,7 +76,7 @@ public sealed class CrossPlatformTests:DatabaseTests
 
         //basic insert
         tbl.Insert(new Dictionary<string, object> { { "MyDate", input } },cultureInfo);
-
+            
         //then bulk insert, both need to work
         using (var blk = tbl.BeginBulkInsert(cultureInfo))
         {
@@ -324,7 +324,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         ]);
 
         var parentIdPkCol = tblParent.DiscoverColumn("ID");
-
+            
         var parentIdFkCol = new DatabaseColumnRequest("Parent_ID", new DatabaseTypeRequest(typeof (int)));
 
         var tblChild = database.CreateTable("Child",
@@ -507,10 +507,10 @@ public sealed class CrossPlatformTests:DatabaseTests
     public void CreateMaxVarcharColumnFromDataTable(DatabaseType type)
     {
         var database = GetTestDatabase(type);
-
+            
         var dt = new DataTable();
         dt.Columns.Add("MassiveColumn");
-
+            
         var sb = new StringBuilder("Amaa");
         for (var i = 0; i < 10000; i++)
             sb.Append(i);
@@ -584,7 +584,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         {
             tbl.AddColumn(newColumnName, new DatabaseTypeRequest(typeof(DateTime)), true, 1000);
         }
-
+            
 
         //new column should exist
         var newCol = tbl.DiscoverColumn(newColumnName);
@@ -598,7 +598,7 @@ public sealed class CrossPlatformTests:DatabaseTests
 
         //sql server can't handle altering primary key columns or anything with a foreign key on it too!
         if (type == DatabaseType.MicrosoftSQLServer)
-            fieldsToAlter.Remove("Field1");
+            fieldsToAlter.Remove("Field1"); 
 
         foreach (var fieldName in fieldsToAlter)
         {
@@ -796,7 +796,7 @@ public sealed class CrossPlatformTests:DatabaseTests
 
         database = database.Server.ExpectDatabase(horribleDatabaseName);
         database.Create(true);
-
+            
         SqlConnection.ClearAllPools();
 
         try
@@ -863,7 +863,7 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "my.database", "my.table", "my.col")]
     public void UnsupportedEntityNames(DatabaseType type, string horribleDatabaseName, string horribleTableName,string columnName)
     {
-
+            
         var database = GetTestDatabase(type);
 
         Assert.Multiple(() =>
@@ -896,7 +896,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         });
 
         AssertCanCreateDatabases();
-
+            
         //CreateDatabase with illegal name
         Assert.That(
             Assert.Throws<RuntimeNameException>(()=>database.Server.CreateDatabase(horribleDatabaseName))
@@ -1006,7 +1006,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             }
         ]);
         DateTime currentValue;
-
+            
         using (var insert = tbl.BeginBulkInsert())
         {
             using var dt = new DataTable();
