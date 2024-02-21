@@ -7,7 +7,7 @@ using TypeGuesser;
 namespace FAnsi.Discovery.TypeTranslation;
 
 /// <inheritdoc cref="ITypeTranslater"/>
-public abstract partial class TypeTranslater:ITypeTranslater
+public abstract partial class TypeTranslater : ITypeTranslater
 {
     private const string StringSizeRegexPattern = @"\(([0-9]+)\)";
     private const string DecimalsBeforeAndAfterPattern = @"\(([0-9]+),([0-9]+)\)";
@@ -20,7 +20,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
     protected Regex SmallIntRegex = SmallIntRe();
     protected Regex IntRegex = IntRe();
     protected Regex LongRegex = LongRe();
-    protected Regex DateRegex;
+    protected readonly Regex DateRegex;
     protected Regex TimeRegex = TimeRe();
     private static readonly Regex StringRegex = StringRe();
     private static readonly Regex ByteArrayRegex = ByteArrayRe();
@@ -44,8 +44,9 @@ public abstract partial class TypeTranslater:ITypeTranslater
     /// </summary>
     /// <param name="maxStringWidthBeforeMax"><see cref="MaxStringWidthBeforeMax"/></param>
     /// <param name="stringWidthWhenNotSupplied"><see cref="StringWidthWhenNotSupplied"/></param>
-    protected TypeTranslater(int maxStringWidthBeforeMax, int stringWidthWhenNotSupplied)
+    protected TypeTranslater(Regex dateRegex, int maxStringWidthBeforeMax, int stringWidthWhenNotSupplied)
     {
+        DateRegex = dateRegex;
         MaxStringWidthBeforeMax = maxStringWidthBeforeMax;
         StringWidthWhenNotSupplied = stringWidthWhenNotSupplied;
     }
@@ -63,10 +64,10 @@ public abstract partial class TypeTranslater:ITypeTranslater
         if (t == typeof(short) || t == typeof(short) || t == typeof(ushort) || t == typeof(short?) || t == typeof(ushort?))
             return GetSmallIntDataType();
 
-        if (t == typeof(int) || t == typeof(int)  || t == typeof(uint) || t == typeof(int?) || t == typeof(uint?))
+        if (t == typeof(int) || t == typeof(int) || t == typeof(uint) || t == typeof(int?) || t == typeof(uint?))
             return GetIntDataType();
 
-        if (t == typeof (long) || t == typeof(ulong) || t == typeof(long?) || t == typeof(ulong?))
+        if (t == typeof(long) || t == typeof(ulong) || t == typeof(long?) || t == typeof(ulong?))
             return GetBigIntDataType();
 
         if (t == typeof(float) || t == typeof(float?) || t == typeof(double) ||
@@ -82,10 +83,10 @@ public abstract partial class TypeTranslater:ITypeTranslater
         if (t == typeof(TimeSpan) || t == typeof(TimeSpan?))
             return GetTimeDataType();
 
-        if (t == typeof (byte[]))
+        if (t == typeof(byte[]))
             return GetByteArrayDataType();
 
-        if (t == typeof (Guid))
+        if (t == typeof(Guid))
             return GetGuidDataType();
 
         throw new TypeNotMappedException(string.Format(FAnsiStrings.TypeTranslater_GetSQLDBTypeForCSharpType_Unsure_what_SQL_type_to_use_for_CSharp_Type___0_____TypeTranslater_was___1__, t.Name, GetType().Name));
@@ -152,7 +153,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    public Type GetCSharpTypeForSQLDBType(string sqlType) =>
+    public Type GetCSharpTypeForSQLDBType(string? sqlType) =>
         TryGetCSharpTypeForSQLDBType(sqlType) ??
         throw new TypeNotMappedException(string.Format(
             FAnsiStrings
@@ -163,8 +164,10 @@ public abstract partial class TypeTranslater:ITypeTranslater
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    public Type? TryGetCSharpTypeForSQLDBType(string sqlType)
+    public Type? TryGetCSharpTypeForSQLDBType(string? sqlType)
     {
+        if (string.IsNullOrWhiteSpace(sqlType)) return null;
+
         if (IsBit(sqlType))
             return typeof(bool);
 
@@ -279,7 +282,7 @@ public abstract partial class TypeTranslater:ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    private static bool IsUnicode(string sqlType) => sqlType != null && sqlType.StartsWith("n",StringComparison.CurrentCultureIgnoreCase);
+    private static bool IsUnicode(string sqlType) => sqlType != null && sqlType.StartsWith("n", StringComparison.CurrentCultureIgnoreCase);
 
     public virtual Guesser GetGuesserFor(DiscoveredColumn discoveredColumn) => GetGuesserFor(discoveredColumn, 0);
 

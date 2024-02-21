@@ -15,12 +15,12 @@ public sealed class ManagedConnection : IManagedConnection
     public DbTransaction? Transaction { get; }
 
     /// <inheritdoc/>
-    public IManagedTransaction ManagedTransaction { get; }
+    public IManagedTransaction? ManagedTransaction { get; }
 
     /// <inheritdoc/>
     public bool CloseOnDispose { get; set; }
 
-    internal ManagedConnection(DiscoveredServer discoveredServer, IManagedTransaction managedTransaction)
+    internal ManagedConnection(DiscoveredServer discoveredServer, IManagedTransaction? managedTransaction)
     {
         //get a new connection or use the existing one within the transaction
         Connection = discoveredServer.GetConnection(managedTransaction);
@@ -37,7 +37,7 @@ public sealed class ManagedConnection : IManagedConnection
         Connection.Open();
     }
 
-    public ManagedConnection Clone() => (ManagedConnection) MemberwiseClone();
+    public ManagedConnection Clone() => (ManagedConnection)MemberwiseClone();
 
     /// <summary>
     /// Closes and disposes the DbConnection unless this class is part of an <see cref="IManagedTransaction"/>

@@ -43,8 +43,8 @@ public sealed class DiscoveredRelationship(string fkName, DiscoveredTable pkTabl
     /// </summary>
     public CascadeRule CascadeDelete { get; private set; } = deleteRule;
 
-    private DiscoveredColumn[] _pkColumns;
-    private DiscoveredColumn[] _fkColumns;
+    private DiscoveredColumn[]? _pkColumns;
+    private DiscoveredColumn[]? _fkColumns;
 
     /// <summary>
     /// Discovers and adds the provided pair to <see cref="Keys"/>.  Column names must be members of <see cref="PrimaryKeyTable"/> and <see cref="ForeignKeyTable"/> (respectively)
@@ -52,16 +52,13 @@ public sealed class DiscoveredRelationship(string fkName, DiscoveredTable pkTabl
     /// <param name="primaryKeyCol"></param>
     /// <param name="foreignKeyCol"></param>
     /// <param name="transaction"></param>
-    public void AddKeys(string primaryKeyCol, string foreignKeyCol,IManagedTransaction? transaction = null)
+    public void AddKeys(string primaryKeyCol, string foreignKeyCol, IManagedTransaction? transaction = null)
     {
-        if (_pkColumns == null)
-        {
-            _pkColumns = PrimaryKeyTable.DiscoverColumns(transaction);
-            _fkColumns = ForeignKeyTable.DiscoverColumns(transaction);
-        }
+        _pkColumns ??= PrimaryKeyTable.DiscoverColumns(transaction);
+        _fkColumns ??= ForeignKeyTable.DiscoverColumns(transaction);
 
         Keys.Add(
-            _pkColumns.Single(c=>c.GetRuntimeName().Equals(primaryKeyCol,StringComparison.CurrentCultureIgnoreCase)),
+            _pkColumns.Single(c => c.GetRuntimeName().Equals(primaryKeyCol, StringComparison.CurrentCultureIgnoreCase)),
             _fkColumns.Single(c => c.GetRuntimeName().Equals(foreignKeyCol, StringComparison.CurrentCultureIgnoreCase))
         );
     }

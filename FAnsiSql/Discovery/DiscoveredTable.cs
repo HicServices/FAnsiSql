@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -88,7 +89,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// Returns the unqualified name of the table e.g. "MyTable"
     /// </summary>
     /// <returns></returns>
-    public virtual string? GetRuntimeName() => QuerySyntaxHelper.GetRuntimeName(TableName);
+    public virtual string GetRuntimeName() => QuerySyntaxHelper.GetRuntimeName(TableName);
 
     /// <summary>
     /// Returns the fully qualified (including schema if appropriate) name of the table e.g. [MyDb].dbo.[MyTable] or `MyDb`.`MyTable`
@@ -100,7 +101,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// Returns the wrapped e.g. "[MyTbl]" name of the table including escaping e.g. if you wanted to name a table "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
     /// </summary>
     /// <returns></returns>
-    public string? GetWrappedName() => QuerySyntaxHelper.EnsureWrapped(GetRuntimeName());
+    public string GetWrappedName() => QuerySyntaxHelper.EnsureWrapped(GetRuntimeName());
 
     /// <summary>
     /// Connects to the server and returns a list of columns found in the table as <see cref="DiscoveredColumn"/>.

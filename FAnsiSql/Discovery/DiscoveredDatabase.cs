@@ -78,7 +78,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// Returns the name of the database without any qualifiers
     /// </summary>
     /// <returns></returns>
-    public string? GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_database);
+    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_database);
 
     /// <summary>
     /// Returns the wrapped e.g. "[MyDatabase]" name of the database including escaping e.g. if you wanted to name a database "][nquisitor" (which would return "[]][nquisitor]").

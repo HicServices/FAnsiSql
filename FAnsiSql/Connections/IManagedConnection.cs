@@ -22,7 +22,7 @@ public interface IManagedConnection : IDisposable
     /// <summary>
     /// Optional - transaction being run (See <see cref="DiscoveredServer.BeginNewTransactedConnection"/>.  If this is not null then <see cref="Transaction"/> should also be not null.
     /// </summary>
-    IManagedTransaction ManagedTransaction { get; }
+    IManagedTransaction? ManagedTransaction { get; }
 
     /// <summary>
     /// True to close the connection in the Dispose step.  If <see cref="IManagedConnection"/> opened the connection itself during construction then this flag will default

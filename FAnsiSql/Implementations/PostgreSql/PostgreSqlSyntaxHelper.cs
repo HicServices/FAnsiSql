@@ -10,7 +10,7 @@ namespace FAnsi.Implementations.PostgreSql;
 public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
 {
     public static readonly PostgreSqlSyntaxHelper Instance = new();
-    private PostgreSqlSyntaxHelper() : base(PostgreSqlTypeTranslater.Instance,PostgreSqlAggregateHelper.Instance,PostgreSqlUpdateHelper.Instance, DatabaseType.PostgreSql)
+    private PostgreSqlSyntaxHelper() : base(PostgreSqlTypeTranslater.Instance, PostgreSqlAggregateHelper.Instance, PostgreSqlUpdateHelper.Instance, DatabaseType.PostgreSql)
     {
     }
 
@@ -30,7 +30,7 @@ public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
         // Starting with 4.0.0 npgsql crashes if it has to read a DateTime Unspecified Kind
         // See : https://github.com/npgsql/efcore.pg/issues/2000
         // Also it doesn't support DateTime.Kind.Local
-        dateTime.Kind == DateTimeKind.Unspecified ? dateTime.ToUniversalTime():dateTime;
+        dateTime.Kind == DateTimeKind.Unspecified ? dateTime.ToUniversalTime() : dateTime;
 
     public override string EnsureWrappedImpl(string databaseOrTableName) => $"\"{GetRuntimeNameWithDoubledDoubleQuotes(databaseOrTableName)}\"";
 
@@ -39,25 +39,19 @@ public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string GetRuntimeNameWithDoubledDoubleQuotes(string s) => GetRuntimeName(s)?.Replace("\"","\"\"");
+    private string? GetRuntimeNameWithDoubledDoubleQuotes(string s) => GetRuntimeName(s)?.Replace("\"", "\"\"");
 
-    protected override string UnescapeWrappedNameBody(string name) => name.Replace("\"\"","\"");
+    protected override string UnescapeWrappedNameBody(string name) => name.Replace("\"\"", "\"");
 
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
-    {
+    public override string EnsureFullyQualified(string? databaseName, string? schema, string tableName) =>
         //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
-        if(string.IsNullOrWhiteSpace(schema))
-            return EnsureWrapped(databaseName) + DatabaseTableSeparator + DefaultPostgresSchema + DatabaseTableSeparator + EnsureWrapped(tableName);
+        $"{EnsureWrapped(databaseName)}{DatabaseTableSeparator}{(string.IsNullOrWhiteSpace(schema) ? DefaultPostgresSchema : EnsureWrapped(schema))}{DatabaseTableSeparator}{EnsureWrapped(tableName)}";
 
-        //there is a schema so add it in
-        return EnsureWrapped(databaseName) + DatabaseTableSeparator + EnsureWrapped(schema) + DatabaseTableSeparator + EnsureWrapped(tableName);
-    }
-
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName,
+    public override string EnsureFullyQualified(string? databaseName, string? schema, string tableName, string columnName,
         bool isTableValuedFunction = false)
     {
         if (isTableValuedFunction)
-            return $"{EnsureWrapped(tableName)}.{EnsureWrapped(GetRuntimeName(columnName))}";//table valued functions do not support database name being in the column level selection list area of sql queries
+            return $"{EnsureWrapped(tableName)}.{EnsureWrapped(GetRuntimeName(columnName))}"; //table valued functions do not support database name being in the column level selection list area of sql queries
 
         return $"{EnsureFullyQualified(databaseName, schema, tableName)}.\"{GetRuntimeName(columnName)}\"";
     }
