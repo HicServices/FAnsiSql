@@ -60,7 +60,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (t == typeof(byte))
             return GetByteDataType();
-
+            
         if (t == typeof(short) || t == typeof(short) || t == typeof(ushort) || t == typeof(short?) || t == typeof(ushort?))
             return GetSmallIntDataType();
 
@@ -113,7 +113,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (maxExpectedStringWidth > MaxStringWidthBeforeMax)
             return GetStringDataTypeWithUnlimitedWidth();
-
+            
         return GetStringDataTypeImpl(maxExpectedStringWidth.Value);
     }
 
@@ -129,7 +129,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (maxExpectedStringWidth > MaxStringWidthBeforeMax)
             return GetUnicodeStringDataTypeWithUnlimitedWidth();
-
+            
         return GetUnicodeStringDataTypeImpl(maxExpectedStringWidth.Value);
     }
 
@@ -231,13 +231,13 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (IsString(sqlType))
             return DbType.String;
-
+            
         if (IsDate(sqlType))
             return DbType.DateTime;
 
         if (IsTime(sqlType))
             return DbType.Time;
-
+            
         if (IsByteArray(sqlType))
             return DbType.Object;
 
@@ -267,7 +267,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (cSharpType == typeof(TimeSpan))
             lengthIfString = GetStringLengthForTimeSpan();
-
+            
         var request = new DatabaseTypeRequest(cSharpType, lengthIfString, digits);
 
         if (cSharpType == typeof(string))

@@ -257,7 +257,7 @@ public sealed class TypeTranslaterTests : DatabaseTests
         finally
         {
             tbl.Drop();
-        }
+        }   
     }
 
     //Data types not supported by FAnsi

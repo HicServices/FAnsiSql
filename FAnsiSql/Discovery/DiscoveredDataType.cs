@@ -81,7 +81,7 @@ public sealed class DiscoveredDataType
     public void Resize(int newSize, IManagedTransaction? managedTransaction = null)
     {
         var toReplace = GetLengthIfString();
-
+            
         if(newSize == toReplace)
             return;
 
@@ -155,7 +155,7 @@ public sealed class DiscoveredDataType
             }
         }
 
-        SQLType = newType;
+        SQLType = newType; 
     }
 
     /// <summary>
