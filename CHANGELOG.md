@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Bump Microsoft.Data.SqlClient from 5.1.5 to 5.2.0
+
 ## [3.1.1] - 2023-09-01
 
 - Bugfix: MySQL text was erroneously capped at 64k (TEXT) instead of LONGTEXT (4GiB)
