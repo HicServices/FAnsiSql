@@ -33,7 +33,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     }
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
-    public abstract DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null);
+    public abstract DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null);
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetDataAdapter"]'/>
     public abstract DbDataAdapter GetDataAdapter(DbCommand cmd);
@@ -55,9 +55,9 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     }
 
     /// <inheritdoc/>
-    public DbConnectionStringBuilder GetConnectionStringBuilder(string server, string database, string username, string password)
+    public DbConnectionStringBuilder GetConnectionStringBuilder(string server, string? database, string username, string password)
     {
-        var builder = GetConnectionStringBuilderImpl(server,database,username,password);
+        var builder = GetConnectionStringBuilderImpl(server, database, username, password);
         EnforceKeywords(builder);
         return builder;
     }
@@ -74,19 +74,19 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
         if (ConnectionStringKeywordAccumulators.TryGetValue(DatabaseType, out var accumulator))
             accumulator.EnforceOptions(builder);
     }
-    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString, string database, string username, string password);
-    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString);
 
+    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString, string? database, string username, string password);
+    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString);
 
 
     protected abstract string ServerKeyName { get; }
     protected abstract string DatabaseKeyName { get; }
     protected virtual string ConnectionTimeoutKeyName => "ConnectionTimeout";
 
-    public string GetServerName(DbConnectionStringBuilder builder)
+    public string? GetServerName(DbConnectionStringBuilder builder)
     {
-        var s = (string) builder[ServerKeyName];
-        return string.IsNullOrWhiteSpace(s)?null:s;
+        var s = (string)builder[ServerKeyName];
+        return string.IsNullOrWhiteSpace(s) ? null : s;
     }
 
     public DbConnectionStringBuilder ChangeServer(DbConnectionStringBuilder builder, string newServer)
@@ -138,7 +138,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     public DatabaseType DatabaseType { get; private set; } = databaseType;
     public abstract Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder);
 
-    public bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds,out Exception exception)
+    public bool RespondsWithinTime(DbConnectionStringBuilder builder, int timeoutInSeconds, out Exception? exception)
     {
         try
         {
@@ -159,11 +159,12 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
             return false;
         }
     }
-    public abstract string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
-    public abstract string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
-    public abstract Version GetVersion(DiscoveredServer server);
 
-    private readonly Regex rVagueVersion = rVagueVersionRe();
+    public abstract string? GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
+    public abstract string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
+    public abstract Version? GetVersion(DiscoveredServer server);
+
+    private static readonly Regex _rVagueVersion = RVagueVersionRe();
 
     /// <summary>
     /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
@@ -178,17 +179,17 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     /// </summary>
     /// <param name="versionString"></param>
     /// <returns></returns>
-    protected Version CreateVersionFromString(string versionString)
+    protected static Version? CreateVersionFromString(string versionString)
     {
         if (Version.TryParse(versionString, out var result))
             return result;
 
-        var m = rVagueVersion.Match(versionString);
+        var m = _rVagueVersion.Match(versionString);
         return m.Success ? Version.Parse(m.Value) :
             //whatever the string was it didn't even remotely resemble a Version
             null;
     }
 
     [GeneratedRegex(@"\d+\.\d+(\.\d+)?(\.\d+)?", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
-    private static partial Regex rVagueVersionRe();
+    private static partial Regex RVagueVersionRe();
 }

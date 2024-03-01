@@ -842,23 +842,22 @@ internal sealed class BulkInsertTest : DatabaseTests
         using var bulk = tbl.BeginBulkInsert();
         bulk.Timeout = 30;
 
-        Exception ex = null;
+        Exception? ex = null;
         try
         {
             bulk.Upload(dt);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             ex = e;
         }
 
-        Assert.That(ex, Is.Not.Null, "Expected upload to fail because value on row 2 is bad");
-
         Assert.Multiple(() =>
         {
-            Assert.That(ex.Message, Is.EqualTo("Failed to parse value '.' in column 'score'"));
-            Assert.That(ex.InnerException, Is.Not.Null, "Expected parse error to be an inner exception");
+            Assert.That(ex, Is.Not.Null, "Expected upload to fail because value on row 2 is bad");
+            Assert.That(ex?.Message, Is.EqualTo("Failed to parse value '.' in column 'score'"));
+            Assert.That(ex?.InnerException, Is.Not.Null, "Expected parse error to be an inner exception");
+            Assert.That(ex?.InnerException?.Message, Does.Contain("Could not parse string value '.' with Decider Type:DecimalTypeDecider"));
         });
-        Assert.That(ex.InnerException?.Message, Does.Contain("Could not parse string value '.' with Decider Type:DecimalTypeDecider"));
     }
 }

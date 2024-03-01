@@ -68,7 +68,6 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
                 toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
                 columns.Add(toAdd);
-
             }
 
             r.Close();
@@ -76,7 +75,6 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
 
         return [.. columns];
-
     }
 
     private static bool YesNoToBool(object o)
@@ -129,7 +127,7 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture) => new MySqlBulkCopy(discoveredTable, connection,culture);
 
-    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction transaction = null)
+    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction? transaction = null)
     {
         var toReturn = new Dictionary<string,DiscoveredRelationship>();
 
@@ -152,7 +150,7 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
                              u.REFERENCED_TABLE_NAME = @tbl
                            """;
 
-        using (var cmd = new MySqlCommand(sql, (MySqlConnection) connection,(MySqlTransaction) transaction?.Transaction))
+        using (var cmd = new MySqlCommand(sql, (MySqlConnection)connection, (MySqlTransaction?)transaction?.Transaction))
         {
             var p = new MySqlParameter("@db", MySqlDbType.String)
             {

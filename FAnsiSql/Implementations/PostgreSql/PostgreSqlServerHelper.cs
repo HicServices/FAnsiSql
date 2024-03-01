@@ -44,11 +44,11 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder) => throw new NotImplementedException();
 
-    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Username;
+    public override string? GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Username;
 
-    public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Password;
+    public override string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Password;
 
-    public override Version GetVersion(DiscoveredServer server)
+    public override Version? GetVersion(DiscoveredServer server)
     {
         using var con = server.GetConnection();
         con.Open();
@@ -88,13 +88,14 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
         return [.. databases];
     }
 
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null) => new NpgsqlCommand(s, (NpgsqlConnection) con, (NpgsqlTransaction) transaction);
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) => new NpgsqlCommand(s, (NpgsqlConnection)
+        con, (NpgsqlTransaction?)transaction);
 
-    public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new NpgsqlDataAdapter((NpgsqlCommand) cmd);
+    public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new NpgsqlDataAdapter((NpgsqlCommand)cmd);
 
     public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new NpgsqlCommandBuilder(new NpgsqlDataAdapter((NpgsqlCommand) cmd));
 
-    public override DbParameter GetParameter(string parameterName) => new NpgsqlParameter {ParameterName = parameterName};
+    public override DbParameter GetParameter(string parameterName) => new NpgsqlParameter { ParameterName = parameterName };
 
     public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new NpgsqlConnection(builder.ConnectionString);
 

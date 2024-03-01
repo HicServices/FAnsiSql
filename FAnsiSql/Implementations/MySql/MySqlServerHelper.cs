@@ -26,7 +26,7 @@ public sealed class MySqlServerHelper : DiscoveredServerHelper
     protected override string DatabaseKeyName => "Database";
 
     #region Up Typing
-    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction transaction = null) =>
+    public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) =>
         new MySqlCommand(s, con as MySqlConnection, transaction as MySqlTransaction);
 
     public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new MySqlDataAdapter(cmd as MySqlCommand ??

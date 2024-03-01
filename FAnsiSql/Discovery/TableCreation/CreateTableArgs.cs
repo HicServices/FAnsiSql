@@ -12,7 +12,7 @@ namespace FAnsi.Discovery.TableCreation;
 /// <remarks>
 /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
 /// </remarks>
-public sealed class CreateTableArgs(DiscoveredDatabase database, string tableName, string schema)
+public sealed class CreateTableArgs(DiscoveredDatabase database, string tableName, string? schema)
 {
     /// <summary>
     /// The destination database in which to create the table
@@ -33,12 +33,12 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// Optional - Columns are normally created based on supplied DataTable data rows.  If this is set then the Type specified here will
     /// be used instead.
     /// </summary>
-    public DatabaseColumnRequest[] ExplicitColumnDefinitions { get; set; }
+    public DatabaseColumnRequest[]? ExplicitColumnDefinitions { get; set; }
 
     /// <summary>
     /// Set this to make last minute changes to column datatypes before table creation
     /// </summary>
-    public IDatabaseColumnRequestAdjuster Adjuster { get; set; }
+    public IDatabaseColumnRequestAdjuster? Adjuster { get; set; }
 
     /// <summary>
     /// Link between columns that you want to create in your table <see cref="DatabaseColumnRequest"/> and existing columns (<see cref="DiscoveredColumn"/>) that
@@ -88,8 +88,9 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// <summary>
     /// Create a table with the given name.  Set your columns in <see cref="ExplicitColumnDefinitions"/>
     /// </summary>
-    public CreateTableArgs(DiscoveredDatabase database,string tableName,string schema,Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs,bool cascadeDelete)
-        :this(database,tableName,schema)
+    public CreateTableArgs(DiscoveredDatabase database, string tableName, string? schema,
+        Dictionary<DatabaseColumnRequest, DiscoveredColumn> foreignKeyPairs, bool cascadeDelete)
+        : this(database, tableName, schema)
     {
         ForeignKeyPairs = foreignKeyPairs;
         CascadeDelete = cascadeDelete;
@@ -99,8 +100,8 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// Create a table with the given name based on the columns and data in the provided <paramref name="dataTable"/>.  If you want to override the
     /// data type of a given column set <see cref="ExplicitColumnDefinitions"/>
     /// </summary>
-    public CreateTableArgs(DiscoveredDatabase database, string tableName, string schema,DataTable dataTable, bool createEmpty)
-        :this(database,tableName,schema)
+    public CreateTableArgs(DiscoveredDatabase database, string tableName, string? schema, DataTable dataTable, bool createEmpty)
+        : this(database, tableName, schema)
     {
         DataTable = dataTable;
         CreateEmpty = createEmpty;

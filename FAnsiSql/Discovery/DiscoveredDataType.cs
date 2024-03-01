@@ -14,7 +14,7 @@ namespace FAnsi.Discovery;
 /// </summary>
 public sealed class DiscoveredDataType
 {
-    private readonly DiscoveredColumn Column;
+    private readonly DiscoveredColumn? _column;
 
     /// <summary>
     /// The proprietary DBMS name for the datatype e.g. varchar2(100) for Oracle, datetime2 for Sql Server etc.
@@ -32,10 +32,10 @@ public sealed class DiscoveredDataType
     /// <param name="r">All the values in r will be copied into the Dictionary property of this class called ProprietaryDatatype</param>
     /// <param name="sqlType">Your inferred SQL data type for it e.g. varchar(50)</param>
     /// <param name="column">The column it belongs to, can be null e.g. if your data type belongs to a DiscoveredParameter instead</param>
-    public DiscoveredDataType(DbDataReader r, string sqlType, DiscoveredColumn column)
+    public DiscoveredDataType(DbDataReader r, string sqlType, DiscoveredColumn? column)
     {
         SQLType = sqlType;
-        Column = column;
+        _column = column;
 
         for (var i = 0; i < r.FieldCount; i++)
             ProprietaryDatatype.Add(r.GetName(i), r.GetValue(i));
@@ -46,7 +46,7 @@ public sealed class DiscoveredDataType
     /// <para>Returns <see cref="int.MaxValue"/> if the string type has no real limit e.g. "text"</para>
     /// </summary>
     /// <returns></returns>
-    public int GetLengthIfString() => Column.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetLengthIfString(SQLType);
+    public int GetLengthIfString() => _column?.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetLengthIfString(SQLType) ?? -1;
 
     /// <summary>
     /// <para>Returns the Scale/Precision of the data type.  Only applies to decimal(x,y) types not basic types e.g. int.</para>
@@ -54,14 +54,14 @@ public sealed class DiscoveredDataType
     /// <para>Returns null if the datatype is not floating point</para>
     /// </summary>
     /// <returns></returns>
-    public DecimalSize GetDecimalSize() => Column.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetDigitsBeforeAndAfterDecimalPointIfDecimal(SQLType);
+    public DecimalSize? GetDecimalSize() => _column?.Table.Database.Server.Helper.GetQuerySyntaxHelper().TypeTranslater.GetDigitsBeforeAndAfterDecimalPointIfDecimal(SQLType);
 
     /// <summary>
     /// Returns the System.Type that should be used to store values read out of columns of this data type (See <see cref="ITypeTranslater.GetCSharpTypeForSQLDBType"/>
     /// </summary>
     /// <returns></returns>
-    [return:DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties|DynamicallyAccessedMemberTypes.PublicFields)]
-    public Type GetCSharpDataType() => Column.Table.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(SQLType);
+    [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)]
+    public Type? GetCSharpDataType() => _column?.Table.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(SQLType);
 
     /// <summary>
     /// Returns the <see cref="SQLType"/>
@@ -78,10 +78,10 @@ public sealed class DiscoveredDataType
     /// <param name="managedTransaction"></param>
     /// <exception cref="InvalidResizeException"></exception>
     /// <exception cref="AlterFailedException"></exception>
-    public void Resize(int newSize, IManagedTransaction managedTransaction = null)
+    public void Resize(int newSize, IManagedTransaction? managedTransaction = null)
     {
         var toReplace = GetLengthIfString();
-
+            
         if(newSize == toReplace)
             return;
 
@@ -104,7 +104,7 @@ public sealed class DiscoveredDataType
     /// <param name="managedTransaction"></param>
     /// <exception cref="InvalidResizeException"></exception>
     /// <exception cref="AlterFailedException"></exception>
-    public void Resize(int numberOfDigitsBeforeDecimalPoint, int numberOfDigitsAfterDecimalPoint, IManagedTransaction managedTransaction = null)
+    public void Resize(int numberOfDigitsBeforeDecimalPoint, int numberOfDigitsAfterDecimalPoint, IManagedTransaction? managedTransaction = null)
     {
         var toReplace = GetDecimalSize();
 
@@ -117,9 +117,10 @@ public sealed class DiscoveredDataType
         if (toReplace.NumbersAfterDecimalPlace> numberOfDigitsAfterDecimalPoint)
             throw new InvalidResizeException(string.Format(FAnsiStrings.DiscoveredDataType_Resize_Cannot_shrink_column__number_of_digits_after_the_decimal_point_is_currently__0__and_you_asked_to_set_it_to__1___Current_SQLType_is__2__, toReplace.NumbersAfterDecimalPlace, numberOfDigitsAfterDecimalPoint, SQLType));
 
-        var newDataType = Column.Table.GetQuerySyntaxHelper()
-            .TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof (decimal), null,
-                new DecimalSize(numberOfDigitsBeforeDecimalPoint, numberOfDigitsAfterDecimalPoint)));
+        var newDataType = _column?.Table.GetQuerySyntaxHelper()
+                              .TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof(decimal), null,
+                                  new DecimalSize(numberOfDigitsBeforeDecimalPoint, numberOfDigitsAfterDecimalPoint))) ??
+                          throw new InvalidOperationException($"Failed to calculate new DB type");
 
         AlterTypeTo(newDataType, managedTransaction);
     }
@@ -133,15 +134,15 @@ public sealed class DiscoveredDataType
     /// <param name="managedTransaction"></param>
     /// <param name="alterTimeoutInSeconds">The time to wait before giving up on the command (See <see cref="DbCommand.CommandTimeout"/></param>
     /// <exception cref="AlterFailedException"></exception>
-    public void AlterTypeTo(string newType, IManagedTransaction managedTransaction = null,int alterTimeoutInSeconds = 500)
+    public void AlterTypeTo(string newType, IManagedTransaction? managedTransaction = null,int alterTimeoutInSeconds = 500)
     {
-        if(Column == null)
+        if(_column == null)
             throw new NotSupportedException(FAnsiStrings.DiscoveredDataType_AlterTypeTo_Cannot_resize_DataType_because_it_does_not_have_a_reference_to_a_Column_to_which_it_belongs);
 
-        var server = Column.Table.Database.Server;
+        var server = _column.Table.Database.Server;
         using (var connection = server.GetManagedConnection(managedTransaction))
         {
-            var sql = Column.Helper.GetAlterColumnToSql(Column, newType, Column.AllowNulls);
+            var sql = _column.Helper.GetAlterColumnToSql(_column, newType, _column.AllowNulls);
             try
             {
                 using var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
@@ -154,7 +155,7 @@ public sealed class DiscoveredDataType
             }
         }
 
-        SQLType = newType;
+        SQLType = newType; 
     }
 
     /// <summary>
@@ -174,7 +175,7 @@ public sealed class DiscoveredDataType
     /// Equality based on <see cref="SQLType"/>
     /// </summary>
     /// <returns></returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;

@@ -25,7 +25,9 @@ internal sealed class DataTypeAdjusterTests:DatabaseTests
     {
         public void AdjustColumns(List<DatabaseColumnRequest> columns)
         {
-            columns[0].TypeRequested.Width = 12;
+#pragma warning disable CS8602 // Dereference of a possibly null reference - spurious
+            if (columns[0].TypeRequested is not null) columns[0].TypeRequested.Width = 12;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
     }
 }

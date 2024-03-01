@@ -50,7 +50,6 @@ internal sealed class CreateTableTests:DatabaseTests
             new DatabaseColumnRequest("dob", new DatabaseTypeRequest(typeof (DateTime)),false),
             new DatabaseColumnRequest("score",
                 new DatabaseTypeRequest(typeof (decimal), null, new DecimalSize(5, 3))) //<- e.g. 12345.123
-
         ]);
 
         Assert.That(tbl.Exists());
@@ -567,7 +566,7 @@ internal sealed class CreateTableTests:DatabaseTests
         dt.Rows.Add("T");
         dt.Rows.Add("F");
 
-        var args = new CreateTableArgs(db,"Hb",null,dt,false);
+        var args = new CreateTableArgs(db, "Hb", null, dt, false);
         Assert.Multiple(() =>
         {
             Assert.That(GuessSettingsFactory.Defaults.CharCanBeBoolean, Is.EqualTo(args.GuessSettings.CharCanBeBoolean), "Default should match the static default");

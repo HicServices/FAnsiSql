@@ -116,15 +116,14 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
         return [.. toReturn];
     }
 
-    private string GetSQLType_FromSpColumnsResult(DbDataReader r)
+    private static string GetSQLType_FromSpColumnsResult(DbDataReader r)
     {
         var columnType = r["data_type"] as string;
         var lengthQualifier = "";
 
-        if (HasPrecisionAndScale(columnType))
+        if (HasPrecisionAndScale(columnType ?? string.Empty))
             lengthQualifier = $"({r["numeric_precision"]},{r["numeric_scale"]})";
-        else
-        if (r["character_maximum_length"] != DBNull.Value) lengthQualifier = $"({Convert.ToInt32(r["character_maximum_length"])})";
+        else if (r["character_maximum_length"] != DBNull.Value) lengthQualifier = $"({Convert.ToInt32(r["character_maximum_length"])})";
 
         return columnType + lengthQualifier;
     }
@@ -152,7 +151,7 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) => new PostgreSqlBulkCopy(discoveredTable, connection,culture);
 
     public override int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd,
-        IManagedTransaction transaction = null)
+        IManagedTransaction? transaction = null)
     {
         var autoIncrement = discoveredTable.DiscoverColumns(transaction).SingleOrDefault(static c => c.IsAutoIncrement);
 
@@ -168,7 +167,7 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
     }
 
     public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,
-        IManagedTransaction transaction = null)
+        IManagedTransaction? transaction = null)
     {
         const string sql = """
                            select c.constraint_name

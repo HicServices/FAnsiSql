@@ -43,12 +43,12 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <summary>
     /// Returns the username portion of <cref name="Builder"/> if specified
     /// </summary>
-    public string ExplicitUsernameIfAny => Helper.GetExplicitUsernameIfAny(Builder);
+    public string? ExplicitUsernameIfAny => Helper.GetExplicitUsernameIfAny(Builder);
 
     /// <summary>
     /// Returns the password portion of <cref name="Builder"/> if specified
     /// </summary>
-    public string ExplicitPasswordIfAny => Helper.GetExplicitPasswordIfAny(Builder);
+    public string? ExplicitPasswordIfAny => Helper.GetExplicitPasswordIfAny(Builder);
 
     /// <summary>
     /// <para>Creates a new server pointed at the <paramref name="builder"/> server. </para>
@@ -73,7 +73,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="connectionString"></param>
     /// <param name="databaseType"></param>
     /// <exception cref="ImplementationNotFoundException"></exception>
-    public DiscoveredServer(string connectionString, DatabaseType databaseType)
+    public DiscoveredServer(string? connectionString, DatabaseType databaseType)
     {
         Helper = ImplementationManager.GetImplementation(databaseType).GetServerHelper();
         Builder = Helper.GetConnectionStringBuilder(connectionString);
@@ -107,7 +107,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - when provided returns the <see cref="IManagedTransaction.Connection"/> instead of opening a new one </param>
     /// <returns></returns>
-    public DbConnection GetConnection(IManagedTransaction transaction = null) => transaction != null ? transaction.Connection : Helper.GetConnection(Builder);
+    public DbConnection GetConnection(IManagedTransaction? transaction = null) => transaction != null ? transaction.Connection : Helper.GetConnection(Builder);
 
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetCommand"]'/>
     public DbCommand GetCommand(string sql, IManagedConnection managedConnection)
@@ -124,7 +124,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="con">Correctly typed connection for the <see cref="DatabaseType"/>.  (See <see cref="GetConnection"/>)</param>
     /// <param name="transaction">Optional - if provided the <see cref="DbCommand.Transaction"/> will be set to the <paramref name="transaction"/></param>
     /// <returns></returns>
-    public DbCommand GetCommand(string sql, DbConnection con, IManagedTransaction transaction = null)
+    public DbCommand GetCommand(string sql, DbConnection con, IManagedTransaction? transaction = null)
     {
         var cmd = Helper.GetCommand(sql, con);
 
@@ -242,7 +242,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction">Optional - if provided this method returns true (existence cannot be checked mid transaction).</param>
     /// <returns></returns>
-    public bool Exists(IManagedTransaction transaction = null)
+    public bool Exists(IManagedTransaction? transaction = null)
     {
         if (transaction != null)
             return true;
@@ -357,7 +357,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="transaction"></param>
     /// <returns></returns>
-    public IManagedConnection GetManagedConnection(IManagedTransaction transaction = null) => new ManagedConnection(this, transaction);
+    public IManagedConnection GetManagedConnection(IManagedTransaction? transaction = null) => new ManagedConnection(this, transaction);
 
     /// <summary>
     /// Returns helper for generating queries compatible with the DBMS (See <see cref="DatabaseType"/>) e.g. TOP X, column qualifiers, what the parameter
@@ -391,7 +391,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;

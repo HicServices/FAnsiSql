@@ -17,7 +17,7 @@ public interface IManagedConnection : IDisposable
     /// <summary>
     /// Optional - DbTransaction being wrapped if one has been started or null
     /// </summary>
-    DbTransaction Transaction { get; }
+    DbTransaction? Transaction { get; }
 
     /// <summary>
     /// Optional - transaction being run (See <see cref="DiscoveredServer.BeginNewTransactedConnection"/>.  If this is not null then <see cref="Transaction"/> should also be not null.

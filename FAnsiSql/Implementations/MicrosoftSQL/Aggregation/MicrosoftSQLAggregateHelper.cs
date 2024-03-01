@@ -246,7 +246,7 @@ public sealed class MicrosoftSQLAggregateHelper : AggregateHelper
         return part1 + part2;
     }
 
-    private string GetPivotPart1(AggregateCustomLineCollection query, out string pivotAlias,out string countAlias, out string axisColumnAlias)
+    private string GetPivotPart1(AggregateCustomLineCollection query, out string pivotAlias, out string countAlias, out string? axisColumnAlias)
     {
         var syntaxHelper = query.SyntaxHelper;
 
@@ -267,7 +267,7 @@ public sealed class MicrosoftSQLAggregateHelper : AggregateHelper
 
         //if there is an axis we don't want to pivot on values that are outside that axis restriction.
         if(query.Axis != null)
-            WrapAxisColumnWithDatePartFunction(query,axisColumnAlias);
+            WrapAxisColumnWithDatePartFunction(query, axisColumnAlias);
         else
         {
             axisColumnAlias = null;

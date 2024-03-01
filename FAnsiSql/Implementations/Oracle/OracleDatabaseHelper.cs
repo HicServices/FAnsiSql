@@ -43,7 +43,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
         throw new NotImplementedException();
     }
 
-    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction transaction = null)
+    public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null)
     {
         var tables = new List<DiscoveredTable>();
 
@@ -77,7 +77,7 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
     }
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
-        DbConnection connection, string database, DbTransaction transaction = null) =>
+        DbConnection connection, string database, DbTransaction? transaction = null) =>
         Array.Empty<DiscoveredTableValuedFunction>();
 
     public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database) => [];

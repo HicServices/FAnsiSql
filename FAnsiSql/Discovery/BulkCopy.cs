@@ -40,7 +40,7 @@ public abstract class BulkCopy:IBulkCopy
     public bool AllowUnmatchedInputColumns { get; private set; }
 
     /// <inheritdoc/>
-    public DateTimeTypeDecider DateTimeDecider {get; protected set; }
+    public DateTimeTypeDecider DateTimeDecider { get; protected set; }
 
     /// <summary>
     /// Begins a new bulk copy operation in which one or more data tables are uploaded to the <paramref name="targetTable"/>.  The API entrypoint for this is
@@ -50,7 +50,7 @@ public abstract class BulkCopy:IBulkCopy
     /// <param name="targetTable"></param>
     /// <param name="connection"></param>
     /// <param name="culture">For parsing string date expressions etc</param>
-    protected BulkCopy(DiscoveredTable targetTable, IManagedConnection connection,CultureInfo culture)
+    protected BulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture)
     {
         Culture = culture;
         TargetTable = targetTable;
@@ -121,11 +121,11 @@ public abstract class BulkCopy:IBulkCopy
             var newColumn = dt.Columns.Add($"{dataColumn.ColumnName}_{Guid.NewGuid()}",dataType);
 
             //if it's a DateTime decider then guess DateTime culture based on values in the table
-            if(decider is DateTimeTypeDecider)
+            if (decider is DateTimeTypeDecider)
             {
                 //also use this one in case the user has set up explicit stuff on it e.g. Culture/Settings
                 decider = DateTimeDecider;
-                DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r=>r[dataColumn] as string));
+                DateTimeDecider.GuessDateFormat(dt.Rows.Cast<DataRow>().Take(500).Select(r => r[dataColumn] as string).OfType<string>());
             }
 
 
@@ -134,9 +134,8 @@ public abstract class BulkCopy:IBulkCopy
                 {
                     //parse the value
                     dr[newColumn] = decider.Parse(dr[dataColumn] as string)??DBNull.Value;
-
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw new Exception($"Failed to parse value '{dr[dataColumn]}' in column '{dataColumn}'",ex);
                 }

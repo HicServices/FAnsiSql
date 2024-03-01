@@ -13,7 +13,8 @@ namespace FAnsi.Discovery;
 /// <param name="table"></param>
 /// <param name="name"></param>
 /// <param name="allowsNulls"></param>
-public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNulls) : IHasFullyQualifiedNameToo,ISupplementalColumnInformation
+public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool allowsNulls) : IHasFullyQualifiedNameToo,
+    ISupplementalColumnInformation
 {
     /// <summary>
     /// The <see cref="DiscoveredTable"/> on which the <see cref="DiscoveredColumn"/> was found
@@ -44,7 +45,7 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// <summary>
     /// The DBMS proprietary column specific collation e.g. "Latin1_General_CS_AS_KS_WS"
     /// </summary>
-    public string Collation { get; set; }
+    public string? Collation { get; set; }
 
     /// <summary>
     /// The data type of the column found (includes String Length and Scale/Precision).
@@ -63,7 +64,7 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// The unqualified name of the column e.g. "MyCol"
     /// </summary>
     /// <returns></returns>
-    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_name);
+    public string? GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_name);
 
     /// <summary>
     /// The fully qualified name of the column e.g. [MyDb].dbo.[MyTable].[MyCol] or `MyDb`.`MyCol`
@@ -105,7 +106,7 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
