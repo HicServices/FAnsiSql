@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.2.0] - 2023-03-01
+## [3.2.0] - 2023-03-04
 
 - Target .Net 8.0
 - Enable AOT compatibility, though upstream dependencies still have issues
