@@ -6,13 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.2.0] - 2023-02-14
+## [3.2.0] - 2023-03-01
 
 - Target .Net 8.0
 - Enable AOT compatibility, though upstream dependencies still have issues
 - Nullable annotations enabled (some warnings remain)
 - Bump HIC.TypeGuesser from 1.1.0 to 1.2.3
-- Bump Microsoft.Data.SqlClient from 5.1.1 to 5.1.5
+- Bump Microsoft.Data.SqlClient from 5.1.1 to 5.2.0
 - Bump MySqlConnector from 2.2.6 to 2.3.5
 - Bump Npgsql from 7.0.4 to 8.0.2
 - Bump Oracle.ManagedDataAccess.Core from 3.21.100 to 3.21.130
