@@ -14,14 +14,13 @@ public sealed partial class MySqlTypeTranslater : TypeTranslater
     private static readonly Regex AlsoStringRegex = AlsoStringRe();
     private static readonly Regex AlsoFloatingPoint = AlsoFloatingPointRe();
 
-    private MySqlTypeTranslater() : base(4000, 4000)
+    private MySqlTypeTranslater() : base(DateRe(), 4000, 4000)
     {
         //match bigint and bigint(20) etc
         ByteRegex = ByteRe();
         SmallIntRegex = SmallIntRe();
         IntRegex = IntRe();
         LongRegex = LongRe();
-        DateRegex = DateRe();
     }
 
     public override int GetLengthIfString(string sqlType) =>

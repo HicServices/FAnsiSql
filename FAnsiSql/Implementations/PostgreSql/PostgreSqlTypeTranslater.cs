@@ -8,9 +8,9 @@ namespace FAnsi.Implementations.PostgreSql;
 public sealed partial class PostgreSqlTypeTranslater : TypeTranslater
 {
     public static readonly PostgreSqlTypeTranslater Instance = new();
-    private PostgreSqlTypeTranslater() : base(8000, 4000)
+
+    private PostgreSqlTypeTranslater() : base(DateRegexImpl(), 8000, 4000)
     {
-        DateRegex = DateRegexImpl();
         TimeRegex = TimeRegexImpl(); //space is important
     }
 

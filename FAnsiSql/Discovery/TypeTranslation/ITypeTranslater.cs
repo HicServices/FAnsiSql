@@ -40,7 +40,7 @@ public interface ITypeTranslater
     [return:
         DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
                                    DynamicallyAccessedMemberTypes.PublicFields)]
-    Type GetCSharpTypeForSQLDBType(string sqlType);
+    Type GetCSharpTypeForSQLDBType(string? sqlType);
 
     /// <summary>
     /// Translates a database proprietary type e.g. 'decimal(10,2)' into a C# type e.g. 'typeof(decimal)'

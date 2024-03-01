@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Implementations.Oracle.Aggregation;
@@ -9,7 +10,7 @@ namespace FAnsi.Implementations.Oracle;
 
 public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
 {
-    public static readonly OracleQuerySyntaxHelper Instance=new();
+    public static readonly OracleQuerySyntaxHelper Instance = new();
     public override int MaximumDatabaseLength => 30;    // JS 2023-05-11 Can be longer, but Oracle RAC limits to 30
     public override int MaximumTableLength => 30;
     public override int MaximumColumnLength => 30;
@@ -19,13 +20,14 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "\"";
 
-    private OracleQuerySyntaxHelper() : base(OracleTypeTranslater.Instance, OracleAggregateHelper.Instance,OracleUpdateHelper.Instance,DatabaseType.Oracle)//no custom translater
+    private OracleQuerySyntaxHelper() : base(OracleTypeTranslater.Instance, OracleAggregateHelper.Instance, OracleUpdateHelper.Instance, DatabaseType.Oracle)//no custom translater
     {
     }
 
     public override char ParameterSymbol => ':';
 
-    public override string GetRuntimeName(string s)
+    [return: NotNullIfNotNull(nameof(s))]
+    public override string? GetRuntimeName(string? s)
     {
         var answer = base.GetRuntimeName(s);
 
@@ -38,7 +40,7 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string EnsureWrappedImpl(string databaseOrTableName) => $"\"{GetRuntimeName(databaseOrTableName)}\"";
 
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
+    public override string EnsureFullyQualified(string? databaseName, string? schema, string tableName)
     {
         //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
         if (!string.IsNullOrWhiteSpace(schema))
@@ -47,7 +49,7 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
         return $"\"{GetRuntimeName(databaseName)}\"{DatabaseTableSeparator}\"{GetRuntimeName(tableName)}\"";
     }
 
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false) => $"{EnsureFullyQualified(databaseName, schema, tableName)}.\"{GetRuntimeName(columnName)}\"";
+    public override string EnsureFullyQualified(string? databaseName, string? schema, string tableName, string columnName, bool isTableValuedFunction = false) => $"{EnsureFullyQualified(databaseName, schema, tableName)}.\"{GetRuntimeName(columnName)}\"";
 
     public override TopXResponse HowDoWeAchieveTopX(int x) => new($"OFFSET 0 ROWS FETCH NEXT {x} ROWS ONLY", QueryComponent.Postfix);
 
@@ -80,7 +82,7 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
         //Value must be a DateTime even if DBParameter is of Type DbType.Time
         Convert.ToDateTime(timeSpan.ToString());
 
-    private static readonly HashSet<string> ReservedWords = new( new []
+    private static readonly HashSet<string> ReservedWords = new(new[]
     {
 
         "ACCESS",
@@ -563,6 +565,6 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
         "XID",
         "YEAR",
         "ZONE"
-    },StringComparer.CurrentCultureIgnoreCase);
+    }, StringComparer.CurrentCultureIgnoreCase);
 
 }

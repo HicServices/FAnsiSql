@@ -47,7 +47,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
             }
         }
 
-        if(toReturn.Count == 0)
+        if (toReturn.Count == 0)
             throw new Exception($"Could not find any columns in table {discoveredTable}");
 
         //don't bother looking for pks if it is a table valued function
@@ -56,7 +56,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
 
         var pks = ListPrimaryKeys(connection, discoveredTable);
 
-        foreach (var c in toReturn.Where(c => pks.Any(pk=>pk.Equals(c.GetRuntimeName()))))
+        foreach (var c in toReturn.Where(c => pks.Any(pk => pk.Equals(c.GetRuntimeName()))))
             c.IsPrimaryKey = true;
 
         return [.. toReturn];
@@ -97,11 +97,11 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
             case TableType.Table:
                 cmd = new SqlCommand($"DROP TABLE {tableToDrop.GetFullyQualifiedName()}", (SqlConnection)connection);
                 break;
-            case TableType.TableValuedFunction :
-                DropFunction(connection,(DiscoveredTableValuedFunction) tableToDrop);
+            case TableType.TableValuedFunction:
+                DropFunction(connection, (DiscoveredTableValuedFunction)tableToDrop);
                 return;
             default:
-                throw new ArgumentOutOfRangeException(nameof(tableToDrop),$"Unknown table type {tableToDrop.TableType}");
+                throw new ArgumentOutOfRangeException(nameof(tableToDrop), $"Unknown table type {tableToDrop.TableType}");
         }
 
         using (cmd)
@@ -110,7 +110,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
 
     public override void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop)
     {
-        using var cmd = new SqlCommand($"DROP FUNCTION {functionToDrop.Schema??"dbo"}.{functionToDrop.GetRuntimeName()}", (SqlConnection)connection);
+        using var cmd = new SqlCommand($"DROP FUNCTION {functionToDrop.Schema ?? "dbo"}.{functionToDrop.GetRuntimeName()}", (SqlConnection)connection);
         cmd.ExecuteNonQuery();
     }
 
@@ -122,7 +122,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
     }
 
 
-    public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
+    public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
     {
         var toReturn = new List<DiscoveredParameter>();
 
@@ -161,7 +161,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         return toReturn.ToArray();
     }
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture) => new MicrosoftSQLBulkCopy(discoveredTable,connection,culture);
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) => new MicrosoftSQLBulkCopy(discoveredTable, connection, culture);
 
     public override void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
     {
@@ -180,18 +180,18 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
             throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__, table, string.Join(",", discoverColumns.Select(static c => c.GetRuntimeName()))), e);
         }
 
-        base.CreatePrimaryKey(args,table, discoverColumns);
+        base.CreatePrimaryKey(args, table, discoverColumns);
     }
 
-    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction? transaction = null)
+    public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection, IManagedTransaction? transaction = null)
     {
-        var toReturn = new Dictionary<string,DiscoveredRelationship>();
+        var toReturn = new Dictionary<string, DiscoveredRelationship>();
 
         const string sql = "exec sp_fkeys @pktable_name = @table, @pktable_qualifier=@database, @pktable_owner=@schema";
 
         using (var cmd = table.GetCommand(sql, connection))
         {
-            if(transaction != null)
+            if (transaction != null)
                 cmd.Transaction = transaction.Transaction;
 
             var p = cmd.CreateParameter();
@@ -216,22 +216,22 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
             var da = table.Database.Server.GetDataAdapter(cmd);
             da.Fill(dt);
 
-            foreach(DataRow r in dt.Rows)
+            foreach (DataRow r in dt.Rows)
             {
-                var fkName = r["FK_NAME"].ToString();
+                var fkName = r["FK_NAME"].ToString() ?? throw new InvalidOperationException("Null foreign key name returned");
 
                 //could be a 2+ columns foreign key?
                 if (!toReturn.TryGetValue(fkName, out var current))
                 {
-                    var pkdb = r["PKTABLE_QUALIFIER"].ToString();
+                    var pkdb = r["PKTABLE_QUALIFIER"].ToString() ?? throw new InvalidOperationException("Null primary key database name returned");
                     var pkschema = r["PKTABLE_OWNER"].ToString();
-                    var pktableName = r["PKTABLE_NAME"].ToString();
+                    var pktableName = r["PKTABLE_NAME"].ToString() ?? throw new InvalidOperationException("Null primary key table name returned");
 
                     var pktable = table.Database.Server.ExpectDatabase(pkdb).ExpectTable(pktableName, pkschema);
 
-                    var fkdb = r["FKTABLE_QUALIFIER"].ToString();
+                    var fkdb = r["FKTABLE_QUALIFIER"].ToString() ?? throw new InvalidOperationException("Null foreign key database name returned");
                     var fkschema = r["FKTABLE_OWNER"].ToString();
-                    var fktableName = r["FKTABLE_NAME"].ToString();
+                    var fktableName = r["FKTABLE_NAME"].ToString() ?? throw new InvalidOperationException("Null foreign key name returned");
 
                     var fktable = table.Database.Server.ExpectDatabase(fkdb).ExpectTable(fktableName, fkschema);
 
@@ -254,11 +254,11 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
     2 = set null
     3 = set default*/
 
-                    current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                    toReturn.Add(current.Name,current);
+                    current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                    toReturn.Add(current.Name, current);
                 }
 
-                current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(),transaction);
+                current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(), transaction);
             }
         }
 
@@ -278,7 +278,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         return $"exec sp_rename '{syntax.Escape(oldName)}', '{syntax.Escape(newName)}'";
     }
 
-    public override void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)
+    public override void MakeDistinct(DatabaseOperationArgs args, DiscoveredTable discoveredTable)
     {
         var syntax = discoveredTable.GetQuerySyntaxHelper();
 
@@ -293,9 +293,9 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
                            """;
 
         var columnList = string.Join(",",
-            discoveredTable.DiscoverColumns().Select(c=>syntax.EnsureWrapped(c.GetRuntimeName())));
+            discoveredTable.DiscoverColumns().Select(c => syntax.EnsureWrapped(c.GetRuntimeName())));
 
-        var sqlToExecute = string.Format(sql,columnList,discoveredTable.GetFullyQualifiedName());
+        var sqlToExecute = string.Format(sql, columnList, discoveredTable.GetFullyQualifiedName());
 
         var server = discoveredTable.Database.Server;
 
@@ -310,15 +310,15 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
     private string GetSQLType_FromSpColumnsResult(DbDataReader r)
     {
         var columnType = r["TYPE_NAME"] as string;
-        var lengthQualifier = "";
-
-        if (HasPrecisionAndScale(columnType))
-            lengthQualifier = $"({r["PRECISION"]},{r["SCALE"]})";
-        else
-        if (RequiresLength(columnType)) lengthQualifier = $"({AdjustForUnicodeAndNegativeOne(columnType, Convert.ToInt32(r["LENGTH"]))})";
 
         if (columnType == "text")
             return "varchar(max)";
+
+        var lengthQualifier = "";
+
+        if (HasPrecisionAndScale(columnType ?? throw new InvalidOperationException("Null type name returned")))
+            lengthQualifier = $"({r["PRECISION"]},{r["SCALE"]})";
+        else if (RequiresLength(columnType)) lengthQualifier = $"({AdjustForUnicodeAndNegativeOne(columnType, Convert.ToInt32(r["LENGTH"]))})";
 
         return columnType + lengthQualifier;
     }
@@ -329,7 +329,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
             return "max";
 
         if (columnType.Contains("nvarchar") || columnType.Contains("nchar") || columnType.Contains("ntext"))
-            return length/2;
+            return length / 2;
 
         return length;
     }
@@ -363,7 +363,7 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
             cmd.Transaction = con.Transaction;
             using var r = cmd.ExecuteReader();
             while (r.Read())
-                toReturn.Add((string) r["ColumnName"]);
+                toReturn.Add((string)r["ColumnName"]);
 
             r.Close();
         }

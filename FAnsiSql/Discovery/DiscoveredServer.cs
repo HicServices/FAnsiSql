@@ -21,9 +21,9 @@ public sealed class DiscoveredServer : IMightNotExist
     public DbConnectionStringBuilder Builder { get; set; }
 
     /// <summary>
-    /// The currently used database
+    /// The currently used database, if any
     /// </summary>
-    private DiscoveredDatabase _currentDatabase;
+    private DiscoveredDatabase? _currentDatabase;
 
     /// <summary>
     /// Stateless helper class with DBMS specific implementation of the logic required by <see cref="DiscoveredServer"/>.
@@ -38,7 +38,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <summary>
     /// The server's name as specified in <cref name="Builder"/> e.g. localhost\sqlexpress
     /// </summary>
-    public string Name => Helper.GetServerName(Builder);
+    public string? Name => Helper.GetServerName(Builder);
 
     /// <summary>
     /// Returns the username portion of <cref name="Builder"/> if specified
@@ -90,13 +90,13 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="usernameIfAny">Optional username to set in the connection string</param>
     /// <param name="passwordIfAny">Optional password to set in the connection string</param>
     /// <exception cref="ImplementationNotFoundException"></exception>
-    public DiscoveredServer(string server,string database, DatabaseType databaseType,string usernameIfAny,string passwordIfAny)
+    public DiscoveredServer(string server, string database, DatabaseType databaseType, string usernameIfAny, string passwordIfAny)
     {
         Helper = ImplementationManager.GetImplementation(databaseType).GetServerHelper();
 
-        Builder = Helper.GetConnectionStringBuilder(server,database,usernameIfAny,passwordIfAny);
+        Builder = Helper.GetConnectionStringBuilder(server, database, usernameIfAny, passwordIfAny);
 
-        if(!string.IsNullOrWhiteSpace(database))
+        if (!string.IsNullOrWhiteSpace(database))
             _currentDatabase = ExpectDatabase(database);
     }
 
@@ -185,7 +185,7 @@ public sealed class DiscoveredServer : IMightNotExist
     public void TestConnection(int timeoutInMillis = 10000)
     {
         using var con = Helper.GetConnection(Builder);
-        using(var tokenSource = new CancellationTokenSource(timeoutInMillis))
+        using (var tokenSource = new CancellationTokenSource(timeoutInMillis))
         using (var openTask = con.OpenAsync(tokenSource.Token))
         {
             try
@@ -226,7 +226,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="timeoutInSeconds"></param>
     /// <param name="exception"></param>
     /// <returns></returns>
-    public bool RespondsWithinTime(int timeoutInSeconds, out Exception exception) => Helper.RespondsWithinTime(Builder, timeoutInSeconds, out exception);
+    public bool RespondsWithinTime(int timeoutInSeconds, out Exception? exception) => Helper.RespondsWithinTime(Builder, timeoutInSeconds, out exception);
 
     /// <summary>
     /// Connects to the server and returns a list of databases found as <see cref="DiscoveredDatabase"/> objects
@@ -279,13 +279,13 @@ public sealed class DiscoveredServer : IMightNotExist
     /// Returns the database that <see cref="Builder"/> is currently pointed at.
     /// </summary>
     /// <returns></returns>
-    public DiscoveredDatabase GetCurrentDatabase()
+    public DiscoveredDatabase? GetCurrentDatabase()
     {
         //Is the database name persisted in the connection string?
         var dbName = Helper.GetCurrentDatabase(Builder);
 
         //yes
-        if(!string.IsNullOrWhiteSpace(dbName))
+        if (!string.IsNullOrWhiteSpace(dbName))
             return ExpectDatabase(dbName);
 
         //no (e.g. Oracle or no default database specified in connection string)
@@ -311,7 +311,7 @@ public sealed class DiscoveredServer : IMightNotExist
     public void ChangeDatabase(string newDatabase)
     {
         //change the connection string to point to the newDatabase
-        Builder = Helper.ChangeDatabase(Builder,newDatabase);
+        Builder = Helper.ChangeDatabase(Builder, newDatabase);
 
         //for DBMS that do not persist database in connection string (Oracle), we must persist this change
         _currentDatabase = ExpectDatabase(newDatabase);
@@ -321,7 +321,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// Returns the server <see cref="Name"/>
     /// </summary>
     /// <returns></returns>
-    public override string ToString() => Name;
+    public override string? ToString() => Name;
 
     /// <summary>
     /// <para>Creates a new database with the given <paramref name="newDatabaseName"/>.</para>
@@ -337,8 +337,8 @@ public sealed class DiscoveredServer : IMightNotExist
 
         Helper.CreateDatabase(Builder, db);
 
-        if(!db.Exists())
-            throw new Exception(string.Format(FAnsiStrings.DiscoveredServer_CreateDatabase_Helper___0___tried_to_create_database___1___but_the_database_didn_t_exist_after_the_creation_attempt, Helper.GetType().Name,newDatabaseName));
+        if (!db.Exists())
+            throw new Exception(string.Format(FAnsiStrings.DiscoveredServer_CreateDatabase_Helper___0___tried_to_create_database___1___but_the_database_didn_t_exist_after_the_creation_attempt, Helper.GetType().Name, newDatabaseName));
 
         return db;
     }
@@ -348,7 +348,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// should be wrapped with a using statement since it is <see cref="IDisposable"/>.
     /// </summary>
     /// <returns></returns>
-    public IManagedConnection BeginNewTransactedConnection() => new ManagedConnection(this, Helper.BeginTransaction(Builder)){CloseOnDispose = true};
+    public IManagedConnection BeginNewTransactedConnection() => new ManagedConnection(this, Helper.BeginTransaction(Builder)) { CloseOnDispose = true };
 
     /// <summary>
     /// <para>Opens a new <see cref="DbConnection"/> or reuses an existing one (if <paramref name="transaction"/> is provided).</para>
@@ -410,5 +410,5 @@ public sealed class DiscoveredServer : IMightNotExist
     /// Returns the version number of the DBMS e.g. MySql 5.7
     /// </summary>
     /// <returns></returns>
-    public Version GetVersion() => Helper.GetVersion(this);
+    public Version? GetVersion() => Helper.GetVersion(this);
 }

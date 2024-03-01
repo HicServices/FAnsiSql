@@ -41,16 +41,16 @@ public interface IQuerySyntaxHelper
     /// <summary>
     /// The character that is used to qualify database entity names e.g. "[" for "[My Table]"
     /// </summary>
-    string OpenQualifier {get;}
+    string OpenQualifier { get; }
     /// <summary>
     /// The character that is used to end qualifying database entity names e.g. "]" for "[My Table]".  For some DBMS this is the same as <see cref="OpenQualifier"/>
     /// </summary>
-    string CloseQualifier {get;}
+    string CloseQualifier { get; }
 
     /// <summary>
     /// Separator between table and column names (and database, schema etc).  Usually "."
     /// </summary>
-    string DatabaseTableSeparator {get; }
+    string DatabaseTableSeparator { get; }
 
     /// <summary>
     /// Characters which are not permitted in column names by FAnsi
@@ -59,6 +59,7 @@ public interface IQuerySyntaxHelper
 
     char ParameterSymbol { get; }
 
+    [return: NotNullIfNotNull(nameof(s))]
     string? GetRuntimeName(string? s);
 
     bool TryGetRuntimeName(string s, out string? name);
@@ -78,6 +79,7 @@ public interface IQuerySyntaxHelper
     /// </summary>
     /// <param name="databaseOrTableName"></param>
     /// <returns></returns>
+    [return: NotNullIfNotNull(nameof(databaseOrTableName))]
     string? EnsureWrapped(string? databaseOrTableName);
 
     string EnsureFullyQualified(string? databaseName, string? schemaName, string tableName);
@@ -163,7 +165,7 @@ public interface IQuerySyntaxHelper
     /// <param name="discoveredColumn">The column the parameter is for loading - this is used to determine the DbType for the paramter</param>
     /// <param name="value">The value to populate into the command, this will be converted to DBNull.Value if the value is nullish</param>
     /// <returns></returns>
-    DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn,object value);
+    DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value);
 
     /// <summary>
     /// Gets a DbParameter hard typed with the correct DbType for the discoveredColumn and the Value set to the correct Value representation (e.g. DBNull for nulls or whitespace).
@@ -174,7 +176,7 @@ public interface IQuerySyntaxHelper
     /// <param name="value">The value to populate into the command, this will be converted to DBNull.Value if the value is nullish</param>
     /// <param name="culture"></param>
     /// <returns></returns>
-    DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn,object value,CultureInfo culture);
+    DbParameter GetParameter(DbParameter p, DiscoveredColumn discoveredColumn, object value, CultureInfo? culture);
 
     /// <summary>
     /// Throws <see cref="RuntimeNameException"/> if the supplied name is invalid (because it is too long or contains unsupported characters)
@@ -200,7 +202,7 @@ public interface IQuerySyntaxHelper
     /// <summary>
     /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
     /// </summary>
-    bool IsValidTableName(string tableName, [NotNullWhen(false)] out string reason);
+    bool IsValidTableName(string tableName, [NotNullWhen(false)] out string? reason);
 
     /// <summary>
     /// Returns false if the supplied name is invalid (because it is too long or contains unsupported characters)
