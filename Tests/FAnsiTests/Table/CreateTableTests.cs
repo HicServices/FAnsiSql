@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using FAnsi;
@@ -12,9 +13,9 @@ using TypeGuesser;
 
 namespace FAnsiTests.Table;
 
-internal sealed class CreateTableTests:DatabaseTests
+internal sealed class CreateTableTests : DatabaseTests
 {
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void CreateSimpleTable_Exists(DatabaseType type)
     {
         var db = GetTestDatabase(type);
@@ -30,7 +31,7 @@ internal sealed class CreateTableTests:DatabaseTests
         Assert.That(table.Exists(), Is.False);
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void TestTableCreation(DatabaseType type)
     {
         var database = GetTestDatabase(type);
@@ -54,14 +55,14 @@ internal sealed class CreateTableTests:DatabaseTests
 
         Assert.That(tbl.Exists());
 
-        var colsDictionary = tbl.DiscoverColumns().ToDictionary(static k => k.GetRuntimeName(), static v => v, StringComparer.InvariantCultureIgnoreCase);
+        var colsDictionary = tbl.DiscoverColumns().ToDictionary(static k => k.GetRuntimeName() ?? throw new InvalidDataException(), static v => v, StringComparer.InvariantCultureIgnoreCase);
 
         var name = colsDictionary["name"];
         Assert.Multiple(() =>
         {
-            Assert.That(name.DataType.GetLengthIfString(), Is.EqualTo(10));
+            Assert.That(name.DataType?.GetLengthIfString(), Is.EqualTo(10));
             Assert.That(name.AllowNulls, Is.EqualTo(false));
-            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(name.DataType.SQLType), Is.EqualTo(typeof(string)));
+            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(name.DataType?.SQLType), Is.EqualTo(typeof(string)));
             Assert.That(name.IsPrimaryKey);
         });
 
@@ -70,8 +71,8 @@ internal sealed class CreateTableTests:DatabaseTests
         Assert.Multiple(() =>
         {
             Assert.That(foreignName.AllowNulls, Is.EqualTo(false));//because it is part of the primary key we ignored the users request about nullability
-            Assert.That(foreignName.DataType.GetLengthIfString(), Is.EqualTo(7));
-            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(foreignName.DataType.SQLType), Is.EqualTo(typeof(string)));
+            Assert.That(foreignName.DataType?.GetLengthIfString(), Is.EqualTo(7));
+            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(foreignName.DataType?.SQLType), Is.EqualTo(typeof(string)));
             Assert.That(foreignName.IsPrimaryKey);
         });
 
@@ -122,7 +123,7 @@ internal sealed class CreateTableTests:DatabaseTests
         table.Drop();
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void CreateSimpleTable_VarcharTypeCorrect(DatabaseType type)
     {
         var db = GetTestDatabase(type);
@@ -160,7 +161,7 @@ internal sealed class CreateTableTests:DatabaseTests
         Assert.That(table.Exists(), Is.False);
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void CreateTable_PrimaryKey_FromDataTable(DatabaseType databaseType)
     {
         var database = GetTestDatabase(databaseType);
@@ -175,7 +176,7 @@ internal sealed class CreateTableTests:DatabaseTests
         Assert.That(table.DiscoverColumn("Name").IsPrimaryKey);
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void CreateTable_PrimaryKey_FromColumnRequest(DatabaseType databaseType)
     {
         var database = GetTestDatabase(databaseType);
@@ -196,7 +197,7 @@ internal sealed class CreateTableTests:DatabaseTests
 
     [TestCase(DatabaseType.MicrosoftSQLServer, "Latin1_General_CS_AS_KS_WS")]
     [TestCase(DatabaseType.MySql, "latin1_german1_ci")]
-    [TestCase(DatabaseType.PostgreSql,"de-DE-x-icu")]
+    [TestCase(DatabaseType.PostgreSql, "de-DE-x-icu")]
     //[TestCase(DatabaseType.Oracle, "BINARY_CI")] //Requires 12.2+ oracle https://www.experts-exchange.com/questions/29102764/SQL-Statement-to-create-case-insensitive-columns-and-or-tables-in-Oracle.html
     public void CreateTable_CollationTest(DatabaseType type, string collation)
     {
@@ -214,13 +215,13 @@ internal sealed class CreateTableTests:DatabaseTests
         Assert.That(tbl.DiscoverColumn("Name").Collation, Is.EqualTo(collation));
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void CreateTable_BoolStrings(DatabaseType type)
     {
         var db = GetTestDatabase(type);
         using var dt = new DataTable();
         dt.TableName = "MyTable";
-        dt.Columns.Add("MyBoolCol",typeof(bool));
+        dt.Columns.Add("MyBoolCol", typeof(bool));
         dt.Rows.Add("true");
 
         var tbl = db.CreateTable("MyTable", dt);
@@ -305,12 +306,12 @@ internal sealed class CreateTableTests:DatabaseTests
     [TestCase(DatabaseType.MicrosoftSQLServer, "Æther")]
     [TestCase(DatabaseType.MicrosoftSQLServer, "乗")]
     [TestCase(DatabaseType.Oracle, "didn’t")]
-    [TestCase(DatabaseType.Oracle,"Æther")]
+    [TestCase(DatabaseType.Oracle, "Æther")]
     [TestCase(DatabaseType.Oracle, "乗")]
     //[TestCase(DatabaseType.MySql, "didn’t")]
     //[TestCase(DatabaseType.MySql, "Æther")]
     //[TestCase(DatabaseType.MySql,"乗")]
-    public void Test_CreateTable_UnicodeStrings(DatabaseType type,string testString)
+    public void Test_CreateTable_UnicodeStrings(DatabaseType type, string testString)
     {
         var db = GetTestDatabase(type);
 
@@ -318,13 +319,13 @@ internal sealed class CreateTableTests:DatabaseTests
         dt.Columns.Add("Yay");
         dt.Rows.Add(testString);
 
-        var table = db.CreateTable("GoGo",dt);
+        var table = db.CreateTable("GoGo", dt);
 
         //find the table column created
         var col = table.DiscoverColumn("Yay");
 
         //value fetched from database should match the one inserted
-        var dbValue = (string) table.GetDataTable().Rows[0][0];
+        var dbValue = (string)table.GetDataTable().Rows[0][0];
         Assert.That(dbValue, Is.EqualTo(testString));
         table.Drop();
 
@@ -337,7 +338,7 @@ internal sealed class CreateTableTests:DatabaseTests
         Assert.That(comp.Guess.Unicode);
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void Test_CreateTable_UnicodeNames(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
@@ -359,11 +360,11 @@ internal sealed class CreateTableTests:DatabaseTests
         var col = table.DiscoverColumn("微笑");
         Assert.That(col.GetRuntimeName(), Is.EqualTo("微笑"));
 
-        table.Insert(new Dictionary<string, object> {{ "微笑","10" } });
+        table.Insert(new Dictionary<string, object> { { "微笑", "10" } });
 
         Assert.That(table.GetRowCount(), Is.EqualTo(2));
 
-        table.Insert(new Dictionary<DiscoveredColumn, object> {{ col,"11" } });
+        table.Insert(new Dictionary<DiscoveredColumn, object> { { col, "11" } });
 
         Assert.That(table.GetRowCount(), Is.EqualTo(3));
 
@@ -371,7 +372,7 @@ internal sealed class CreateTableTests:DatabaseTests
         dt2.Columns.Add("微笑");
         dt2.Rows.Add(23);
 
-        using(var bulk = table.BeginBulkInsert())
+        using (var bulk = table.BeginBulkInsert())
             bulk.Upload(dt2);
 
         Assert.That(table.GetRowCount(), Is.EqualTo(4));
@@ -401,22 +402,22 @@ internal sealed class CreateTableTests:DatabaseTests
         tbl.Drop();
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void Test_CreateTable_DoNotRetype(DatabaseType dbType)
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
         using var dt = new DataTable();
-        dt.Columns.Add("Hb");
+        var hb = dt.Columns.Add("Hb");
         dt.Rows.Add("T");
         dt.Rows.Add("F");
 
         //do not retype string to bool
-        dt.Columns["Hb"].SetDoNotReType(true);
+        hb.SetDoNotReType(true);
 
         var tbl = db.CreateTable("T1", dt);
 
-        Assert.That(tbl.DiscoverColumn("Hb").DataType.GetCSharpDataType(), Is.EqualTo(typeof(string)));
+        Assert.That(tbl.DiscoverColumn("Hb").DataType?.GetCSharpDataType(), Is.EqualTo(typeof(string)));
 
         var dt2 = tbl.GetDataTable();
         var values = dt2.Rows.Cast<DataRow>().Select(static c => (string)c[0]).ToArray();
@@ -438,17 +439,17 @@ internal sealed class CreateTableTests:DatabaseTests
         //the default Type for a DataColumn is string
         Assert.That(dt.Columns[0].DataType, Is.EqualTo(typeof(string)));
 
-        dt.Columns["C1"]?.ExtendedProperties.Add("ff",true);
+        dt.Columns["C1"]?.ExtendedProperties.Add("ff", true);
 
         var dt2 = dt.Clone();
-        Assert.That(dt2.Columns["C1"]?.ExtendedProperties.ContainsKey("ff")??false);
+        Assert.That(dt2.Columns["C1"]?.ExtendedProperties.ContainsKey("ff") ?? false);
     }
 
     [Test]
     public void Test_GetDoNotRetype_OnlyStringColumns()
     {
         using var dt = new DataTable();
-        dt.Columns.Add("C1",typeof(int));
+        dt.Columns.Add("C1", typeof(int));
 
         dt.SetDoNotReType(true);
 
@@ -464,17 +465,17 @@ internal sealed class CreateTableTests:DatabaseTests
     /// <summary>
     /// Tests how CreateTable interacts with <see cref="DataColumn"/> of type Object
     /// </summary>
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void CreateTable_ObjectColumns_StringContent(DatabaseType dbType)
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
         var dt = new DataTable();
-        dt.Columns.Add("Hb",typeof(object));
+        dt.Columns.Add("Hb", typeof(object));
         dt.Rows.Add("T");
         dt.Rows.Add("F");
 
-        var ex = Assert.Throws<NotSupportedException>(()=>db.CreateTable("T1", dt));
+        var ex = Assert.Throws<NotSupportedException>(() => db.CreateTable("T1", dt));
 
         Assert.That(ex?.Message, Does.Contain("System.Object"));
 
@@ -484,8 +485,8 @@ internal sealed class CreateTableTests:DatabaseTests
     /// Tests how we can customize how "T" and "F" etc are interpreted (either as boolean true/false or as string). This test
     /// uses the static defaults in <see cref="GuessSettingsFactory.Defaults"/>.
     /// </summary>
-    [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-    [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+    [TestCase(DatabaseType.MicrosoftSQLServer, true)]
+    [TestCase(DatabaseType.MicrosoftSQLServer, false)]
     public void CreateTable_GuessSettings_StaticDefaults_TF(DatabaseType dbType, bool treatAsBoolean)
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
@@ -517,7 +518,7 @@ internal sealed class CreateTableTests:DatabaseTests
         }
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void TestSomething(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
@@ -555,8 +556,8 @@ internal sealed class CreateTableTests:DatabaseTests
     /// Tests how we can customize how "T" and "F" etc are interpreted (either as boolean true/false or as string). This test
     /// uses the <see cref="CreateTableArgs.GuessSettings"/> injection.
     /// </summary>
-    [TestCase(DatabaseType.MicrosoftSQLServer,true)]
-    [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+    [TestCase(DatabaseType.MicrosoftSQLServer, true)]
+    [TestCase(DatabaseType.MicrosoftSQLServer, false)]
     public void CreateTable_GuessSettings_InArgs_TF(DatabaseType dbType, bool treatAsBoolean)
     {
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
@@ -586,7 +587,7 @@ internal sealed class CreateTableTests:DatabaseTests
         });
     }
 
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypesWithBoolFlags))]
     public void CreateTable_GuessSettings_ExplicitDateTimeFormat(DatabaseType dbType, bool useCustomDate)
     {
         //Values like 013020 would normally be treated as string data (due to leading zero) but maybe the user wants it to be a date?
@@ -595,7 +596,7 @@ internal sealed class CreateTableTests:DatabaseTests
         dt.Columns.Add("DateCol");
         dt.Rows.Add("013020");
 
-        var args = new CreateTableArgs(db,"Hb",null,dt,false);
+        var args = new CreateTableArgs(db, "Hb", null, dt, false);
         Assert.Multiple(() =>
         {
             Assert.That(GuessSettingsFactory.Defaults.ExplicitDateFormats, Is.EqualTo(args.GuessSettings.ExplicitDateFormats), "Default should match the static default");
@@ -603,15 +604,15 @@ internal sealed class CreateTableTests:DatabaseTests
         });
 
         //change the args settings to treat this date format
-        args.GuessSettings.ExplicitDateFormats = useCustomDate ? ["MMddyy"] :null;
+        args.GuessSettings.ExplicitDateFormats = useCustomDate ? ["MMddyy"] : null;
 
         var tbl = db.CreateTable(args);
         var col = tbl.DiscoverColumn("DateCol");
 
-        Assert.That(col.DataType.GetCSharpDataType(), Is.EqualTo(useCustomDate ? typeof(DateTime): typeof(string)));
+        Assert.That(col.DataType.GetCSharpDataType(), Is.EqualTo(useCustomDate ? typeof(DateTime) : typeof(string)));
 
         var dtDown = tbl.GetDataTable();
-        Assert.That(dtDown.Rows[0][0], Is.EqualTo(useCustomDate ? new DateTime(2020,01,30): "013020"));
+        Assert.That(dtDown.Rows[0][0], Is.EqualTo(useCustomDate ? new DateTime(2020, 01, 30) : "013020"));
     }
     [Test]
     public void GuessSettings_CopyProperties()

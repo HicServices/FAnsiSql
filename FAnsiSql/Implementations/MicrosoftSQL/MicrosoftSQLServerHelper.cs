@@ -25,19 +25,19 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
     #region Up Typing
     public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) => new SqlCommand(s, (SqlConnection)con, transaction as SqlTransaction);
 
-    public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new SqlDataAdapter((SqlCommand) cmd);
+    public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new SqlDataAdapter((SqlCommand)cmd);
 
-    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new SqlCommandBuilder((SqlDataAdapter) GetDataAdapter(cmd));
+    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new SqlCommandBuilder((SqlDataAdapter)GetDataAdapter(cmd));
 
-    public override DbParameter GetParameter(string parameterName) => new SqlParameter(parameterName,null);
+    public override DbParameter GetParameter(string parameterName) => new SqlParameter(parameterName, null);
 
     public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new SqlConnection(builder.ConnectionString);
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) => new SqlConnectionStringBuilder(connectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string? database, string username, string password)
     {
-        var toReturn = new SqlConnectionStringBuilder { DataSource = server};
+        var toReturn = new SqlConnectionStringBuilder { DataSource = server };
         if (!string.IsNullOrWhiteSpace(username))
         {
             toReturn.UserID = username;
@@ -46,12 +46,12 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         else
             toReturn.IntegratedSecurity = true;
 
-        if(!string.IsNullOrWhiteSpace(database))
+        if (!string.IsNullOrWhiteSpace(database))
             toReturn.InitialCatalog = database;
 
         return toReturn;
     }
-    public static string GetDatabaseNameFrom(DbConnectionStringBuilder builder) => ((SqlConnectionStringBuilder) builder).InitialCatalog;
+    public static string GetDatabaseNameFrom(DbConnectionStringBuilder builder) => ((SqlConnectionStringBuilder)builder).InitialCatalog;
 
     #endregion
 
@@ -74,10 +74,10 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
     {
         var databases = new List<string>();
 
-        using(var cmd = GetCommand("select name [Database] from master..sysdatabases", con))
+        using (var cmd = GetCommand("select name [Database] from master..sysdatabases", con))
         using (var r = cmd.ExecuteReader())
             while (r.Read())
-                databases.Add((string) r["Database"]);
+                databases.Add((string)r["Database"]);
 
         con.Close();
         return [.. databases];
@@ -85,7 +85,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
     public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)
     {
-        var b = (SqlConnectionStringBuilder) builder;
+        var b = (SqlConnectionStringBuilder)builder;
 
         b.MultipleActiveResultSets = true;
 
@@ -113,7 +113,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         cmd.ExecuteNonQuery();
     }
 
-    public override Dictionary<string,string> DescribeServer(DbConnectionStringBuilder builder)
+    public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder)
     {
         var toReturn = new Dictionary<string, string>();
 
@@ -126,8 +126,8 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         try
         {
             using var dt = new DataTable();
-            using(var cmd = new SqlCommand("EXEC master..xp_fixeddrives",con))
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cmd = new SqlCommand("EXEC master..xp_fixeddrives", con))
+            using (var da = new SqlDataAdapter(cmd))
                 da.Fill(dt);
 
             foreach (DataRow row in dt.Rows)
@@ -142,15 +142,15 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         return toReturn;
     }
 
-    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder)
+    public override string? GetExplicitUsernameIfAny(DbConnectionStringBuilder builder)
     {
-        var u = ((SqlConnectionStringBuilder) builder).UserID;
-        return string.IsNullOrWhiteSpace(u) ? null: u;
+        var u = ((SqlConnectionStringBuilder)builder).UserID;
+        return string.IsNullOrWhiteSpace(u) ? null : u;
     }
 
-    public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder)
+    public override string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder)
     {
-        var pwd = ((SqlConnectionStringBuilder) builder).Password;
+        var pwd = ((SqlConnectionStringBuilder)builder).Password;
         return string.IsNullOrWhiteSpace(pwd) ? null : pwd;
     }
 
@@ -165,14 +165,14 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         if (msb.Authentication != SqlAuthenticationMethod.NotSpecified) msb.IntegratedSecurity = false;
     }
 
-    public override Version GetVersion(DiscoveredServer server)
+    public override Version? GetVersion(DiscoveredServer server)
     {
         using var con = server.GetConnection();
         con.Open();
-        using var cmd = server.GetCommand("SELECT @@VERSION",con);
+        using var cmd = server.GetCommand("SELECT @@VERSION", con);
         using var r = cmd.ExecuteReader();
-        if(r.Read())
-            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
+        if (r.Read())
+            return r[0] == DBNull.Value ? null : CreateVersionFromString((string)r[0]);
 
         return null;
     }

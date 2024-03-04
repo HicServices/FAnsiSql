@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using FAnsi.Connections;
 using TypeGuesser;
 using TypeGuesser.Deciders;
@@ -10,7 +11,7 @@ using TypeGuesser.Deciders;
 namespace FAnsi.Discovery;
 
 /// <inheritdoc/>
-public abstract class BulkCopy:IBulkCopy
+public abstract class BulkCopy : IBulkCopy
 {
     public CultureInfo Culture { get; }
 
@@ -28,7 +29,9 @@ public abstract class BulkCopy:IBulkCopy
     /// The cached columns found on the <see cref="TargetTable"/>.  If you alter the table midway through a bulk insert you must
     /// call <see cref="InvalidateTableSchema"/> to refresh this.
     /// </summary>
-    protected DiscoveredColumn[] TargetTableColumns;
+    protected DiscoveredColumn[] TargetTableColumns => _targetTableColumns.Value;
+
+    private Lazy<DiscoveredColumn[]> _targetTableColumns;
 
     /// <summary>
     /// When calling GetMapping if there are DataColumns in the input table that you are trying to bulk insert that are not matched
@@ -55,7 +58,9 @@ public abstract class BulkCopy:IBulkCopy
         Culture = culture;
         TargetTable = targetTable;
         Connection = connection;
-        InvalidateTableSchema();
+        _targetTableColumns = new Lazy<DiscoveredColumn[]>(
+            () => TargetTable.DiscoverColumns(Connection.ManagedTransaction),
+            LazyThreadSafetyMode.ExecutionAndPublication);
         AllowUnmatchedInputColumns = false;
         DateTimeDecider = new DateTimeTypeDecider(culture);
     }
@@ -68,7 +73,9 @@ public abstract class BulkCopy:IBulkCopy
     /// </summary>
     public void InvalidateTableSchema()
     {
-        TargetTableColumns = TargetTable.DiscoverColumns(Connection.ManagedTransaction);
+        _targetTableColumns = new Lazy<DiscoveredColumn[]>(
+            () => TargetTable.DiscoverColumns(Connection.ManagedTransaction),
+            LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     /// <summary>
@@ -100,7 +107,7 @@ public abstract class BulkCopy:IBulkCopy
     /// <param name="dt"></param>
     protected void ConvertStringTypesToHardTypes(DataTable dt)
     {
-        var dict = GetMapping(dt.Columns.Cast<DataColumn>(),out _);
+        var dict = GetMapping(dt.Columns.Cast<DataColumn>(), out _);
 
         var factory = new TypeDeciderFactory(Culture);
 
@@ -108,17 +115,17 @@ public abstract class BulkCopy:IBulkCopy
         var deciders = factory.Dictionary;
 
         //for each column in the destination
-        foreach(var (dataColumn, discoveredColumn) in dict)
+        foreach (var (dataColumn, discoveredColumn) in dict)
         {
             //if the destination column is a problematic type
-            var dataType = discoveredColumn.DataType.GetCSharpDataType();
+            var dataType = discoveredColumn.DataType?.GetCSharpDataType();
             if (!deciders.TryGetValue(dataType, out var decider)) continue;
             //if it's already not a string then that's fine (hopefully it's a legit Type e.g. DateTime!)
-            if(dataColumn.DataType != typeof(string))
+            if (dataColumn.DataType != typeof(string))
                 continue;
 
             //create a new column hard typed to DateTime
-            var newColumn = dt.Columns.Add($"{dataColumn.ColumnName}_{Guid.NewGuid()}",dataType);
+            var newColumn = dt.Columns.Add($"{dataColumn.ColumnName}_{Guid.NewGuid()}", dataType);
 
             //if it's a DateTime decider then guess DateTime culture based on values in the table
             if (decider is DateTimeTypeDecider)
@@ -129,30 +136,30 @@ public abstract class BulkCopy:IBulkCopy
             }
 
 
-            foreach(DataRow dr in dt.Rows)
+            foreach (DataRow dr in dt.Rows)
                 try
                 {
                     //parse the value
-                    dr[newColumn] = decider.Parse(dr[dataColumn] as string)??DBNull.Value;
+                    dr[newColumn] = dr[dataColumn] is string v ? decider.Parse(v) ?? DBNull.Value : DBNull.Value;
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"Failed to parse value '{dr[dataColumn]}' in column '{dataColumn}'",ex);
+                    throw new Exception($"Failed to parse value '{dr[dataColumn]}' in column '{dataColumn}'", ex);
                 }
 
             //if the DataColumn is part of the Primary Key of the DataTable (in memory)
             //then we need to update the primary key to include the new column not the old one
-            if(dt.PrimaryKey != null && dt.PrimaryKey.Contains(dataColumn))
-                dt.PrimaryKey = dt.PrimaryKey.Except(new [] { dataColumn }).Union(new []{newColumn }).ToArray();
+            if (dt.PrimaryKey != null && dt.PrimaryKey.Contains(dataColumn))
+                dt.PrimaryKey = dt.PrimaryKey.Except(new[] { dataColumn }).Union(new[] { newColumn }).ToArray();
 
-            var oldOrdinal  = dataColumn.Ordinal;
+            var oldOrdinal = dataColumn.Ordinal;
 
             //drop the original column
             dt.Columns.Remove(dataColumn);
 
             //rename the hard typed column to match the old column name
             newColumn.ColumnName = dataColumn.ColumnName;
-            if(oldOrdinal != -1)
+            if (oldOrdinal != -1)
                 newColumn.SetOrdinal(oldOrdinal);
         }
     }
@@ -198,5 +205,5 @@ public abstract class BulkCopy:IBulkCopy
     /// </summary>
     /// <param name="inputColumns"></param>
     /// <returns></returns>
-    protected Dictionary<DataColumn,DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns) => GetMapping(inputColumns, out _);
+    protected Dictionary<DataColumn, DiscoveredColumn> GetMapping(IEnumerable<DataColumn> inputColumns) => GetMapping(inputColumns, out _);
 }

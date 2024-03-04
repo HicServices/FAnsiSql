@@ -11,8 +11,8 @@ namespace FAnsi.Implementations.MicrosoftSQL;
 /// <inheritdoc/>
 public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 {
-    public static readonly MicrosoftQuerySyntaxHelper Instance=new();
-    private MicrosoftQuerySyntaxHelper() : base(MicrosoftSQLTypeTranslater.Instance,new MicrosoftSQLAggregateHelper(),new MicrosoftSQLUpdateHelper(),DatabaseType.MicrosoftSQLServer)
+    public static readonly MicrosoftQuerySyntaxHelper Instance = new();
+    private MicrosoftQuerySyntaxHelper() : base(MicrosoftSQLTypeTranslater.Instance, new MicrosoftSQLAggregateHelper(), new MicrosoftSQLUpdateHelper(), DatabaseType.MicrosoftSQLServer)
     {
     }
 
@@ -80,30 +80,32 @@ public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
     public override string EnsureWrappedImpl(string databaseOrTableName) => $"[{GetRuntimeNameWithDoubledClosingSquareBrackets(databaseOrTableName)}]";
 
 
-    protected override string UnescapeWrappedNameBody(string name) => name.Replace("]]","]");
+    protected override string UnescapeWrappedNameBody(string name) => name.Replace("]]", "]");
 
     /// <summary>
     /// Returns the runtime name of the string with all ending square brackets escaped by doubling up (but resulting string is not wrapped itself)
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string? GetRuntimeNameWithDoubledClosingSquareBrackets(string s) => GetRuntimeName(s)?.Replace("]","]]");
+    private string? GetRuntimeNameWithDoubledClosingSquareBrackets(string s) => GetRuntimeName(s)?.Replace("]", "]]");
 
-    public override string EnsureFullyQualified(string databaseName, string? schema, string tableName)
+    public override string EnsureFullyQualified(string? databaseName, string? schema, string tableName)
     {
         //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
         if (string.IsNullOrWhiteSpace(schema))
-            return EnsureWrapped( GetRuntimeName(databaseName)) + DatabaseTableSeparator + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(tableName));
+            return
+                $"{EnsureWrapped(GetRuntimeName(databaseName))}{DatabaseTableSeparator}{DatabaseTableSeparator}{EnsureWrapped(GetRuntimeName(tableName))}";
 
         //there is a schema so add it in
-        return EnsureWrapped(GetRuntimeName(databaseName)) + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(schema)) + DatabaseTableSeparator + EnsureWrapped( GetRuntimeName(tableName));
+        return
+            $"{EnsureWrapped(GetRuntimeName(databaseName))}{DatabaseTableSeparator}{EnsureWrapped(GetRuntimeName(schema))}{DatabaseTableSeparator}{EnsureWrapped(GetRuntimeName(tableName))}";
     }
 
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName, string columnName, bool isTableValuedFunction = false)
+    public override string EnsureFullyQualified(string? databaseName, string? schema, string tableName, string columnName, bool isTableValuedFunction = false)
     {
         if (isTableValuedFunction)
             return GetRuntimeName(tableName) + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(columnName));//table valued functions do not support database name being in the column level selection list area of sql queries
 
-        return EnsureFullyQualified(databaseName,schema,tableName) + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(columnName));
+        return EnsureFullyQualified(databaseName, schema, tableName) + DatabaseTableSeparator + EnsureWrapped(GetRuntimeName(columnName));
     }
 }

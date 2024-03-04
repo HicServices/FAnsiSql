@@ -11,10 +11,10 @@ namespace FAnsi.Implementations.MySql;
 
 public sealed class MySqlServerHelper : DiscoveredServerHelper
 {
-    public static readonly MySqlServerHelper Instance=new();
+    public static readonly MySqlServerHelper Instance = new();
     static MySqlServerHelper()
     {
-        AddConnectionStringKeyword(DatabaseType.MySql, "AllowUserVariables","True",ConnectionStringKeywordPriority.ApiRule);
+        AddConnectionStringKeyword(DatabaseType.MySql, "AllowUserVariables", "True", ConnectionStringKeywordPriority.ApiRule);
         AddConnectionStringKeyword(DatabaseType.MySql, "CharSet", "utf8", ConnectionStringKeywordPriority.ApiRule);
     }
 
@@ -35,7 +35,7 @@ public sealed class MySqlServerHelper : DiscoveredServerHelper
     public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) =>
         new MySqlCommandBuilder((MySqlDataAdapter)GetDataAdapter(cmd));
 
-    public override DbParameter GetParameter(string parameterName) => new MySqlParameter(parameterName,null);
+    public override DbParameter GetParameter(string parameterName) => new MySqlParameter(parameterName, null);
 
     public override DbConnection GetConnection(DbConnectionStringBuilder builder) =>
         new MySqlConnection(builder.ConnectionString);
@@ -43,14 +43,14 @@ public sealed class MySqlServerHelper : DiscoveredServerHelper
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) =>
         new MySqlConnectionStringBuilder(connectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string? database, string username, string password)
     {
         var toReturn = new MySqlConnectionStringBuilder
         {
             Server = server
         };
 
-        if(!string.IsNullOrWhiteSpace(database))
+        if (!string.IsNullOrWhiteSpace(database))
             toReturn.Database = database;
 
         if (!string.IsNullOrWhiteSpace(username))
@@ -77,25 +77,25 @@ public sealed class MySqlServerHelper : DiscoveredServerHelper
 
         using var con = new MySqlConnection(b.ConnectionString);
         con.Open();
-        using var cmd = GetCommand($"CREATE DATABASE `{newDatabaseName.GetRuntimeName()}`",con);
+        using var cmd = GetCommand($"CREATE DATABASE `{newDatabaseName.GetRuntimeName()}`", con);
         cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
         cmd.ExecuteNonQuery();
     }
 
     public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder) => throw new NotImplementedException();
 
-    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((MySqlConnectionStringBuilder) builder).UserID;
+    public override string GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((MySqlConnectionStringBuilder)builder).UserID;
 
     public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((MySqlConnectionStringBuilder)builder).Password;
 
-    public override Version GetVersion(DiscoveredServer server)
+    public override Version? GetVersion(DiscoveredServer server)
     {
         using var con = server.GetConnection();
         con.Open();
-        using var cmd = server.GetCommand("show variables like \"version\"",con);
+        using var cmd = server.GetCommand("show variables like \"version\"", con);
         using var r = cmd.ExecuteReader();
         if (r.Read())
-            return r["Value"] == DBNull.Value ? null: CreateVersionFromString((string)r["Value"]);
+            return r["Value"] == DBNull.Value ? null : CreateVersionFromString((string)r["Value"]);
 
         return null;
     }
