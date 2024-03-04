@@ -1,6 +1,8 @@
 # FAnsiSql
 
-[![.NET Core](https://github.com/HicServices/FAnsiSql/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/HicServices/FAnsiSql/actions/workflows/dotnet-core.yml) [![Total alerts](https://img.shields.io/lgtm/alerts/g/HicServices/FAnsiSql.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/HicServices/FAnsiSql/alerts/) [![NuGet Badge](https://buildstats.info/nuget/HIC.FAnsiSql)](https://www.nuget.org/packages/HIC.FansiSql/)
+[![Build and test](https://github.com/HicServices/FAnsiSql/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/HicServices/FAnsiSql/actions/workflows/dotnet-core.yml)
+[![CodeQL](https://github.com/HicServices/FAnsiSql/actions/workflows/codeql.yml/badge.svg)](https://github.com/HicServices/FAnsiSql/actions/workflows/codeql.yml)
+[![NuGet Badge](https://buildstats.info/nuget/HIC.FAnsiSql)](https://www.nuget.org/packages/HIC.FansiSql/)
 
 - [Nuget](https://www.nuget.org/packages/HIC.FansiSql/)
 - [Dependencies](./Packages.md)

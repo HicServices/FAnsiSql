@@ -37,3 +37,20 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:csharp"
+          upload: False
+          output: sarif-results
+
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@v1
+        with:
+          patterns: |
+            +**/*
+            -**/*.g.cs
+            -**/Tests/**
+          input: sarif-results/csharp.sarif
+          output: sarif-results/csharp.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: sarif-results/csharp.sarif
