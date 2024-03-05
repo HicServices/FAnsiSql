@@ -22,7 +22,8 @@
     <IsAotCompatible>true</IsAotCompatible>
     <NoWarn>CS1591</NoWarn>
     <NeutralLanguage>en-GB</NeutralLanguage>
-	<DebugType>embedded</DebugType>
+    <DebugType>embedded</DebugType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <WarningLevel>1</WarningLevel>
@@ -43,6 +44,9 @@
     <PackageReference Include="MySqlConnector" Version="2.3.5" />
     <PackageReference Include="Npgsql" Version="8.0.2" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.130" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="FAnsiStrings.Designer.cs">
