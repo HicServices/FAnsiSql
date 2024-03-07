@@ -166,17 +166,11 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
 
     private static readonly Regex _rVagueVersion = RVagueVersionRe();
 
-
-    public void SetCreateDatabaseTimeoutInSeconds(int timeoutInSeconds)
-    {
-        CreateDatabaseTimeoutInSeconds = timeoutInSeconds;  
-    }
-
     /// <summary>
     /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
     /// Defaults to 30.
     /// </summary>
-    public static int CreateDatabaseTimeoutInSeconds { get; private set;} = 30;
+    public static int CreateDatabaseTimeoutInSeconds { get; set;} = 30;
 
     /// <summary>
     /// Returns a new <see cref="Version"/> by parsing the <paramref name="versionString"/>.  If the string
