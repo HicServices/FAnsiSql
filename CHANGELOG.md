@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add Setter for DiscoveredDatabaseHelper Create Database Timeout
+
 ## [3.2.0] - 2023-03-04
 
 - Target .Net 8.0
