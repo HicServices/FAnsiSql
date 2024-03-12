@@ -17,7 +17,7 @@ namespace FAnsi.Implementations.MySql;
 public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture)
     : BulkCopy(targetTable, connection, culture)
 {
-    public static readonly int BulkInsertBatchTimeoutInSeconds = 0;
+    public static int BulkInsertBatchTimeoutInSeconds { get; set; } = 0;
 
     public override int UploadImpl(DataTable dt)
     {
@@ -28,7 +28,7 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
         int maxPacket;
         using (var packetQ = new MySqlCommand("select @@max_allowed_packet", (MySqlConnection)Connection.Connection, (MySqlTransaction?)(Connection.Transaction ?? ourTrans)))
             maxPacket = Convert.ToInt32(packetQ.ExecuteScalar());
-        using var cmd = new MySqlCommand("", (MySqlConnection) Connection.Connection,
+        using var cmd = new MySqlCommand("", (MySqlConnection)Connection.Connection,
             (MySqlTransaction?)(Connection.Transaction ?? ourTrans));
         if (BulkInsertBatchTimeoutInSeconds != 0)
             cmd.CommandTimeout = BulkInsertBatchTimeoutInSeconds;
@@ -37,10 +37,10 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
             $"INSERT INTO {TargetTable.GetFullyQualifiedName()}({string.Join(",", matchedColumns.Values.Select(static c =>
                 $"`{c.GetRuntimeName()}`"))}) VALUES ";
 
-        var sb = new StringBuilder(commandPrefix,1<<22);
+        var sb = new StringBuilder(commandPrefix, 1 << 22);
 
         var matches = matchedColumns.Keys.Select(column => (matchedColumns[column].DataType.SQLType, column.Ordinal)).ToArray();
-        foreach(DataRow dr in dt.Rows)
+        foreach (DataRow dr in dt.Rows)
         {
             sb.Append('(');
 
@@ -51,7 +51,7 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
             sb.AppendLine("),");
 
             //don't let command get too long
-            if (sb.Length*2<maxPacket) continue;
+            if (sb.Length * 2 < maxPacket) continue;
 
             cmd.CommandText = sb.ToString().TrimEnd(',', '\r', '\n');
             affected += cmd.ExecuteNonQuery();
@@ -60,7 +60,7 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
         }
 
         //send final batch
-        if(sb.Length > commandPrefix.Length)
+        if (sb.Length > commandPrefix.Length)
         {
             cmd.CommandText = sb.ToString().TrimEnd(',', '\r', '\n');
             affected += cmd.ExecuteNonQuery();
@@ -76,7 +76,7 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
         dataType = dataType.ToUpper();
         dataType = BracketsRe().Replace(dataType, "").Trim();
 
-        if(value is DateTime valueDateTime)
+        if (value is DateTime valueDateTime)
             switch (dataType)
             {
                 case "DATE":
@@ -87,7 +87,7 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
                     return $"'{valueDateTime:HH:mm:ss}'";
             }
 
-        if(value == null || value == DBNull.Value)
+        if (value == null || value == DBNull.Value)
             return "NULL";
 
         return ConstructIndividualValue(dataType, value.ToString());
