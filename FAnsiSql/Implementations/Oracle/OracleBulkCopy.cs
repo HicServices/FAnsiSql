@@ -9,7 +9,7 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace FAnsi.Implementations.Oracle;
 
-internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture) : BulkCopy(targetTable, connection,culture)
+internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnection connection, CultureInfo culture) : BulkCopy(targetTable, connection, culture)
 {
     private readonly DiscoveredServer _server = targetTable.Database.Server;
 
@@ -23,7 +23,7 @@ internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnec
         var tt = syntaxHelper.TypeTranslater;
 
         //if the column name is a reserved keyword e.g. "Comment" we need to give it a new name
-        var parameterNames = syntaxHelper.GetParameterNamesFor(dt.Columns.Cast<DataColumn>().ToArray(), static c=>c.ColumnName);
+        var parameterNames = syntaxHelper.GetParameterNamesFor(dt.Columns.Cast<DataColumn>().ToArray(), static c => c.ColumnName);
 
         var affectedRows = 0;
 
@@ -32,12 +32,12 @@ internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnec
         var dateColumns = new HashSet<DataColumn>();
 
         var sql = string.Format("INSERT INTO " + TargetTable.GetFullyQualifiedName() + "({0}) VALUES ({1})",
-            string.Join(",", mapping.Values.Select(static c=> c.GetWrappedName())),
+            string.Join(",", mapping.Values.Select(static c => c.GetWrappedName())),
             string.Join(",", mapping.Keys.Select(c => parameterNames[c]))
         );
 
 
-        using var cmd = (OracleCommand) _server.GetCommand(sql, Connection);
+        using var cmd = (OracleCommand)_server.GetCommand(sql, Connection);
         //send all the data at once
         cmd.ArrayBindCount = dt.Rows.Count;
 
@@ -61,23 +61,23 @@ internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnec
 
         foreach (DataRow dataRow in dt.Rows)
             //populate parameters for current row
-        foreach (var col in mapping.Keys)
-        {
-            var val = dataRow[col];
+            foreach (var col in mapping.Keys)
+            {
+                var val = dataRow[col];
 
-            if (val is string stringVal && string.IsNullOrWhiteSpace(stringVal))
-                val = null;
-            else
-            if (val == DBNull.Value)
-                val = null;
-            else if (dateColumns.Contains(col))
-                val = val is string s ? (DateTime)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
+                if (val is string stringVal && string.IsNullOrWhiteSpace(stringVal))
+                    val = null;
+                else
+                if (val == DBNull.Value)
+                    val = null;
+                else if (dateColumns.Contains(col))
+                    val = val is string s ? (DateTime)DateTimeDecider.Parse(s) : Convert.ToDateTime(dataRow[col]);
 
-            if (col.DataType == typeof(bool) && val is bool b)
-                values[col].Add(b?1:0);
-            else
-                values[col].Add(val);
-        }
+                if (col.DataType == typeof(bool) && val is bool b)
+                    values[col].Add(b ? 1 : 0);
+                else
+                    values[col].Add(val);
+            }
 
         foreach (var col in mapping.Keys)
         {
