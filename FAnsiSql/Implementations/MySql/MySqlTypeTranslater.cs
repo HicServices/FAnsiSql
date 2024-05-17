@@ -39,6 +39,8 @@ public sealed partial class MySqlTypeTranslater : TypeTranslater
 
     protected override string GetUnicodeStringDataTypeImpl(int maxExpectedStringWidth) => $"varchar({maxExpectedStringWidth})";
 
+    protected override bool IsBool(string sqlType) => base.IsBool(sqlType) || sqlType.StartsWith("tinyint(1)", StringComparison.InvariantCultureIgnoreCase);
+
     protected override bool IsInt(string sqlType) =>
         //not an int
         !sqlType.StartsWith("int8", StringComparison.InvariantCultureIgnoreCase) && base.IsInt(sqlType);
