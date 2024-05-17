@@ -139,7 +139,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
     protected virtual string GetTimeDataType() => "time";
 
-    protected virtual string GetBoolDataType() => "bit";
+    protected virtual string GetBoolDataType() => "boolean";
 
     protected virtual string GetSmallIntDataType() => "smallint";
 

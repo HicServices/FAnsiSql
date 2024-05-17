@@ -13,6 +13,12 @@ public sealed partial class MicrosoftSQLTypeTranslater : TypeTranslater
     {
     }
 
+    /// <summary>
+    /// Microsoft SQL lacks any sane boolean support, so use a 'BIT' instead
+    /// </summary>
+    /// <returns></returns>
+    protected override string GetBoolDataType() => "bit";
+
     protected override string GetDateDateTimeDataType() => "datetime2";
 
     public override string GetStringDataTypeWithUnlimitedWidth() => "varchar(max)";
