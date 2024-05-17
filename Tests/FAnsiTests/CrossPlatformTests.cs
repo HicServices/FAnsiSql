@@ -264,7 +264,7 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.MicrosoftSQLServer, "int", "-24")]
     [TestCase(DatabaseType.MySql, "int", "-23.00")]
     [TestCase(DatabaseType.MySql, "int", "-25")]
-    [TestCase(DatabaseType.MySql, "boolean", "0")]
+    [TestCase(DatabaseType.MySql, "tinyint(1)", "0")]
     [TestCase(DatabaseType.PostgreSql, "int", "-23.00")]
     [TestCase(DatabaseType.PostgreSql, "int", "23.0")]
     [TestCase(DatabaseType.PostgreSql, "boolean", "0")]
