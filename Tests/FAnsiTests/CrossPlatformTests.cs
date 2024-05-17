@@ -236,7 +236,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         var db = GetTestDatabase(type);
         var tbl = db.ExpectTable(tableName);
         if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))])));
+        tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
