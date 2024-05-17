@@ -264,13 +264,13 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.MicrosoftSQLServer, "int", "-24")]
     [TestCase(DatabaseType.MySql, "int", "-23.00")]
     [TestCase(DatabaseType.MySql, "int", "-25")]
-    [TestCase(DatabaseType.MySql, "bit", "0")]
+    [TestCase(DatabaseType.MySql, "boolean", "0")]
     [TestCase(DatabaseType.PostgreSql, "int", "-23.00")]
     [TestCase(DatabaseType.PostgreSql, "int", "23.0")]
-    [TestCase(DatabaseType.PostgreSql, "bit", "0")]
+    [TestCase(DatabaseType.PostgreSql, "boolean", "0")]
     [TestCase(DatabaseType.PostgreSql, "int", "00.0")]
     [TestCase(DatabaseType.PostgreSql, "int", "-24")]
-    public void TypeConsensusBetweenGuesserAndDiscoveredTableTest(DatabaseType dbType, string datatType,string insertValue)
+    public void TypeConsensusBetweenGuesserAndDiscoveredTableTest(DatabaseType dbType, string datatType, string insertValue)
     {
         var database = GetTestDatabase(dbType);
 
