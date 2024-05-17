@@ -9,6 +9,7 @@ using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsiTests.TypeTranslation;
+using Microsoft.VisualBasic.CompilerServices;
 using NUnit.Framework;
 using TypeGuesser;
 using TypeGuesser.Deciders;
@@ -72,10 +73,13 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql,"28/2/1993 5:36:27 AM","en-GB")]
     public void DateColumnTests_UkUsFormat_Explicit(DatabaseType type, object input, string culture)
     {
+        const string tableName = nameof(DateColumnTests_UkUsFormat_Explicit);
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable",[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable(tableName,[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
 
-        var cultureInfo = new CultureInfo (culture);
+        var cultureInfo = new CultureInfo(culture);
 
         //basic insert
         tbl.Insert(new Dictionary<string, object> { { "MyDate", input } },cultureInfo);
@@ -97,6 +101,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             Assert.That(result.Rows[0][0], Is.EqualTo(expectedDate));
             Assert.That(result.Rows[1][0], Is.EqualTo(expectedDate));
         });
+        tbl.Drop();
     }
 
 
@@ -117,7 +122,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         var db = GetTestDatabase(type);
         var tbl = db.ExpectTable(tableName);
         if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable("MyTable",[
+        tbl = db.CreateTable(tableName, [
             new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))
                 {IsPrimaryKey = true }
         ]);
@@ -140,6 +145,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         var result = tbl.GetDataTable();
         var expectedDate = new DateTime(1993, 2,28,5,36,27);
         Assert.That(result.Rows[0][0], Is.EqualTo(expectedDate));
+        tbl.Drop();
     }
 
 
@@ -157,7 +163,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         var db = GetTestDatabase(type);
         var tbl = db.ExpectTable(tableName);
         if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
+        tbl = db.CreateTable(tableName, [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
@@ -236,7 +242,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         var db = GetTestDatabase(type);
         var tbl = db.ExpectTable(tableName);
         if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
+        tbl = db.CreateTable(tableName, [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
@@ -499,9 +505,12 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateMaxVarcharColumns(DatabaseType type)
     {
+        const string tableName = nameof(CreateMaxVarcharColumns);
         var database = GetTestDatabase(type);
 
-        var tbl = database.CreateTable("TestDistincting",
+        var tbl = database.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = database.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),int.MaxValue)), //varchar(max)
             new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(string))), //varchar(???)
@@ -519,6 +528,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             Assert.That(tbl.DiscoverColumn("Field2").DataType.GetLengthIfString(), Is.GreaterThanOrEqualTo(1000)); // unknown size should be at least 1k? that seems sensible
             Assert.That(tbl.DiscoverColumn("Field6").DataType.GetLengthIfString(), Is.EqualTo(10));
         });
+        tbl.Drop();
     }
 
 
@@ -569,12 +579,15 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void AddColumnTest(DatabaseType type,bool useTransaction)
     {
+        const string tableName = nameof(AddColumnTest);
         const string newColumnName = "My Fun New Column[Lol]"; //<- lets make sure dodgy names are also supported
 
         var database = GetTestDatabase(type);
 
         //create a single column table with primary key
-        var tbl = database.CreateTable("TestDistincting",
+        var tbl = database.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        database.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),100)){IsPrimaryKey = true} //varchar(max)
         ]);
@@ -646,6 +659,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             //and should not be a primary key
             Assert.That(tbl.DiscoverColumn(newColumnName).IsPrimaryKey, Is.False);
         });
+        tbl.Drop();
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -973,9 +987,12 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_AutoIncrementColumnTest(DatabaseType type)
     {
+        const string tableName = nameof(CreateTable_AutoIncrementColumnTest);
         var database = GetTestDatabase(type);
 
-        var tbl =  database.CreateTable("MyTable",
+        var tbl = database.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = database.CreateTable(tableName,
         [
             new DatabaseColumnRequest("IdColumn", new DatabaseTypeRequest(typeof (int)))
             {
@@ -1008,14 +1025,18 @@ public sealed class CrossPlatformTests:DatabaseTests
 
         var autoIncrement = tbl.Insert(new Dictionary<string, object> {{"Name", "Tony"}});
         Assert.That(autoIncrement, Is.EqualTo(2));
+        tbl.Drop();
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_DefaultTest_Date(DatabaseType type)
     {
+        const string tableName = nameof(CreateTable_DefaultTest_Date);
         var database = GetTestDatabase(type);
 
-        var tbl = database.CreateTable("MyTable",
+        var tbl = database.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = database.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100)),
             new DatabaseColumnRequest("myDt", new DatabaseTypeRequest(typeof (DateTime)))
@@ -1047,12 +1068,13 @@ public sealed class CrossPlatformTests:DatabaseTests
             Assert.That(databaseValue.Day, Is.EqualTo(currentValue.Day));
             Assert.That(databaseValue.Hour, Is.EqualTo(currentValue.Hour));
         });
+        tbl.Drop();
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_DefaultTest_Guid(DatabaseType type)
     {
-        var tableName = nameof(CreateTable_DefaultTest_Guid);
+        const string tableName = nameof(CreateTable_DefaultTest_Guid);
         var database = GetTestDatabase(type);
 
         // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
@@ -1099,16 +1121,19 @@ public sealed class CrossPlatformTests:DatabaseTests
         var databaseValue = (string)dt2.Rows.Cast<DataRow>().Single()["MyGuid"];
 
         Assert.That(databaseValue, Is.Not.Null);
-        TestContext.WriteLine(databaseValue);
+        tbl.Drop();
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_BulkInserting_LotsOfDates(DatabaseType type)
     {
+        const string tableName = nameof(Test_BulkInserting_LotsOfDates);
         var culture = new CultureInfo("en-gb");
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("LotsOfDatesTest",
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable(tableName,
         [
             new DatabaseColumnRequest("ID",new DatabaseTypeRequest(typeof(int))),
             new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime))),
@@ -1143,6 +1168,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         }
 
         Assert.That(tbl.GetRowCount(), Is.EqualTo(someDates.Length*2));
+        tbl.Drop();
     }
 
     private readonly string [] someDates = [
