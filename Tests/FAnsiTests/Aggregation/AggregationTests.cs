@@ -57,7 +57,7 @@ internal class AggregationTests:DatabaseTests
             dt.Rows.Add("2001-01-01", "G", "53");
 
 
-            foreach (var (key, _) in TestConnectionStrings)
+            foreach (var key in TestConnectionStrings.Keys)
                 try
                 {
                     var db = GetTestDatabase(key);

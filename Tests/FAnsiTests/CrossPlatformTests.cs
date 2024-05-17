@@ -36,11 +36,14 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql,"2007-01-01 00:00:00")]
     public void DateColumnTests_NoTime(DatabaseType type, object input)
     {
+        const string tableName = nameof(DateColumnTests_NoTime);
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable",[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable(tableName,[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyDate", input } });
-            
+
         using (var blk = tbl.BeginBulkInsert())
         {
             using var dt = new DataTable();
@@ -110,8 +113,11 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "2/28/1993 5:36:27 AM","en-US")]
     public void DateColumnTests_PrimaryKeyColumn(DatabaseType type, object input, string culture)
     {
+        const string tableName = nameof(DateColumnTests_PrimaryKeyColumn);
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable",[
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable("MyTable",[
             new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))
                 {IsPrimaryKey = true }
         ]);
@@ -147,8 +153,11 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "00:00")]
     public void DateColumnTests_TimeOnly_Midnight(DatabaseType type, object input)
     {
+        const string tableName = nameof(DateColumnTests_TimeOnly_Midnight);
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
@@ -176,6 +185,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             Assert.That(resultTimeSpans[0], Is.EqualTo(expectedTime));
             Assert.That(resultTimeSpans[1], Is.EqualTo(expectedTime));
         });
+        tbl.Drop();
     }
 
     /*
@@ -222,8 +232,11 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "13:11")]
     public void DateColumnTests_TimeOnly_Afternoon(DatabaseType type, object input)
     {
+        const string tableName = nameof(DateColumnTests_TimeOnly_Afternoon);
         var db = GetTestDatabase(type);
-        var tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable("MyTable", [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))])));
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
@@ -254,6 +267,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             var eval = t.Subtract(new TimeSpan(0, 0, 0, t.Seconds));
             Assert.That(eval, Is.EqualTo(expectedTime));
         }
+        tbl.Drop();
     }
 
     [Test]
@@ -317,7 +331,12 @@ public sealed class CrossPlatformTests:DatabaseTests
     {
         var database = GetTestDatabase(type);
 
-        var tblParent = database.CreateTable("Parent",
+        var tbl = database.ExpectTable($"{nameof(ForeignKeyCreationTest)}Child");
+        if (tbl.Exists()) tbl.Drop();
+        tbl = database.ExpectTable($"{nameof(ForeignKeyCreationTest)}Parent");
+        if (tbl.Exists()) tbl.Drop();
+
+        var tblParent = database.CreateTable($"{nameof(ForeignKeyCreationTest)}Parent",
         [
             new DatabaseColumnRequest("ID",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true},
             new DatabaseColumnRequest("Name",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
@@ -327,7 +346,7 @@ public sealed class CrossPlatformTests:DatabaseTests
             
         var parentIdFkCol = new DatabaseColumnRequest("Parent_ID", new DatabaseTypeRequest(typeof (int)));
 
-        var tblChild = database.CreateTable("Child",
+        var tblChild = database.CreateTable($"{nameof(ForeignKeyCreationTest)}Child",
         [
             parentIdFkCol,
             new DatabaseColumnRequest("ChildName",new DatabaseTypeRequest(typeof(string),10)) //varchar(10)
@@ -1033,6 +1052,7 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_DefaultTest_Guid(DatabaseType type)
     {
+        var tableName = nameof(CreateTable_DefaultTest_Guid);
         var database = GetTestDatabase(type);
 
         // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
@@ -1052,7 +1072,10 @@ public sealed class CrossPlatformTests:DatabaseTests
             }
         }
 
-        var tbl = database.CreateTable("MyTable",
+        var tbl = database.ExpectTable(tableName);
+        if (tbl.Exists())
+            tbl.Drop();
+        tbl = database.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100)),
             new DatabaseColumnRequest("MyGuid", new DatabaseTypeRequest(typeof (string)))
