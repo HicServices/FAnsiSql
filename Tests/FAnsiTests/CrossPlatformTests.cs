@@ -9,14 +9,13 @@ using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using FAnsiTests.TypeTranslation;
-using Microsoft.VisualBasic.CompilerServices;
 using NUnit.Framework;
 using TypeGuesser;
 using TypeGuesser.Deciders;
 
 namespace FAnsiTests;
 
-public sealed class CrossPlatformTests:DatabaseTests
+public sealed class CrossPlatformTests : DatabaseTests
 {
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -37,11 +36,10 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql,"2007-01-01 00:00:00")]
     public void DateColumnTests_NoTime(DatabaseType type, object input)
     {
-        const string tableName = nameof(DateColumnTests_NoTime);
+        var tableName = nameof(DateColumnTests_NoTime);
         var db = GetTestDatabase(type);
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName,[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
+        ClearTable(db, ref tableName);
+        var tbl = db.CreateTable(tableName,[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyDate", input } });
 
@@ -73,11 +71,10 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql,"28/2/1993 5:36:27 AM","en-GB")]
     public void DateColumnTests_UkUsFormat_Explicit(DatabaseType type, object input, string culture)
     {
-        const string tableName = nameof(DateColumnTests_UkUsFormat_Explicit);
+        var tableName = nameof(DateColumnTests_UkUsFormat_Explicit);
         var db = GetTestDatabase(type);
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName,[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
+        ClearTable(db, ref tableName);
+        var tbl = db.CreateTable(tableName,[new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))]);
 
         var cultureInfo = new CultureInfo(culture);
 
@@ -118,11 +115,10 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "2/28/1993 5:36:27 AM","en-US")]
     public void DateColumnTests_PrimaryKeyColumn(DatabaseType type, object input, string culture)
     {
-        const string tableName = nameof(DateColumnTests_PrimaryKeyColumn);
+        var tableName = nameof(DateColumnTests_PrimaryKeyColumn);
         var db = GetTestDatabase(type);
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName, [
+        ClearTable(db, ref tableName);
+        var tbl = db.CreateTable(tableName, [
             new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime)))
                 {IsPrimaryKey = true }
         ]);
@@ -159,11 +155,10 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "00:00")]
     public void DateColumnTests_TimeOnly_Midnight(DatabaseType type, object input)
     {
-        const string tableName = nameof(DateColumnTests_TimeOnly_Midnight);
+        var tableName = nameof(DateColumnTests_TimeOnly_Midnight);
         var db = GetTestDatabase(type);
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName, [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
+        ClearTable(db, ref tableName);
+        var tbl = db.CreateTable(tableName, [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
@@ -238,11 +233,10 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.PostgreSql, "13:11")]
     public void DateColumnTests_TimeOnly_Afternoon(DatabaseType type, object input)
     {
-        const string tableName = nameof(DateColumnTests_TimeOnly_Afternoon);
+        var tableName = nameof(DateColumnTests_TimeOnly_Afternoon);
         var db = GetTestDatabase(type);
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName, [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
+        ClearTable(db, ref tableName);
+        var tbl = db.CreateTable(tableName, [new DatabaseColumnRequest("MyTime", new DatabaseTypeRequest(typeof(TimeSpan)))]);
 
         tbl.Insert(new Dictionary<string, object> { { "MyTime", input } });
 
@@ -505,12 +499,10 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateMaxVarcharColumns(DatabaseType type)
     {
-        const string tableName = nameof(CreateMaxVarcharColumns);
-        var database = GetTestDatabase(type);
-
-        var tbl = database.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = database.CreateTable(tableName,
+        var tableName = nameof(CreateMaxVarcharColumns);
+        var db = GetTestDatabase(type);
+        ClearTable(db, ref tableName);
+        var tbl = db.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),int.MaxValue)), //varchar(max)
             new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(string))), //varchar(???)
@@ -579,15 +571,14 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void AddColumnTest(DatabaseType type,bool useTransaction)
     {
-        const string tableName = nameof(AddColumnTest);
+        var tableName = nameof(AddColumnTest);
         const string newColumnName = "My Fun New Column[Lol]"; //<- lets make sure dodgy names are also supported
 
-        var database = GetTestDatabase(type);
+        var db = GetTestDatabase(type);
+        ClearTable(db, ref tableName);
 
         //create a single column table with primary key
-        var tbl = database.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        database.CreateTable(tableName,
+        var tbl = db.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),100)){IsPrimaryKey = true} //varchar(max)
         ]);
@@ -608,7 +599,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         //ALTER TABLE to ADD COLUMN of date type
         if (useTransaction)
         {
-            using var con = database.Server.BeginNewTransactedConnection();
+            using var con = db.Server.BeginNewTransactedConnection();
             tbl.AddColumn(newColumnName, new DatabaseTypeRequest(typeof(DateTime)), true,new DatabaseOperationArgs{TimeoutInSeconds = 1000,TransactionIfAny = con.ManagedTransaction});
             con.ManagedTransaction.CommitAndCloseConnection();
         }
@@ -623,7 +614,7 @@ public sealed class CrossPlatformTests:DatabaseTests
 
         //and should have a type of datetime as requested
         var typeCreated = newCol.DataType.SQLType;
-        var tt = database.Server.GetQuerySyntaxHelper().TypeTranslater;
+        var tt = db.Server.GetQuerySyntaxHelper().TypeTranslater;
         Assert.That(tt.GetCSharpTypeForSQLDBType(typeCreated), Is.EqualTo(typeof(DateTime)));
 
         var fieldsToAlter = new List<string>(new []{"Field1", newColumnName});
@@ -987,12 +978,11 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_AutoIncrementColumnTest(DatabaseType type)
     {
-        const string tableName = nameof(CreateTable_AutoIncrementColumnTest);
-        var database = GetTestDatabase(type);
+        var tableName = nameof(CreateTable_AutoIncrementColumnTest);
+        var db = GetTestDatabase(type);
+        ClearTable(db, ref tableName);
 
-        var tbl = database.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = database.CreateTable(tableName,
+        var tbl = db.CreateTable(tableName,
         [
             new DatabaseColumnRequest("IdColumn", new DatabaseTypeRequest(typeof (int)))
             {
@@ -1031,12 +1021,11 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_DefaultTest_Date(DatabaseType type)
     {
-        const string tableName = nameof(CreateTable_DefaultTest_Date);
-        var database = GetTestDatabase(type);
+        var tableName = nameof(CreateTable_DefaultTest_Date);
+        var db = GetTestDatabase(type);
+        ClearTable(db, ref tableName);
 
-        var tbl = database.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = database.CreateTable(tableName,
+        var tbl = db.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string),100)),
             new DatabaseColumnRequest("myDt", new DatabaseTypeRequest(typeof (DateTime)))
@@ -1127,13 +1116,12 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_BulkInserting_LotsOfDates(DatabaseType type)
     {
-        const string tableName = nameof(Test_BulkInserting_LotsOfDates);
+        var tableName = nameof(Test_BulkInserting_LotsOfDates);
         var culture = new CultureInfo("en-gb");
         var db = GetTestDatabase(type);
+        ClearTable(db, ref tableName);
 
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName,
+        var tbl = db.CreateTable(tableName,
         [
             new DatabaseColumnRequest("ID",new DatabaseTypeRequest(typeof(int))),
             new DatabaseColumnRequest("MyDate",new DatabaseTypeRequest(typeof(DateTime))),

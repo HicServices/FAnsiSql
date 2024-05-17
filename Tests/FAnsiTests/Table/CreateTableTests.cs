@@ -222,7 +222,7 @@ internal sealed class CreateTableTests : DatabaseTests
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void CreateTable_BoolStrings(DatabaseType type)
     {
-        const string tableName = nameof(CreateTable_BoolStrings);
+        var tableName = nameof(CreateTable_BoolStrings);
         var db = GetTestDatabase(type);
 
         using var dt = new DataTable();
@@ -230,9 +230,8 @@ internal sealed class CreateTableTests : DatabaseTests
         dt.Columns.Add("MyBoolCol", typeof(bool));
         dt.Rows.Add("true");
 
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName, dt);
+        ClearTable(db, ref tableName);
+        var tbl = db.CreateTable(tableName, dt);
 
         Assert.Multiple(() =>
         {
@@ -393,7 +392,7 @@ internal sealed class CreateTableTests : DatabaseTests
     [TestCase(DatabaseType.PostgreSql)]
     public void Test_CreateTable_TF(DatabaseType dbType)
     {
-        const string tableName = nameof(Test_CreateTable_TF);
+        var tableName = nameof(Test_CreateTable_TF);
 
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
@@ -402,9 +401,9 @@ internal sealed class CreateTableTests : DatabaseTests
         dt.Rows.Add("T");
         dt.Rows.Add("F");
 
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName, dt);
+        ClearTable(db, ref tableName);
+
+        var tbl = db.CreateTable(tableName, dt);
 
         Assert.That(tbl.DiscoverColumn("Hb").DataType.GetCSharpDataType(), Is.EqualTo(typeof(bool)));
 
@@ -502,7 +501,7 @@ internal sealed class CreateTableTests : DatabaseTests
     [TestCase(DatabaseType.MicrosoftSQLServer, false)]
     public void CreateTable_GuessSettings_StaticDefaults_TF(DatabaseType dbType, bool treatAsBoolean)
     {
-        const string tableName = nameof(CreateTable_GuessSettings_StaticDefaults_TF);
+        var tableName = nameof(CreateTable_GuessSettings_StaticDefaults_TF);
 
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
@@ -517,10 +516,9 @@ internal sealed class CreateTableTests : DatabaseTests
         {
             //change the static default option
             GuessSettingsFactory.Defaults.CharCanBeBoolean = treatAsBoolean;
+            ClearTable(db, ref tableName);
 
-            var tbl = db.ExpectTable(tableName);
-            if (tbl.Exists()) tbl.Drop();
-            db.CreateTable(tableName, dt);
+            var tbl = db.CreateTable(tableName, dt);
             var col = tbl.DiscoverColumn("Hb");
 
             Assert.Multiple(() =>
@@ -608,15 +606,14 @@ internal sealed class CreateTableTests : DatabaseTests
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypesWithBoolFlags))]
     public void CreateTable_GuessSettings_ExplicitDateTimeFormat(DatabaseType dbType, bool useCustomDate)
     {
-        const string tableName = nameof(CreateTable_GuessSettings_ExplicitDateTimeFormat);
+        var tableName = nameof(CreateTable_GuessSettings_ExplicitDateTimeFormat);
         //Values like 013020 would normally be treated as string data (due to leading zero) but maybe the user wants it to be a date?
         var db = GetTestDatabase(dbType);
         using var dt = new DataTable();
         dt.Columns.Add("DateCol");
         dt.Rows.Add("013020");
 
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
+        ClearTable(db, ref tableName);
 
         var args = new CreateTableArgs(db, tableName, null, dt, false);
         Assert.Multiple(() =>

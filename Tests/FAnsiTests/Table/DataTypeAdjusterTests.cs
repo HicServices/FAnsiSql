@@ -12,12 +12,12 @@ internal sealed class DataTypeAdjusterTests:DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void CreateTable_WithAdjuster(DatabaseType type)
     {
-        const string tableName = nameof(CreateTable_WithAdjuster);
+        var tableName = nameof(CreateTable_WithAdjuster);
 
         var db = GetTestDatabase(type);
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
-        tbl = db.CreateTable(tableName,
+        ClearTable(db, ref tableName);
+
+        var tbl = db.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10))
         ], null, new DataTypeAdjusterTestsPadder());

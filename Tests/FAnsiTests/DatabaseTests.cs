@@ -79,6 +79,14 @@ public class DatabaseTests
 
     }
 
+    protected static void ClearTable(DiscoveredDatabase db, ref string name)
+    {
+        if (db.Server.DatabaseType == DatabaseType.Oracle && name.Length > 30)
+            name = name[..15] + name[^15..];
+        var tbl = db.ExpectTable(name);
+        if (tbl.Exists()) tbl.Drop();
+    }
+
     protected IEnumerable<DiscoveredServer> TestServer()
     {
         return TestConnectionStrings.Select(static kvp => new DiscoveredServer(kvp.Value, kvp.Key));

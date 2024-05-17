@@ -14,7 +14,7 @@ internal sealed class CreatePrimaryKeyTest: DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBasicCase_KeysCreated(DatabaseType databaseType)
     {
-        const string tableName = nameof(TestBasicCase_KeysCreated);
+        var tableName = nameof(TestBasicCase_KeysCreated);
         var db = GetTestDatabase(databaseType);
 
         // Force columns B and C to be strings otherwise Oracle gets upset by TypeGuesser mis-guessing the nulls as boolean
@@ -22,8 +22,8 @@ internal sealed class CreatePrimaryKeyTest: DatabaseTests
         b.SetDoNotReType(true);
         var c=new DataColumn("C", typeof(string));
         c.SetDoNotReType(true);
-        var tbl = db.ExpectTable(tableName);
-        if (tbl.Exists()) tbl.Drop();
+        ClearTable(db, ref tableName);
+        DiscoveredTable tbl;
 
         using (var dt = new DataTable("Fish"))
         {
