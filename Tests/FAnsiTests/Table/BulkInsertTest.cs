@@ -138,13 +138,16 @@ internal sealed class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBulkInsert_Transaction(DatabaseType type)
     {
+        const string tableName = nameof(TestBulkInsert_Transaction);
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("MyBulkInsertTest",
-            [
-                new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
-                new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
-            ]);
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        db.CreateTable(tableName,
+        [
+            new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof (string), 10)),
+            new DatabaseColumnRequest("Age", new DatabaseTypeRequest(typeof (int)))
+        ]);
 
 
         Assert.That(tbl.GetRowCount(), Is.EqualTo(0));
@@ -179,6 +182,7 @@ internal sealed class BulkInsertTest : DatabaseTests
 
         //Transaction was committed final row count should be 3
         Assert.That(tbl.GetRowCount(), Is.EqualTo(3));
+        tbl.Drop();
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -311,9 +315,12 @@ internal sealed class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void UnmatchedColumnsBulkInsertTest_UsesDefaultValues_Passes(DatabaseType type)
     {
+        const string tableName = nameof(UnmatchedColumnsBulkInsertTest_UsesDefaultValues_Passes);
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("Test",
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable(tableName,
         [
             new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
             {
@@ -364,11 +371,14 @@ internal sealed class BulkInsertTest : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void UnmatchedColumnsBulkInsertTest_UsesDefaultValues_TwoLargeBatches_Passes(DatabaseType type)
     {
+        const string tableName = nameof(UnmatchedColumnsBulkInsertTest_UsesDefaultValues_TwoLargeBatches_Passes);
         const int numberOfRowsPerBatch = 100010;
 
         var db = GetTestDatabase(type);
 
-        var tbl = db.CreateTable("Test",
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable("Test",
         [
             new DatabaseColumnRequest("bob", new DatabaseTypeRequest(typeof (string), 100))
             {

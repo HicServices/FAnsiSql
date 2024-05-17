@@ -14,12 +14,17 @@ internal sealed class CreatePrimaryKeyTest: DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void TestBasicCase_KeysCreated(DatabaseType databaseType)
     {
+        const string tableName = nameof(TestBasicCase_KeysCreated);
+        var db = GetTestDatabase(databaseType);
+
         // Force columns B and C to be strings otherwise Oracle gets upset by TypeGuesser mis-guessing the nulls as boolean
-        var b=new DataColumn("B", typeof(string));
+        var b =new DataColumn("B", typeof(string));
         b.SetDoNotReType(true);
         var c=new DataColumn("C", typeof(string));
         c.SetDoNotReType(true);
-        DiscoveredTable tbl;
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+
         using (var dt = new DataTable("Fish"))
         {
             dt.Columns.Add("A");
@@ -30,9 +35,7 @@ internal sealed class CreatePrimaryKeyTest: DatabaseTests
             dt.Rows.Add("a2", null, null);
             dt.Rows.Add("a3", null, null);
 
-            var db = GetTestDatabase(databaseType);
-
-            tbl = db.CreateTable("Fish", dt);
+            tbl = db.CreateTable(tableName, dt);
         }
 
         var col = tbl.DiscoverColumn("A");
@@ -52,6 +55,7 @@ internal sealed class CreatePrimaryKeyTest: DatabaseTests
             Assert.That(col.AllowNulls, Is.False);
             Assert.That(col.IsPrimaryKey);
         });
+        tbl.Drop();
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]

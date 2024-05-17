@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks.Dataflow;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.TableCreation;
@@ -111,10 +112,13 @@ internal sealed class CreateTableTests : DatabaseTests
     [Test]
     public void Test_CreateTable_ProprietaryType()
     {
+        const string tableName = nameof(Test_CreateTable_ProprietaryType);
         var database = GetTestDatabase(DatabaseType.Oracle);
 
-        var table = database.CreateTable(
-            "MyTable",
+        var table = database.ExpectTable(tableName);
+        if (table.Exists()) table.Drop();
+        table = database.CreateTable(
+            tableName,
             [new DatabaseColumnRequest("Name", "VARCHAR2(10)")]
         );
 
@@ -218,13 +222,17 @@ internal sealed class CreateTableTests : DatabaseTests
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void CreateTable_BoolStrings(DatabaseType type)
     {
+        const string tableName = nameof(CreateTable_BoolStrings);
         var db = GetTestDatabase(type);
+
         using var dt = new DataTable();
         dt.TableName = "MyTable";
         dt.Columns.Add("MyBoolCol", typeof(bool));
         dt.Rows.Add("true");
 
-        var tbl = db.CreateTable("MyTable", dt);
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable(tableName, dt);
 
         Assert.Multiple(() =>
         {
@@ -241,6 +249,7 @@ internal sealed class CreateTableTests : DatabaseTests
             Assert.That(tbl.DiscoverColumn("MyBoolCol").GetGuesser().Guess.CSharpType, Is.EqualTo(typeof(bool)));
             Assert.That(tbl.GetDataTable().Rows[0][0], Is.EqualTo(true));
         });
+        tbl.Drop();
     }
 
     [Test]
@@ -384,14 +393,18 @@ internal sealed class CreateTableTests : DatabaseTests
     [TestCase(DatabaseType.PostgreSql)]
     public void Test_CreateTable_TF(DatabaseType dbType)
     {
+        const string tableName = nameof(Test_CreateTable_TF);
+
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Hb");
         dt.Rows.Add("T");
         dt.Rows.Add("F");
 
-        var tbl = db.CreateTable("T1", dt);
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+        tbl = db.CreateTable(tableName, dt);
 
         Assert.That(tbl.DiscoverColumn("Hb").DataType.GetCSharpDataType(), Is.EqualTo(typeof(bool)));
 
@@ -489,6 +502,8 @@ internal sealed class CreateTableTests : DatabaseTests
     [TestCase(DatabaseType.MicrosoftSQLServer, false)]
     public void CreateTable_GuessSettings_StaticDefaults_TF(DatabaseType dbType, bool treatAsBoolean)
     {
+        const string tableName = nameof(CreateTable_GuessSettings_StaticDefaults_TF);
+
         //T and F is normally True and False.  If you want to keep it as a string set DoNotRetype
         var db = GetTestDatabase(dbType);
         using var dt = new DataTable();
@@ -503,7 +518,9 @@ internal sealed class CreateTableTests : DatabaseTests
             //change the static default option
             GuessSettingsFactory.Defaults.CharCanBeBoolean = treatAsBoolean;
 
-            var tbl = db.CreateTable("T1", dt);
+            var tbl = db.ExpectTable(tableName);
+            if (tbl.Exists()) tbl.Drop();
+            db.CreateTable(tableName, dt);
             var col = tbl.DiscoverColumn("Hb");
 
             Assert.Multiple(() =>
@@ -511,6 +528,7 @@ internal sealed class CreateTableTests : DatabaseTests
                 Assert.That(col.DataType.GetCSharpDataType(), Is.EqualTo(treatAsBoolean ? typeof(bool) : typeof(string)));
                 Assert.That(col.DataType.GetLengthIfString(), Is.EqualTo(treatAsBoolean ? -1 : 1), "Expected string length to be 1 for 'T'");
             });
+            tbl.Drop();
         }
         finally
         {
@@ -590,13 +608,17 @@ internal sealed class CreateTableTests : DatabaseTests
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypesWithBoolFlags))]
     public void CreateTable_GuessSettings_ExplicitDateTimeFormat(DatabaseType dbType, bool useCustomDate)
     {
+        const string tableName = nameof(CreateTable_GuessSettings_ExplicitDateTimeFormat);
         //Values like 013020 would normally be treated as string data (due to leading zero) but maybe the user wants it to be a date?
         var db = GetTestDatabase(dbType);
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("DateCol");
         dt.Rows.Add("013020");
 
-        var args = new CreateTableArgs(db, "Hb", null, dt, false);
+        var tbl = db.ExpectTable(tableName);
+        if (tbl.Exists()) tbl.Drop();
+
+        var args = new CreateTableArgs(db, tableName, null, dt, false);
         Assert.Multiple(() =>
         {
             Assert.That(GuessSettingsFactory.Defaults.ExplicitDateFormats, Is.EqualTo(args.GuessSettings.ExplicitDateFormats), "Default should match the static default");
@@ -606,14 +628,16 @@ internal sealed class CreateTableTests : DatabaseTests
         //change the args settings to treat this date format
         args.GuessSettings.ExplicitDateFormats = useCustomDate ? ["MMddyy"] : null;
 
-        var tbl = db.CreateTable(args);
+        tbl = db.CreateTable(args);
         var col = tbl.DiscoverColumn("DateCol");
 
         Assert.That(col.DataType.GetCSharpDataType(), Is.EqualTo(useCustomDate ? typeof(DateTime) : typeof(string)));
 
         var dtDown = tbl.GetDataTable();
         Assert.That(dtDown.Rows[0][0], Is.EqualTo(useCustomDate ? new DateTime(2020, 01, 30) : "013020"));
+        tbl.Drop();
     }
+
     [Test]
     public void GuessSettings_CopyProperties()
     {
