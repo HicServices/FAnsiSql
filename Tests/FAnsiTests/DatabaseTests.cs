@@ -91,7 +91,7 @@ public class DatabaseTests
         return new DiscoveredServer(TestConnectionStrings[type], type);
     }
 
-    protected DiscoveredDatabase GetTestDatabase(DatabaseType type, bool cleanDatabase=true)
+    protected DiscoveredDatabase GetTestDatabase(DatabaseType type, bool cleanDatabase = false)
     {
         var server = GetTestServer(type);
         var db = server.ExpectDatabase(_testScratchDatabase);
