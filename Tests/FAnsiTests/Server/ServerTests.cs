@@ -194,11 +194,14 @@ internal sealed class ServerLevelTests:DatabaseTests
     [TestCase(DatabaseType.MySql, DatabaseType.MicrosoftSQLServer)]
     [TestCase(DatabaseType.MicrosoftSQLServer,DatabaseType.PostgreSql)]
     [TestCase(DatabaseType.PostgreSql, DatabaseType.MicrosoftSQLServer)]
-
     public void MoveData_BetweenServerTypes(DatabaseType from, DatabaseType to)
     {
+        var tableName = nameof(MoveData_BetweenServerTypes);
+        var tableNameF = tableName + "F";
+        var tableNameT = tableName + "T";
+
         //Create some test data
-        var dtToMove = new DataTable();
+        using var dtToMove = new DataTable();
         dtToMove.Columns.Add("MyCol");
         dtToMove.Columns.Add("DateOfBirth");
         dtToMove.Columns.Add("Sanity");
@@ -211,12 +214,14 @@ internal sealed class ServerLevelTests:DatabaseTests
 
         //Upload it to the first database
         var fromDb = GetTestDatabase(from);
-        var tblFrom = fromDb.CreateTable("MyTable", dtToMove);
+        ClearTable(fromDb, ref tableNameF);
+        var tblFrom = fromDb.CreateTable(tableNameF, dtToMove);
         Assert.That(tblFrom.Exists());
 
         //Get pointer to the second database table (which doesn't exist yet)
         var toDb = GetTestDatabase(to);
-        var toTable = toDb.ExpectTable("MyNewTable");
+        ClearTable(toDb, ref tableNameT);
+        var toTable = toDb.ExpectTable(tableNameT);
         Assert.That(toTable.Exists(), Is.False);
 
         //Get the clone table sql adjusted to work on the other DBMS
@@ -231,7 +236,7 @@ internal sealed class ServerLevelTests:DatabaseTests
         }
 
         //new table should exist
-        Assert.That(tblFrom.Exists());
+        Assert.That(toTable.Exists());
 
         using (var insert = toTable.BeginBulkInsert())
         {
@@ -249,6 +254,8 @@ internal sealed class ServerLevelTests:DatabaseTests
         });
 
         AssertAreEqual(toTable.GetDataTable(), tblFrom.GetDataTable());
+        toTable.Drop();
+        tblFrom.Drop();
     }
 
     [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]

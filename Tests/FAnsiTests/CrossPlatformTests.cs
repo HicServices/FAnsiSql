@@ -414,9 +414,14 @@ public sealed class CrossPlatformTests : DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void ForeignKeyCreationTest_TwoColumns(DatabaseType type, bool cascadeDelete)
     {
+        var tableName = nameof(ForeignKeyCreationTest_TwoColumns);
+        var tableNameC = tableName + 'C';
+        var tableNameP = tableName + 'P';
         var database = GetTestDatabase(type);
+        ClearTable(database,ref tableNameC);
+        ClearTable(database, ref tableNameP);
 
-        var tblParent = database.CreateTable("Parent",
+        var tblParent = database.CreateTable(tableNameP,
         [
             new DatabaseColumnRequest("ID1",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true}, //varchar(10)
             new DatabaseColumnRequest("ID2",new DatabaseTypeRequest(typeof(int))){IsPrimaryKey =  true}, //varchar(10)
@@ -429,7 +434,7 @@ public sealed class CrossPlatformTests : DatabaseTests
         var parentIdFkCol1 = new DatabaseColumnRequest("Parent_ID1", new DatabaseTypeRequest(typeof(int)));
         var parentIdFkCol2 = new DatabaseColumnRequest("Parent_ID2", new DatabaseTypeRequest(typeof(int)));
 
-        var tblChild = database.CreateTable("Child",
+        var tblChild = database.CreateTable(tableNameC,
         [
             parentIdFkCol1,
             parentIdFkCol2,
@@ -494,6 +499,8 @@ public sealed class CrossPlatformTests : DatabaseTests
                 Assert.That(() => cmd.ExecuteNonQuery(), Throws.Exception);
             }
         }
+        tblChild.Drop();
+        tblParent.Drop();
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -664,12 +671,14 @@ public sealed class CrossPlatformTests : DatabaseTests
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithTwoBoolFlags))]
-    public void TestDistincting(DatabaseType type,bool useTransaction, bool dodgyNames)
+    public void TestDistincting(DatabaseType type, bool useTransaction, bool dodgyNames)
     {
+        var tableName = dodgyNames ? nameof(TestDistincting) : ",,";
         var database = GetTestDatabase(type);
+        ClearTable(database, ref tableName);
 
         // JS 2023-05-11 4000 characters, because SELECT DISTINCT doesn't work on CLOB (Oracle)
-        var tbl = database.CreateTable(dodgyNames?",,":"Field3",
+        var tbl = database.CreateTable(tableName,
         [
             new DatabaseColumnRequest("Field1",new DatabaseTypeRequest(typeof(string),4000)), //varchar(max)
             new DatabaseColumnRequest("Field2",new DatabaseTypeRequest(typeof(DateTime))),

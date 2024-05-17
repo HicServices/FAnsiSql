@@ -12,7 +12,9 @@ internal sealed class TopXTests :DatabaseTests
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypesWithBoolFlags))]
     public void Test_TopX_OrderBy(DatabaseType type,bool asc)
     {
+        var tableName = nameof(Test_TopX_OrderBy);
         var db = GetTestDatabase(type);
+        ClearTable(db, ref tableName);
 
         DiscoveredTable tbl;
         using (var dt = new DataTable())
@@ -25,7 +27,7 @@ internal sealed class TopXTests :DatabaseTests
             dt.Rows.Add(3,"fish");
             dt.Rows.Add(4,"fish");
 
-            tbl = db.CreateTable("MyTopXTable",dt);
+            tbl = db.CreateTable(tableName,dt);
         }
 
         var topx = tbl.GetQuerySyntaxHelper().HowDoWeAchieveTopX(1);
@@ -63,5 +65,7 @@ internal sealed class TopXTests :DatabaseTests
 
             Assert.That(db.Server.GetCommand(sqlcol,con).ExecuteScalar(), Is.EqualTo("fish"));
         }
+
+        tbl.Drop();
     }
 }
