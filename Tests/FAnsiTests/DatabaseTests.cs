@@ -82,7 +82,7 @@ public class DatabaseTests
     protected static void ClearTable(DiscoveredDatabase db, ref string name)
     {
         if (db.Server.DatabaseType == DatabaseType.Oracle && name.Length > 30)
-            name = name[..15] + name[^15..];
+            name = name[..14] + name[^15..];
         var tbl = db.ExpectTable(name);
         if (tbl.Exists()) tbl.Drop();
     }
