@@ -625,7 +625,7 @@ internal sealed class CreateTableTests : DatabaseTests
         //change the args settings to treat this date format
         args.GuessSettings.ExplicitDateFormats = useCustomDate ? ["MMddyy"] : null;
 
-        tbl = db.CreateTable(args);
+        var tbl = db.CreateTable(args);
         var col = tbl.DiscoverColumn("DateCol");
 
         Assert.That(col.DataType.GetCSharpDataType(), Is.EqualTo(useCustomDate ? typeof(DateTime) : typeof(string)));
