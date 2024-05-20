@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using FAnsi.Connections;
@@ -105,9 +106,9 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     }
 
     public abstract IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder);
-    public abstract string[] ListDatabases(DbConnection con);
+    public abstract IEnumerable<string> ListDatabases(DbConnection con);
 
-    public string[] ListDatabasesAsync(DbConnectionStringBuilder builder, CancellationToken token)
+    public IAsyncEnumerable<string> ListDatabasesAsync(DbConnectionStringBuilder builder, CancellationToken token)
     {
         //list the database on the server
         using var con = GetConnection(builder);
@@ -116,7 +117,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
         var openTask = con.OpenAsync(token);
         openTask.Wait(token);
 
-        return ListDatabases(con);
+        return ListDatabases(con).ToAsyncEnumerable();
     }
 
     public abstract DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder);

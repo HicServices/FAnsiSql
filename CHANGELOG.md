@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- Fix bug in PostgreSQL boolean handling (use booleans, not BIT)
+- Fix bug in PostgreSQL where database listing failed if a database named 'postgres' was not present
+- Make database enumeration an Enumerable not an array
+
 ## [3.2.1] - 2024-03-11
 
 - Add Setter for DiscoveredDatabaseHelper Create Database Timeout

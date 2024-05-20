@@ -44,7 +44,8 @@ public interface IDiscoveredServerHelper
     DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder);
 
     IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder);
-    string[] ListDatabasesAsync(DbConnectionStringBuilder builder, CancellationToken token);
+    IEnumerable<string> ListDatabases(DbConnection con);
+    IAsyncEnumerable<string> ListDatabasesAsync(DbConnectionStringBuilder builder, CancellationToken token);
 
     IDiscoveredDatabaseHelper GetDatabaseHelper();
     IQuerySyntaxHelper GetQuerySyntaxHelper();

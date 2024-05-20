@@ -70,17 +70,12 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
         return ListDatabases(con);
     }
 
-    public override string[] ListDatabases(DbConnection con)
+    public override IEnumerable<string> ListDatabases(DbConnection con)
     {
-        var databases = new List<string>();
-
-        using (var cmd = GetCommand("select name [Database] from master..sysdatabases", con))
-        using (var r = cmd.ExecuteReader())
-            while (r.Read())
-                databases.Add((string)r["Database"]);
-
-        con.Close();
-        return [.. databases];
+        using var cmd = GetCommand("select name [Database] from master..sysdatabases", con);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            yield return (string)r["Database"];
     }
 
     public override DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder)

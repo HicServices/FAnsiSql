@@ -66,7 +66,6 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
         //create a copy so as not to corrupt the original
         var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString)
         {
-            Database = "postgres",
             Timeout = 5
         };
 
@@ -75,17 +74,12 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
         return ListDatabases(con);
     }
 
-    public override string[] ListDatabases(DbConnection con)
+    public override IEnumerable<string> ListDatabases(DbConnection con)
     {
-        var databases = new List<string>();
-
-        using(var cmd = GetCommand("SELECT datname FROM pg_database;", con))
-        using(var r = cmd.ExecuteReader())
-            while (r.Read())
-                databases.Add((string) r["datname"]);
-
-        con.Close();
-        return [.. databases];
+        using var cmd = GetCommand("SELECT datname FROM pg_database;", con);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            yield return (string)r["datname"];
     }
 
     public override DbCommand GetCommand(string s, DbConnection con, DbTransaction? transaction = null) => new NpgsqlCommand(s, (NpgsqlConnection)
