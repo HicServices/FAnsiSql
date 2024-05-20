@@ -71,7 +71,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 
         using var con = new NpgsqlConnection(b.ConnectionString);
         con.Open();
-        return ListDatabases(con);
+        foreach (var listDatabase in ListDatabases(con)) yield return listDatabase;
     }
 
     public override IEnumerable<string> ListDatabases(DbConnection con)

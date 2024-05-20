@@ -67,7 +67,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
         using var con = new SqlConnection(b.ConnectionString);
         con.Open();
-        return ListDatabases(con);
+        foreach (var listDatabase in ListDatabases(con)) yield return listDatabase;
     }
 
     public override IEnumerable<string> ListDatabases(DbConnection con)

@@ -120,7 +120,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
         using var con = new OracleConnection(builder.ConnectionString);
         con.UseHourOffsetForUnsupportedTimezone = true;
         con.Open();
-        return ListDatabases(con);
+        foreach (var listDatabase in ListDatabases(con)) yield return listDatabase;
     }
 
     public override IEnumerable<string> ListDatabases(DbConnection con)

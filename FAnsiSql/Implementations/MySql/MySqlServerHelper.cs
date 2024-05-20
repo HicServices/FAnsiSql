@@ -107,7 +107,7 @@ public sealed class MySqlServerHelper : DiscoveredServerHelper
 
         using var con = new MySqlConnection(b.ConnectionString);
         con.Open();
-        return ListDatabases(con);
+        foreach (var listDatabase in ListDatabases(con)) yield return listDatabase;
     }
 
     public override IEnumerable<string> ListDatabases(DbConnection con)
