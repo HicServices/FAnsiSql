@@ -66,6 +66,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
         //create a copy so as not to corrupt the original
         var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString)
         {
+            Database = null,
             Timeout = 5
         };
 
