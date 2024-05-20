@@ -16,6 +16,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
     //Ideally don't use $ (end of string) since databases can stick extraneous stuff on the end in many cases
 
     private static readonly Regex BitRegex = BitRegexImpl();
+    private static readonly Regex BoolRegex = BoolRegexImpl();
     protected Regex ByteRegex = ByteRegexImpl();
     protected Regex SmallIntRegex = SmallIntRe();
     protected Regex IntRegex = IntRe();
@@ -139,7 +140,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
     protected virtual string GetTimeDataType() => "time";
 
-    protected virtual string GetBoolDataType() => "bit";
+    protected virtual string GetBoolDataType() => "boolean";
 
     protected virtual string GetSmallIntDataType() => "smallint";
 
@@ -392,6 +393,7 @@ select LEN(dt) from omgdates
 
     protected virtual bool IsBit(string sqlType) => BitRegex.IsMatch(sqlType);
 
+    protected virtual bool IsBool(string sqlType) => BoolRegex.IsMatch(sqlType);
     protected bool IsByte(string sqlType) => ByteRegex.IsMatch(sqlType);
 
     protected virtual bool IsSmallInt(string sqlType) => SmallIntRegex.IsMatch(sqlType);
@@ -416,7 +418,12 @@ select LEN(dt) from omgdates
     private static partial Regex StringSizeRegex();
     [GeneratedRegex("^(bit)|(bool)|(boolean)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex BitRegexImpl();
+
+    [GeneratedRegex("^bool", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex BoolRegexImpl();
+
     [GeneratedRegex("^tinyint", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+
     private static partial Regex ByteRegexImpl();
     [GeneratedRegex("^uniqueidentifier", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex GuidRe();

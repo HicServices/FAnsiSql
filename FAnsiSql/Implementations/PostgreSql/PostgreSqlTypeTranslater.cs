@@ -26,7 +26,7 @@ public sealed partial class PostgreSqlTypeTranslater : TypeTranslater
     {
 
         if (t == typeof(bool) || t == typeof(bool?))
-            return NpgsqlDbType.Bit;
+            return NpgsqlDbType.Boolean;
 
         if (t == typeof(byte))
             return NpgsqlDbType.Bytea;

@@ -264,13 +264,13 @@ public sealed class CrossPlatformTests:DatabaseTests
     [TestCase(DatabaseType.MicrosoftSQLServer, "int", "-24")]
     [TestCase(DatabaseType.MySql, "int", "-23.00")]
     [TestCase(DatabaseType.MySql, "int", "-25")]
-    [TestCase(DatabaseType.MySql, "bit", "0")]
+    [TestCase(DatabaseType.MySql, "boolean", "0")]
     [TestCase(DatabaseType.PostgreSql, "int", "-23.00")]
     [TestCase(DatabaseType.PostgreSql, "int", "23.0")]
-    [TestCase(DatabaseType.PostgreSql, "bit", "0")]
+    [TestCase(DatabaseType.PostgreSql, "boolean", "0")]
     [TestCase(DatabaseType.PostgreSql, "int", "00.0")]
     [TestCase(DatabaseType.PostgreSql, "int", "-24")]
-    public void TypeConsensusBetweenGuesserAndDiscoveredTableTest(DatabaseType dbType, string datatType,string insertValue)
+    public void TypeConsensusBetweenGuesserAndDiscoveredTableTest(DatabaseType dbType, string datatType, string insertValue)
     {
         var database = GetTestDatabase(dbType);
 
@@ -279,7 +279,7 @@ public sealed class CrossPlatformTests:DatabaseTests
         if (tbl.Exists())
             tbl.Drop();
 
-        var dt = new DataTable("TestTableCreationStrangeTypology");
+        using var dt = new DataTable("TestTableCreationStrangeTypology");
         dt.Columns.Add("mycol");
         dt.Rows.Add(insertValue);
 
@@ -294,14 +294,14 @@ public sealed class CrossPlatformTests:DatabaseTests
 
         var expectedDataType = datatType;
 
-        //you ask for an int PostgreSql gives you an integer!
-        if(dbType == DatabaseType.PostgreSql)
-            expectedDataType = datatType switch
-            {
-                "int" => "integer",
-                "bit" => "bit(1)",
-                _ => expectedDataType
-            };
+        expectedDataType = dbType switch
+        {
+            //you ask for an int PostgreSql gives you an integer!
+            DatabaseType.PostgreSql when datatType == "int" => "integer",
+            // MySQL boolean is really an aliased tinyint(1)
+            DatabaseType.MySql when datatType == "boolean" => "tinyint(1)",
+            _ => expectedDataType
+        };
 
         Assert.Multiple(() =>
         {
