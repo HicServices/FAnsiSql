@@ -107,16 +107,14 @@ public sealed class MySqlServerHelper : DiscoveredServerHelper
 
         using var con = new MySqlConnection(b.ConnectionString);
         con.Open();
-        return ListDatabases(con);
+        foreach (var listDatabase in ListDatabases(con)) yield return listDatabase;
     }
-    public override string[] ListDatabases(DbConnection con)
-    {
-        var databases = new List<string>();
 
+    public override IEnumerable<string> ListDatabases(DbConnection con)
+    {
         using var cmd = GetCommand("show databases;", con);
         using var r = cmd.ExecuteReader();
         while (r.Read())
-            databases.Add((string)r["Database"]);
-        return [.. databases];
+            yield return (string)r["Database"];
     }
 }

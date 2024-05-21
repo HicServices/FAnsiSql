@@ -105,7 +105,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
     public override Version GetVersion(DiscoveredServer server)
     {
         using var tcon = server.GetConnection();
-        if (tcon is not OracleConnection con) throw new ArgumentException("Oracle helped called on non-Oracle server",nameof(server));
+        if (tcon is not OracleConnection con) throw new ArgumentException("Oracle helper called on non-Oracle server",nameof(server));
 
         con.UseHourOffsetForUnsupportedTimezone = true;
         con.Open();
@@ -120,18 +120,14 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
         using var con = new OracleConnection(builder.ConnectionString);
         con.UseHourOffsetForUnsupportedTimezone = true;
         con.Open();
-        return ListDatabases(con);
+        foreach (var listDatabase in ListDatabases(con)) yield return listDatabase;
     }
 
-    public override string[] ListDatabases(DbConnection con)
+    public override IEnumerable<string> ListDatabases(DbConnection con)
     {
-        var databases = new List<string>();
-
-        using(var cmd = GetCommand("select * from all_users", con)) //already comes as single column called Database
-        using (var r = cmd.ExecuteReader())
-            while (r.Read())
-                databases.Add((string) r["username"]);
-
-        return [.. databases];
+        using var cmd = GetCommand("select * from all_users", con);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            yield return (string)r["username"];
     }
 }
