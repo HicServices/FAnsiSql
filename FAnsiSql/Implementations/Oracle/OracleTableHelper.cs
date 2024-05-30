@@ -7,6 +7,7 @@ using System.Linq;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
+using FAnsi.Exceptions;
 using FAnsi.Naming;
 using Oracle.ManagedDataAccess.Client;
 
@@ -113,6 +114,23 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
         return [.. columns];
     }
 
+    public virtual void DropIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName)
+    {
+        using var connection = args.GetManagedConnection(table);
+        try
+        {
+
+            var sql =
+                $"DROP INDEX {indexName}";
+
+            using var cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
+            args.ExecuteNonQuery(cmd);
+        }
+        catch (Exception e)
+        {
+            throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_DropIndex_Failed, table), e);
+        }
+    }
 
     public override IDiscoveredColumnHelper GetColumnHelper() => OracleColumnHelper.Instance;
 
