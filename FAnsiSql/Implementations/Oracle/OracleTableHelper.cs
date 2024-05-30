@@ -114,7 +114,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
         return [.. columns];
     }
 
-    public virtual void DropIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName)
+    public override void DropIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName)
     {
         using var connection = args.GetManagedConnection(table);
         try
