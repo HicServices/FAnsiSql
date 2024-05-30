@@ -170,12 +170,6 @@ public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
         }
     }
 
-    public virtual List<String> GetIndexes(DatabaseOperationArgs args, DiscoveredTable table)
-    {
-        List<String> indexes = new List<string>();
-        return indexes;
-    }
-
     public virtual void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
     {
         var syntax = table.GetQuerySyntaxHelper();

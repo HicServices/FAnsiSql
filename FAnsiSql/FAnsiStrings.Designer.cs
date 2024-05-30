@@ -303,6 +303,15 @@ namespace FAnsi {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to fetch index names for the table &apos;{0}&apos;.
+        /// </summary>
+        public static string DiscoveredTableHelper_GetIndexes_Failed {
+            get {
+                return ResourceManager.GetString("DiscoveredTableHelper_GetIndexes_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rename is not supported for TableType {0}.
         /// </summary>
         public static string DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_ {

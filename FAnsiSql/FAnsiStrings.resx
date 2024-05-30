@@ -252,4 +252,7 @@
   <data name="DiscoveredTableHelper_DropIndex_Failed" xml:space="preserve">
     <value>Unable to drop index on table '{0}'</value>
   </data>
+  <data name="DiscoveredTableHelper_GetIndexes_Failed" xml:space="preserve">
+    <value>Unable to fetch index names for the table '{0}'</value>
+  </data>
 </root>

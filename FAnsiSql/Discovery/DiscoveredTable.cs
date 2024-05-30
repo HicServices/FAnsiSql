@@ -377,7 +377,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
 
     public void CreateIndex(string indexName, DiscoveredColumn[] discoverColumns, bool isUnique = false)
     {
-        CreateIndex(new DatabaseOperationArgs(),indexName,discoverColumns,isUnique);
+        CreateIndex(new DatabaseOperationArgs(), indexName, discoverColumns, isUnique);
     }
 
     public void CreateIndex(DatabaseOperationArgs args, string indexName, DiscoveredColumn[] discoverColumns, bool isUnique = false)
@@ -385,6 +385,15 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
         Helper.CreateIndex(args, this, indexName, discoverColumns, isUnique);
     }
 
+    public void DropIndex(string indexName)
+    {
+        DropIndex(new DatabaseOperationArgs(), indexName);
+    }
+
+    public void DropIndex(DatabaseOperationArgs args, string indexName)
+    {
+        Helper.DropIndex(args, this, indexName);
+    }
 
     public void CreatePrimaryKey(DatabaseOperationArgs args, params DiscoveredColumn[] discoverColumns)
     {

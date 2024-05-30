@@ -44,7 +44,6 @@ public interface IDiscoveredTableHelper
 
     void CreateIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName, DiscoveredColumn[] columns, bool unique = false);
     void DropIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName);
-    List<String> GetIndexes(DatabaseOperationArgs args, DiscoveredTable table);
     void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable columns, DiscoveredColumn[] discoverColumns);
     int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction=null);
     DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction? transaction = null);
