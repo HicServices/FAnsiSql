@@ -375,21 +375,41 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
         }, this, discoverColumns);
     }
 
+    /// <summary>
+    /// Creates an index on the table
+    /// </summary>
+    /// <param name="indexName"></param>
+    /// <param name="discoverColumns"></param>
+    /// <param name="isUnique"></param>
     public void CreateIndex(string indexName, DiscoveredColumn[] discoverColumns, bool isUnique = false)
     {
         CreateIndex(new DatabaseOperationArgs(), indexName, discoverColumns, isUnique);
     }
 
+    /// <summary>
+    /// Creates an index on the table
+    /// </summary>
+    /// <param name="indexName"></param>
+    /// <param name="discoverColumns"></param>
+    /// <param name="isUnique"></param>
     public void CreateIndex(DatabaseOperationArgs args, string indexName, DiscoveredColumn[] discoverColumns, bool isUnique = false)
     {
         Helper.CreateIndex(args, this, indexName, discoverColumns, isUnique);
     }
 
+    /// <summary>
+    /// Drops the specified index from the discovered table
+    /// </summary>
+    /// <param name="indexName"></param>
     public void DropIndex(string indexName)
     {
         DropIndex(new DatabaseOperationArgs(), indexName);
     }
 
+    /// <summary>
+    /// Drops the specified index from the discovered table
+    /// </summary>
+    /// <param name="indexName"></param>
     public void DropIndex(DatabaseOperationArgs args, string indexName)
     {
         Helper.DropIndex(args, this, indexName);
