@@ -19,7 +19,7 @@ namespace FAnsi {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class FAnsiStrings {
@@ -275,12 +275,30 @@ namespace FAnsi {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to create index on table &apos;{0}&apos;.
+        /// </summary>
+        public static string DiscoveredTableHelper_CreateIndex_Failed {
+            get {
+                return ResourceManager.GetString("DiscoveredTableHelper_CreateIndex_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to create primary key on table {0} using columns ({1}).
         /// </summary>
         public static string DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__using_columns___1__ {
             get {
                 return ResourceManager.GetString("DiscoveredTableHelper_CreatePrimaryKey_Failed_to_create_primary_key_on_table__0__" +
                         "using_columns___1__", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to drop index on table &apos;{0}&apos;.
+        /// </summary>
+        public static string DiscoveredTableHelper_DropIndex_Failed {
+            get {
+                return ResourceManager.GetString("DiscoveredTableHelper_DropIndex_Failed", resourceCulture);
             }
         }
         

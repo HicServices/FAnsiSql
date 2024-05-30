@@ -8,6 +8,7 @@ using FAnsi.Connections;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Exceptions;
 using FAnsi.Naming;
+using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace FAnsi.Discovery;
 
@@ -15,7 +16,7 @@ namespace FAnsi.Discovery;
 /// DBMS specific implementation of all functionality that relates to interacting with existing tables (altering, dropping, truncating etc).  For table creation
 /// see <see cref="DiscoveredDatabaseHelper"/>.
 /// </summary>
-public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
+public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
 {
     public abstract string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX);
 
@@ -29,36 +30,36 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             TableType.Table => "DROP TABLE {0}",
             TableType.View => "DROP VIEW {0}",
             TableType.TableValuedFunction => throw new NotSupportedException(),
-            _ => throw new ArgumentOutOfRangeException(nameof(tableToDrop),"Unknown TableType")
+            _ => throw new ArgumentOutOfRangeException(nameof(tableToDrop), "Unknown TableType")
         };
 
-        using var cmd = tableToDrop.GetCommand(string.Format(sql,tableToDrop.GetFullyQualifiedName()),connection);
+        using var cmd = tableToDrop.GetCommand(string.Format(sql, tableToDrop.GetFullyQualifiedName()), connection);
         cmd.ExecuteNonQuery();
     }
 
     public abstract void DropFunction(DbConnection connection, DiscoveredTableValuedFunction functionToDrop);
     public abstract void DropColumn(DbConnection connection, DiscoveredColumn columnToDrop);
 
-    public virtual void AddColumn(DatabaseOperationArgs args,DiscoveredTable table, string name, string dataType, bool allowNulls)
+    public virtual void AddColumn(DatabaseOperationArgs args, DiscoveredTable table, string name, string dataType, bool allowNulls)
     {
         var syntax = table.GetQuerySyntaxHelper();
 
         using var con = args.GetManagedConnection(table);
         using var cmd = table.Database.Server.GetCommand(
-            $"ALTER TABLE {table.GetFullyQualifiedName()} ADD {syntax.EnsureWrapped(name)} {dataType} {(allowNulls ? "NULL" : "NOT NULL")}",con);
+            $"ALTER TABLE {table.GetFullyQualifiedName()} ADD {syntax.EnsureWrapped(name)} {dataType} {(allowNulls ? "NULL" : "NOT NULL")}", con);
         args.ExecuteNonQuery(cmd);
     }
 
     public virtual int GetRowCount(DatabaseOperationArgs args, DiscoveredTable table)
     {
         using var connection = args.GetManagedConnection(table);
-        using var cmd  = table.Database.Server.GetCommand($"SELECT count(*) FROM {table.GetFullyQualifiedName()}", connection);
+        using var cmd = table.Database.Server.GetCommand($"SELECT count(*) FROM {table.GetFullyQualifiedName()}", connection);
         return Convert.ToInt32(args.ExecuteScalar(cmd));
     }
 
     public abstract IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
 
-    public abstract IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture);
+    public abstract IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture);
 
     public virtual void TruncateTable(DiscoveredTable discoveredTable)
     {
@@ -121,7 +122,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
 
     public virtual void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection)
     {
-        if(discoveredTable.TableType != TableType.Table)
+        if (discoveredTable.TableType != TableType.Table)
             throw new NotSupportedException(string.Format(FAnsiStrings.DiscoveredTableHelper_RenameTable_Rename_is_not_supported_for_TableType__0_, discoveredTable.TableType));
 
         discoveredTable.GetQuerySyntaxHelper().ValidateTableName(newName);
@@ -130,12 +131,58 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         cmd.ExecuteNonQuery();
     }
 
+    public virtual void CreateIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName, DiscoveredColumn[] columns, bool isUnique = false)
+    {
+        var syntax = table.GetQuerySyntaxHelper();
+
+        using var connection = args.GetManagedConnection(table);
+        try
+        {
+            var unique = isUnique ? "UNIQUE" : "";
+            var columnNameList = string.Join(" , ", columns.Select(c => syntax.EnsureWrapped(c.GetRuntimeName())));
+            var sql =
+                $"CREATE {unique}INDEX {indexName} ON {table.GetFullyQualifiedName()} ({columnNameList})";
+
+            using var cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
+            args.ExecuteNonQuery(cmd);
+        }
+        catch (Exception e)
+        {
+            throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_CreateIndex_Failed, table), e);
+        }
+    }
+
+    public virtual void DropIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName)
+    {
+        using var connection = args.GetManagedConnection(table);
+        try
+        {
+
+            var sql =
+                $"DROP INDEX {indexName} ON {table.GetFullyQualifiedName()}";
+
+            using var cmd = table.Database.Server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
+            args.ExecuteNonQuery(cmd);
+        }
+        catch (Exception e)
+        {
+            throw new AlterFailedException(string.Format(FAnsiStrings.DiscoveredTableHelper_DropIndex_Failed, table), e);
+        }
+    }
+
+    public virtual List<String> GetIndexes(DatabaseOperationArgs args, DiscoveredTable table)
+    {
+        List<String> indexes = new List<string>();
+        return indexes;
+    }
+
     public virtual void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable table, DiscoveredColumn[] discoverColumns)
     {
         var syntax = table.GetQuerySyntaxHelper();
 
         using var connection = args.GetManagedConnection(table);
-        try{
+        try
+        {
 
             var sql =
                 $"ALTER TABLE {table.GetFullyQualifiedName()} ADD PRIMARY KEY ({string.Join(",", discoverColumns.Select(c => syntax.EnsureWrapped(c.GetRuntimeName())))})";
@@ -149,7 +196,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         }
     }
 
-    public virtual int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction=null)
+    public virtual int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction = null)
     {
         cmd.CommandText += ";SELECT @@IDENTITY";
 
@@ -161,26 +208,26 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
         return Convert.ToInt32(result);
     }
 
-    public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table,DbConnection connection, IManagedTransaction? transaction = null);
+    public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection, IManagedTransaction? transaction = null);
 
-    public virtual void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt)
+    public virtual void FillDataTableWithTopX(DatabaseOperationArgs args, DiscoveredTable table, int topX, DataTable dt)
     {
         var sql = GetTopXSqlForTable(table, topX);
 
         using var con = args.GetManagedConnection(table);
         using var cmd = table.Database.Server.GetCommand(sql, con);
         using var da = table.Database.Server.GetDataAdapter(cmd);
-        args.Fill(da,cmd, dt);
+        args.Fill(da, cmd, dt);
     }
 
     /// <inheritdoc/>
-    public virtual DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args,Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string? constraintName = null)
+    public virtual DiscoveredRelationship AddForeignKey(DatabaseOperationArgs args, Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs, bool cascadeDeletes, string? constraintName = null)
     {
         var foreignTables = foreignKeyPairs.Select(static c => c.Key.Table).Distinct().ToArray();
-        var primaryTables= foreignKeyPairs.Select(static c => c.Value.Table).Distinct().ToArray();
+        var primaryTables = foreignKeyPairs.Select(static c => c.Value.Table).Distinct().ToArray();
 
-        if(primaryTables.Length != 1 || foreignTables.Length != 1)
-            throw new ArgumentException("Primary and foreign keys must all belong to the same table",nameof(foreignKeyPairs));
+        if (primaryTables.Length != 1 || foreignTables.Length != 1)
+            throw new ArgumentException("Primary and foreign keys must all belong to the same table", nameof(foreignKeyPairs));
 
 
         var primary = primaryTables[0];
@@ -190,7 +237,7 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
 
         var constraintBit = primary.Database.Helper.GetForeignKeyConstraintSql(foreign.GetRuntimeName(), primary.GetQuerySyntaxHelper(),
             foreignKeyPairs
-                .ToDictionary(static k=>(IHasRuntimeName)k.Key, static v=>v.Value), cascadeDeletes, constraintName);
+                .ToDictionary(static k => (IHasRuntimeName)k.Key, static v => v.Value), cascadeDeletes, constraintName);
 
         var sql = $"""
                    ALTER TABLE {foreign.GetFullyQualifiedName()}
@@ -206,18 +253,18 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             }
             catch (Exception e)
             {
-                throw new AlterFailedException($"Failed to create relationship using SQL:{sql}",e);
+                throw new AlterFailedException($"Failed to create relationship using SQL:{sql}", e);
             }
         }
 
         return primary.DiscoverRelationships(args.TransactionIfAny).Single(
-            r =>r.Name.Equals(constraintName,StringComparison.CurrentCultureIgnoreCase)
+            r => r.Name.Equals(constraintName, StringComparison.CurrentCultureIgnoreCase)
         );
     }
 
     protected abstract string GetRenameTableSql(DiscoveredTable discoveredTable, string newName);
 
-    public virtual void MakeDistinct(DatabaseOperationArgs args,DiscoveredTable discoveredTable)
+    public virtual void MakeDistinct(DatabaseOperationArgs args, DiscoveredTable discoveredTable)
     {
         var server = discoveredTable.Database.Server;
 
@@ -245,20 +292,20 @@ public abstract class DiscoveredTableHelper :IDiscoveredTableHelper
             cmdTruncate.ExecuteNonQuery();
         }
 
-        using(var cmdBack = server.GetCommand($"INSERT INTO {tableName} (SELECT * FROM {tempTable})", con))
+        using (var cmdBack = server.GetCommand($"INSERT INTO {tableName} (SELECT * FROM {tempTable})", con))
         {
             cmdBack.CommandTimeout = args.TimeoutInSeconds;
             cmdBack.ExecuteNonQuery();
         }
 
-        using(var cmdDropDistinctTable = server.GetCommand($"DROP TABLE {tempTable}", con))
+        using (var cmdDropDistinctTable = server.GetCommand($"DROP TABLE {tempTable}", con))
         {
             cmdDropDistinctTable.CommandTimeout = args.TimeoutInSeconds;
             cmdDropDistinctTable.ExecuteNonQuery();
         }
 
         //if we opened a new transaction we should commit it
-        if(args.TransactionIfAny == null)
+        if (args.TransactionIfAny == null)
             con.ManagedTransaction?.CommitAndCloseConnection();
     }
 

@@ -246,4 +246,10 @@
   <data name="DataTable_Column__0__was_of_DataType__1___this_is_not_allowed___Use_String_for_untyped_data" xml:space="preserve">
     <value>DataTable column {0} was of DataType {1}, this is not allowed.  Use String for untyped data</value>
   </data>
+  <data name="DiscoveredTableHelper_CreateIndex_Failed" xml:space="preserve">
+    <value>Unable to create index on table '{0}'</value>
+  </data>
+  <data name="DiscoveredTableHelper_DropIndex_Failed" xml:space="preserve">
+    <value>Unable to drop index on table '{0}'</value>
+  </data>
 </root>

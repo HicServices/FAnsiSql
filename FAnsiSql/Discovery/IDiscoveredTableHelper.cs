@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
@@ -40,6 +41,10 @@ public interface IDiscoveredTableHelper
     string ScriptTableCreation(DiscoveredTable constraints, bool dropPrimaryKeys, bool dropNullability, bool convertIdentityToInt, DiscoveredTable? toCreateTable = null);
     bool IsEmpty(DatabaseOperationArgs args, DiscoveredTable discoveredTable);
     void RenameTable(DiscoveredTable discoveredTable, string newName, IManagedConnection connection);
+
+    void CreateIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName, DiscoveredColumn[] columns, bool unique = false);
+    void DropIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName);
+    List<String> GetIndexes(DatabaseOperationArgs args, DiscoveredTable table);
     void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable columns, DiscoveredColumn[] discoverColumns);
     int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction=null);
     DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction? transaction = null);
