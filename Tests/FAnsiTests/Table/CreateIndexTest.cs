@@ -21,8 +21,8 @@ internal sealed class CreateIndexTest : DatabaseTests
         var c = new DataColumn("C", typeof(string));
         c.SetDoNotReType(true);
 
-        if (databaseType==DatabaseType.MySql && unique)
-            Assert.Inconclusive("Can't do UNIQUE TEXT indexes on MySQL");
+        if (databaseType==DatabaseType.MySql)
+            Assert.Inconclusive("Can't do TEXT indexes on MySQL without specifying prefix length");
 
         DiscoveredTable tbl;
         using (var dt = new DataTable("Fish"))
