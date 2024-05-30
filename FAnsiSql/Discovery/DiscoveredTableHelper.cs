@@ -8,7 +8,6 @@ using FAnsi.Connections;
 using FAnsi.Discovery.Constraints;
 using FAnsi.Exceptions;
 using FAnsi.Naming;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace FAnsi.Discovery;
 
