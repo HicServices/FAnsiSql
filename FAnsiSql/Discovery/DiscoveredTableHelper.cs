@@ -137,7 +137,7 @@ public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
         using var connection = args.GetManagedConnection(table);
         try
         {
-            var unique = isUnique ? "UNIQUE" : "";
+            var unique = isUnique ? "UNIQUE " : "";
             var columnNameList = string.Join(" , ", columns.Select(c => syntax.EnsureWrapped(c.GetRuntimeName())));
             var sql =
                 $"CREATE {unique}INDEX {indexName} ON {table.GetFullyQualifiedName()} ({columnNameList})";
