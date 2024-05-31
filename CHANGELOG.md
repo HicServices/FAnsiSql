@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add the ability to create and drop indexes from DiscoveredTables
+
 ## [3.2.3] - 2024-05-22
 
 - Fix bug in PostgreSQL boolean handling (use booleans, not BIT)

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -95,7 +94,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// Returns the fully qualified (including schema if appropriate) name of the table e.g. [MyDb].dbo.[MyTable] or `MyDb`.`MyTable`
     /// </summary>
     /// <returns></returns>
-    public virtual string GetFullyQualifiedName() => QuerySyntaxHelper.EnsureFullyQualified(Database.GetRuntimeName(),Schema, GetRuntimeName());
+    public virtual string GetFullyQualifiedName() => QuerySyntaxHelper.EnsureFullyQualified(Database.GetRuntimeName(), Schema, GetRuntimeName());
 
     /// <summary>
     /// Returns the wrapped e.g. "[MyTbl]" name of the table including escaping e.g. if you wanted to name a table "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
@@ -109,7 +108,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="managedTransaction">Optional - if set the connection to list tables will be sent on the connection on which the current
     /// <paramref name="managedTransaction"/> is open</param>
     /// <returns></returns>
-    public DiscoveredColumn[] DiscoverColumns(IManagedTransaction? managedTransaction=null)
+    public DiscoveredColumn[] DiscoverColumns(IManagedTransaction? managedTransaction = null)
     {
         using var connection = Database.Server.GetManagedConnection(managedTransaction);
         return Helper.DiscoverColumns(this, connection, Database.GetRuntimeName());
@@ -135,7 +134,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="transaction">Optional - if set the connection to list tables will be sent on the connection on which the current
     /// <paramref name="transaction"/> is open</param>
     /// <returns></returns>
-    public DiscoveredColumn DiscoverColumn(string specificColumnName,IManagedTransaction? transaction=null)
+    public DiscoveredColumn DiscoverColumn(string specificColumnName, IManagedTransaction? transaction = null)
     {
         try
         {
@@ -161,9 +160,9 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// schema of the <see cref="DiscoveredTable"/></param>
     /// <param name="transaction">Optional - if set the connection to fetch the data will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
     /// <returns></returns>
-    public DataTable GetDataTable(int topX = int.MaxValue,bool enforceTypesAndNullness = true, IManagedTransaction? transaction = null) => GetDataTable(new DatabaseOperationArgs {TransactionIfAny = transaction},topX,enforceTypesAndNullness);
+    public DataTable GetDataTable(int topX = int.MaxValue, bool enforceTypesAndNullness = true, IManagedTransaction? transaction = null) => GetDataTable(new DatabaseOperationArgs { TransactionIfAny = transaction }, topX, enforceTypesAndNullness);
 
-    public DataTable GetDataTable(DatabaseOperationArgs args,int topX = int.MaxValue, bool enforceTypesAndNullness = true)
+    public DataTable GetDataTable(DatabaseOperationArgs args, int topX = int.MaxValue, bool enforceTypesAndNullness = true)
     {
         var dt = new DataTable();
 
@@ -175,7 +174,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
                 col.DataType = c.DataType.GetCSharpDataType();
             }
 
-        Helper.FillDataTableWithTopX(args,this,topX,dt);
+        Helper.FillDataTableWithTopX(args, this, topX, dt);
 
         return dt;
     }
@@ -186,10 +185,10 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     public virtual void Drop()
     {
         using var connection = Database.Server.GetManagedConnection();
-        Helper.DropTable(connection.Connection,this);
+        Helper.DropTable(connection.Connection, this);
     }
 
-    public int GetRowCount(IManagedTransaction? transaction = null) => GetRowCount(new DatabaseOperationArgs { TransactionIfAny = transaction});
+    public int GetRowCount(IManagedTransaction? transaction = null) => GetRowCount(new DatabaseOperationArgs { TransactionIfAny = transaction });
 
     /// <summary>
     /// Returns the estimated number of rows in the table.  This may use a short cut e.g. consulting sys.partitions in Sql
@@ -204,14 +203,14 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// </summary>
     /// <param name="transaction">Optional - if set the query will be sent on the connection on which the current <paramref name="transaction"/> is open</param>
     /// <returns></returns>
-    public bool IsEmpty(IManagedTransaction? transaction = null) => IsEmpty(new DatabaseOperationArgs {TransactionIfAny = transaction});
+    public bool IsEmpty(IManagedTransaction? transaction = null) => IsEmpty(new DatabaseOperationArgs { TransactionIfAny = transaction });
 
     /// <summary>
     /// Returns true if there are no rows in the table
     /// </summary>
     /// <param name="args"></param>
     /// <returns></returns>
-    public bool IsEmpty(DatabaseOperationArgs args) => Helper.IsEmpty(args,this);
+    public bool IsEmpty(DatabaseOperationArgs args) => Helper.IsEmpty(args, this);
 
     /// <summary>
     /// Creates and runs an ALTER TABLE SQL statement that adds a new column to the table
@@ -220,9 +219,9 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="type">The data type for the new column</param>
     /// <param name="allowNulls">True to allow null</param>
     /// <param name="timeoutInSeconds">The length of time to wait in seconds before giving up (See <see cref="DbCommand.CommandTimeout"/>)</param>
-    public void AddColumn(string name, DatabaseTypeRequest type,bool allowNulls,int timeoutInSeconds)
+    public void AddColumn(string name, DatabaseTypeRequest type, bool allowNulls, int timeoutInSeconds)
     {
-        AddColumn(name, type, allowNulls, new DatabaseOperationArgs {TimeoutInSeconds = timeoutInSeconds});
+        AddColumn(name, type, allowNulls, new DatabaseOperationArgs { TimeoutInSeconds = timeoutInSeconds });
     }
 
     /// <summary>
@@ -246,12 +245,12 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="timeoutInSeconds">The length of time to wait in seconds before giving up (See <see cref="DbCommand.CommandTimeout"/>)</param>
     public void AddColumn(string name, string databaseType, bool allowNulls, int timeoutInSeconds)
     {
-        AddColumn(name,databaseType,allowNulls,new DatabaseOperationArgs{TimeoutInSeconds = timeoutInSeconds});
+        AddColumn(name, databaseType, allowNulls, new DatabaseOperationArgs { TimeoutInSeconds = timeoutInSeconds });
     }
 
     public void AddColumn(string name, string databaseType, bool allowNulls, DatabaseOperationArgs args)
     {
-        Helper.AddColumn(args,this, name, databaseType, allowNulls);
+        Helper.AddColumn(args, this, name, databaseType, allowNulls);
     }
 
     /// <summary>
@@ -279,11 +278,11 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="culture"></param>
     /// <param name="transaction">Optional - records inserted should form part of the supplied ongoing transaction</param>
     /// <returns></returns>
-    public IBulkCopy BeginBulkInsert(CultureInfo culture,IManagedTransaction? transaction = null)
+    public IBulkCopy BeginBulkInsert(CultureInfo culture, IManagedTransaction? transaction = null)
     {
         Database.Server.EnableAsync();
         var connection = Database.Server.GetManagedConnection(transaction);
-        return Helper.BeginBulkInsert(this, connection,culture);
+        return Helper.BeginBulkInsert(this, connection, culture);
     }
 
     /// <summary>
@@ -299,9 +298,9 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// Deletes all EXACT duplicate rows from the table leaving only unique records.  This is method may not be transaction/threadsafe
     /// </summary>
     /// <param name="timeoutInSeconds">The length of time to allow for the command to complete (See <see cref="DbCommand.CommandTimeout"/>)</param>
-    public void MakeDistinct(int timeoutInSeconds=30)
+    public void MakeDistinct(int timeoutInSeconds = 30)
     {
-        MakeDistinct(new DatabaseOperationArgs {TimeoutInSeconds = timeoutInSeconds});
+        MakeDistinct(new DatabaseOperationArgs { TimeoutInSeconds = timeoutInSeconds });
     }
 
     /// <summary>
@@ -310,7 +309,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="args">Options for timeout, transaction etc</param>
     public void MakeDistinct(DatabaseOperationArgs args)
     {
-        Helper.MakeDistinct(args,this);
+        Helper.MakeDistinct(args, this);
     }
 
 
@@ -335,7 +334,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     public void Rename(string newName)
     {
         using var connection = Database.Server.GetManagedConnection();
-        Helper.RenameTable(this,newName,connection);
+        Helper.RenameTable(this, newName, connection);
         TableName = newName;
     }
 
@@ -355,7 +354,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="discoverColumns">Columns that should become part of the primary key</param>
     public void CreatePrimaryKey(int timeoutInSeconds, params DiscoveredColumn[] discoverColumns)
     {
-        CreatePrimaryKey(new DatabaseOperationArgs {TimeoutInSeconds = timeoutInSeconds}, discoverColumns);
+        CreatePrimaryKey(new DatabaseOperationArgs { TimeoutInSeconds = timeoutInSeconds }, discoverColumns);
     }
 
     /// <summary>
@@ -367,17 +366,57 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="discoverColumns">Columns that should become part of the primary key</param>
     public void CreatePrimaryKey(IManagedTransaction? transaction, CancellationToken token, int timeoutInSeconds, params DiscoveredColumn[] discoverColumns)
     {
-        Helper.CreatePrimaryKey(new DatabaseOperationArgs{
+        Helper.CreatePrimaryKey(new DatabaseOperationArgs
+        {
             TransactionIfAny = transaction,
             CancellationToken = token,
             TimeoutInSeconds = timeoutInSeconds
         }, this, discoverColumns);
     }
 
+    /// <summary>
+    /// Creates an index on the table
+    /// </summary>
+    /// <param name="indexName"></param>
+    /// <param name="discoverColumns"></param>
+    /// <param name="isUnique"></param>
+    public void CreateIndex(string indexName, DiscoveredColumn[] discoverColumns, bool isUnique = false)
+    {
+        CreateIndex(new DatabaseOperationArgs(), indexName, discoverColumns, isUnique);
+    }
+
+    /// <summary>
+    /// Creates an index on the table
+    /// </summary>
+    /// <param name="indexName"></param>
+    /// <param name="discoverColumns"></param>
+    /// <param name="isUnique"></param>
+    public void CreateIndex(DatabaseOperationArgs args, string indexName, DiscoveredColumn[] discoverColumns, bool isUnique = false)
+    {
+        Helper.CreateIndex(args, this, indexName, discoverColumns, isUnique);
+    }
+
+    /// <summary>
+    /// Drops the specified index from the discovered table
+    /// </summary>
+    /// <param name="indexName"></param>
+    public void DropIndex(string indexName)
+    {
+        DropIndex(new DatabaseOperationArgs(), indexName);
+    }
+
+    /// <summary>
+    /// Drops the specified index from the discovered table
+    /// </summary>
+    /// <param name="indexName"></param>
+    public void DropIndex(DatabaseOperationArgs args, string indexName)
+    {
+        Helper.DropIndex(args, this, indexName);
+    }
 
     public void CreatePrimaryKey(DatabaseOperationArgs args, params DiscoveredColumn[] discoverColumns)
     {
-        Helper.CreatePrimaryKey(args,this, discoverColumns);
+        Helper.CreatePrimaryKey(args, this, discoverColumns);
     }
 
     /// <summary>
@@ -422,7 +461,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="toInsert"></param>
     /// <param name="transaction">ongoing transaction this insert should be part of</param>
     /// <returns></returns>
-    public int Insert(Dictionary<string, object> toInsert, IManagedTransaction? transaction = null) => Insert(toInsert,null, transaction);
+    public int Insert(Dictionary<string, object> toInsert, IManagedTransaction? transaction = null) => Insert(toInsert, null, transaction);
 
     /// <summary>
     /// Overload which will discover the columns by name for you.
@@ -446,10 +485,10 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
                         .DiscoveredTable_Insert_Insert_failed__could_not_find_column_called___0___in_table___1__, k,
                     TableName));
 
-            foundColumns.Add(match,toInsert[k]);
+            foundColumns.Add(match, toInsert[k]);
         }
 
-        return Insert(foundColumns, culture,transaction);
+        return Insert(foundColumns, culture, transaction);
     }
     /// <summary>
     /// See <see cref="DiscoveredServerHelper.GetCommand"/>
@@ -464,7 +503,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     public DiscoveredRelationship[] DiscoverRelationships(IManagedTransaction? transaction = null)
     {
         using var connection = Database.Server.GetManagedConnection(transaction);
-        return Helper.DiscoverRelationships(this, connection.Connection,transaction);
+        return Helper.DiscoverRelationships(this, connection.Connection, transaction);
     }
 
     /// <summary>
@@ -508,14 +547,14 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     {
         unchecked
         {
-            var hashCode =  StringComparer.OrdinalIgnoreCase.GetHashCode(GetSchemaWithDefaultForNull()??string.Empty);
+            var hashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(GetSchemaWithDefaultForNull() ?? string.Empty);
             hashCode = (hashCode * 397) ^ (Database != null ? Database.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ (int)TableType;
             return hashCode;
         }
     }
 
-    public DiscoveredRelationship AddForeignKey(DiscoveredColumn foreignKey, DiscoveredColumn primaryKey, bool cascadeDeletes,string? constraintName = null, DatabaseOperationArgs? args = null) => AddForeignKey(new Dictionary<DiscoveredColumn,DiscoveredColumn>{{foreignKey,primaryKey}},cascadeDeletes,constraintName,args);
+    public DiscoveredRelationship AddForeignKey(DiscoveredColumn foreignKey, DiscoveredColumn primaryKey, bool cascadeDeletes, string? constraintName = null, DatabaseOperationArgs? args = null) => AddForeignKey(new Dictionary<DiscoveredColumn, DiscoveredColumn> { { foreignKey, primaryKey } }, cascadeDeletes, constraintName, args);
 
     /// <summary>
     /// 
@@ -528,6 +567,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <param name="args">Options for timeout, transaction etc</param>
     /// <returns></returns>
     public DiscoveredRelationship AddForeignKey(Dictionary<DiscoveredColumn, DiscoveredColumn> foreignKeyPairs,
-        bool cascadeDeletes,string? constraintName = null, DatabaseOperationArgs? args = null) =>
-        Helper.AddForeignKey(args??new DatabaseOperationArgs(),foreignKeyPairs, cascadeDeletes,constraintName);
+        bool cascadeDeletes, string? constraintName = null, DatabaseOperationArgs? args = null) =>
+        Helper.AddForeignKey(args ?? new DatabaseOperationArgs(), foreignKeyPairs, cascadeDeletes, constraintName);
+
 }
