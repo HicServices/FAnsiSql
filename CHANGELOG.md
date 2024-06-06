@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.5] - 2024-06-06
+
+- Bugfix for resource lifetime in ListDatabasesAsync, add unit tests
+
 ## [3.2.4] - 2024-06-05
 
 - Add the ability to create and drop indexes from DiscoveredTables
@@ -385,7 +389,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Drop table to work correctly with Views
 - Exists now works correctly for Views (previously it would return true if there was no view but a table with the same name)
 
-[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/v3.2.4...main
+[Unreleased]: https://github.com/HicServices/FAnsiSql/compare/v3.2.5...main
+[3.2.5]: https://github.com/HicServices/FAnsiSql/compare/v2.3.4...v3.2.5
 [3.2.4]: https://github.com/HicServices/FAnsiSql/compare/v3.2.3...v3.2.4
 [3.2.3]: https://github.com/HicServices/FAnsiSql/compare/v3.2.2...v3.2.3
 [3.2.2]: https://github.com/HicServices/FAnsiSql/compare/v3.2.1...v3.2.2
