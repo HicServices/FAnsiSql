@@ -16,7 +16,7 @@ namespace FAnsiTests.TypeTranslation;
 /// </summary>
 public sealed class GuesserTests
 {
-    private readonly ITypeTranslater _translater = MicrosoftSQLTypeTranslater.Instance;
+    private readonly MicrosoftSQLTypeTranslater _translater = MicrosoftSQLTypeTranslater.Instance;
 
     [Test]
     public void TestGuesser_IntToFloat()

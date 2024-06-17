@@ -232,7 +232,7 @@ public sealed class TypeTranslaterTests : DatabaseTests
 
             //What type does FAnsi think this is?
             var tBefore = tt.TryGetCSharpTypeForSQLDBType(sqlType);
-            Assert.That(tBefore, Is.Not.Null, $"We asked to create a '{sqlType}', DBMS created a '{col.DataType.SQLType}'.  FAnsi didn't recognise '{sqlType}' as a supported Type");
+            Assert.That(tBefore, Is.Not.Null, $"We asked to create a '{sqlType}', DBMS created a '{col.DataType?.SQLType}'.  FAnsi didn't recognise '{sqlType}' as a supported Type");
 
             //Does FAnsi understand the datatype that was actually created on the server (sometimes you specify something and it is an
             //alias for something else e.g. Oracle creates 'varchar2' when you ask for 'CHAR VARYING'
@@ -243,15 +243,15 @@ public sealed class TypeTranslaterTests : DatabaseTests
             Assert.Multiple(() =>
             {
                 //was the Type REQUESTED correct according to the test case expectation
-                Assert.That(tBefore, Is.EqualTo(expectedType), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType.SQLType}' is '{tAfter}'");
+                Assert.That(tBefore, Is.EqualTo(expectedType), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType?.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType?.SQLType}' is '{tAfter}'");
 
                 //Was the Type CREATED matching the REQUESTED type (as far as FAnsi is concerned)
-                Assert.That(tAfter, Is.EqualTo(tBefore), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType.SQLType}' is '{tAfter}'");
+                Assert.That(tAfter, Is.EqualTo(tBefore), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType?.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType?.SQLType}' is '{tAfter}'");
             });
 
-            if (!string.Equals(col.DataType.SQLType,sqlType,StringComparison.CurrentCultureIgnoreCase))
+            if (!string.Equals(col.DataType?.SQLType,sqlType,StringComparison.OrdinalIgnoreCase))
                 TestContext.WriteLine("{0} created a '{1}' when asked to create a '{2}'", type,
-                    col.DataType.SQLType, sqlType);
+                    col.DataType?.SQLType, sqlType);
 
         }
         finally

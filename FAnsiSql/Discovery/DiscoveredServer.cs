@@ -90,7 +90,7 @@ public sealed class DiscoveredServer : IMightNotExist
     /// <param name="usernameIfAny">Optional username to set in the connection string</param>
     /// <param name="passwordIfAny">Optional password to set in the connection string</param>
     /// <exception cref="ImplementationNotFoundException"></exception>
-    public DiscoveredServer(string server, string database, DatabaseType databaseType, string usernameIfAny, string passwordIfAny)
+    public DiscoveredServer(string server, string? database, DatabaseType databaseType, string usernameIfAny, string passwordIfAny)
     {
         Helper = ImplementationManager.GetImplementation(databaseType).GetServerHelper();
 

@@ -174,7 +174,7 @@ internal sealed class BulkInsertTest : DatabaseTests
                 Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(3));
             }
 
-            transaction.ManagedTransaction.CommitAndCloseConnection();
+            transaction.ManagedTransaction?.CommitAndCloseConnection();
         }
 
         //Transaction was committed final row count should be 3
@@ -220,7 +220,7 @@ internal sealed class BulkInsertTest : DatabaseTests
                 Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(3));
             }
 
-            transaction.ManagedTransaction.AbandonAndCloseConnection();
+            transaction.ManagedTransaction?.AbandonAndCloseConnection();
         }
 
         //We abandoned transaction so final rowcount should be 0
@@ -266,7 +266,7 @@ internal sealed class BulkInsertTest : DatabaseTests
                 var col = tbl.DiscoverColumn("Name", transaction.ManagedTransaction);
 
                 //Make it bigger
-                col.DataType.Resize(100, transaction.ManagedTransaction);
+                col.DataType?.Resize(100, transaction.ManagedTransaction);
 
                 bulk.Upload(dt);
 
@@ -274,7 +274,7 @@ internal sealed class BulkInsertTest : DatabaseTests
                 Assert.That(tbl.GetRowCount(transaction.ManagedTransaction), Is.EqualTo(3));
             }
 
-            transaction.ManagedTransaction.CommitAndCloseConnection();
+            transaction.ManagedTransaction?.CommitAndCloseConnection();
         }
 
         //We abandoned transaction so final rowcount should be 0
@@ -501,9 +501,9 @@ internal sealed class BulkInsertTest : DatabaseTests
             //give it 300 ms delay (simulates user cancelling not DbCommand.Timeout expiring)
             using var cts = new CancellationTokenSource(300);
             //GetDataTable should have been cancelled at the database level
-            Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,50000,
+            Assert.Throws<OperationCanceledException>(()=>tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction ?? throw new InvalidOperationException(),50000,
                 cts.Token)));
-            tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction,50000, default));
+            tbl.GetDataTable(new DatabaseOperationArgs(con.ManagedTransaction ?? throw new InvalidOperationException(),50000, default));
         }
 
 

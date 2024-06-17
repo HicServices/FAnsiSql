@@ -63,14 +63,14 @@ internal sealed class ForeignKeyTests:DatabaseTests
             Assert.That(relationships[0].CascadeDelete, Is.EqualTo(cascade ? CascadeRule.Delete : CascadeRule.NoAction));
         });
 
-        var sort1 = new RelationshipTopologicalSort(new[] {childTable, parentTable});
+        var sort1 = new RelationshipTopologicalSort([childTable, parentTable]);
         Assert.Multiple(() =>
         {
             Assert.That(parentTable, Is.EqualTo(sort1.Order[0]));
             Assert.That(childTable, Is.EqualTo(sort1.Order[1]));
         });
 
-        var sort2 = new RelationshipTopologicalSort(new[] { parentTable,childTable});
+        var sort2 = new RelationshipTopologicalSort([parentTable, childTable]);
         Assert.Multiple(() =>
         {
             Assert.That(parentTable, Is.EqualTo(sort2.Order[0]));
@@ -181,7 +181,7 @@ internal sealed class ForeignKeyTests:DatabaseTests
             using var con = t1.Database.Server.BeginNewTransactedConnection();
             constraint1 = t1.AddForeignKey(c2,c1,true,null,new DatabaseOperationArgs {TransactionIfAny = con.ManagedTransaction});
             constraint2 = t1.AddForeignKey(c3,c1,true,"FK_Lol",new DatabaseOperationArgs {TransactionIfAny = con.ManagedTransaction});
-            con.ManagedTransaction.CommitAndCloseConnection();
+            con.ManagedTransaction?.CommitAndCloseConnection();
         }
         else
         {
@@ -201,7 +201,7 @@ internal sealed class ForeignKeyTests:DatabaseTests
             Assert.That(constraint2.Name, Is.EqualTo("FK_Lol").IgnoreCase);
         });
 
-        var sort2 = new RelationshipTopologicalSort(new[] { t1,t2,t3 });
+        var sort2 = new RelationshipTopologicalSort([t1,t2,t3]);
 
 
         Assert.That(sort2.Order.ToList(), Does.Contain(t1));
@@ -249,7 +249,7 @@ internal sealed class ForeignKeyTests:DatabaseTests
             Assert.That(constraint2, Is.Not.Null);
         });
 
-        var sort2 = new RelationshipTopologicalSort(new[] { t1,t2,t3 });
+        var sort2 = new RelationshipTopologicalSort([t1,t2,t3]);
 
         Assert.That(sort2.Order.ToList(), Does.Contain(t1));
         Assert.That(sort2.Order.ToList(), Does.Contain(t2));
@@ -265,10 +265,10 @@ internal sealed class ForeignKeyTests:DatabaseTests
         var robbers = db.CreateTable("Robbers", [new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100))]);
         var lawyers = db.CreateTable("Lawyers", [new DatabaseColumnRequest("Name", new DatabaseTypeRequest(typeof(string), 100))]);
 
-        var sort = new RelationshipTopologicalSort(new[] {cops});
+        var sort = new RelationshipTopologicalSort([cops]);
         Assert.That(sort.Order.Single(), Is.EqualTo(cops));
 
-        var sort2 = new RelationshipTopologicalSort(new[] { cops,robbers,lawyers });
+        var sort2 = new RelationshipTopologicalSort([cops,robbers,lawyers]);
         Assert.Multiple(() =>
         {
             Assert.That(sort2.Order[0], Is.EqualTo(cops));
