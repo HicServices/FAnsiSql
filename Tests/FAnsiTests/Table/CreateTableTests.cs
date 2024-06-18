@@ -79,18 +79,18 @@ internal sealed class CreateTableTests : DatabaseTests
         var address = colsDictionary["address"];
         Assert.Multiple(() =>
         {
-            Assert.That(address.DataType.GetLengthIfString(), Is.EqualTo(500));
+            Assert.That(address.DataType?.GetLengthIfString(), Is.EqualTo(500));
             Assert.That(address.AllowNulls, Is.EqualTo(true));
-            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(address.DataType.SQLType), Is.EqualTo(typeof(string)));
+            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(address.DataType?.SQLType), Is.EqualTo(typeof(string)));
             Assert.That(address.IsPrimaryKey, Is.False);
         });
 
         var dob = colsDictionary["dob"];
         Assert.Multiple(() =>
         {
-            Assert.That(dob.DataType.GetLengthIfString(), Is.EqualTo(-1));
+            Assert.That(dob.DataType?.GetLengthIfString(), Is.EqualTo(-1));
             Assert.That(dob.AllowNulls, Is.EqualTo(false));
-            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(dob.DataType.SQLType), Is.EqualTo(typeof(DateTime)));
+            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(dob.DataType?.SQLType), Is.EqualTo(typeof(DateTime)));
             Assert.That(dob.IsPrimaryKey, Is.False);
         });
 
@@ -98,10 +98,10 @@ internal sealed class CreateTableTests : DatabaseTests
         Assert.Multiple(() =>
         {
             Assert.That(score.AllowNulls, Is.EqualTo(true));
-            Assert.That(score.DataType.GetDecimalSize().NumbersBeforeDecimalPlace, Is.EqualTo(5));
-            Assert.That(score.DataType.GetDecimalSize().NumbersAfterDecimalPlace, Is.EqualTo(3));
+            Assert.That(score.DataType?.GetDecimalSize()?.NumbersBeforeDecimalPlace, Is.EqualTo(5));
+            Assert.That(score.DataType?.GetDecimalSize()?.NumbersAfterDecimalPlace, Is.EqualTo(3));
 
-            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(score.DataType.SQLType), Is.EqualTo(typeof(decimal)));
+            Assert.That(syntaxHelper.TypeTranslater.GetCSharpTypeForSQLDBType(score.DataType?.SQLType), Is.EqualTo(typeof(decimal)));
         });
 
         tbl.Drop();
@@ -118,7 +118,7 @@ internal sealed class CreateTableTests : DatabaseTests
             [new DatabaseColumnRequest("Name", "VARCHAR2(10)")]
         );
 
-        Assert.That(table.DiscoverColumn("Name").DataType.GetLengthIfString(), Is.EqualTo(10));
+        Assert.That(table.DiscoverColumn("Name").DataType?.GetLengthIfString(), Is.EqualTo(10));
 
         table.Drop();
     }
@@ -135,7 +135,7 @@ internal sealed class CreateTableTests : DatabaseTests
         Assert.That(table.Exists());
 
 
-        var dbType = table.DiscoverColumn("Name").DataType.SQLType;
+        var dbType = table.DiscoverColumn("Name").DataType?.SQLType;
 
         switch (type)
         {
@@ -297,7 +297,7 @@ internal sealed class CreateTableTests : DatabaseTests
             ]);
 
         var col = table.DiscoverColumn("MyCol");
-        Assert.That(col.DataType.SQLType, Is.EqualTo("decimal(1,0)"));
+        Assert.That(col.DataType?.SQLType, Is.EqualTo("decimal(1,0)"));
     }
 
 
@@ -330,7 +330,7 @@ internal sealed class CreateTableTests : DatabaseTests
         table.Drop();
 
         //column created should know it is unicode
-        var typeRequest = col.Table.GetQuerySyntaxHelper().TypeTranslater.GetDataTypeRequestForSQLDBType(col.DataType.SQLType);
+        var typeRequest = col.Table.GetQuerySyntaxHelper().TypeTranslater.GetDataTypeRequestForSQLDBType(col.DataType?.SQLType ?? throw new InvalidOperationException());
         Assert.That(typeRequest.Unicode, "Expected column DatabaseTypeRequest generated from column SQLType to be Unicode");
 
         //Column created should use unicode when creating a new datatype computer from the col
@@ -393,7 +393,7 @@ internal sealed class CreateTableTests : DatabaseTests
 
         var tbl = db.CreateTable("T1", dt);
 
-        Assert.That(tbl.DiscoverColumn("Hb").DataType.GetCSharpDataType(), Is.EqualTo(typeof(bool)));
+        Assert.That(tbl.DiscoverColumn("Hb").DataType?.GetCSharpDataType(), Is.EqualTo(typeof(bool)));
 
         var dt2 = tbl.GetDataTable();
         Assert.That(dt2.Rows.Cast<DataRow>().Select(static c => c[0]).ToArray(), Does.Contain(true));
@@ -508,8 +508,8 @@ internal sealed class CreateTableTests : DatabaseTests
 
             Assert.Multiple(() =>
             {
-                Assert.That(col.DataType.GetCSharpDataType(), Is.EqualTo(treatAsBoolean ? typeof(bool) : typeof(string)));
-                Assert.That(col.DataType.GetLengthIfString(), Is.EqualTo(treatAsBoolean ? -1 : 1), "Expected string length to be 1 for 'T'");
+                Assert.That(col.DataType?.GetCSharpDataType(), Is.EqualTo(treatAsBoolean ? typeof(bool) : typeof(string)));
+                Assert.That(col.DataType?.GetLengthIfString(), Is.EqualTo(treatAsBoolean ? -1 : 1), "Expected string length to be 1 for 'T'");
             });
         }
         finally
@@ -544,10 +544,10 @@ internal sealed class CreateTableTests : DatabaseTests
         {
             Assert.That(tbl.Exists());
 
-            Assert.That(tbl.DiscoverColumn("cint").DataType.GetCSharpDataType(), Is.EqualTo(typeof(int)));
-            Assert.That(tbl.DiscoverColumn("clong").DataType.GetCSharpDataType(), Is.EqualTo(typeof(long)));
-            Assert.That(tbl.DiscoverColumn("cshort").DataType.GetCSharpDataType(), Is.EqualTo(typeof(short)));
-            Assert.That(tbl.DiscoverColumn("script_name").DataType.GetCSharpDataType(), Is.EqualTo(typeof(string)));
+            Assert.That(tbl.DiscoverColumn("cint").DataType?.GetCSharpDataType(), Is.EqualTo(typeof(int)));
+            Assert.That(tbl.DiscoverColumn("clong").DataType?.GetCSharpDataType(), Is.EqualTo(typeof(long)));
+            Assert.That(tbl.DiscoverColumn("cshort").DataType?.GetCSharpDataType(), Is.EqualTo(typeof(short)));
+            Assert.That(tbl.DiscoverColumn("script_name").DataType?.GetCSharpDataType(), Is.EqualTo(typeof(string)));
         });
         tbl.Drop();
     }
@@ -582,8 +582,8 @@ internal sealed class CreateTableTests : DatabaseTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(col.DataType.GetCSharpDataType(), Is.EqualTo(treatAsBoolean ? typeof(bool) : typeof(string)));
-            Assert.That(col.DataType.GetLengthIfString(), Is.EqualTo(treatAsBoolean ? -1 : 1), "Expected string length to be 1 for 'T'");
+            Assert.That(col.DataType?.GetCSharpDataType(), Is.EqualTo(treatAsBoolean ? typeof(bool) : typeof(string)));
+            Assert.That(col.DataType?.GetLengthIfString(), Is.EqualTo(treatAsBoolean ? -1 : 1), "Expected string length to be 1 for 'T'");
         });
     }
 
@@ -609,7 +609,7 @@ internal sealed class CreateTableTests : DatabaseTests
         var tbl = db.CreateTable(args);
         var col = tbl.DiscoverColumn("DateCol");
 
-        Assert.That(col.DataType.GetCSharpDataType(), Is.EqualTo(useCustomDate ? typeof(DateTime) : typeof(string)));
+        Assert.That(col.DataType?.GetCSharpDataType(), Is.EqualTo(useCustomDate ? typeof(DateTime) : typeof(string)));
 
         var dtDown = tbl.GetDataTable();
         Assert.That(dtDown.Rows[0][0], Is.EqualTo(useCustomDate ? new DateTime(2020, 01, 30) : "013020"));

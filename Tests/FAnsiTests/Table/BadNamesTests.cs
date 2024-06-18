@@ -89,7 +89,7 @@ internal sealed class BadNamesTests : DatabaseTests
 
         var (_, badColumnName, _) = GetBadNames(dbType);
         var col = tbl.DiscoverColumn(badColumnName);
-        Assert.That(col.DataType.GetLengthIfString(), Is.EqualTo(100));
+        Assert.That(col.DataType?.GetLengthIfString(), Is.EqualTo(100));
 
         var varcharType = tbl.Database.Server.GetQuerySyntaxHelper().TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof(string),10));
 

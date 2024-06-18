@@ -68,7 +68,7 @@ public class DatabaseTests
 
                 var constr = element.Element("ConnectionString")?.Value;
 
-                TestConnectionStrings.Add(databaseType,constr);
+                TestConnectionStrings.Add(databaseType,constr ?? throw new InvalidOperationException());
             }
         }
         catch (Exception exception)

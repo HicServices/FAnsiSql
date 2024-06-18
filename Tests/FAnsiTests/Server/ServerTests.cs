@@ -62,18 +62,14 @@ internal sealed class ServerLevelTests:DatabaseTests
 
         var server = new DiscoveredServer(builder);
 
-        Assert.That(server.Name, Is.EqualTo("loco"));
-
-        //Oracle does not persist database in connection string
-        if(type == DatabaseType.Oracle)
-            Assert.That(server.GetCurrentDatabase(), Is.Null);
-        else
-            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("bob"));
-
         Assert.Multiple(() =>
         {
-            Assert.That(server.ExplicitUsernameIfAny, Is.EqualTo("franko"));
-            Assert.That(server.ExplicitPasswordIfAny, Is.EqualTo("wacky"));
+            Assert.That(server.Name,Is.EqualTo("loco"));
+
+            //Oracle does not persist database in connection string
+            Assert.That(server.GetCurrentDatabase()?.GetRuntimeName(),type == DatabaseType.Oracle ? Is.Null : Is.EqualTo("bob"));
+            Assert.That(server.ExplicitUsernameIfAny,Is.EqualTo("franko"));
+            Assert.That(server.ExplicitPasswordIfAny,Is.EqualTo("wacky"));
         });
     }
 
@@ -123,7 +119,7 @@ internal sealed class ServerLevelTests:DatabaseTests
             Assert.That(server.Name, Is.EqualTo("loco"));
 
             //this failure is already exposed by Server_Helper_GetConnectionStringBuilder
-            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo(expectCaps ? "BOB" : "bob"));
+            Assert.That(server.GetCurrentDatabase()?.GetRuntimeName(), Is.EqualTo(expectCaps ? "BOB" : "bob"));
 
             Assert.That(server.ExplicitUsernameIfAny, Is.EqualTo("franko"));
             Assert.That(server.ExplicitPasswordIfAny, Is.EqualTo("wacky"));
@@ -135,7 +131,7 @@ internal sealed class ServerLevelTests:DatabaseTests
         {
             Assert.That(server.Name, Is.EqualTo("loco"));
 
-            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo(expectCaps ? "OMGGGG" : "omgggg"));
+            Assert.That(server.GetCurrentDatabase()?.GetRuntimeName(), Is.EqualTo(expectCaps ? "OMGGGG" : "omgggg"));
             Assert.That(server.ExplicitUsernameIfAny, Is.EqualTo("franko"));
             Assert.That(server.ExplicitPasswordIfAny, Is.EqualTo("wacky"));
         });
@@ -160,7 +156,7 @@ internal sealed class ServerLevelTests:DatabaseTests
         Assert.Multiple(() =>
         {
             Assert.That(server.Name, Is.EqualTo("loco"));
-            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("bob"));
+            Assert.That(server.GetCurrentDatabase()?.GetRuntimeName(), Is.EqualTo("bob"));
         });
 
         //Use API to change databases
@@ -170,7 +166,7 @@ internal sealed class ServerLevelTests:DatabaseTests
             Assert.Multiple(() =>
             {
                 Assert.That(server.Name, Is.EqualTo("loco"));
-                Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("omgggg"));
+                Assert.That(server.GetCurrentDatabase()?.GetRuntimeName(), Is.EqualTo("omgggg"));
             });
         }
 
@@ -179,14 +175,14 @@ internal sealed class ServerLevelTests:DatabaseTests
         Assert.Multiple(() =>
         {
             Assert.That(server.Name, Is.EqualTo("loco"));
-            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("Fisss"));
+            Assert.That(server.GetCurrentDatabase()?.GetRuntimeName(), Is.EqualTo("Fisss"));
         });
 
         server.Builder["Server"] = "Amagad";
         Assert.Multiple(() =>
         {
             Assert.That(server.Name, Is.EqualTo("Amagad"));
-            Assert.That(server.GetCurrentDatabase().GetRuntimeName(), Is.EqualTo("Fisss"));
+            Assert.That(server.GetCurrentDatabase()?.GetRuntimeName(), Is.EqualTo("Fisss"));
         });
     }
 
@@ -198,7 +194,7 @@ internal sealed class ServerLevelTests:DatabaseTests
     public void MoveData_BetweenServerTypes(DatabaseType from, DatabaseType to)
     {
         //Create some test data
-        var dtToMove = new DataTable();
+        using var dtToMove = new DataTable();
         dtToMove.Columns.Add("MyCol");
         dtToMove.Columns.Add("DateOfBirth");
         dtToMove.Columns.Add("Sanity");
@@ -207,7 +203,7 @@ internal sealed class ServerLevelTests:DatabaseTests
         dtToMove.Rows.Add("Tony", null,"9.99");
         dtToMove.Rows.Add("Jez", new DateTime(2001, 05, 01),"100.0");
 
-        dtToMove.PrimaryKey = [dtToMove.Columns["MyCol"]];
+        dtToMove.PrimaryKey = [dtToMove.Columns["MyCol"] ?? throw new InvalidOperationException()];
 
         //Upload it to the first database
         var fromDb = GetTestDatabase(from);

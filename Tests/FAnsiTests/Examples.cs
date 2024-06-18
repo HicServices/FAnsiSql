@@ -35,8 +35,8 @@ internal sealed class TestExamples : DatabaseTests
         Assert.Multiple(() =>
         {
             //Database types are compatible with all the data
-            Assert.That(table.DiscoverColumn("Date of Birth").DataType.SQLType, Is.EqualTo("datetime2"));
-            Assert.That(table.DiscoverColumn("Name").DataType.SQLType, Is.EqualTo("varchar(25)"));
+            Assert.That(table.DiscoverColumn("Date of Birth").DataType?.SQLType, Is.EqualTo("datetime2"));
+            Assert.That(table.DiscoverColumn("Name").DataType?.SQLType, Is.EqualTo("varchar(25)"));
 
             //And the (string) data is now properly typed and sat in our DBMS
             Assert.That(table.GetRowCount(), Is.EqualTo(2));
@@ -73,8 +73,8 @@ internal sealed class TestExamples : DatabaseTests
 
         //Table has 2 rows in it
         TestContext.WriteLine("Table {0} has {1} rows" ,table.GetFullyQualifiedName(), table.GetRowCount());
-        TestContext.WriteLine("Column Name is of type {0}", table.DiscoverColumn("Name").DataType.SQLType);
-        TestContext.WriteLine("Column DateOfBirth is of type {0}", table.DiscoverColumn("DateOfBirth").DataType.SQLType);
+        TestContext.WriteLine("Column Name is of type {0}", table.DiscoverColumn("Name").DataType?.SQLType);
+        TestContext.WriteLine("Column DateOfBirth is of type {0}", table.DiscoverColumn("DateOfBirth").DataType?.SQLType);
 
         using var con = server.GetConnection();
         con.Open();

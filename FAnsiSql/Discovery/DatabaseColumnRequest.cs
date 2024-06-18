@@ -57,7 +57,7 @@ public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest
     /// Applies only if the <see cref="TypeRequested"/> is string based.  Setting this will override the default collation and specify
     /// a specific collation.  The value specified must be an installed collation supported by the DBMS
     /// </summary>
-    public string Collation { get; set; }
+    public string? Collation { get; set; }
 
     public DatabaseColumnRequest(string columnName, string explicitDbType, bool allowNulls = true) : this(columnName, (DatabaseTypeRequest?)null, allowNulls)
     {

@@ -58,7 +58,7 @@ public sealed class DatabaseOperationArgs
     /// </summary>
     /// <param name="cmd"></param>
     /// <exception cref="OperationCanceledException"></exception>
-    public object ExecuteScalar(DbCommand cmd)
+    public object? ExecuteScalar(DbCommand cmd)
     {
         return Execute(cmd, ()=>cmd.ExecuteScalarAsync(CancellationToken));
     }

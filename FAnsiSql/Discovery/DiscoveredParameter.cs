@@ -13,5 +13,5 @@ public sealed class DiscoveredParameter(string parameterName)
     /// <summary>
     /// The <see cref="DiscoveredDataType"/> the parameter is declared as e.g. varchar(10)
     /// </summary>
-    public DiscoveredDataType DataType { get; set; }
+    public DiscoveredDataType? DataType { get; set; }
 }
