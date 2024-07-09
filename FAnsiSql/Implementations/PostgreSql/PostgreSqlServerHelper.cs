@@ -66,7 +66,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
         //create a copy so as not to corrupt the original
         var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString)
         {
-            Database = null,
+            Database = "postgres", //Use the default database, otherwise Npgsql will try to connect to a database with the same name as the user
             Timeout = 5
         };
 
