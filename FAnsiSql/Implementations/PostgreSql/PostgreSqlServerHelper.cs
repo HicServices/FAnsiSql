@@ -33,7 +33,6 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
         var b = (NpgsqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
-        b.Database = null;
 
         using var con = new NpgsqlConnection(b.ConnectionString);
         con.Open();
