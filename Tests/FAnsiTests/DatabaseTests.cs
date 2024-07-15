@@ -13,6 +13,7 @@ using FAnsi.Implementations.Oracle;
 using FAnsi.Implementations.MicrosoftSQL;
 using FAnsi.Implementations.PostgreSql;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 
 namespace FAnsiTests;
 
@@ -72,11 +73,10 @@ public class DatabaseTests
             }
             if (TestConnectionStrings.ContainsKey(DatabaseType.PostgreSql))
             {
-                //make the postgres test DB if it doesn't exist
-                var testDB = GetTestDatabase(DatabaseType.PostgreSql);
-                if (!testDB.Server.DiscoverDatabases().ToList().Any(db => db.GetWrappedName().Contains(_testScratchDatabase)))
+                var server = GetTestServer(DatabaseType.PostgreSql);
+                if (!server.DiscoverDatabases().ToList().Any(db => db.GetWrappedName().Contains(_testScratchDatabase)))
                 {
-                    testDB.Server.CreateDatabase(_testScratchDatabase);
+                    server.CreateDatabase(_testScratchDatabase);
                 }
             }
         }

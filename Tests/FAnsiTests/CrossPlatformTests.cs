@@ -793,9 +793,6 @@ public sealed class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         SqlConnection.ClearAllPools();
-        //var db = database.Server.ExpectDatabase(horribleTableName);
-        //if (db.Exists())
-        //    db.Drop();
         if (type == DatabaseType.PostgreSql)
             database.Server.CreateDatabase(horribleDatabaseName);
 
