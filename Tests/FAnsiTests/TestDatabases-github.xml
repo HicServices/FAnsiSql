@@ -18,6 +18,6 @@
   </TestDatabase>
   <TestDatabase>
     <DatabaseType>PostgreSql</DatabaseType>
-    <ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432</ConnectionString>
+    <ConnectionString>User ID=postgres;Password=pgpass4291;Host=127.0.0.1;Port=5432;Database=postgres</ConnectionString>
   </TestDatabase>
 </TestDatabases>
