@@ -793,9 +793,15 @@ public sealed class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         SqlConnection.ClearAllPools();
+        //var db = database.Server.ExpectDatabase(horribleTableName);
+        //if (db.Exists())
+        //    db.Drop();
+        if (type == DatabaseType.PostgreSql)
+            database.Server.CreateDatabase(horribleDatabaseName);
 
         database = database.Server.ExpectDatabase(horribleDatabaseName);
-        database.Create(true);
+        if(type != DatabaseType.PostgreSql)
+            database.Create(true);
             
         SqlConnection.ClearAllPools();
 
@@ -918,9 +924,8 @@ public sealed class CrossPlatformTests:DatabaseTests
         AssertCanCreateDatabases();
 
         var database = GetTestDatabase(type);
-
+        database.Server.CreateDatabase(horribleDatabaseName);
         database = database.Server.ExpectDatabase(horribleDatabaseName);
-        database.Create(true);
         Assert.That(database.GetRuntimeName(), Is.EqualTo(horribleDatabaseName).IgnoreCase);
 
         try
