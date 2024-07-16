@@ -34,20 +34,19 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
         var b = (NpgsqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
-        b.Database = null;
 
         using var con = new NpgsqlConnection(b.ConnectionString);
         con.Open();
-        using var cmd = GetCommand($"CREATE DATABASE \"{newDatabaseName.GetRuntimeName()}\"",con);
+        using var cmd = GetCommand($"CREATE DATABASE \"{newDatabaseName.GetRuntimeName()}\"", con);
         cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
         cmd.ExecuteNonQuery();
     }
 
     public override Dictionary<string, string> DescribeServer(DbConnectionStringBuilder builder) => throw new NotImplementedException();
 
-    public override string? GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Username;
+    public override string? GetExplicitUsernameIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder)builder).Username;
 
-    public override string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Password;
+    public override string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder)builder).Password;
 
     public override Version GetVersion(DiscoveredServer server)
     {
@@ -59,10 +58,10 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
     public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
         //create a copy so as not to corrupt the original
+
         var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString)
         {
-            Database = null,
-            Timeout = 5
+            Timeout = builder.TryGetValue("Timeout", out var timeout) ? (int)timeout : 5
         };
 
         using var con = new NpgsqlConnection(b.ConnectionString);
@@ -83,7 +82,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override DbDataAdapter GetDataAdapter(DbCommand cmd) => new NpgsqlDataAdapter((NpgsqlCommand)cmd);
 
-    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new NpgsqlCommandBuilder(new NpgsqlDataAdapter((NpgsqlCommand) cmd));
+    public override DbCommandBuilder GetCommandBuilder(DbCommand cmd) => new NpgsqlCommandBuilder(new NpgsqlDataAdapter((NpgsqlCommand)cmd));
 
     public override DbParameter GetParameter(string parameterName) => new NpgsqlParameter { ParameterName = parameterName };
 

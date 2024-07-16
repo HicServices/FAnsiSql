@@ -793,10 +793,13 @@ public sealed class CrossPlatformTests:DatabaseTests
         var database = GetTestDatabase(type);
 
         SqlConnection.ClearAllPools();
+        if (type == DatabaseType.PostgreSql)
+            database.Server.CreateDatabase(horribleDatabaseName);
 
         database = database.Server.ExpectDatabase(horribleDatabaseName);
-        database.Create(true);
-
+        if(type != DatabaseType.PostgreSql)
+            database.Create(true);
+            
         SqlConnection.ClearAllPools();
 
         try
@@ -918,10 +921,9 @@ public sealed class CrossPlatformTests:DatabaseTests
         AssertCanCreateDatabases();
 
         var database = GetTestDatabase(type);
-
+        database.Server.CreateDatabase(horribleDatabaseName);
         database = database.Server.ExpectDatabase(horribleDatabaseName);
-        database.Create(true);
-        Assert.That(database.GetRuntimeName(),Is.EqualTo(horribleDatabaseName).IgnoreCase);
+        Assert.That(database.GetRuntimeName(), Is.EqualTo(horribleDatabaseName).IgnoreCase);
 
         try
         {
