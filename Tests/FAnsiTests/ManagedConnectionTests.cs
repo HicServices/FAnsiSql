@@ -149,9 +149,9 @@ internal sealed class ManagedConnectionTests:DatabaseTests
             Assert.That(con.Connection.State, Is.EqualTo(ConnectionState.Open));
 
             if(commit)
-                ongoingCon.ManagedTransaction.CommitAndCloseConnection();
+                ongoingCon.ManagedTransaction?.CommitAndCloseConnection();
             else
-                ongoingCon.ManagedTransaction.AbandonAndCloseConnection();
+                ongoingCon.ManagedTransaction?.AbandonAndCloseConnection();
 
             //that should really have closed it!
             Assert.That(ongoingCon.Connection.State, Is.EqualTo(ConnectionState.Closed));
@@ -171,10 +171,10 @@ internal sealed class ManagedConnectionTests:DatabaseTests
         //pretend that there is an ongoing transaction already
         using (ongoingCon = db.Server.BeginNewTransactedConnection())
         {
-            ongoingCon.ManagedTransaction.AbandonAndCloseConnection();
-            ongoingCon.ManagedTransaction.AbandonAndCloseConnection();
-            ongoingCon.ManagedTransaction.AbandonAndCloseConnection();
-            ongoingCon.ManagedTransaction.CommitAndCloseConnection();
+            ongoingCon.ManagedTransaction?.AbandonAndCloseConnection();
+            ongoingCon.ManagedTransaction?.AbandonAndCloseConnection();
+            ongoingCon.ManagedTransaction?.AbandonAndCloseConnection();
+            ongoingCon.ManagedTransaction?.CommitAndCloseConnection();
         }
     }
 

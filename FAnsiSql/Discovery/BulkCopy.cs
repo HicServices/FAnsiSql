@@ -119,7 +119,7 @@ public abstract class BulkCopy : IBulkCopy
         {
             //if the destination column is a problematic type
             var dataType = discoveredColumn.DataType?.GetCSharpDataType();
-            if (!deciders.TryGetValue(dataType, out var decider)) continue;
+            if (dataType == null || !deciders.TryGetValue(dataType, out var decider)) continue;
             //if it's already not a string then that's fine (hopefully it's a legit Type e.g. DateTime!)
             if (dataColumn.DataType != typeof(string))
                 continue;

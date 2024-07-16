@@ -61,7 +61,7 @@ END";
         Assert.Multiple(() =>
         {
             Assert.That(p.ParameterName, Is.EqualTo("@startNumber"));
-            Assert.That(p.DataType.SQLType, Is.EqualTo("int"));
+            Assert.That(p.DataType?.SQLType, Is.EqualTo("int"));
             Assert.That(tvf.Schema ?? "dbo", Is.EqualTo(schema));
         });
 
