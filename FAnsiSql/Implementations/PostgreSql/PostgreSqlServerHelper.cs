@@ -11,6 +11,7 @@ namespace FAnsi.Implementations.PostgreSql;
 public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 {
     public static readonly PostgreSqlServerHelper Instance = new();
+
     private PostgreSqlServerHelper() : base(DatabaseType.PostgreSql)
     {
     }
@@ -48,16 +49,10 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((NpgsqlConnectionStringBuilder) builder).Password;
 
-    public override Version? GetVersion(DiscoveredServer server)
+    public override Version GetVersion(DiscoveredServer server)
     {
-        using var con = server.GetConnection();
-        con.Open();
-        using var cmd = server.GetCommand("SHOW server_version",con);
-        using var r = cmd.ExecuteReader();
-        if(r.Read())
-            return r[0] == DBNull.Value ? null: CreateVersionFromString((string)r[0]);
-
-        return null;
+        using var con = new NpgsqlConnection(server.Builder.ConnectionString);
+        return con.PostgreSqlVersion;
     }
 
 
