@@ -51,6 +51,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
     public override Version GetVersion(DiscoveredServer server)
     {
         using var con = new NpgsqlConnection(server.Builder.ConnectionString);
+        con.Open();
         return con.PostgreSqlVersion;
     }
 
