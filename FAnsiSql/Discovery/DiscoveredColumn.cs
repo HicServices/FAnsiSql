@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using FAnsi.Discovery.QuerySyntax;
+﻿using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Naming;
 using TypeGuesser;
 
