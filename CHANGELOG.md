@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.6] - 2024-07-16
+
 - Listing databases on Postgres now respects connection string database and timeout
+- Bump Oracle.ManagedDataAccess.Core from 23.4.0 to 23.5.0
+- Bump HIC.TypeGuesser from 1.2.4 to 1.2.6
 
 ## [3.2.5] - 2024-06-07
 
