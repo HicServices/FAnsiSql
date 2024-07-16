@@ -33,9 +33,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override void CreateDatabase(DbConnectionStringBuilder builder, IHasRuntimeName newDatabaseName)
     {
-        var b = (NpgsqlConnectionStringBuilder)GetConnectionStringBuilder(builder.ConnectionString);
-
-        using var con = new NpgsqlConnection(b.ConnectionString);
+        using var con = new NpgsqlConnection(builder.ConnectionString);
         con.Open();
         using var cmd = GetCommand($"CREATE DATABASE \"{newDatabaseName.GetRuntimeName()}\"", con);
         cmd.CommandTimeout = CreateDatabaseTimeoutInSeconds;
@@ -58,14 +56,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override IEnumerable<string> ListDatabases(DbConnectionStringBuilder builder)
     {
-        //create a copy so as not to corrupt the original
-
-        var b = new NpgsqlConnectionStringBuilder(builder.ConnectionString)
-        {
-            Timeout = builder.TryGetValue("Timeout", out var timeout) ? (int)timeout : 5
-        };
-
-        using var con = new NpgsqlConnection(b.ConnectionString);
+        using var con = new NpgsqlConnection(builder.ConnectionString);
         con.Open();
         foreach (var listDatabase in ListDatabases(con)) yield return listDatabase;
     }
@@ -89,7 +80,7 @@ public sealed class PostgreSqlServerHelper : DiscoveredServerHelper
 
     public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new NpgsqlConnection(builder.ConnectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database,
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string? database,
         string username, string password)
     {
         var toReturn = new NpgsqlConnectionStringBuilder
