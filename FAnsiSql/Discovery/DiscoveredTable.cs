@@ -388,6 +388,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <summary>
     /// Creates an index on the table
     /// </summary>
+    /// <param name="args"></param>
     /// <param name="indexName"></param>
     /// <param name="discoverColumns"></param>
     /// <param name="isUnique"></param>
@@ -408,6 +409,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// <summary>
     /// Drops the specified index from the discovered table
     /// </summary>
+    /// <param name="args"></param>
     /// <param name="indexName"></param>
     public void DropIndex(DatabaseOperationArgs args, string indexName)
     {

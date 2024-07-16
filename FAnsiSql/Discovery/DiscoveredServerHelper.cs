@@ -47,7 +47,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
 
     public abstract DbConnection GetConnection(DbConnectionStringBuilder builder);
 
-    public DbConnectionStringBuilder GetConnectionStringBuilder(string connectionString)
+    public DbConnectionStringBuilder GetConnectionStringBuilder(string? connectionString)
     {
         var builder = GetConnectionStringBuilderImpl(connectionString);
         EnforceKeywords(builder);
@@ -77,7 +77,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     }
 
     protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString, string? database, string username, string password);
-    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString);
+    protected abstract DbConnectionStringBuilder GetConnectionStringBuilderImpl(string? connectionString);
 
 
     protected abstract string ServerKeyName { get; }
@@ -165,7 +165,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
     public abstract string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
     public abstract Version? GetVersion(DiscoveredServer server);
 
-    private static readonly Regex _rVagueVersion = RVagueVersionRe();
+    private static readonly Regex RVagueVersion = RVagueVersionRe();
 
     /// <summary>
     /// Number of seconds to allow <see cref="CreateDatabase(DbConnectionStringBuilder, IHasRuntimeName)"/> to run for before timing out.
@@ -185,7 +185,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
         if (Version.TryParse(versionString, out var result))
             return result;
 
-        var m = _rVagueVersion.Match(versionString);
+        var m = RVagueVersion.Match(versionString);
         return m.Success ? Version.Parse(m.Value) :
             //whatever the string was it didn't even remotely resemble a Version
             null;
