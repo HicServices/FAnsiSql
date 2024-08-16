@@ -114,6 +114,9 @@ public sealed partial class MicrosoftSQLTableHelper : DiscoveredTableHelper
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
         DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction? transaction)
     {
+        if (connection.State != ConnectionState.Open)
+            throw new ArgumentException($@"Connection state was {connection.State} but had to be Open", nameof(connection));
+
         const string query = """
                              select
                              sys.parameters.name AS name,
