@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using FAnsi.Connections;
 using FAnsi.Discovery;
 using FAnsi.Discovery.Constraints;
@@ -13,53 +14,41 @@ using Microsoft.Data.SqlClient;
 
 namespace FAnsi.Implementations.MicrosoftSQL;
 
-public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
+public sealed partial class MicrosoftSQLTableHelper : DiscoveredTableHelper
 {
-    public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
+    public override IEnumerable<DiscoveredColumn> DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
-        var toReturn = new List<DiscoveredColumn>();
-
-        using (var cmd = discoveredTable.GetCommand(
-                   $"use [{database}];\r\nSELECT  \r\nsys.columns.name AS COLUMN_NAME,\r\n sys.types.name AS TYPE_NAME,\r\n  sys.columns.collation_name AS COLLATION_NAME,\r\n   sys.columns.max_length as LENGTH,\r\n   sys.columns.scale as SCALE,\r\n    sys.columns.is_identity,\r\n    sys.columns.is_nullable,\r\n   sys.columns.precision as PRECISION,\r\nsys.columns.collation_name\r\nfrom sys.columns \r\njoin \r\nsys.types on sys.columns.user_type_id = sys.types.user_type_id\r\nwhere object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Transaction))
-        {
-            var p = cmd.CreateParameter();
-            p.ParameterName = "@tableName";
-            p.Value = GetObjectName(discoveredTable);
-            cmd.Parameters.Add(p);
-
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
-            {
-                var isNullable = Convert.ToBoolean(r["is_nullable"]);
-
-                //if it is a table valued function prefix the column name with the table valued function name
-                var columnName = discoveredTable is DiscoveredTableValuedFunction
-                    ? $"{discoveredTable.GetRuntimeName()}.{r["COLUMN_NAME"]}"
-                    : r["COLUMN_NAME"].ToString();
-
-                var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
-                {
-                    IsAutoIncrement = Convert.ToBoolean(r["is_identity"]),
-                    Collation = r["collation_name"] as string
-                };
-                toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
-                toReturn.Add(toAdd);
-            }
-        }
-
-        if (toReturn.Count == 0)
-            throw new Exception($"Could not find any columns in table {discoveredTable}");
-
         //don't bother looking for pks if it is a table valued function
-        if (discoveredTable is DiscoveredTableValuedFunction)
-            return [.. toReturn];
+        var pks = discoveredTable is DiscoveredTableValuedFunction
+            ? null
+            : ListPrimaryKeys(connection, discoveredTable).ToHashSet();
 
-        var pks = ListPrimaryKeys(connection, discoveredTable);
+        using var cmd = discoveredTable.GetCommand(
+            $"use [{database}];\r\nSELECT  \r\nsys.columns.name AS COLUMN_NAME,\r\n sys.types.name AS TYPE_NAME,\r\n  sys.columns.collation_name AS COLLATION_NAME,\r\n   sys.columns.max_length as LENGTH,\r\n   sys.columns.scale as SCALE,\r\n    sys.columns.is_identity,\r\n    sys.columns.is_nullable,\r\n   sys.columns.precision as PRECISION,\r\nsys.columns.collation_name\r\nfrom sys.columns \r\njoin \r\nsys.types on sys.columns.user_type_id = sys.types.user_type_id\r\nwhere object_id = OBJECT_ID(@tableName)", connection.Connection, connection.Transaction);
+        var p = cmd.CreateParameter();
+        p.ParameterName = "@tableName";
+        p.Value = GetObjectName(discoveredTable);
+        cmd.Parameters.Add(p);
 
-        foreach (var c in toReturn.Where(c => pks.Any(pk => pk.Equals(c.GetRuntimeName()))))
-            c.IsPrimaryKey = true;
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            var isNullable = Convert.ToBoolean(r["is_nullable"]);
 
-        return [.. toReturn];
+            //if it is a table valued function prefix the column name with the table valued function name
+            var columnName = discoveredTable is DiscoveredTableValuedFunction
+                ? $"{discoveredTable.GetRuntimeName()}.{r["COLUMN_NAME"]}"
+                : r["COLUMN_NAME"].ToString();
+
+            var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
+            {
+                IsAutoIncrement = Convert.ToBoolean(r["is_identity"]),
+                Collation = r["collation_name"] as string
+            };
+            toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
+            toAdd.IsPrimaryKey = pks?.Contains(toAdd.GetRuntimeName()) ?? false;
+            yield return toAdd;
+        }
     }
 
     /// <summary>
@@ -122,10 +111,9 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
     }
 
 
-    public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction)
+    public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction? transaction)
     {
-        var toReturn = new List<DiscoveredParameter>();
-
         const string query = """
                              select
                              sys.parameters.name AS name,
@@ -141,24 +129,24 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
                              where object_id = OBJECT_ID(@tableName)
                              """;
 
-        using (var cmd = discoveredTableValuedFunction.GetCommand(query, connection))
+        using var cmd = discoveredTableValuedFunction.GetCommand(query, connection);
+        var p = cmd.CreateParameter();
+        p.ParameterName = "@tableName";
+        p.Value = GetObjectName(discoveredTableValuedFunction);
+        cmd.Parameters.Add(p);
+
+        cmd.Transaction = transaction;
+
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
         {
-            var p = cmd.CreateParameter();
-            p.ParameterName = "@tableName";
-            p.Value = GetObjectName(discoveredTableValuedFunction);
-            cmd.Parameters.Add(p);
-
-            cmd.Transaction = transaction;
-
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
-                toReturn.Add(new DiscoveredParameter(r["name"].ToString())
+            var name = r["name"].ToString();
+            if (name != null)
+                yield return new DiscoveredParameter(name)
                 {
                     DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), null)
-                });
+                };
         }
-
-        return toReturn.ToArray();
     }
 
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) => new MicrosoftSQLBulkCopy(discoveredTable, connection, culture);
@@ -328,17 +316,14 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
         if (length == -1)
             return "max";
 
-        if (columnType.Contains("nvarchar") || columnType.Contains("nchar") || columnType.Contains("ntext"))
+        if (UnicodeRegex().IsMatch(columnType))
             return length / 2;
 
         return length;
     }
 
-
-    private string[] ListPrimaryKeys(IManagedConnection con, DiscoveredTable table)
+    private static IEnumerable<string> ListPrimaryKeys(IManagedConnection con, DiscoveredTable table)
     {
-        var toReturn = new List<string>();
-
         const string query = """
                              SELECT i.name AS IndexName,
                              OBJECT_NAME(ic.OBJECT_ID) AS TableName,
@@ -353,22 +338,20 @@ public sealed class MicrosoftSQLTableHelper : DiscoveredTableHelper
                              ORDER BY OBJECT_NAME(ic.OBJECT_ID), ic.key_ordinal
                              """;
 
-        using (var cmd = table.GetCommand(query, con.Connection))
-        {
-            var p = cmd.CreateParameter();
-            p.ParameterName = "@tableName";
-            p.Value = GetObjectName(table);
-            cmd.Parameters.Add(p);
+        using var cmd = table.GetCommand(query, con.Connection);
+        var p = cmd.CreateParameter();
+        p.ParameterName = "@tableName";
+        p.Value = GetObjectName(table);
+        cmd.Parameters.Add(p);
 
-            cmd.Transaction = con.Transaction;
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
-                toReturn.Add((string)r["ColumnName"]);
+        cmd.Transaction = con.Transaction;
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            yield return (string)r["ColumnName"];
 
-            r.Close();
-        }
-
-
-        return [.. toReturn];
+        r.Close();
     }
+
+    [GeneratedRegex("n(varchar|char|text)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex UnicodeRegex();
 }

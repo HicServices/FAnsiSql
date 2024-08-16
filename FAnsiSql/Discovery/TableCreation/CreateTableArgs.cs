@@ -27,7 +27,7 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// <summary>
     /// Schema of the <see cref="Database"/> to create the table in.  This is NOT the database e.g. in [MyDb].[dbo].[MyTable] the schema is "dbo". If in doubt leave blank
     /// </summary>
-    public string Schema { get; private set; } = schema;
+    public string? Schema { get; private set; } = schema;
 
     /// <summary>
     /// Optional - Columns are normally created based on supplied DataTable data rows.  If this is set then the Type specified here will
@@ -47,7 +47,7 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// Key is the foreign key column (and the table the constraint will be put on).
     /// Value is the primary key table column (which the constraint reference points to)
     /// </summary>
-    public Dictionary<DatabaseColumnRequest, DiscoveredColumn> ForeignKeyPairs { get; set; }
+    public Dictionary<DatabaseColumnRequest, DiscoveredColumn>? ForeignKeyPairs { get; set; }
 
     /// <summary>
     /// When creating a foreign key constraint (See <see cref="ForeignKeyPairs"/>) determines whether ON DELETE CASCADE should be set.
@@ -78,7 +78,7 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// Populated after the table has been created (See <see cref="TableCreated"/>), list of the <see cref="Guesser"/> used to create the columns in the table.
     /// <para>This will be null if no <see cref="DataTable"/> was provided when creating the table</para>
     /// </summary>
-    public Dictionary<string, Guesser> ColumnCreationLogic { get; private set; }
+    public Dictionary<string, Guesser>? ColumnCreationLogic { get; private set; }
 
     /// <summary>
     /// Used to determine what how to parse untyped strings in <see cref="DataTable"/> (if building schema from data table).

@@ -1073,12 +1073,11 @@ public sealed class CrossPlatformTests:DatabaseTests
             insert.Upload(dt);
         }
 
-        var dt2 = tbl.GetDataTable();
+        using var dt2 = tbl.GetDataTable();
 
         var databaseValue = (string)dt2.Rows.Cast<DataRow>().Single()["MyGuid"];
 
         Assert.That(databaseValue,Is.Not.Null);
-        TestContext.WriteLine(databaseValue);
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]

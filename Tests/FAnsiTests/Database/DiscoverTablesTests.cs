@@ -126,7 +126,7 @@ internal sealed class DiscoverTablesTests:DatabaseTests
             if (!ignoreFailure)
                 throw;
 
-            TestContext.WriteLine("Drop table failed, this is expected, since FAnsi won't see this dodgy table name we can't drop it as normal before tests");
+            //TestContext.Out.WriteLine("Drop table failed, this is expected, since FAnsi won't see this dodgy table name we can't drop it as normal before tests");
         }
     }
 
@@ -168,7 +168,7 @@ internal sealed class DiscoverTablesTests:DatabaseTests
                 if (!ignoreFailure)
                     throw;
 
-                TestContext.WriteLine("Drop view failed, this is expected, since FAnsi won't see this dodgy table name we can't drop it as normal before tests");
+                //TestContext.Out.WriteLine("Drop view failed, this is expected, since FAnsi won't see this dodgy table name we can't drop it as normal before tests");
             }
         }
 

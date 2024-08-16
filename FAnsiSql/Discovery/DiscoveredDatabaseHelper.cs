@@ -27,7 +27,7 @@ public abstract class DiscoveredDatabaseHelper:IDiscoveredDatabaseHelper
     public abstract IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
         DbConnection connection, string database, DbTransaction? transaction = null);
 
-    public abstract DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database);
+    public abstract IEnumerable<DiscoveredStoredprocedure> ListStoredprocedures(DbConnectionStringBuilder builder, string database);
     public abstract IDiscoveredTableHelper GetTableHelper();
     public abstract void DropDatabase(DiscoveredDatabase database);
     public abstract Dictionary<string, string> DescribeDatabase(DbConnectionStringBuilder builder, string database);

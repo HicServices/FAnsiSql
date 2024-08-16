@@ -38,7 +38,7 @@ public interface IDiscoveredServerHelper
     string? GetServerName(DbConnectionStringBuilder builder);
     DbConnectionStringBuilder ChangeServer(DbConnectionStringBuilder builder, string newServer);
 
-    string GetCurrentDatabase(DbConnectionStringBuilder builder);
+    string? GetCurrentDatabase(DbConnectionStringBuilder builder);
     DbConnectionStringBuilder ChangeDatabase(DbConnectionStringBuilder builder, string newDatabase);
 
     DbConnectionStringBuilder EnableAsync(DbConnectionStringBuilder builder);

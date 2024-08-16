@@ -112,7 +112,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// Connects to the database and returns a list of stored proceedures found as <see cref="DiscoveredStoredprocedure"/> objects
     /// </summary>
     /// <returns></returns>
-    public DiscoveredStoredprocedure[] DiscoverStoredprocedures() => Helper.ListStoredprocedures(Server.Builder,GetRuntimeName());
+    public IEnumerable<DiscoveredStoredprocedure> DiscoverStoredprocedures() => Helper.ListStoredprocedures(Server.Builder,GetRuntimeName());
 
     /// <summary>
     /// Returns the name of the database
@@ -231,7 +231,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <param name="createEmpty"></param>
     /// <param name="adjuster"></param>
     /// <returns></returns>
-    public DiscoveredTable CreateTable(out Dictionary<string, Guesser> typeDictionary, string tableName, DataTable dt, DatabaseColumnRequest[]? explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster? adjuster = null)
+    public DiscoveredTable CreateTable(out Dictionary<string, Guesser>? typeDictionary, string tableName, DataTable dt, DatabaseColumnRequest[]? explicitColumnDefinitions = null, bool createEmpty = false, IDatabaseColumnRequestAdjuster? adjuster = null)
     {
         var args = new CreateTableArgs(this, tableName, null, dt, createEmpty)
         {
@@ -240,7 +240,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
         };
         var table = Helper.CreateTable(args);
 
-        if(!args.TableCreated)
+        if (!args.TableCreated)
             throw new Exception(FAnsiStrings.DiscoveredDatabase_CreateTableDidNotPopulateTableCreatedProperty);
 
         typeDictionary = args.ColumnCreationLogic;

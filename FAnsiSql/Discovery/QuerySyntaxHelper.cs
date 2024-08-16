@@ -66,20 +66,6 @@ public abstract partial class QuerySyntaxHelper(
 
     public virtual char ParameterSymbol => '@';
 
-    /// <summary>
-    /// Returns a regex that picks up alias specifications in SELECT sql (e.g. "mytbl.mycol as fish").  This only has to match when the
-    /// " AS " qualifier is used explicitly.  The capture groups of this Regex must match <see cref="SplitLineIntoSelectSQLAndAlias"/>
-    /// </summary>
-    /// <returns></returns>
-    private Regex GetAliasRegex() =>
-        //whitespace followed by as and more whitespace
-        //Then any word (optionally bounded by a table name qualifier)
-        //alias is a word
-        //(w+)
-        //alias is a wrapped word e.g. [hey hey].  In this case we must allow anything between the brackets that is not closing bracket
-        //[[`""]([^[`""]+)[]`""]
-        AliasRegex();
-
     private static string GetAliasConst() => " AS ";
 
     public string AliasPrefix => GetAliasConst();
@@ -207,7 +193,7 @@ public abstract partial class QuerySyntaxHelper(
         //Ths line is expected to be some SELECT sql so remove trailing whitespace and commas etc
         lineToSplit = lineToSplit.TrimEnd(',', ' ', '\n', '\r');
 
-        var matches = GetAliasRegex().Matches(lineToSplit);
+        var matches = AliasRegex().Matches(lineToSplit);
 
         switch (matches.Count)
         {
@@ -499,14 +485,25 @@ public abstract partial class QuerySyntaxHelper(
 
     [GeneratedRegex(@"^\w*$")]
     private static partial Regex sensibleParameterNamesIncludeRe();
+
+    //whitespace followed by as and more whitespace
+    //Then any word (optionally bounded by a table name qualifier)
+    //alias is a word
+    //(w+)
+    //alias is a wrapped word e.g. [hey hey].  In this case we must allow anything between the brackets that is not closing bracket
+    //[[`""]([^[`""]+)[]`""]
     [GeneratedRegex("""\s+as\s+((\w+)|([[`"]([^[`"]+)[]`"]))$""", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex AliasRegex();
+
     [GeneratedRegex("([@:][A-Za-z0-9_]*)\\s?", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex ParameterNamesRe();
+
     [GeneratedRegex("[^A-Za-z0-9_ \u0101-\uFFFF]")]
     private static partial Regex HeaderNameCharRegex();
+
     [GeneratedRegex("^[0-9]")]
     private static partial Regex StartsDigitsRe();
+
     [GeneratedRegex("[^A-Za-z0-9_]")]
     private static partial Regex NotAlphaNumRe();
 }

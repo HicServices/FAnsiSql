@@ -34,15 +34,15 @@ public sealed class MySqlQuerySyntaxHelper : QuerySyntaxHelper
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string GetRuntimeNameWithDoubledBackticks(string s) => GetRuntimeName(s)?.Replace("`","``");
+    private string? GetRuntimeNameWithDoubledBackticks(string s) => GetRuntimeName(s)?.Replace("`", "``");
 
-    protected override string UnescapeWrappedNameBody(string name) => name.Replace("``","`");
+    protected override string UnescapeWrappedNameBody(string name) => name.Replace("``", "`");
 
-    public override string EnsureFullyQualified(string databaseName, string schema, string tableName)
+    public override string EnsureFullyQualified(string? databaseName, string? schema, string tableName)
     {
         //if there is no schema address it as db..table (which is the same as db.dbo.table in Microsoft SQL Server)
         if (!string.IsNullOrWhiteSpace(schema))
-            throw new NotSupportedException("Schema (e.g. .dbo. not supported by MySql)");
+            throw new NotSupportedException("Schema (e.g. .dbo.) is not supported by MySql");
 
         return $"{EnsureWrapped(databaseName)}{DatabaseTableSeparator}{EnsureWrapped(tableName)}";
     }

@@ -8,9 +8,9 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-internal sealed class UpdateTests :DatabaseTests
+internal sealed class UpdateTests : DatabaseTests
 {
-    [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
     public void Test_UpdateTableFromJoin(DatabaseType dbType)
     {
         var db = GetTestDatabase(dbType);
@@ -56,23 +56,18 @@ internal sealed class UpdateTests :DatabaseTests
 
         var sql = updateHelper.BuildUpdate(tbl1, tbl2, queryLines);
 
-        TestContext.WriteLine($"UPDATE Sql:{sql}");
-
         using var con = db.Server.GetConnection();
         con.Open();
 
-        var cmd = db.Server.GetCommand(sql, con);
-        var affectedRows = cmd.ExecuteNonQuery();
-
-        Assert.That(affectedRows, Is.EqualTo(1));
+        using (var cmd = db.Server.GetCommand(sql,con)) 
+            Assert.That(cmd.ExecuteNonQuery(), Is.EqualTo(1));
 
         //Frank should have got a new high score of 900
-        cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Frank'", con);
-        Assert.That(cmd.ExecuteScalar(), Is.EqualTo(900));
+        using (var cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Frank'",con))
+            Assert.That(cmd.ExecuteScalar(),Is.EqualTo(900));
 
         //Dave should have his old score of 100
-        cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Dave'", con);
-        Assert.That(cmd.ExecuteScalar(), Is.EqualTo(100));
+        using (var cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Dave'",con))
+            Assert.That(cmd.ExecuteScalar(),Is.EqualTo(100));
     }
-
 }

@@ -40,8 +40,10 @@ public sealed class MySqlServerHelper : DiscoveredServerHelper
     public override DbConnection GetConnection(DbConnectionStringBuilder builder) =>
         new MySqlConnection(builder.ConnectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) =>
-        new MySqlConnectionStringBuilder(connectionString);
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string? connectionString) =>
+        connectionString != null
+            ? new MySqlConnectionStringBuilder(connectionString)
+            : new MySqlConnectionStringBuilder();
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string? database, string username, string password)
     {

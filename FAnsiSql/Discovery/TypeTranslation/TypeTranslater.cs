@@ -43,6 +43,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="dateRegex"><see cref="DateRegex"/></param>
     /// <param name="maxStringWidthBeforeMax"><see cref="MaxStringWidthBeforeMax"/></param>
     /// <param name="stringWidthWhenNotSupplied"><see cref="StringWidthWhenNotSupplied"/></param>
     protected TypeTranslater(Regex dateRegex, int maxStringWidthBeforeMax, int stringWidthWhenNotSupplied)

@@ -23,67 +23,56 @@ internal class AggregationTests:DatabaseTests
 
     private void SetupDatabaseTable(bool easy, string name)
     {
-        try
+        using var dt = new DataTable();
+        dt.TableName = name;
+
+        dt.Columns.Add("EventDate");
+        dt.Columns.Add("Category");
+        dt.Columns.Add("NumberInTrouble");
+
+        dt.Rows.Add("2001-01-01", "T", "7");
+        dt.Rows.Add("2001-01-02", "T", "11");
+        dt.Rows.Add("2001-01-01", "T", "49");
+
+        dt.Rows.Add("2002-02-01", "T", "13");
+        dt.Rows.Add("2002-03-02", "T", "17");
+        dt.Rows.Add("2003-01-01", "T", "19");
+        dt.Rows.Add("2003-04-02", "T", "23");
+
+
+        dt.Rows.Add("2002-01-01", "F", "29");
+        dt.Rows.Add("2002-01-01", "F", "31");
+
+        if (!easy)
         {
-            using var dt = new DataTable();
-            dt.TableName = name;
-
-            dt.Columns.Add("EventDate");
-            dt.Columns.Add("Category");
-            dt.Columns.Add("NumberInTrouble");
-
-            dt.Rows.Add("2001-01-01", "T", "7");
-            dt.Rows.Add("2001-01-02", "T", "11");
-            dt.Rows.Add("2001-01-01", "T", "49");
-
-            dt.Rows.Add("2002-02-01", "T", "13");
-            dt.Rows.Add("2002-03-02", "T", "17");
-            dt.Rows.Add("2003-01-01", "T", "19");
-            dt.Rows.Add("2003-04-02", "T", "23");
+            dt.Rows.Add("2001-01-01", "E&, %a' mp;E", "37");
+            dt.Rows.Add("2002-01-01", "E&, %a' mp;E", "41");
+            dt.Rows.Add("2005-01-01", "E&, %a' mp;E", "59"); //note there are no records in 2004 it is important for axis tests (axis involves you having to build a calendar table)
+        }
 
 
-            dt.Rows.Add("2002-01-01", "F", "29");
-            dt.Rows.Add("2002-01-01", "F", "31");
+        dt.Rows.Add(null, "G", "47");
+        dt.Rows.Add("2001-01-01", "G", "53");
 
-            if (!easy)
+
+        foreach (var (key, _) in TestConnectionStrings)
+            try
             {
-                dt.Rows.Add("2001-01-01", "E&, %a' mp;E", "37");
-                dt.Rows.Add("2002-01-01", "E&, %a' mp;E", "41");
-                dt.Rows.Add("2005-01-01", "E&, %a' mp;E", "59");  //note there are no records in 2004 it is important for axis tests (axis involves you having to build a calendar table)
+                var db = GetTestDatabase(key);
+                var tbl = db.CreateTable("AggregateDataBasedTests", dt);
+
+                var dic = easy ? _easyTables : _hardTables;
+                dic.Add(key, tbl);
             }
-
-
-            dt.Rows.Add(null, "G", "47");
-            dt.Rows.Add("2001-01-01", "G", "53");
-
-
-            foreach (var (key, _) in TestConnectionStrings)
-                try
-                {
-                    var db = GetTestDatabase(key);
-                    var tbl = db.CreateTable("AggregateDataBasedTests", dt);
-
-                    var dic = easy ? _easyTables : _hardTables;
-                    dic.Add(key, tbl);
-
-                }
-                catch (Exception e)
-                {
-                    TestContext.WriteLine($"Could not setup test database for DatabaseType {key}");
-                    TestContext.WriteLine(e);
-
-                }
-        }
-        catch (Exception e)
-        {
-            TestContext.WriteLine(e);
-            throw;
-        }
+            catch (Exception e)
+            {
+                TestContext.Out.WriteLine($"Could not setup test database for DatabaseType {key}:{e}");
+            }
     }
 
     protected static void AssertHasRow(DataTable dt, params object?[] cells)
     {
-        Assert.That(dt.Rows.Cast<DataRow>().Any(r => IsMatch(r, cells)),$"Did not find expected row:{string.Join("|", cells)}");
+        Assert.That(dt.Rows.Cast<DataRow>().Any(r => IsMatch(r, cells)), $"Did not find expected row:{string.Join("|", cells)}");
     }
 
     /// <summary>

@@ -20,7 +20,7 @@ namespace FAnsiTests;
 [NonParallelizable]
 public class DatabaseTests
 {
-    protected readonly Dictionary<DatabaseType, string> TestConnectionStrings = [];
+    protected readonly Dictionary<DatabaseType,string> TestConnectionStrings = [];
 
     private bool _allowDatabaseCreation;
     private string _testScratchDatabase;
@@ -30,75 +30,62 @@ public class DatabaseTests
     [OneTimeSetUp]
     public void CheckFiles()
     {
-        try
+        ImplementationManager.Load<OracleImplementation>();
+        ImplementationManager.Load<MicrosoftSQLImplementation>();
+        ImplementationManager.Load<MySqlImplementation>();
+        ImplementationManager.Load<PostgreSqlImplementation>();
+
+        var file = Path.Combine(TestContext.CurrentContext.TestDirectory,TestFilename);
+
+        Assert.That(File.Exists(file), $"Could not find {TestFilename}");
+
+        var doc = XDocument.Load(file);
+
+        var root = doc.Element("TestDatabases") ?? throw new Exception($"Missing element 'TestDatabases' in {TestFilename}");
+
+        var settings = root.Element("Settings") ??
+                       throw new Exception($"Missing element 'Settings' in {TestFilename}");
+
+        var e = settings.Element("AllowDatabaseCreation") ??
+                throw new Exception($"Missing element 'AllowDatabaseCreation' in {TestFilename}");
+
+        _allowDatabaseCreation = Convert.ToBoolean(e.Value);
+
+        e = settings.Element("TestScratchDatabase") ??
+            throw new Exception($"Missing element 'TestScratchDatabase' in {TestFilename}");
+
+        _testScratchDatabase = e.Value;
+
+        foreach (var element in root.Elements("TestDatabase"))
         {
-            ImplementationManager.Load<OracleImplementation>();
-            ImplementationManager.Load<MicrosoftSQLImplementation>();
-            ImplementationManager.Load<MySqlImplementation>();
-            ImplementationManager.Load<PostgreSqlImplementation>();
+            var type = element.Element("DatabaseType")?.Value;
 
-            var file = Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilename);
-
-            Assert.That(File.Exists(file), "Could not find " + TestFilename);
-
-            var doc = XDocument.Load(file);
-
-            var root = doc.Element("TestDatabases") ?? throw new Exception($"Missing element 'TestDatabases' in {TestFilename}");
-
-            var settings = root.Element("Settings") ??
-                           throw new Exception($"Missing element 'Settings' in {TestFilename}");
-
-            var e = settings.Element("AllowDatabaseCreation") ??
-                    throw new Exception($"Missing element 'AllowDatabaseCreation' in {TestFilename}");
-
-            _allowDatabaseCreation = Convert.ToBoolean(e.Value);
-
-            e = settings.Element("TestScratchDatabase") ??
-                throw new Exception($"Missing element 'TestScratchDatabase' in {TestFilename}");
-
-            _testScratchDatabase = e.Value;
-
-            foreach (var element in root.Elements("TestDatabase"))
-            {
-                var type = element.Element("DatabaseType")?.Value;
-
-                if (!Enum.TryParse(type, out DatabaseType databaseType))
-                    throw new Exception($"Could not parse DatabaseType {type}");
+            if (!Enum.TryParse(type,out DatabaseType databaseType))
+                throw new Exception($"Could not parse DatabaseType {type}");
 
 
-                var constr = element.Element("ConnectionString")?.Value;
+            var constr = element.Element("ConnectionString")?.Value ??
+                         throw new Exception($"Invalid connection string for {type}");
 
-                TestConnectionStrings.Add(databaseType, constr);
+            TestConnectionStrings.Add(databaseType, constr);
 
-                // Make sure our scratch db exists for PostgreSQL
-                if (databaseType == DatabaseType.PostgreSql)
-                {
-                    var server = GetTestServer(DatabaseType.PostgreSql);
-                    if (server.DiscoverDatabases().All(db => db.GetWrappedName()?.Contains(_testScratchDatabase) != true)) server.CreateDatabase(_testScratchDatabase);
-                }
-            }
+            // Make sure our scratch db exists for PostgreSQL
+            if (databaseType != DatabaseType.PostgreSql) continue;
+
+            var server = GetTestServer(DatabaseType.PostgreSql);
+            if (server.DiscoverDatabases().All(db => db.GetWrappedName()?.Contains(_testScratchDatabase) != true)) server.CreateDatabase(_testScratchDatabase);
         }
-        catch (Exception exception)
-        {
-            TestContext.WriteLine(exception);
-            throw;
-        }
-
     }
 
-    protected IEnumerable<DiscoveredServer> TestServer()
-    {
-        return TestConnectionStrings.Select(static kvp => new DiscoveredServer(kvp.Value, kvp.Key));
-    }
     protected DiscoveredServer GetTestServer(DatabaseType type)
     {
-        if (!TestConnectionStrings.ContainsKey(type))
+        if (!TestConnectionStrings.TryGetValue(type, out var connString))
             Assert.Inconclusive("No connection string configured for that server");
 
-        return new DiscoveredServer(TestConnectionStrings[type], type);
+        return new DiscoveredServer(connString, type);
     }
 
-    protected DiscoveredDatabase GetTestDatabase(DatabaseType type, bool cleanDatabase = true)
+    protected DiscoveredDatabase GetTestDatabase(DatabaseType type,bool cleanDatabase = true)
     {
         var server = GetTestServer(type);
         var db = server.ExpectDatabase(_testScratchDatabase);
@@ -142,10 +129,10 @@ public class DatabaseTests
             Assert.Inconclusive("Test cannot run when AllowDatabaseCreation is false");
     }
 
-    private static bool AreBasicallyEquals(object? o, object? o2, bool handleSlashRSlashN = true)
+    private static bool AreBasicallyEquals(object? o,object? o2,bool handleSlashRSlashN = true)
     {
         //if they are legit equals
-        if (Equals(o, o2))
+        if (Equals(o,o2))
             return true;
 
         //if they are null but basically the same
@@ -157,23 +144,23 @@ public class DatabaseTests
 
         //they are not null so tostring them deals with int vs long etc that DbDataAdapters can be a bit flaky on
         if (handleSlashRSlashN)
-            return string.Equals(o?.ToString()?.Replace("\r", "").Replace("\n", ""), o2?.ToString()?.Replace("\r", "").Replace("\n", ""));
+            return string.Equals(o?.ToString()?.Replace("\r","").Replace("\n",""),o2?.ToString()?.Replace("\r","").Replace("\n",""));
 
-        return string.Equals(o?.ToString(), o2?.ToString());
+        return string.Equals(o?.ToString(),o2?.ToString());
     }
 
-    protected static void AssertAreEqual(DataTable dt1, DataTable dt2)
+    protected static void AssertAreEqual(DataTable dt1,DataTable dt2)
     {
         Assert.Multiple(() =>
         {
-            Assert.That(dt2.Columns, Has.Count.EqualTo(dt1.Columns.Count), "DataTables had a column count mismatch");
-            Assert.That(dt2.Rows, Has.Count.EqualTo(dt1.Rows.Count), "DataTables had a row count mismatch");
+            Assert.That(dt2.Columns,Has.Count.EqualTo(dt1.Columns.Count),"DataTables had a column count mismatch");
+            Assert.That(dt2.Rows,Has.Count.EqualTo(dt1.Rows.Count),"DataTables had a row count mismatch");
         });
 
         foreach (DataRow row1 in dt1.Rows)
         {
-            var match = dt2.Rows.Cast<DataRow>().Any(row2 => dt1.Columns.Cast<DataColumn>().All(c => AreBasicallyEquals(row1[c.ColumnName], row2[c.ColumnName])));
-            Assert.That(match, $"Couldn't find match for row:{string.Join(",", row1.ItemArray)}");
+            var match = dt2.Rows.Cast<DataRow>().Any(row2 => dt1.Columns.Cast<DataColumn>().All(c => AreBasicallyEquals(row1[c.ColumnName],row2[c.ColumnName])));
+            Assert.That(match,$"Couldn't find match for row:{string.Join(",",row1.ItemArray)}");
         }
 
     }

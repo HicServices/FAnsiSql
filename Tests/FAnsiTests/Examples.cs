@@ -72,16 +72,16 @@ internal sealed class TestExamples : DatabaseTests
         var table = database.CreateTable("MyTable", dt);
 
         //Table has 2 rows in it
-        TestContext.WriteLine("Table {0} has {1} rows" ,table.GetFullyQualifiedName(), table.GetRowCount());
-        TestContext.WriteLine("Column Name is of type {0}", table.DiscoverColumn("Name").DataType?.SQLType);
-        TestContext.WriteLine("Column DateOfBirth is of type {0}", table.DiscoverColumn("DateOfBirth").DataType?.SQLType);
+        TestContext.Out.WriteLine("Table {0} has {1} rows" ,table.GetFullyQualifiedName(), table.GetRowCount());
+        TestContext.Out.WriteLine("Column Name is of type {0}", table.DiscoverColumn("Name").DataType?.SQLType);
+        TestContext.Out.WriteLine("Column DateOfBirth is of type {0}", table.DiscoverColumn("DateOfBirth").DataType?.SQLType);
 
         using var con = server.GetConnection();
         con.Open();
         using var cmd = server.GetCommand($"Select * from {table.GetFullyQualifiedName()}", con);
         using var r = cmd.ExecuteReader();
         while (r.Read())
-            TestContext.WriteLine(string.Join(",", r["Name"],r["DateOfBirth"]));
+            TestContext.Out.WriteLine(string.Join(",", r["Name"],r["DateOfBirth"]));
 
         //Drop the table afterwards
         table.Drop();

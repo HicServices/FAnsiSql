@@ -17,7 +17,7 @@ public interface IDiscoveredTableHelper
     /// <param name="table">The table to fetch records from</param>
     string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX);
 
-    DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);
+    IEnumerable<DiscoveredColumn> DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);
 
     IDiscoveredColumnHelper GetColumnHelper();
 
@@ -29,7 +29,7 @@ public interface IDiscoveredTableHelper
 
     int GetRowCount(DatabaseOperationArgs args, DiscoveredTable table);
 
-    IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
+    IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction? transaction);
 
     IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture);
 
@@ -45,7 +45,7 @@ public interface IDiscoveredTableHelper
     void DropIndex(DatabaseOperationArgs args, DiscoveredTable table, string indexName);
     void CreatePrimaryKey(DatabaseOperationArgs args, DiscoveredTable columns, DiscoveredColumn[] discoverColumns);
     int ExecuteInsertReturningIdentity(DiscoveredTable discoveredTable, DbCommand cmd, IManagedTransaction? transaction=null);
-    DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction? transaction = null);
+    IEnumerable<DiscoveredRelationship> DiscoverRelationships(DiscoveredTable discoveredTable,DbConnection connection, IManagedTransaction? transaction = null);
     void FillDataTableWithTopX(DatabaseOperationArgs args,DiscoveredTable table, int topX, DataTable dt);
 
 

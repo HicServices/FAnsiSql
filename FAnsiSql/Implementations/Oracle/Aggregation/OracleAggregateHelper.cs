@@ -21,7 +21,7 @@ public sealed class OracleAggregateHelper : AggregateHelper
             _ => throw new ArgumentOutOfRangeException(nameof(increment))
         };
 
-    private string GetDateAxisTableDeclaration(IQueryAxis axis)
+    private static string GetDateAxisTableDeclaration(IQueryAxis axis)
     {
         //https://stackoverflow.com/questions/8374959/how-to-populate-calendar-table-in-oracle
 

@@ -14,11 +14,10 @@ namespace FAnsi.Discovery;
 /// </summary>
 public interface IDiscoveredDatabaseHelper
 {
-
     IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null);
     IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction? transaction = null);
 
-    DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database);
+    IEnumerable<DiscoveredStoredprocedure> ListStoredprocedures(DbConnectionStringBuilder builder, string database);
 
     IDiscoveredTableHelper GetTableHelper();
     void DropDatabase(DiscoveredDatabase database);
