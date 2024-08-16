@@ -57,7 +57,7 @@ public sealed class CreateTableArgs(DiscoveredDatabase database, string tableNam
     /// <summary>
     /// The data to use to determine table schema and load into the newly created table (unless <see cref="CreateEmpty"/> is set).
     /// </summary>
-    public DataTable DataTable { get; set; }
+    public DataTable? DataTable { get; set; }
 
     /// <summary>
     /// When creating the table, do not upload any rows supplied in <see cref="DataTable"/>

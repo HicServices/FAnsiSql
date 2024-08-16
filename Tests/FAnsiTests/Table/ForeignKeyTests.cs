@@ -193,20 +193,16 @@ internal sealed class ForeignKeyTests:DatabaseTests
         {
             Assert.That(constraint1, Is.Not.Null);
             Assert.That(constraint2, Is.Not.Null);
-        });
-
-        Assert.Multiple(() =>
-        {
             Assert.That(constraint1.Name, Is.EqualTo("FK_T2_T1").IgnoreCase);
             Assert.That(constraint2.Name, Is.EqualTo("FK_Lol").IgnoreCase);
         });
 
-        var sort2 = new RelationshipTopologicalSort([t1,t2,t3]);
+        var sort2 = new RelationshipTopologicalSort([t1,t2,t3]).Order.ToList();
 
 
-        Assert.That(sort2.Order.ToList(), Does.Contain(t1));
-        Assert.That(sort2.Order.ToList(), Does.Contain(t2));
-        Assert.That(sort2.Order.ToList(), Does.Contain(t3));
+        Assert.That(sort2, Does.Contain(t1));
+        Assert.That(sort2, Does.Contain(t2));
+        Assert.That(sort2, Does.Contain(t3));
     }
 
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
@@ -249,11 +245,11 @@ internal sealed class ForeignKeyTests:DatabaseTests
             Assert.That(constraint2, Is.Not.Null);
         });
 
-        var sort2 = new RelationshipTopologicalSort([t1,t2,t3]);
+        var sort2 = new RelationshipTopologicalSort([t1,t2,t3]).Order.ToList();
 
-        Assert.That(sort2.Order.ToList(), Does.Contain(t1));
-        Assert.That(sort2.Order.ToList(), Does.Contain(t2));
-        Assert.That(sort2.Order.ToList(), Does.Contain(t3));
+        Assert.That(sort2, Does.Contain(t1));
+        Assert.That(sort2, Does.Contain(t2));
+        Assert.That(sort2, Does.Contain(t3));
     }
 
     [Test]
