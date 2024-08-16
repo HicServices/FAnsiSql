@@ -89,8 +89,6 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
                                          AND indisprimary
                              """;
 
-        var toReturn = new List<string>();
-
         using var cmd = table.GetCommand(query, con.Connection);
         cmd.Transaction = con.Transaction;
 
@@ -100,7 +98,8 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
         cmd.Parameters.Add(p);
 
         using var r = cmd.ExecuteReader();
-        yield return (string)r["attname"];
+        while(r.Read())
+            yield return (string)r["attname"];
 
         r.Close();
     }

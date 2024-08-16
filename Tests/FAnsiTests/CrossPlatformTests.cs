@@ -562,7 +562,6 @@ public sealed class CrossPlatformTests:DatabaseTests
 
         Assert.Multiple(() =>
         {
-
             //table should exist
             Assert.That(tbl.Exists());
 
