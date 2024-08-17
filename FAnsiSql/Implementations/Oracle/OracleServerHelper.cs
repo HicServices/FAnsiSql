@@ -32,13 +32,14 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
 
     public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new OracleConnection(builder.ConnectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) => new OracleConnectionStringBuilder(connectionString);
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string? connectionString) =>
+        new OracleConnectionStringBuilder(connectionString);
 
     #endregion
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string database, string username, string password)
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string? database, string username, string password)
     {
-        var toReturn = new OracleConnectionStringBuilder {DataSource = server};
+        var toReturn = new OracleConnectionStringBuilder { DataSource = server };
 
         if (string.IsNullOrWhiteSpace(username))
             toReturn.UserID = "/";
@@ -61,7 +62,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
 
     public override IQuerySyntaxHelper GetQuerySyntaxHelper() => OracleQuerySyntaxHelper.Instance;
 
-    public override string GetCurrentDatabase(DbConnectionStringBuilder builder) =>
+    public override string? GetCurrentDatabase(DbConnectionStringBuilder builder) =>
         //Oracle does not persist database as a connection string (only server).
         null;
 
@@ -102,7 +103,7 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
 
     public override string GetExplicitPasswordIfAny(DbConnectionStringBuilder builder) => ((OracleConnectionStringBuilder)builder).Password;
 
-    public override Version GetVersion(DiscoveredServer server)
+    public override Version? GetVersion(DiscoveredServer server)
     {
         using var tcon = server.GetConnection();
         if (tcon is not OracleConnection con) throw new ArgumentException("Oracle helper called on non-Oracle server",nameof(server));

@@ -96,7 +96,7 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
         return builder;
     }
 
-    public virtual string GetCurrentDatabase(DbConnectionStringBuilder builder) => (string)builder[DatabaseKeyName];
+    public virtual string? GetCurrentDatabase(DbConnectionStringBuilder builder) => (string)builder[DatabaseKeyName];
 
     public virtual DbConnectionStringBuilder ChangeDatabase(DbConnectionStringBuilder builder, string newDatabase)
     {

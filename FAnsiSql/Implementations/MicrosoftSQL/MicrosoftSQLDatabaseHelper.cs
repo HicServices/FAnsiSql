@@ -24,16 +24,12 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
         if (connection.State == ConnectionState.Closed)
             throw new InvalidOperationException("Expected connection to be open");
 
-        var tables = new List<DiscoveredTable>();
-
-
         using var cmd = new SqlCommand($"use {querySyntaxHelper.EnsureWrapped(database)}; EXEC sp_tables", (SqlConnection) connection);
         cmd.Transaction = transaction as SqlTransaction;
 
         using var r = cmd.ExecuteReader();
         while (r.Read())
         {
-            //its a system table
             var schema = r["TABLE_OWNER"] as string;
 
             if (schema is
@@ -43,24 +39,20 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
             //add views if we are including them
             if (includeViews && r["TABLE_TYPE"].Equals("VIEW") &&
                 querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
-                tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema,
-                    TableType.View));
+                yield return new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema,
+                    TableType.View);
 
             //add tables
             if (r["TABLE_TYPE"].Equals("TABLE") &&
                 querySyntaxHelper.IsValidTableName((string)r["TABLE_NAME"], out _))
-                tables.Add(new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema));
+                yield return new DiscoveredTable(parent, (string)r["TABLE_NAME"], querySyntaxHelper, schema);
         }
-
-        return tables.ToArray();
     }
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction? transaction = null)
     {
-        var functionsToReturn = new List<DiscoveredTableValuedFunction>();
-
-        using( DbCommand cmd = new SqlCommand(
-                  $"use {querySyntaxHelper.EnsureWrapped(database)};select name,\r\n (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name\r\n  from sys.objects o\r\nWHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection))
+        using (DbCommand cmd = new SqlCommand(
+                   $"use {querySyntaxHelper.EnsureWrapped(database)};select name,\r\n (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name\r\n  from sys.objects o\r\nWHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection))
 
         {
             cmd.Transaction = transaction;
@@ -72,32 +64,25 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
                 if (string.Equals("dbo", schema))
                     schema = null;
-                functionsToReturn.Add(new DiscoveredTableValuedFunction(parent, r["name"].ToString(), querySyntaxHelper,schema));
-
+                var name = r["name"].ToString();
+                if (name != null)
+                    yield return new DiscoveredTableValuedFunction(parent, name, querySyntaxHelper, schema);
             }
         }
-
-
-        return functionsToReturn.ToArray();
     }
 
-    public override DiscoveredStoredprocedure[] ListStoredprocedures(DbConnectionStringBuilder builder, string database)
+    public override IEnumerable<DiscoveredStoredprocedure> ListStoredprocedures(DbConnectionStringBuilder builder, string database)
     {
-        var toReturn = new List<DiscoveredStoredprocedure>();
         var querySyntaxHelper = MicrosoftQuerySyntaxHelper.Instance;
 
         using var con = new SqlConnection(builder.ConnectionString);
         con.Open();
-        using (var cmdFindStoredprocedure =
-               new SqlCommand($"use {querySyntaxHelper.EnsureWrapped(database)};  SELECT * FROM sys.procedures", con))
-        {
-            var result = cmdFindStoredprocedure.ExecuteReader();
+        using var cmdFindStoredprocedure =
+            new SqlCommand($"use {querySyntaxHelper.EnsureWrapped(database)};  SELECT * FROM sys.procedures", con);
+        var result = cmdFindStoredprocedure.ExecuteReader();
 
-            while (result.Read())
-                toReturn.Add(new DiscoveredStoredprocedure((string)result["name"]));
-        }
-
-        return [.. toReturn];
+        while (result.Read())
+            yield return new DiscoveredStoredprocedure((string)result["name"]);
     }
 
     public override IDiscoveredTableHelper GetTableHelper() => new MicrosoftSQLTableHelper();

@@ -253,10 +253,8 @@ internal sealed class ServerLevelTests:DatabaseTests
         var db = GetTestDatabase(dbType, false);
         var ver = db.Server.GetVersion();
 
-        TestContext.WriteLine($"Version:{ver}");
+        TestContext.Out.WriteLine($"Version:{ver}");
         Assert.That(ver, Is.Not.Null);
-
         Assert.That(ver.Major, Is.GreaterThan(0));
     }
-
 }

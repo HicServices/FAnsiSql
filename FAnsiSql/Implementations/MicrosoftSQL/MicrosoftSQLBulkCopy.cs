@@ -166,7 +166,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
     /// <param name="newMessage"></param>
     /// <param name="badMapping"></param>
     /// <returns></returns>
-    private bool BcpColIdToString(SqlBulkCopy insert, SqlException? ex, out string? newMessage, out SqlBulkCopyColumnMapping? badMapping)
+    private static bool BcpColIdToString(SqlBulkCopy insert, SqlException? ex, out string? newMessage, out SqlBulkCopyColumnMapping? badMapping)
     {
         var match = ColumnLevelComplaint.Match(ex?.Message ?? "");
         if (ex == null || !match.Success)
@@ -230,7 +230,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
         }
 
         if (e is ReflectionTypeLoadException reflectionTypeLoadException)
-            foreach (var loaderException in reflectionTypeLoadException.LoaderExceptions)
+            foreach (var loaderException in reflectionTypeLoadException.LoaderExceptions.OfType<Exception>())
             {
                 message.AppendLine();
                 message.Append(ExceptionToListOfInnerMessages(loaderException, includeStackTrace));
@@ -239,7 +239,7 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
         if (e.InnerException == null) return message.ToString();
 
         message.AppendLine();
-        message.Append( ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace));
+        message.Append(ExceptionToListOfInnerMessages(e.InnerException, includeStackTrace));
         return message.ToString();
     }
 

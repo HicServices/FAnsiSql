@@ -248,9 +248,6 @@ public sealed class GuesserTests
     {
         var t = new Guesser();
 
-        Console.WriteLine(CultureInfo.CurrentCulture.EnglishName);
-        TestContext.WriteLine(CultureInfo.CurrentCulture.DateTimeFormat.MonthDayPattern);
-
         t.AdjustToCompensateForValue($"{GetCultureSpecificDate()} 11:10");
         t.AdjustToCompensateForValue(null);
 

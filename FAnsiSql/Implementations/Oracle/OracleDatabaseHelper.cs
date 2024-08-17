@@ -45,10 +45,8 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
 
     public override IEnumerable<DiscoveredTable> ListTables(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, bool includeViews, DbTransaction? transaction = null)
     {
-        var tables = new List<DiscoveredTable>();
-
         //find all the tables
-        using(var cmd = new OracleCommand($"SELECT table_name FROM all_tables where owner='{database}'", (OracleConnection) connection))
+        using (var cmd = new OracleCommand($"SELECT table_name FROM all_tables where owner='{database}'", (OracleConnection)connection))
         {
             cmd.Transaction = transaction as OracleTransaction;
 
@@ -56,24 +54,27 @@ public sealed class OracleDatabaseHelper : DiscoveredDatabaseHelper
 
             while (r.Read())
                 //skip invalid table names
-                if(querySyntaxHelper.IsValidTableName((string)r["table_name"],out _))
-                    tables.Add(new DiscoveredTable(parent,r["table_name"].ToString(),querySyntaxHelper));
+                if (querySyntaxHelper.IsValidTableName((string)r["table_name"], out _))
+                    yield return new DiscoveredTable(parent, (string)r["table_name"], querySyntaxHelper);
         }
 
         //find all the views
-        if(includeViews)
+        if (!includeViews) yield break;
+
+        using (var cmd = new OracleCommand($"SELECT view_name FROM all_views where owner='{database}'",
+                   (OracleConnection)connection))
         {
-            using var cmd = new OracleCommand($"SELECT view_name FROM all_views where owner='{database}'", (OracleConnection) connection);
             cmd.Transaction = transaction as OracleTransaction;
             var r = cmd.ExecuteReader();
 
             while (r.Read())
-                if(querySyntaxHelper.IsValidTableName((string)r["view_name"],out _))
-                    tables.Add(new DiscoveredTable(parent,r["view_name"].ToString(),querySyntaxHelper,null,TableType.View));
+            {
+                var name = (string)r["view_name"];
+                if (querySyntaxHelper.IsValidTableName(name, out _))
+                    yield return new DiscoveredTable(parent, name, querySyntaxHelper, null,
+                        TableType.View);
+            }
         }
-
-
-        return tables.ToArray();
     }
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,

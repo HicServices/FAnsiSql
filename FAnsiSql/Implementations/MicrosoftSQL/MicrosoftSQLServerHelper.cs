@@ -33,7 +33,7 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
     public override DbConnection GetConnection(DbConnectionStringBuilder builder) => new SqlConnection(builder.ConnectionString);
 
-    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string connectionString) => new SqlConnectionStringBuilder(connectionString);
+    protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string? connectionString) => new SqlConnectionStringBuilder(connectionString);
 
     protected override DbConnectionStringBuilder GetConnectionStringBuilderImpl(string server, string? database, string username, string password)
     {

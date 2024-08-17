@@ -120,12 +120,12 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
             "LONGTEXT" => $"'{MySqlHelper.EscapeString(value)}'",
             "ENUM" => $"'{MySqlHelper.EscapeString(value)}'",
             //Dates/times
-            "DATE" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd}'",
-            "TIMESTAMP" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
-            "DATETIME" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
-            "TIME" => $"'{(DateTime)DateTimeDecider.Parse(value):HH:mm:ss}'",
-            "YEAR2" => $"'{(DateTime)DateTimeDecider.Parse(value):yy}'",
-            "YEAR4" => $"'{(DateTime)DateTimeDecider.Parse(value):yyyy}'",
+            "DATE" => $"'{(DateTime?)DateTimeDecider.Parse(value):yyyy-MM-dd}'",
+            "TIMESTAMP" => $"'{(DateTime?)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
+            "DATETIME" => $"'{(DateTime?)DateTimeDecider.Parse(value):yyyy-MM-dd HH:mm:ss}'",
+            "TIME" => $"'{(DateTime?)DateTimeDecider.Parse(value):HH:mm:ss}'",
+            "YEAR2" => $"'{(DateTime?)DateTimeDecider.Parse(value):yy}'",
+            "YEAR4" => $"'{(DateTime?)DateTimeDecider.Parse(value):yyyy}'",
             _ => $"'{MySqlHelper.EscapeString(value)}'"
         };
     }

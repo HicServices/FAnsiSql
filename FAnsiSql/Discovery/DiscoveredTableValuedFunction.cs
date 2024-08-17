@@ -42,6 +42,8 @@ public sealed class DiscoveredTableValuedFunction(DiscoveredDatabase database,
     public IEnumerable<DiscoveredParameter> DiscoverParameters(ManagedTransaction? transaction = null)
     {
         using var connection = Database.Server.GetManagedConnection(transaction);
-        return Helper.DiscoverTableValuedFunctionParameters(connection.Connection, this, connection.Transaction);
+        foreach (var param in Helper.DiscoverTableValuedFunctionParameters(connection.Connection, this,
+                     connection.Transaction))
+            yield return param;
     }
 }

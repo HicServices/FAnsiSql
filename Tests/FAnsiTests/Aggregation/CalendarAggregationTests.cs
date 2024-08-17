@@ -40,8 +40,6 @@ internal sealed class CalendarAggregationTests:AggregationTests
 
         var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
-        TestContext.WriteLine($"About to send SQL:{Environment.NewLine}{sql}");
-
         using var con = svr.GetConnection();
         con.Open();
 
@@ -236,8 +234,6 @@ internal sealed class CalendarAggregationTests:AggregationTests
 
         var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
 
-        TestContext.WriteLine(sql);
-
         using var con = svr.GetConnection();
         con.Open();
 
@@ -307,8 +303,6 @@ internal sealed class CalendarAggregationTests:AggregationTests
 
 
         var sql = svr.GetQuerySyntaxHelper().AggregateHelper.BuildAggregate(lines, axis);
-
-        TestContext.WriteLine(sql);
 
         using var con = svr.GetConnection();
         con.Open();

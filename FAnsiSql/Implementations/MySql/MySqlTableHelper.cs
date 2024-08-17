@@ -22,59 +22,54 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
     private static readonly Regex SmallintParentheses = SmallintParenthesesRe();
     private static readonly Regex BitParentheses = BitParenthesesRe();
 
-    public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection,
+    public override IEnumerable<DiscoveredColumn> DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection,
         string database)
     {
-        var columns = new List<DiscoveredColumn>();
         var tableName = discoveredTable.GetRuntimeName();
 
-        using (var cmd = discoveredTable.Database.Server.Helper.GetCommand(
-                   """
-                   SELECT * FROM information_schema.`COLUMNS`
-                   WHERE table_schema = @db
-                     AND table_name = @tbl
-                   """, connection.Connection))
+        using var cmd = discoveredTable.Database.Server.Helper.GetCommand(
+            """
+            SELECT * FROM information_schema.`COLUMNS`
+            WHERE table_schema = @db
+              AND table_name = @tbl
+            """, connection.Connection);
+        cmd.Transaction = connection.Transaction;
+
+        var p = new MySqlParameter("@db", MySqlDbType.String)
         {
-            cmd.Transaction = connection.Transaction;
+            Value = discoveredTable.Database.GetRuntimeName()
+        };
+        cmd.Parameters.Add(p);
 
-            var p = new MySqlParameter("@db", MySqlDbType.String)
-            {
-                Value = discoveredTable.Database.GetRuntimeName()
-            };
-            cmd.Parameters.Add(p);
+        p = new MySqlParameter("@tbl", MySqlDbType.String)
+        {
+            Value = discoveredTable.GetRuntimeName()
+        };
+        cmd.Parameters.Add(p);
 
-            p = new MySqlParameter("@tbl", MySqlDbType.String)
-            {
-                Value = discoveredTable.GetRuntimeName()
-            };
-            cmd.Parameters.Add(p);
+        using var r = cmd.ExecuteReader();
+        if (!r.HasRows)
+            throw new Exception($"Could not find any columns for table {tableName} in database {database}");
 
-            using var r = cmd.ExecuteReader();
-            if (!r.HasRows)
-                throw new Exception($"Could not find any columns for table {tableName} in database {database}");
+        while (r.Read())
+        {
+            var toAdd = new DiscoveredColumn(discoveredTable, (string) r["COLUMN_NAME"],YesNoToBool(r["IS_NULLABLE"]));
 
-            while (r.Read())
-            {
-                var toAdd = new DiscoveredColumn(discoveredTable, (string) r["COLUMN_NAME"],YesNoToBool(r["IS_NULLABLE"]));
+            if (r["COLUMN_KEY"].Equals("PRI"))
+                toAdd.IsPrimaryKey = true;
 
-                if (r["COLUMN_KEY"].Equals("PRI"))
-                    toAdd.IsPrimaryKey = true;
+            toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
+            toAdd.Collation = r["COLLATION_NAME"] as string;
 
-                toAdd.IsAutoIncrement = r["Extra"] as string == "auto_increment";
-                toAdd.Collation = r["COLLATION_NAME"] as string;
-
-                //todo the only way to know if something in MySql is unicode is by r["character_set_name"]
+            //todo the only way to know if something in MySql is unicode is by r["character_set_name"]
 
 
-                toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
-                columns.Add(toAdd);
-            }
+            toAdd.DataType = new DiscoveredDataType(r, TrimIntDisplayValues(r["COLUMN_TYPE"].ToString()), toAdd);
 
-            r.Close();
+            yield return toAdd;
         }
 
-
-        return [.. columns];
+        r.Close();
     }
 
     private static bool YesNoToBool(object o)
@@ -94,9 +89,11 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
     }
 
 
-
-    private string TrimIntDisplayValues(string type)
+    private static string TrimIntDisplayValues(string? type)
     {
+        if (string.IsNullOrWhiteSpace(type))
+            return "";
+
         //See comments of int(5) means display 5 digits only it doesn't prevent storing larger numbers: https://stackoverflow.com/a/5634147/4824531
 
         if (IntParentheses.IsMatch(type))
@@ -122,14 +119,15 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
 
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
-        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction) =>
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction? transaction) =>
         throw new NotImplementedException();
 
-    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable,IManagedConnection connection,CultureInfo culture) => new MySqlBulkCopy(discoveredTable, connection,culture);
+    public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,
+        CultureInfo culture) => new MySqlBulkCopy(discoveredTable, connection, culture);
 
     public override DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection,IManagedTransaction? transaction = null)
     {
-        var toReturn = new Dictionary<string,DiscoveredRelationship>();
+        var toReturn = new Dictionary<string, DiscoveredRelationship>();
 
         const string sql = """
                            SELECT DISTINCT
@@ -168,9 +166,10 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
             var da = table.Database.Server.GetDataAdapter(cmd);
             da.Fill(dt);
 
-            foreach(DataRow r in dt.Rows)
+            foreach (DataRow r in dt.Rows)
             {
                 var fkName = r["CONSTRAINT_NAME"].ToString();
+                if (fkName == null) continue;
 
                 //could be a 2+ columns foreign key?
                 if (!toReturn.TryGetValue(fkName, out var current))
@@ -179,7 +178,9 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
                     var pkTableName = r["REFERENCED_TABLE_NAME"].ToString();
 
                     var fkDb = r["TABLE_SCHEMA"].ToString();
-                    var fkTableName =  r["TABLE_NAME"].ToString();
+                    var fkTableName = r["TABLE_NAME"].ToString();
+
+                    if (pkDb == null || pkTableName == null || fkDb == null || fkTableName == null) continue;
 
                     var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
                     var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
@@ -197,11 +198,14 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
                         _ => CascadeRule.Unknown
                     };
 
-                    current = new DiscoveredRelationship(fkName,pktable,fktable,deleteRule);
-                    toReturn.Add(current.Name,current);
+                    current = new DiscoveredRelationship(fkName, pktable, fktable, deleteRule);
+                    toReturn.Add(current.Name, current);
                 }
 
-                current.AddKeys(r["REFERENCED_COLUMN_NAME"].ToString(), r["COLUMN_NAME"].ToString(), transaction);
+                var colName = r["COLUMN_NAME"].ToString();
+                var refName = r["REFERENCED_COLUMN_NAME"].ToString();
+                if (colName != null && refName != null)
+                    current.AddKeys(refName, colName, transaction);
             }
         }
 
@@ -225,8 +229,10 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
 
     [GeneratedRegex(@"^int\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex IntParenthesesRe();
+
     [GeneratedRegex(@"^smallint\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex SmallintParenthesesRe();
+
     [GeneratedRegex(@"^bit\(\d+\)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex BitParenthesesRe();
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration.Internal;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
@@ -16,12 +17,18 @@ namespace FAnsi.Implementations.PostgreSql;
 public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
 {
     public static readonly PostgreSqlTableHelper Instance = new();
-    private PostgreSqlTableHelper() {}
+
+    private PostgreSqlTableHelper()
+    {
+    }
+
     public override string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX) => $"SELECT * FROM {table.GetFullyQualifiedName()} FETCH FIRST {topX} ROWS ONLY";
 
-    public override DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
+    public override IEnumerable<DiscoveredColumn> DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database)
     {
-        var toReturn = new List<DiscoveredColumn>();
+        var pks =
+            //don't bother looking for pks if it is a table valued function
+            discoveredTable is DiscoveredTableValuedFunction ? null : ListPrimaryKeys(connection, discoveredTable).ToHashSet();
 
         const string sqlColumns = """
                                   SELECT *
@@ -30,58 +37,44 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
                                               AND table_name   = @tableName;
                                   """;
 
-        using (var cmd =
-               discoveredTable.GetCommand(sqlColumns, connection.Connection, connection.Transaction))
+        using var cmd =
+            discoveredTable.GetCommand(sqlColumns, connection.Connection, connection.Transaction);
+        var p = cmd.CreateParameter();
+        p.ParameterName = "@tableName";
+        p.Value = discoveredTable.GetRuntimeName();
+        cmd.Parameters.Add(p);
+
+        var p2 = cmd.CreateParameter();
+        p2.ParameterName = "@schemaName";
+        p2.Value = string.IsNullOrWhiteSpace(discoveredTable.Schema) ? PostgreSqlSyntaxHelper.DefaultPostgresSchema : discoveredTable.Schema;
+        cmd.Parameters.Add(p2);
+
+
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
         {
-            var p = cmd.CreateParameter();
-            p.ParameterName = "@tableName";
-            p.Value = discoveredTable.GetRuntimeName();
-            cmd.Parameters.Add(p);
+            var isNullable = Equals(r["is_nullable"] , "YES");
 
-            var p2 = cmd.CreateParameter();
-            p2.ParameterName = "@schemaName";
-            p2.Value = string.IsNullOrWhiteSpace(discoveredTable.Schema) ? PostgreSqlSyntaxHelper.DefaultPostgresSchema : discoveredTable.Schema;
-            cmd.Parameters.Add(p2);
+            //if it is a table valued function prefix the column name with the table valued function name
+            var columnName = discoveredTable is DiscoveredTableValuedFunction
+                ? $"{discoveredTable.GetRuntimeName()}.{r["column_name"]}"
+                : r["column_name"].ToString();
 
+            if (columnName == null) continue;
 
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
+            var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
             {
-                var isNullable = Equals(r["is_nullable"] , "YES");
+                IsAutoIncrement = Equals(r["is_identity"],"YES"),
+                Collation = r["collation_name"] as string
+            };
+            toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
 
-                //if it is a table valued function prefix the column name with the table valued function name
-                var columnName = discoveredTable is DiscoveredTableValuedFunction
-                    ? $"{discoveredTable.GetRuntimeName()}.{r["column_name"]}"
-                    : r["column_name"].ToString();
-
-                var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
-                {
-                    IsAutoIncrement = Equals(r["is_identity"],"YES"),
-                    Collation = r["collation_name"] as string
-                };
-                toAdd.DataType = new DiscoveredDataType(r, GetSQLType_FromSpColumnsResult(r), toAdd);
-                toReturn.Add(toAdd);
-            }
+            toAdd.IsPrimaryKey = pks?.Contains(toAdd.GetRuntimeName()) ?? false;
+            yield return toAdd;
         }
-
-
-
-        if(toReturn.Count == 0)
-            throw new Exception($"Could not find any columns in table {discoveredTable}");
-
-        //don't bother looking for pks if it is a table valued function
-        if (discoveredTable is DiscoveredTableValuedFunction)
-            return [.. toReturn];
-
-        var pks = ListPrimaryKeys(connection, discoveredTable);
-
-        foreach (var c in toReturn.Where(c => pks.Any(pk=>pk.Equals(c.GetRuntimeName()))))
-            c.IsPrimaryKey = true;
-
-        return [.. toReturn];
     }
 
-    private string[] ListPrimaryKeys(IManagedConnection con, DiscoveredTable table)
+    private static IEnumerable<string> ListPrimaryKeys(IManagedConnection con, DiscoveredTable table)
     {
         const string query = """
                              SELECT
@@ -96,8 +89,6 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
                                          AND indisprimary
                              """;
 
-        var toReturn = new List<string>();
-
         using var cmd = table.GetCommand(query, con.Connection);
         cmd.Transaction = con.Transaction;
 
@@ -106,15 +97,11 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
         p.Value = table.GetFullyQualifiedName();
         cmd.Parameters.Add(p);
 
-        using(var r = cmd.ExecuteReader())
-        {
-            while (r.Read())
-                toReturn.Add((string) r["attname"]);
+        using var r = cmd.ExecuteReader();
+        while(r.Read())
+            yield return (string)r["attname"];
 
-            r.Close();
-        }
-
-        return [.. toReturn];
+        r.Close();
     }
 
     private static string GetSQLType_FromSpColumnsResult(DbDataReader r)
@@ -163,7 +150,7 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
     }
 
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
-        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction) =>
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction? transaction) =>
         throw new NotImplementedException();
 
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture) => new PostgreSqlBulkCopy(discoveredTable, connection,culture);
@@ -225,12 +212,13 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
 
             //fill data table to avoid multiple active readers
             using var dt = new DataTable();
-            using(var da = new NpgsqlDataAdapter((NpgsqlCommand) cmd))
+            using (var da = new NpgsqlDataAdapter((NpgsqlCommand)cmd))
                 da.Fill(dt);
 
-            foreach(DataRow r in dt.Rows)
+            foreach (DataRow r in dt.Rows)
             {
                 var fkName = r["constraint_name"].ToString();
+                if (fkName == null) continue;
 
                 //could be a 2+ columns foreign key?
                 if (!toReturn.TryGetValue(fkName, out var current))
@@ -242,8 +230,10 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
                     var fkSchema = r["foreign_table_schema"].ToString();
                     var fkTableName = r["foreign_table_name"].ToString();
 
-                    var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName,pkSchema);
-                    var fktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(fkTableName,fkSchema);
+                    if (pkTableName == null || fkTableName == null) continue;
+
+                    var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName, pkSchema);
+                    var fktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(fkTableName, fkSchema);
 
                     var deleteRuleString = r["delete_rule"].ToString();
 
@@ -261,7 +251,10 @@ public sealed class PostgreSqlTableHelper : DiscoveredTableHelper
                     toReturn.Add(current.Name, current);
                 }
 
-                current.AddKeys(r["column_name"].ToString(), r["foreign_column_name"].ToString(), transaction);
+                var colName = r["column_name"].ToString();
+                var foreignName = r["foreign_column_name"].ToString();
+                if (colName != null && foreignName != null)
+                    current.AddKeys(colName, foreignName, transaction);
             }
         }
 

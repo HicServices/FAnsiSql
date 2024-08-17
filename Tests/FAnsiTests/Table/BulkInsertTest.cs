@@ -435,8 +435,9 @@ internal sealed class BulkInsertTest : DatabaseTests
             {
                 Assert.That(blk.Upload(dt), Is.EqualTo(numberOfRowsPerBatch)); //affected rows should match batch size
             }
+
             sw.Stop();
-            TestContext.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
+            var firstTime = sw.ElapsedMilliseconds;
 
             dt.Rows.Clear();
 
@@ -452,7 +453,7 @@ internal sealed class BulkInsertTest : DatabaseTests
             }
 
             sw.Stop();
-            TestContext.WriteLine($"Time taken:{sw.ElapsedMilliseconds}ms");
+            TestContext.Out.WriteLine($"Time taken:{firstTime}ms {sw.ElapsedMilliseconds}ms");
         }
 
 
@@ -461,14 +462,10 @@ internal sealed class BulkInsertTest : DatabaseTests
         {
             Assert.That(result.Columns, Has.Count.EqualTo(33));
             Assert.That(result.Rows, Has.Count.EqualTo(numberOfRowsPerBatch * 2));
-        });
-        Assert.Multiple(() =>
-        {
+
             Assert.That(result.Rows[0]["bob"], Is.Not.Null);
             Assert.That(result.Rows[0]["frank"], Is.Not.Null);
-        });
-        Assert.Multiple(() =>
-        {
+
             Assert.That(result.Rows[0]["frank"].ToString()?.Length, Is.GreaterThanOrEqualTo(5)); //should be a date
             Assert.That(result.Rows[0]["peter"], Is.EqualTo("no"));
         });
@@ -486,13 +483,11 @@ internal sealed class BulkInsertTest : DatabaseTests
             using var cts = new CancellationTokenSource();
             cts.Cancel();
             //creation should have been cancelled at the database level
-            var ex = Assert.Throws<AlterFailedException>(()=>tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
+            var ex = Assert.Throws<AlterFailedException>(() => tbl.CreatePrimaryKey(con.ManagedTransaction,cts.Token,50000,bobCol));
 
             //MySql seems to be throwing null reference inside ExecuteNonQueryAsync.  No idea why but it is still cancelled
-            if(type != DatabaseType.MySql)
+            if (type != DatabaseType.MySql)
                 Assert.That(ex?.InnerException?.Message, Does.Contain("cancel"));
-            else
-                TestContext.WriteLine($"MySql error was:{ex?.InnerException?.Message}");
         }
 
         //Now let's test cancelling GetDataTable

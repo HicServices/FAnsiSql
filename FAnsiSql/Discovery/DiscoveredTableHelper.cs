@@ -19,7 +19,7 @@ public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
 {
     public abstract string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX);
 
-    public abstract DiscoveredColumn[] DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);
+    public abstract IEnumerable<DiscoveredColumn> DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);
 
     public abstract IDiscoveredColumnHelper GetColumnHelper();
     public virtual void DropTable(DbConnection connection, DiscoveredTable tableToDrop)
@@ -56,7 +56,7 @@ public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
         return Convert.ToInt32(args.ExecuteScalar(cmd));
     }
 
-    public abstract IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction);
+    public abstract IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection, DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction? transaction);
 
     public abstract IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection, CultureInfo culture);
 
@@ -201,7 +201,7 @@ public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
         return Convert.ToInt32(result);
     }
 
-    public abstract DiscoveredRelationship[] DiscoverRelationships(DiscoveredTable table, DbConnection connection, IManagedTransaction? transaction = null);
+    public abstract IEnumerable<DiscoveredRelationship> DiscoverRelationships(DiscoveredTable table, DbConnection connection, IManagedTransaction? transaction = null);
 
     public virtual void FillDataTableWithTopX(DatabaseOperationArgs args, DiscoveredTable table, int topX, DataTable dt)
     {

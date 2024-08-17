@@ -236,12 +236,13 @@ public sealed class TypeTranslaterTests : DatabaseTests
 
             //Does FAnsi understand the datatype that was actually created on the server (sometimes you specify something and it is an
             //alias for something else e.g. Oracle creates 'varchar2' when you ask for 'CHAR VARYING'
-            var Guesser = col.GetGuesser();
-            Assert.That(Guesser.Guess.CSharpType, Is.Not.Null);
-            var tAfter = Guesser.Guess.CSharpType;
+            var guesser = col.GetGuesser();
+            var tAfter = guesser.Guess.CSharpType;
 
             Assert.Multiple(() =>
             {
+                Assert.That(tAfter, Is.Not.Null);
+
                 //was the Type REQUESTED correct according to the test case expectation
                 Assert.That(tBefore, Is.EqualTo(expectedType), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType?.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType?.SQLType}' is '{tAfter}'");
 
@@ -249,15 +250,14 @@ public sealed class TypeTranslaterTests : DatabaseTests
                 Assert.That(tAfter, Is.EqualTo(tBefore), $"We asked to create a '{sqlType}', DBMS created a '{col.DataType?.SQLType}'.  FAnsi decided that '{sqlType}' is '{tBefore}' and that '{col.DataType?.SQLType}' is '{tAfter}'");
             });
 
-            if (!string.Equals(col.DataType?.SQLType,sqlType,StringComparison.OrdinalIgnoreCase))
-                TestContext.WriteLine("{0} created a '{1}' when asked to create a '{2}'", type,
-                    col.DataType?.SQLType, sqlType);
-
+            /*if (!string.Equals(col.DataType?.SQLType, sqlType, StringComparison.OrdinalIgnoreCase))
+                TestContext.Out.WriteLine("{0} created a '{1}' when asked to create a '{2}'", type,
+                    col.DataType?.SQLType, sqlType);*/
         }
         finally
         {
             tbl.Drop();
-        }   
+        }
     }
 
     //Data types not supported by FAnsi

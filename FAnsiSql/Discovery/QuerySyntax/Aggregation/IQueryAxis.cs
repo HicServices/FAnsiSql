@@ -9,7 +9,7 @@ namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 /// </summary>
 public interface IQueryAxis
 {
-    string EndDate { get; }
-    string StartDate { get; }
+    string? EndDate { get; }
+    string? StartDate { get; }
     AxisIncrement AxisIncrement { get; }
 }

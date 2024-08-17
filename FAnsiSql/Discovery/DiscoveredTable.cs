@@ -111,7 +111,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     public DiscoveredColumn[] DiscoverColumns(IManagedTransaction? managedTransaction = null)
     {
         using var connection = Database.Server.GetManagedConnection(managedTransaction);
-        return Helper.DiscoverColumns(this, connection, Database.GetRuntimeName());
+        return Helper.DiscoverColumns(this, connection, Database.GetRuntimeName()).ToArray();
     }
 
     /// <summary>
@@ -505,7 +505,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     public DiscoveredRelationship[] DiscoverRelationships(IManagedTransaction? transaction = null)
     {
         using var connection = Database.Server.GetManagedConnection(transaction);
-        return Helper.DiscoverRelationships(this, connection.Connection, transaction);
+        return Helper.DiscoverRelationships(this, connection.Connection, transaction).ToArray();
     }
 
     /// <summary>

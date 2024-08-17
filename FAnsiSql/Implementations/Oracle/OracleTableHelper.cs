@@ -196,7 +196,7 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
     }
 
     public override IEnumerable<DiscoveredParameter> DiscoverTableValuedFunctionParameters(DbConnection connection,
-        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction transaction) =>
+        DiscoveredTableValuedFunction discoveredTableValuedFunction, DbTransaction? transaction) =>
         throw new NotImplementedException();
 
     public override IBulkCopy BeginBulkInsert(DiscoveredTable discoveredTable, IManagedConnection connection,CultureInfo culture) => new OracleBulkCopy(discoveredTable,connection,culture);
@@ -266,16 +266,18 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
             while (r.Read())
             {
                 var fkName = r["constraint_name"].ToString();
+                if (fkName == null) continue;
 
                 //could be a 2+ columns foreign key?
                 if (!toReturn.TryGetValue(fkName, out var current))
                 {
-
                     var pkDb = r["r_owner"].ToString();
                     var pkTableName = r["r_table_name"].ToString();
 
                     var fkDb = r["owner"].ToString();
                     var fkTableName = r["table_name"].ToString();
+
+                    if (pkDb == null || fkDb == null || pkTableName == null || fkTableName == null) continue;
 
                     var pktable = table.Database.Server.ExpectDatabase(pkDb).ExpectTable(pkTableName);
                     var fktable = table.Database.Server.ExpectDatabase(fkDb).ExpectTable(fkTableName);
@@ -297,7 +299,10 @@ public sealed class OracleTableHelper : DiscoveredTableHelper
                     toReturn.Add(current.Name, current);
                 }
 
-                current.AddKeys(r["r_column_name"].ToString(), r["column_name"].ToString(), transaction);
+                var colName = r["r_column_name"].ToString();
+                var foreignName = r["column_name"].ToString();
+                if (colName != null && foreignName != null)
+                    current.AddKeys(colName, foreignName, transaction);
             }
         }
 
