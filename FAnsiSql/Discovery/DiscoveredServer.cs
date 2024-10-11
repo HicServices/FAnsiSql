@@ -377,14 +377,10 @@ public sealed class DiscoveredServer : IMightNotExist
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    private bool Equals(DiscoveredServer other)
-    {
-        if (Builder == null || other.Builder == null)
-            return Equals(Builder, other.Builder) && DatabaseType == other.DatabaseType;
-
+    private bool Equals(DiscoveredServer other) =>
         //server is the same if they are pointed at the same server
-        return string.Equals(Builder.ConnectionString, other.Builder.ConnectionString, StringComparison.OrdinalIgnoreCase) && DatabaseType == other.DatabaseType;
-    }
+        DatabaseType == other.DatabaseType &&
+        string.Equals(Builder.ConnectionString, other.Builder.ConnectionString, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Equality based on Builder.ConnectionString and DatabaseType

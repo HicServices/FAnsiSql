@@ -83,7 +83,7 @@ public abstract partial class QuerySyntaxHelper(
         if (string.IsNullOrWhiteSpace(query))
             return [];
 
-        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Cast<Match>().Select(static match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
+        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Select(static match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
         return toReturn;
     }
 
@@ -172,7 +172,7 @@ public abstract partial class QuerySyntaxHelper(
             : //table valued functions do not support database name being in the column level selection list area of sql queries
             $"{EnsureFullyQualified(databaseName, schema, tableName)}.{EnsureWrapped(GetRuntimeName(columnName))}";
 
-    public virtual string Escape(string sql) => string.IsNullOrWhiteSpace(sql) ? sql : sql.Replace("'", "''");
+    public virtual string? Escape([NotNullIfNotNull(nameof(sql))] string? sql) => string.IsNullOrWhiteSpace(sql) ? sql : sql.Replace("'", "''");
     public abstract TopXResponse HowDoWeAchieveTopX(int x);
 
     public virtual string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request) => GetParameterDeclaration(proposedNewParameterName, TypeTranslater.GetSQLDBTypeForCSharpType(request));
@@ -218,7 +218,7 @@ public abstract partial class QuerySyntaxHelper(
     public abstract string GetScalarFunctionSql(MandatoryScalarFunctions function);
 
     /// <inheritdoc/>
-    public void SplitLineIntoOuterMostMethodAndContents(string lineToSplit, out string method, out string contents)
+    public void SplitLineIntoOuterMostMethodAndContents(string? lineToSplit, out string method, out string contents)
     {
         if (string.IsNullOrWhiteSpace(lineToSplit))
             throw new ArgumentException(
@@ -296,7 +296,7 @@ public abstract partial class QuerySyntaxHelper(
     public abstract string GetAutoIncrementKeywordIfAny();
     public abstract Dictionary<string, string> GetSQLFunctionsDictionary();
 
-    public bool IsBasicallyNull(object value)
+    public bool IsBasicallyNull(object? value)
     {
         if (value is string stringValue)
             return string.IsNullOrWhiteSpace(stringValue);
@@ -326,8 +326,8 @@ public abstract partial class QuerySyntaxHelper(
                 factories.Add(culture, new TypeDeciderFactory(culture));
 
             var tt = TypeTranslater;
-            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
-            var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType.SQLType);
+            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType?.SQLType);
+            var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType?.SQLType);
 
             if (IsBasicallyNull(value))
                 p.Value = DBNull.Value;
@@ -438,7 +438,7 @@ public abstract partial class QuerySyntaxHelper(
     protected virtual object FormatTimespanForDbParameter(TimeSpan timeSpan) => timeSpan;
 
     #region Equality Members
-    protected bool Equals(QuerySyntaxHelper other)
+    protected bool Equals(QuerySyntaxHelper? other)
     {
         if (other == null)
             return false;

@@ -39,7 +39,7 @@ public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string? GetRuntimeNameWithDoubledDoubleQuotes(string s) => GetRuntimeName(s)?.Replace("\"", "\"\"");
+    private string GetRuntimeNameWithDoubledDoubleQuotes(string s) => GetRuntimeName(s).Replace("\"", "\"\"");
 
     protected override string UnescapeWrappedNameBody(string name) => name.Replace("\"\"", "\"");
 

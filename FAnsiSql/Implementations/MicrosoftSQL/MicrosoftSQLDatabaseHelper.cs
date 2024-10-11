@@ -51,23 +51,20 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper, DbConnection connection, string database, DbTransaction? transaction = null)
     {
-        using (DbCommand cmd = new SqlCommand(
-                   $"use {querySyntaxHelper.EnsureWrapped(database)};select name,\r\n (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name\r\n  from sys.objects o\r\nWHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection))
+        using DbCommand cmd = new SqlCommand(
+            $"use {querySyntaxHelper.EnsureWrapped(database)};select name,\r\n (select name from sys.schemas s where s.schema_id = o.schema_id) as schema_name\r\n  from sys.objects o\r\nWHERE type_desc = 'SQL_INLINE_TABLE_VALUED_FUNCTION' OR type_desc = 'SQL_TABLE_VALUED_FUNCTION' OR type_desc ='CLR_TABLE_VALUED_FUNCTION'", (SqlConnection)connection);
+        cmd.Transaction = transaction;
 
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
         {
-            cmd.Transaction = transaction;
+            var schema = r["schema_name"] as string;
 
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
-            {
-                var schema = r["schema_name"] as string;
-
-                if (string.Equals("dbo", schema))
-                    schema = null;
-                var name = r["name"].ToString();
-                if (name != null)
-                    yield return new DiscoveredTableValuedFunction(parent, name, querySyntaxHelper, schema);
-            }
+            if (string.Equals("dbo", schema))
+                schema = null;
+            var name = r["name"].ToString();
+            if (name != null)
+                yield return new DiscoveredTableValuedFunction(parent, name, querySyntaxHelper, schema);
         }
     }
 
@@ -89,7 +86,7 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
     public override void DropDatabase(DiscoveredDatabase database)
     {
-        var userIsCurrentlyInDatabase = database.Server.GetCurrentDatabase().GetRuntimeName().Equals(database.GetRuntimeName());
+        var userIsCurrentlyInDatabase = database.Server.GetCurrentDatabase()?.GetRuntimeName().Equals(database.GetRuntimeName()) == true;
 
         var serverConnectionBuilder = new SqlConnectionStringBuilder(database.Server.Builder.ConnectionString);
         if (userIsCurrentlyInDatabase)
@@ -168,7 +165,7 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
                                                                                     WHERE d.[name] = 'master' AND type = 0
                                                             """;
 
-        string dataFolder;
+        string? dataFolder;
 
         // Create a new server so we don't mutate database.Server and cause a whole lot of side-effects in other code, e.g. attachers
         var server = database.Server;
@@ -194,12 +191,12 @@ public sealed class MicrosoftSQLDatabaseHelper: DiscoveredDatabaseHelper
 
         // detach!
         sql = $@"EXEC sys.sp_detach_db '{dbLiteralName}';";
-        using(var cmd = new SqlCommand(sql, con))
+        using (var cmd = new SqlCommand(sql, con))
             cmd.ExecuteNonQuery();
 
         // get data-files path from SQL Server
-        using(var cmd = new SqlCommand(getDefaultSqlServerDatabaseDirectory, con))
-            dataFolder = (string)cmd.ExecuteScalar();
+        using (var cmd = new SqlCommand(getDefaultSqlServerDatabaseDirectory, con))
+            dataFolder = cmd.ExecuteScalar() as string;
 
         return dataFolder == null ? null : new DirectoryInfo(dataFolder);
     }

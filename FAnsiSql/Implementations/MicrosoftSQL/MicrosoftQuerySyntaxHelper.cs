@@ -87,7 +87,7 @@ public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    private string? GetRuntimeNameWithDoubledClosingSquareBrackets(string s) => GetRuntimeName(s)?.Replace("]", "]]");
+    private string GetRuntimeNameWithDoubledClosingSquareBrackets(string s) => GetRuntimeName(s).Replace("]", "]]");
 
     public override string EnsureFullyQualified(string? databaseName, string? schema, string tableName)
     {

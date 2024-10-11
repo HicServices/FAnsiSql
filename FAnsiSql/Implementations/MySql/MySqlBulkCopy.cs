@@ -39,7 +39,7 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
 
         var sb = new StringBuilder(commandPrefix, 1 << 22);
 
-        var matches = matchedColumns.Keys.Select(column => (matchedColumns[column].DataType.SQLType, column.Ordinal)).ToArray();
+        var matches = matchedColumns.Keys.Select(column => (matchedColumns[column].DataType?.SQLType, column.Ordinal)).ToArray();
         foreach (DataRow dr in dt.Rows)
         {
             sb.Append('(');
@@ -71,10 +71,9 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
         return affected;
     }
 
-    private string ConstructIndividualValue(string dataType, object value)
+    private string ConstructIndividualValue(string? dataType, object? value)
     {
-        dataType = dataType.ToUpper();
-        dataType = BracketsRe().Replace(dataType, "").Trim();
+        dataType = BracketsRe().Replace(dataType?.ToUpper() ?? "", "").Trim();
 
         if (value is DateTime valueDateTime)
             switch (dataType)
@@ -90,7 +89,7 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
         if (value == null || value == DBNull.Value)
             return "NULL";
 
-        return ConstructIndividualValue(dataType, value.ToString());
+        return ConstructIndividualValue(dataType, value.ToString() ?? "NULL");
     }
 
     private string ConstructIndividualValue(string dataType, string value)

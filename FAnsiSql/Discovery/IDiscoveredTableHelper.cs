@@ -15,6 +15,7 @@ public interface IDiscoveredTableHelper
 {
     /// <include file='../../CommonMethods.doc.xml' path='Methods/Method[@name="GetTopXSql"]'/>
     /// <param name="table">The table to fetch records from</param>
+    /// <param name="topX">How many results to retrieve</param>
     string GetTopXSqlForTable(IHasFullyQualifiedNameToo table, int topX);
 
     IEnumerable<DiscoveredColumn> DiscoverColumns(DiscoveredTable discoveredTable, IManagedConnection connection, string database);

@@ -90,7 +90,7 @@ public interface IQuerySyntaxHelper
     /// </summary>
     /// <param name="sql"></param>
     /// <returns></returns>
-    string Escape(string sql);
+    string? Escape(string? sql);
 
     TopXResponse HowDoWeAchieveTopX(int x);
     string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request);
@@ -129,7 +129,7 @@ public interface IQuerySyntaxHelper
     /// <param name="method"></param>
     /// <param name="contents"></param>
     /// <exception cref="ArgumentException">If <paramref name="lineToSplit"/> was badly formed, blank etc</exception>
-    void SplitLineIntoOuterMostMethodAndContents(string lineToSplit, out string method, out string contents);
+    void SplitLineIntoOuterMostMethodAndContents(string? lineToSplit, out string method, out string contents);
 
     /// <summary>
     /// The SQL that would be valid for a CREATE TABLE statement that would result in a given column becoming auto increment e.g. "IDENTITY(1,1)"

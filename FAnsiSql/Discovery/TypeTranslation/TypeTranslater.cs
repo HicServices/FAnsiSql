@@ -53,8 +53,10 @@ public abstract partial class TypeTranslater : ITypeTranslater
         StringWidthWhenNotSupplied = stringWidthWhenNotSupplied;
     }
 
-    public string GetSQLDBTypeForCSharpType(DatabaseTypeRequest request)
+    public string GetSQLDBTypeForCSharpType(DatabaseTypeRequest? request)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         var t = request.CSharpType;
 
         if (t == typeof(bool) || t == typeof(bool?))
@@ -62,7 +64,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (t == typeof(byte))
             return GetByteDataType();
-            
+
         if (t == typeof(short) || t == typeof(short) || t == typeof(ushort) || t == typeof(short?) || t == typeof(ushort?))
             return GetSmallIntDataType();
 
@@ -98,7 +100,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
     private static string GetByteDataType() => "tinyint";
 
-    private static string GetFloatingPointDataType(DecimalSize decimalSize)
+    private static string GetFloatingPointDataType(DecimalSize? decimalSize)
     {
         if (decimalSize == null || decimalSize.IsEmpty)
             return "decimal(20,10)";
@@ -115,7 +117,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (maxExpectedStringWidth > MaxStringWidthBeforeMax)
             return GetStringDataTypeWithUnlimitedWidth();
-            
+
         return GetStringDataTypeImpl(maxExpectedStringWidth.Value);
     }
 
@@ -131,7 +133,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (maxExpectedStringWidth > MaxStringWidthBeforeMax)
             return GetUnicodeStringDataTypeWithUnlimitedWidth();
-            
+
         return GetUnicodeStringDataTypeImpl(maxExpectedStringWidth.Value);
     }
 
@@ -210,8 +212,13 @@ public abstract partial class TypeTranslater : ITypeTranslater
     public bool IsSupportedSQLDBType(string sqlType) => TryGetCSharpTypeForSQLDBType(sqlType) != null;
 
     /// <inheritdoc/>
-    public DbType GetDbTypeForSQLDBType(string sqlType)
+    public DbType GetDbTypeForSQLDBType(string? sqlType)
     {
+        if (string.IsNullOrWhiteSpace(sqlType))
+            throw new TypeNotMappedException(string.Format(
+                FAnsiStrings
+                    .TypeTranslater_GetCSharpTypeForSQLDBType_No_CSharp_type_mapping_exists_for_SQL_type___0____TypeTranslater_was___1___,
+                sqlType, GetType().Name));
 
         if (IsBit(sqlType))
             return DbType.Boolean;
@@ -233,13 +240,13 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (IsString(sqlType))
             return DbType.String;
-            
+
         if (IsDate(sqlType))
             return DbType.DateTime;
 
         if (IsTime(sqlType))
             return DbType.Time;
-            
+
         if (IsByteArray(sqlType))
             return DbType.Object;
 
@@ -252,7 +259,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
             sqlType, GetType().Name));
     }
 
-    public virtual DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string sqlType)
+    public virtual DatabaseTypeRequest GetDataTypeRequestForSQLDBType(string? sqlType)
     {
         var cSharpType = GetCSharpTypeForSQLDBType(sqlType);
 
@@ -269,11 +276,10 @@ public abstract partial class TypeTranslater : ITypeTranslater
 
         if (cSharpType == typeof(TimeSpan))
             lengthIfString = GetStringLengthForTimeSpan();
-            
+
         var request = new DatabaseTypeRequest(cSharpType, lengthIfString, digits);
 
-        if (cSharpType == typeof(string))
-            request.Unicode = IsUnicode(sqlType);
+        if (cSharpType == typeof(string) && sqlType != null) request.Unicode = IsUnicode(sqlType);
 
         return request;
     }
@@ -284,20 +290,20 @@ public abstract partial class TypeTranslater : ITypeTranslater
     /// </summary>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    private static bool IsUnicode(string sqlType) => sqlType != null && sqlType.StartsWith("n", StringComparison.CurrentCultureIgnoreCase);
+    private static bool IsUnicode(string sqlType) => sqlType.StartsWith("n", StringComparison.OrdinalIgnoreCase);
 
     public virtual Guesser GetGuesserFor(DiscoveredColumn discoveredColumn) => GetGuesserFor(discoveredColumn, 0);
 
     protected Guesser GetGuesserFor(DiscoveredColumn discoveredColumn, int extraLengthPerNonAsciiCharacter)
     {
-        var reqType = GetDataTypeRequestForSQLDBType(discoveredColumn.DataType.SQLType);
+        var reqType = GetDataTypeRequestForSQLDBType(discoveredColumn.DataType?.SQLType);
         return new Guesser(reqType)
         {
             ExtraLengthPerNonAsciiCharacter = extraLengthPerNonAsciiCharacter
         };
     }
 
-    public virtual int GetLengthIfString(string sqlType)
+    public virtual int GetLengthIfString(string? sqlType)
     {
         if (string.IsNullOrWhiteSpace(sqlType))
             return -1;
@@ -315,7 +321,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
         return -1;
     }
 
-    public DecimalSize? GetDigitsBeforeAndAfterDecimalPointIfDecimal(string sqlType)
+    public DecimalSize? GetDigitsBeforeAndAfterDecimalPointIfDecimal(string? sqlType)
     {
         if (string.IsNullOrWhiteSpace(sqlType))
             return null;
@@ -328,7 +334,7 @@ public abstract partial class TypeTranslater : ITypeTranslater
         return new DecimalSize(precision - scale, scale);
     }
 
-    public string TranslateSQLDBType(string sqlType, ITypeTranslater destinationTypeTranslater)
+    public string TranslateSQLDBType(string? sqlType, ITypeTranslater destinationTypeTranslater)
     {
         //e.g. data_type is datetime2 (i.e. Sql Server), this returns System.DateTime
         var requested = GetDataTypeRequestForSQLDBType(sqlType);

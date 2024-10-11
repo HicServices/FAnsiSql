@@ -11,7 +11,7 @@ public sealed class OracleAggregateHelper : AggregateHelper
     private OracleAggregateHelper() {}
     protected override IQuerySyntaxHelper GetQuerySyntaxHelper() => OracleQuerySyntaxHelper.Instance;
 
-    public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql) =>
+    public override string GetDatePartOfColumn(AxisIncrement? increment, string columnSql) =>
         increment switch
         {
             AxisIncrement.Day => columnSql,
@@ -29,11 +29,11 @@ public sealed class OracleAggregateHelper : AggregateHelper
 
         var startDateSql =
             //is it a date in some format or other?
-            DateTime.TryParse(axis.StartDate.Trim('\'', '"'), out var start)
+            DateTime.TryParse(axis.StartDate?.Trim('\'', '"'), out var start)
                 ? $"to_date('{start:yyyyMMdd}','yyyymmdd')"
                 : $"to_date(to_char({axis.StartDate}, 'YYYYMMDD'), 'yyyymmdd')"; //assume its some Oracle specific syntax that results in a date
 
-        var endDateSql = DateTime.TryParse(axis.EndDate.Trim('\'', '"'), out var end)
+        var endDateSql = DateTime.TryParse(axis.EndDate?.Trim('\'', '"'), out var end)
             ? $"to_date('{end:yyyyMMdd}','yyyymmdd')"
             : $"to_date(to_char({axis.EndDate}, 'YYYYMMDD'), 'yyyymmdd')"; //assume its some Oracle specific syntax that results in a date e.g. CURRENT_TIMESTAMP
 
@@ -81,6 +81,8 @@ public sealed class OracleAggregateHelper : AggregateHelper
 
     protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
     {
+        ArgumentNullException.ThrowIfNull(query.Axis);
+
         //we are trying to produce something like this:
         /*
 with calendar as (
@@ -100,8 +102,8 @@ group by
 dt
 order by dt*/
 
-        var countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);
-        var axisColumnAlias = query.AxisSelect.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
+        var countAlias = query.CountSelect?.GetAliasFromText(query.SyntaxHelper);
+        var axisColumnAlias = query.AxisSelect?.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
 
         WrapAxisColumnWithDatePartFunction(query, axisColumnAlias);
 

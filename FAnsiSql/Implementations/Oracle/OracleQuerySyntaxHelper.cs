@@ -82,9 +82,7 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
         //Value must be a DateTime even if DBParameter is of Type DbType.Time
         Convert.ToDateTime(timeSpan.ToString());
 
-    private static readonly HashSet<string> ReservedWords = new(new[]
-    {
-
+    private static readonly HashSet<string> ReservedWords = new([
         "ACCESS",
         "ACCOUNT",
         "ACTIVATE",
@@ -565,6 +563,6 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
         "XID",
         "YEAR",
         "ZONE"
-    }, StringComparer.CurrentCultureIgnoreCase);
+    ], StringComparer.CurrentCultureIgnoreCase);
 
 }

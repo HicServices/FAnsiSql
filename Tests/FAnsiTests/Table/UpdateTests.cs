@@ -30,7 +30,7 @@ internal sealed class UpdateTests : DatabaseTests
             tbl1 = db.CreateTable("HighScoresTable", dt1);
         }
 
-        using(var dt2 = new DataTable())
+        using (var dt2 = new DataTable())
         {
             dt2.Columns.Add("Name");
             dt2.Columns.Add("Score");
@@ -50,24 +50,24 @@ internal sealed class UpdateTests : DatabaseTests
         var score = syntaxHelper.EnsureWrapped("Score");
         var name = syntaxHelper.EnsureWrapped("Name");
 
-        queryLines.Add(new CustomLine($"t1.{highScore} = t2.{score}",QueryComponent.SET));
-        queryLines.Add(new CustomLine($"t1.{highScore} < t2.{score} OR t1.{highScore} is null",QueryComponent.WHERE));
-        queryLines.Add(new CustomLine($"t1.{name} = t2.{name}",QueryComponent.JoinInfoJoin));
+        queryLines.Add(new CustomLine($"t1.{highScore} = t2.{score}", QueryComponent.SET));
+        queryLines.Add(new CustomLine($"t1.{highScore} < t2.{score} OR t1.{highScore} is null", QueryComponent.WHERE));
+        queryLines.Add(new CustomLine($"t1.{name} = t2.{name}", QueryComponent.JoinInfoJoin));
 
         var sql = updateHelper.BuildUpdate(tbl1, tbl2, queryLines);
 
         using var con = db.Server.GetConnection();
         con.Open();
 
-        using (var cmd = db.Server.GetCommand(sql,con)) 
+        using (var cmd = db.Server.GetCommand(sql, con))
             Assert.That(cmd.ExecuteNonQuery(), Is.EqualTo(1));
 
         //Frank should have got a new high score of 900
-        using (var cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Frank'",con))
-            Assert.That(cmd.ExecuteScalar(),Is.EqualTo(900));
+        using (var cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Frank'", con))
+            Assert.That(cmd.ExecuteScalar(), Is.EqualTo(900));
 
         //Dave should have his old score of 100
-        using (var cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Dave'",con))
-            Assert.That(cmd.ExecuteScalar(),Is.EqualTo(100));
+        using (var cmd = db.Server.GetCommand($"SELECT {highScore} from {tbl1.GetFullyQualifiedName()} WHERE {name} = 'Dave'", con))
+            Assert.That(cmd.ExecuteScalar(), Is.EqualTo(100));
     }
 }

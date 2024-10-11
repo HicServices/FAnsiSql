@@ -4,11 +4,11 @@ using NUnit.Framework;
 
 namespace FAnsiTests.Table;
 
-internal sealed class TableValuedFunctionTests:DatabaseTests
+internal sealed class TableValuedFunctionTests : DatabaseTests
 {
     [TestCase("dbo")]
     [TestCase("Omg")]
-    public void Test_DropTableValuedFunction(string schema)
+    public void Test_DropTableValuedFunction(string? schema)
     {
         var db = GetTestDatabase(DatabaseType.MicrosoftSQLServer);
 
@@ -17,12 +17,14 @@ internal sealed class TableValuedFunctionTests:DatabaseTests
             con.Open();
 
             //create the schema if it doesn't exist yet
-            if(schema != null)
-                db.Server.GetCommand($@"
-IF NOT EXISTS ( SELECT  *
-                FROM    sys.schemas
-                WHERE   name = N'{schema}' ) 
-EXEC('CREATE SCHEMA  {schema}')", con).ExecuteNonQuery();
+            if (schema != null)
+                db.Server.GetCommand($"""
+
+                                      IF NOT EXISTS ( SELECT  *
+                                                      FROM    sys.schemas
+                                                      WHERE   name = N'{schema}' ) 
+                                      EXEC('CREATE SCHEMA  {schema}')
+                                      """, con).ExecuteNonQuery();
 
 
             var sql = $@"CREATE FUNCTION {schema}.MyAwesomeFunction
@@ -53,7 +55,7 @@ BEGIN
 
 	RETURN 
 END";
-            db.Server.GetCommand(sql,con).ExecuteNonQuery();
+            db.Server.GetCommand(sql, con).ExecuteNonQuery();
         }
 
         var tvf = db.DiscoverTableValuedFunctions().Single();

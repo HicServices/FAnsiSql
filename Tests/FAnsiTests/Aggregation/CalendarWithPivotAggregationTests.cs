@@ -58,17 +58,17 @@ internal sealed class CalendarWithPivotAggregationTests : AggregationTests
 
             //pivot columns should ordered by sum of pivot values (T has the highest followed by E...)
 
-            /*joinDt	T	E&, %a' mp;E	F	G
-                    2001	3	1	            0	1
-                    2002	2	1	            2	0
-                    2003	2	0	            0	0
-                    2004	0	0	            0	0
-                    2005	0	1	            0	0
-                    2006	0	0	            0	0
-                    2007	0	0	            0	0
-                    2008	0	0	            0	0
-                    2009	0	0	            0	0
-                    2010	0	0	            0	0
+            /*joinDt    T   E&, %a' mp;E    F   G
+                    2001 3   1               0   1
+                    2002 2   1               2   0
+                    2003 2   0               0   0
+                    2004 0   0               0   0
+                    2005 0   1               0   0
+                    2006 0   0               0   0
+                    2007 0   0               0   0
+                    2008 0   0               0   0
+                    2009 0   0               0   0
+                    2010 0   0               0   0
 */
 
             Assert.That(dt.Rows, Has.Count.EqualTo(10)); //there are 10 years between 2001 and 2010 even though not all years are represented in the data

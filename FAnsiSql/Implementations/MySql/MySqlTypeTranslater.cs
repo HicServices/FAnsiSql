@@ -23,14 +23,14 @@ public sealed partial class MySqlTypeTranslater : TypeTranslater
         LongRegex = LongRe();
     }
 
-    public override int GetLengthIfString(string sqlType) =>
-        sqlType.ToUpperInvariant() switch
+    public override int GetLengthIfString(string? sqlType) =>
+        sqlType?.ToUpperInvariant() switch
         {
             "TINYTEXT" => 1 << 8,
             "TEXT" => 1 << 16,
             "MEDIUMTEXT" => 1 << 24,
             "LONGTEXT" => int.MaxValue, // Should be 1<<32 but that overflows...
-            _ => AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType)
+            _ => sqlType != null && AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType)
         };
 
     public override string GetStringDataTypeWithUnlimitedWidth() => "longtext";
