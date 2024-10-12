@@ -150,9 +150,14 @@ public abstract class BulkCopy : IBulkCopy
             //if the DataColumn is part of the Primary Key of the DataTable (in memory)
             //then we need to update the primary key to include the new column not the old one
             if (dt.PrimaryKey != null)
+            {
                 for (var i = 0; i < dt.PrimaryKey.Length; i++)
                     if (dt.PrimaryKey[i] == dataColumn)
                         dt.PrimaryKey[i] = newColumn;
+                // Invoke the PrimaryKey setter to update the internal state of the DataTable
+                dt.PrimaryKey = dt.PrimaryKey;
+            }
+
             var oldOrdinal = dataColumn.Ordinal;
 
             //drop the original column
