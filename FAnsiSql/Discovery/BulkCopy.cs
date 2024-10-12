@@ -150,8 +150,19 @@ public abstract class BulkCopy : IBulkCopy
             //if the DataColumn is part of the Primary Key of the DataTable (in memory)
             //then we need to update the primary key to include the new column not the old one
             if (dt.PrimaryKey != null)
+            {
+                var modified = false;
                 // Need to invoke the PrimaryKey setter to update the internal state of the DataTable, can't just modify existing array!
-                dt.PrimaryKey = Array.ConvertAll(dt.PrimaryKey, c => c == dataColumn ? newColumn : c);
+                var newKey = Array.ConvertAll(dt.PrimaryKey, c =>
+                {
+                    if (c != dataColumn) return c;
+
+                    modified = true;
+                    return newColumn;
+                });
+                if (modified)
+                    dt.PrimaryKey = newKey;
+            }
 
             var oldOrdinal = dataColumn.Ordinal;
 

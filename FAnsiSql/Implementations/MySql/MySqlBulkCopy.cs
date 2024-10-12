@@ -73,18 +73,30 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
 
     private string ConstructIndividualValue(string? dataType, object? value)
     {
-        dataType = BracketsRe().Replace(dataType?.ToUpper() ?? "", "").Trim();
-
-        if (value is DateTime valueDateTime)
-            switch (dataType)
+        if (value is DateTime valueDateTime && dataType is { Length: > 0 })
+        {
+            var dt = dataType.AsSpan().Trim();
+            switch (dt[0])
             {
-                case "DATE":
-                    return $"'{valueDateTime:yyyy-MM-dd}'";
-                case "TIMESTAMP" or "DATETIME":
-                    return $"'{valueDateTime:yyyy-MM-dd HH:mm:ss}'";
-                case "TIME":
-                    return $"'{valueDateTime:HH:mm:ss}'";
+                case 'd':
+                case 'D':
+                    if (dt.Equals("date", StringComparison.OrdinalIgnoreCase))
+                        return $"'{valueDateTime:yyyy-MM-dd}'";
+                    if (dt.Equals("datetime", StringComparison.OrdinalIgnoreCase))
+                        return $"'{valueDateTime:yyyy-MM-dd HH:mm:ss}'";
+
+                    break;
+
+                case 't':
+                case 'T':
+                    if (dt.Equals("time", StringComparison.OrdinalIgnoreCase))
+                        return $"'{valueDateTime:HH:mm:ss}'";
+                    if (dt.Equals("timestamp", StringComparison.OrdinalIgnoreCase))
+                        return $"'{valueDateTime:yyyy-MM-dd HH:mm:ss}'";
+
+                    break;
             }
+        }
 
         if (value == null || value == DBNull.Value)
             return "NULL";
@@ -92,8 +104,9 @@ public sealed partial class MySqlBulkCopy(DiscoveredTable targetTable, IManagedC
         return ConstructIndividualValue(dataType, value.ToString() ?? "NULL");
     }
 
-    private string ConstructIndividualValue(string dataType, string value)
+    private string ConstructIndividualValue(string? dataType, string value)
     {
+        dataType = BracketsRe().Replace(dataType?.ToUpper() ?? "", "").Trim();
         return dataType switch
         {
             "BIT" => value,
