@@ -31,7 +31,9 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
     {
         var answer = base.GetRuntimeName(s);
 
-        return string.IsNullOrWhiteSpace(answer) ? s :
+        return string.IsNullOrWhiteSpace(answer)
+            ? s
+            :
             //upper it because oracle loves uppercase stuff
             answer.Trim('"').ToUpper();
     }

@@ -23,15 +23,39 @@ public sealed partial class MySqlTypeTranslater : TypeTranslater
         LongRegex = LongRe();
     }
 
-    public override int GetLengthIfString(string? sqlType) =>
-        sqlType?.ToUpperInvariant() switch
+    public override int GetLengthIfString(string? sqlType)
+    {
+        if (!(sqlType?.Length > 0))
+            return sqlType != null && AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType);
+
+        switch (sqlType[0])
         {
-            "TINYTEXT" => 1 << 8,
-            "TEXT" => 1 << 16,
-            "MEDIUMTEXT" => 1 << 24,
-            "LONGTEXT" => int.MaxValue, // Should be 1<<32 but that overflows...
-            _ => sqlType != null && AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType)
-        };
+            case 'l':
+            case 'L':
+                if (sqlType.Equals("longtext", StringComparison.OrdinalIgnoreCase))
+                    return int.MaxValue;
+
+                break;
+
+            case 'm':
+            case 'M':
+                if (sqlType.Equals("mediumtext", StringComparison.OrdinalIgnoreCase))
+                    return 1 << 24;
+
+                break;
+
+            case 't':
+            case 'T':
+                if (sqlType.Equals("text", StringComparison.OrdinalIgnoreCase))
+                    return 1 << 16;
+                if (sqlType.Equals("tinytext", StringComparison.OrdinalIgnoreCase))
+                    return 1 << 8;
+ 
+                break;
+        }
+
+        return AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType);
+    }
 
     public override string GetStringDataTypeWithUnlimitedWidth() => "longtext";
 
