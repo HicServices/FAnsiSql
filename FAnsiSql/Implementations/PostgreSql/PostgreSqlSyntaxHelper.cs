@@ -24,6 +24,10 @@ public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "\"";
 
+    public override string False => "FALSE";
+
+    public override string True => "TRUE";
+
     public override bool SupportsEmbeddedParameters() => false;
 
     protected override object FormatDateTimeForDbParameter(DateTime dateTime) =>

@@ -28,6 +28,10 @@ public sealed class MicrosoftQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "]";
 
+    public override string False => "0";
+
+    public override string True => "1";
+
     public override TopXResponse HowDoWeAchieveTopX(int x) => new($"TOP {x}", QueryComponent.SELECT);
 
     public override string GetParameterDeclaration(string proposedNewParameterName, string sqlType) => $"DECLARE {proposedNewParameterName} AS {sqlType};";

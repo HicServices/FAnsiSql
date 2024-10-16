@@ -39,6 +39,9 @@ public abstract partial class QuerySyntaxHelper(
     /// <inheritdoc/>
     public virtual char[] IllegalNameChars { get; } = ['.', '(', ')'];
 
+    public abstract string False { get; }
+    public abstract string True { get; }
+
     /// <summary>
     /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
     /// </summary>

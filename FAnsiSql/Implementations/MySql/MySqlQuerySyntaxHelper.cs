@@ -21,6 +21,10 @@ public sealed class MySqlQuerySyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "`";
 
+    public override string False => "0";
+
+    public override string True => "1";
+
     private MySqlQuerySyntaxHelper() : base(MySqlTypeTranslater.Instance, MySqlAggregateHelper.Instance,MySqlUpdateHelper.Instance,DatabaseType.MySql)//no specific type translation required
     {
     }

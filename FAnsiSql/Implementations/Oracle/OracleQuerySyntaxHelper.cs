@@ -26,6 +26,10 @@ public sealed class OracleQuerySyntaxHelper : QuerySyntaxHelper
 
     public override char ParameterSymbol => ':';
 
+    public override string False => "0";
+
+    public override string True => "1";
+
     [return: NotNullIfNotNull(nameof(s))]
     public override string? GetRuntimeName(string? s)
     {
