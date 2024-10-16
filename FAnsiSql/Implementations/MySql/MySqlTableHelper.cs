@@ -72,7 +72,7 @@ public sealed partial class MySqlTableHelper : DiscoveredTableHelper
         r.Close();
     }
 
-    private static bool YesNoToBool(object o)
+    private static bool YesNoToBool(object? o)
     {
         if (o is bool b)
             return b;

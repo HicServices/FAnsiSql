@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace FAnsi.Discovery.QuerySyntax.Aggregation;
 
-public abstract class AggregateHelper:IAggregateHelper
+public abstract class AggregateHelper : IAggregateHelper
 {
     public string BuildAggregate(List<CustomLine> queryLines, IQueryAxis? axisIfAny)
     {
@@ -20,7 +20,7 @@ public abstract class AggregateHelper:IAggregateHelper
 
         //pivot (no axis)
         if (lines.AxisSelect == null)
-            return BuildPivotOnlyAggregate(lines,GetPivotOnlyNonPivotColumn(lines));
+            return BuildPivotOnlyAggregate(lines, GetPivotOnlyNonPivotColumn(lines));
 
         //pivot and axis
         return BuildPivotAndAxisAggregate(lines);
@@ -28,8 +28,8 @@ public abstract class AggregateHelper:IAggregateHelper
 
     private static CustomLine GetPivotOnlyNonPivotColumn(AggregateCustomLineCollection query)
     {
-        var nonPivotColumn = query.Lines.Where(static l => l.LocationToInsert == QueryComponent.QueryTimeColumn && l.Role == CustomLineRole.None).ToArray();
-        if(nonPivotColumn.Length != 1)
+        var nonPivotColumn = query.Lines.Where(static l => l is { LocationToInsert: QueryComponent.QueryTimeColumn, Role: CustomLineRole.None }).ToArray();
+        if (nonPivotColumn.Length != 1)
             throw new Exception("Pivot is only valid when there are 3 SELECT columns, an aggregate (e.g. count(*)), a pivot and a final column");
 
         return nonPivotColumn[0];
@@ -48,7 +48,7 @@ public abstract class AggregateHelper:IAggregateHelper
     /// <returns></returns>
     protected abstract string BuildAxisAggregate(AggregateCustomLineCollection query);
 
-    protected abstract string BuildPivotOnlyAggregate(AggregateCustomLineCollection query,CustomLine nonPivotColumn);
+    protected abstract string BuildPivotOnlyAggregate(AggregateCustomLineCollection query, CustomLine nonPivotColumn);
 
     protected abstract string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query);
 
@@ -60,21 +60,25 @@ public abstract class AggregateHelper:IAggregateHelper
     /// </summary>
     /// <param name="query"></param>
     /// <param name="axisColumnAlias"></param>
-    protected void WrapAxisColumnWithDatePartFunction(AggregateCustomLineCollection query, string axisColumnAlias)
+    protected void WrapAxisColumnWithDatePartFunction(AggregateCustomLineCollection query, string? axisColumnAlias)
     {
-        if(string.IsNullOrWhiteSpace(axisColumnAlias))
-            throw new ArgumentNullException(nameof(axisColumnAlias));
+        ArgumentException.ThrowIfNullOrWhiteSpace(axisColumnAlias, nameof(axisColumnAlias));
+        if (query.Axis?.AxisIncrement == null)
+            throw new InvalidOperationException("No axis increment in query");
 
-        var axisGroupBy = query.AxisGroupBy;
-        var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
+        var axisGroupBy = query.AxisGroupBy ??
+                          throw new InvalidOperationException("No axis grouping in query");
+        var axisColumnWithoutAlias = query.AxisSelect?.GetTextWithoutAlias(query.SyntaxHelper) ??
+                                     throw new InvalidOperationException("No axis column in query");
 
-        var axisColumnEndedWithComma = query.AxisSelect.Text.EndsWith(',');
-        query.AxisSelect.Text =
-            $"{GetDatePartOfColumn(query.Axis?.AxisIncrement ?? throw new InvalidOperationException("No axis in query"), axisColumnWithoutAlias)} AS {axisColumnAlias}{(axisColumnEndedWithComma ? "," : "")}";
+        var axisColumnEndedWithComma = query.AxisSelect?.Text.EndsWith(',') == true;
+        if (query.AxisSelect != null)
+            query.AxisSelect.Text =
+                $"{GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias)} AS {axisColumnAlias}{(axisColumnEndedWithComma ? "," : "")}";
 
         var groupByEndedWithComma = axisGroupBy.Text.EndsWith(',');
         axisGroupBy.Text = GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias) + (groupByEndedWithComma ? "," : "");
     }
 
-    public abstract string GetDatePartOfColumn(AxisIncrement increment, string columnSql);
+    public abstract string GetDatePartOfColumn(AxisIncrement? axisIncrement, string columnSql);
 }

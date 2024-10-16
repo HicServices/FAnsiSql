@@ -40,7 +40,8 @@ public sealed partial class MicrosoftSQLTableHelper : DiscoveredTableHelper
                 ? $"{discoveredTable.GetRuntimeName()}.{r["COLUMN_NAME"]}"
                 : r["COLUMN_NAME"].ToString();
 
-            var toAdd = new DiscoveredColumn(discoveredTable, columnName, isNullable)
+            var toAdd = new DiscoveredColumn(discoveredTable,
+                columnName ?? throw new InvalidOperationException("Anonymous column found"), isNullable)
             {
                 IsAutoIncrement = Convert.ToBoolean(r["is_identity"]),
                 Collation = r["collation_name"] as string
@@ -56,7 +57,7 @@ public sealed partial class MicrosoftSQLTableHelper : DiscoveredTableHelper
     /// </summary>
     /// <param name="table"></param>
     /// <returns></returns>
-    private static string? GetObjectName(DiscoveredTable table)
+    private static string GetObjectName(DiscoveredTable table)
     {
         var syntax = table.GetQuerySyntaxHelper();
 
@@ -160,7 +161,9 @@ public sealed partial class MicrosoftSQLTableHelper : DiscoveredTableHelper
         {
             using var connection = args.GetManagedConnection(table);
             var columnHelper = GetColumnHelper();
-            foreach (var alterSql in discoverColumns.Where(static dc => dc.AllowNulls).Select(col => columnHelper.GetAlterColumnToSql(col, col.DataType.SQLType, false)))
+            foreach (var alterSql in discoverColumns.Where(static dc => dc.AllowNulls).Select(col =>
+                         columnHelper.GetAlterColumnToSql(col,
+                             col.DataType?.SQLType ?? throw new InvalidOperationException("Missing type"), false)))
             {
                 using var alterCmd = table.GetCommand(alterSql, connection.Connection, connection.Transaction);
                 args.ExecuteNonQuery(alterCmd);
@@ -249,7 +252,9 @@ public sealed partial class MicrosoftSQLTableHelper : DiscoveredTableHelper
                     toReturn.Add(current.Name, current);
                 }
 
-                current.AddKeys(r["PKCOLUMN_NAME"].ToString(), r["FKCOLUMN_NAME"].ToString(), transaction);
+                current.AddKeys(
+                    r["PKCOLUMN_NAME"].ToString() ?? throw new InvalidOperationException("Unnamed primary key column"),
+                    r["FKCOLUMN_NAME"].ToString() ?? throw new InvalidOperationException("Unnamed foreign key column"), transaction);
             }
         }
 

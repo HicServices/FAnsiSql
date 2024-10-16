@@ -62,7 +62,7 @@ public sealed class ImplementationManager
                     .ImplementationManager_GetImplementation_No_implementation_found_for_ADO_Net_object_of_Type__0_,
                 connection.GetType()));
     }
-    private static IImplementation GetImplementation(Func<IImplementation,bool> condition, string errorIfNotFound) => Instance?._implementations.FirstOrDefault(condition)??throw new ImplementationNotFoundException(errorIfNotFound);
+    private static IImplementation GetImplementation(Func<IImplementation,bool> condition, string errorIfNotFound) => Instance._implementations.FirstOrDefault(condition)??throw new ImplementationNotFoundException(errorIfNotFound);
 
     /// <summary>
     /// Returns all currently loaded implementations or null if no implementations have been loaded

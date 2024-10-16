@@ -171,7 +171,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
             {
                 var col = dt.Columns.Add(c.GetRuntimeName());
                 col.AllowDBNull = c.AllowNulls;
-                col.DataType = c.DataType.GetCSharpDataType();
+                col.DataType = c.DataType?.GetCSharpDataType();
             }
 
         Helper.FillDataTableWithTopX(args, this, topX, dt);
@@ -441,15 +441,15 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
         var syntaxHelper = GetQuerySyntaxHelper();
         var server = Database.Server;
 
-        var _parameterNames = syntaxHelper.GetParameterNamesFor(toInsert.Keys.ToArray(), static c => c.GetRuntimeName());
+        var parameterNames = syntaxHelper.GetParameterNamesFor(toInsert.Keys.ToArray(), static c => c.GetRuntimeName());
 
         using var connection = Database.Server.GetManagedConnection(transaction);
         var sql =
-            $"INSERT INTO {GetFullyQualifiedName()}({string.Join(",", toInsert.Keys.Select(c => syntaxHelper.EnsureWrapped(c.GetRuntimeName())))}) VALUES ({string.Join(",", toInsert.Keys.Select(c => _parameterNames[c]))})";
+            $"INSERT INTO {GetFullyQualifiedName()}({string.Join(",", toInsert.Keys.Select(c => syntaxHelper.EnsureWrapped(c.GetRuntimeName())))}) VALUES ({string.Join(",", toInsert.Keys.Select(c => parameterNames[c]))})";
 
         using var cmd = server.Helper.GetCommand(sql, connection.Connection, connection.Transaction);
         foreach (var p in toInsert
-                     .Select(kvp => new { kvp, parameter = server.Helper.GetParameter(_parameterNames[kvp.Key]) })
+                     .Select(kvp => new { kvp, parameter = server.Helper.GetParameter(parameterNames[kvp.Key]) })
                      .Select(t =>
                          GetQuerySyntaxHelper().GetParameter(t.parameter, t.kvp.Key, t.kvp.Value, culture)))
             cmd.Parameters.Add(p);
@@ -545,16 +545,7 @@ public class DiscoveredTable : IHasFullyQualifiedNameToo, IMightNotExist, IHasQu
     /// Based on table name, schema, database and TableType
     /// </summary>
     /// <returns></returns>
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            var hashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(GetSchemaWithDefaultForNull() ?? string.Empty);
-            hashCode = (hashCode * 397) ^ (Database != null ? Database.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ (int)TableType;
-            return hashCode;
-        }
-    }
+    public override int GetHashCode() => HashCode.Combine(TableName, GetSchemaWithDefaultForNull(), Database, TableType);
 
     public DiscoveredRelationship AddForeignKey(DiscoveredColumn foreignKey, DiscoveredColumn primaryKey, bool cascadeDeletes, string? constraintName = null, DatabaseOperationArgs? args = null) => AddForeignKey(new Dictionary<DiscoveredColumn, DiscoveredColumn> { { foreignKey, primaryKey } }, cascadeDeletes, constraintName, args);
 

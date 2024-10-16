@@ -14,5 +14,4 @@ public enum QueryComponent
     Having,
     OrderBy,
     Postfix //after everything else in the query (including WHERE containers and any ORDER BYs)
-
 }

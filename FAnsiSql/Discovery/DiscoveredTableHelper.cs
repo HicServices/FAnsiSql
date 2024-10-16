@@ -76,7 +76,7 @@ public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
 
         foreach (var c in table.DiscoverColumns())
         {
-            var sqlType = c.DataType.SQLType;
+            var sqlType = c.DataType?.SQLType;
 
             if (c.IsAutoIncrement && convertIdentityToInt)
                 sqlType = "int";
@@ -90,7 +90,7 @@ public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
                 var fromtt = table.Database.Server.GetQuerySyntaxHelper().TypeTranslater;
                 var tott = toCreateTable?.Database.Server.GetQuerySyntaxHelper().TypeTranslater ?? throw new InvalidOperationException($"Unable to retrieve type translator for {toCreateTable}");
 
-                sqlType = fromtt.TranslateSQLDBType(c.DataType.SQLType, tott);
+                sqlType = fromtt.TranslateSQLDBType(c.DataType?.SQLType, tott);
             }
 
             var colRequest = new DatabaseColumnRequest(c.GetRuntimeName(), sqlType, c.AllowNulls || dropNullability)
@@ -99,7 +99,7 @@ public abstract class DiscoveredTableHelper : IDiscoveredTableHelper
                 IsAutoIncrement = c.IsAutoIncrement && !convertIdentityToInt
             };
 
-            colRequest.AllowNulls = colRequest.AllowNulls && !colRequest.IsAutoIncrement;
+            colRequest.AllowNulls = colRequest is { AllowNulls: true, IsAutoIncrement: false };
 
             //if there is a collation
             if (!string.IsNullOrWhiteSpace(c.Collation) && (toCreateTable == null || !isToDifferentDatabaseType))

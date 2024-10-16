@@ -59,7 +59,7 @@ public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest
     /// </summary>
     public string? Collation { get; set; }
 
-    public DatabaseColumnRequest(string columnName, string explicitDbType, bool allowNulls = true) : this(columnName, (DatabaseTypeRequest?)null, allowNulls)
+    public DatabaseColumnRequest(string columnName, string? explicitDbType, bool allowNulls = true) : this(columnName, (DatabaseTypeRequest?)null, allowNulls)
     {
         ExplicitDbType = explicitDbType;
     }
@@ -69,7 +69,8 @@ public sealed class DatabaseColumnRequest(string columnName, DatabaseTypeRequest
     /// </summary>
     /// <param name="typeTranslater"></param>
     /// <returns></returns>
-    public string GetSQLDbType(ITypeTranslater typeTranslater) => ExplicitDbType??typeTranslater.GetSQLDBTypeForCSharpType(TypeRequested);
+    public string GetSQLDbType(ITypeTranslater typeTranslater) =>
+        ExplicitDbType ?? typeTranslater.GetSQLDBTypeForCSharpType(TypeRequested);
 
     public string GetRuntimeName() => ColumnName;
 }

@@ -59,7 +59,9 @@ public sealed partial class OracleTypeTranslater:TypeTranslater
 
     protected override bool IsFloatingPoint(string sqlType) => base.IsFloatingPoint(sqlType) || AlsoFloatingPointRegex.IsMatch(sqlType);
 
-    public override int GetLengthIfString(string sqlType) => AlsoStringRegex.IsMatch(sqlType) ? int.MaxValue : base.GetLengthIfString(sqlType);
+    public override int GetLengthIfString(string? sqlType) => sqlType != null && AlsoStringRegex.IsMatch(sqlType)
+        ? int.MaxValue
+        : base.GetLengthIfString(sqlType);
 
     protected override bool IsSmallInt(string sqlType) =>
         //yup you ask for one of these, you will get a NUMBER(38) https://docs.oracle.com/cd/A58617_01/server.804/a58241/ch5.htm

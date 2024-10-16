@@ -49,8 +49,9 @@ public sealed class DatabaseOperationArgs
     /// <exception cref="OperationCanceledException"></exception>
     public int ExecuteNonQuery(DbCommand cmd)
     {
-        return Execute(cmd, ()=>cmd.ExecuteNonQueryAsync(CancellationToken));
+        return Execute(cmd, () => cmd.ExecuteNonQueryAsync(CancellationToken));
     }
+
     /// <summary>
     /// Sets the timeout and cancellation on <paramref name="cmd"/> then runs <see cref="DbCommand.ExecuteScalar()"/> with the
     /// <see cref="CancellationToken"/> (if any) and blocks till the call completes.

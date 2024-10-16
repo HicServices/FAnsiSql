@@ -81,7 +81,7 @@ public sealed class DiscoveredDataType
     public void Resize(int newSize, IManagedTransaction? managedTransaction = null)
     {
         var toReplace = GetLengthIfString();
-            
+
         if(newSize == toReplace)
             return;
 
@@ -120,7 +120,7 @@ public sealed class DiscoveredDataType
         var newDataType = _column?.Table.GetQuerySyntaxHelper()
                               .TypeTranslater.GetSQLDBTypeForCSharpType(new DatabaseTypeRequest(typeof(decimal), null,
                                   new DecimalSize(numberOfDigitsBeforeDecimalPoint, numberOfDigitsAfterDecimalPoint))) ??
-                          throw new InvalidOperationException($"Failed to calculate new DB type");
+                          throw new InvalidOperationException("Failed to calculate new DB type");
 
         AlterTypeTo(newDataType, managedTransaction);
     }
@@ -155,7 +155,7 @@ public sealed class DiscoveredDataType
             }
         }
 
-        SQLType = newType; 
+        SQLType = newType;
     }
 
     /// <summary>

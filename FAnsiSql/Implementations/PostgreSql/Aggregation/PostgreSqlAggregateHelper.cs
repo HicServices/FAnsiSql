@@ -22,10 +22,10 @@ public sealed class PostgreSqlAggregateHelper : AggregateHelper
             _ => throw new ArgumentOutOfRangeException(nameof(query),$"Invalid AxisIncrement {query.Axis?.AxisIncrement}")
         };
 
-        var countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);
-        var axisColumnAlias = query.AxisSelect.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
+        var countAlias = query.CountSelect?.GetAliasFromText(query.SyntaxHelper);
+        var axisColumnAlias = query.AxisSelect?.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
 
-        WrapAxisColumnWithDatePartFunction(query,axisColumnAlias);
+        WrapAxisColumnWithDatePartFunction(query, axisColumnAlias);
 
         var sql =
             string.Format("""
@@ -63,7 +63,7 @@ public sealed class PostgreSqlAggregateHelper : AggregateHelper
 
     protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query) => throw new NotImplementedException();
 
-    public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql) =>
+    public override string GetDatePartOfColumn(AxisIncrement? increment, string columnSql) =>
         increment switch
         {
             AxisIncrement.Day => $"{columnSql}::date",

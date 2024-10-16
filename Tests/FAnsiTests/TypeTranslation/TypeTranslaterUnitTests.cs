@@ -13,9 +13,9 @@ internal sealed class TypeTranslaterUnitTests
     /// <param name="dbType"></param>
     /// <param name="sqlDbType"></param>
     /// <param name="expectedOutcome"></param>
-    [TestCase(DatabaseType.MicrosoftSQLServer,"varchar2(10)",true)]
+    [TestCase(DatabaseType.MicrosoftSQLServer, "varchar2(10)", true)]
     [TestCase(DatabaseType.MicrosoftSQLServer, "monkeychar7", true)]
-    public void Test_IsSupportedType(DatabaseType dbType,string sqlDbType,bool expectedOutcome)
+    public void Test_IsSupportedType(DatabaseType dbType, string sqlDbType, bool expectedOutcome)
     {
         var tt = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper().TypeTranslater;
         Assert.That(tt.IsSupportedSQLDBType(sqlDbType), Is.EqualTo(expectedOutcome), $"Unexpected result for IsSupportedSQLDBType with {dbType}.  Input was '{sqlDbType}' expected {expectedOutcome}");
