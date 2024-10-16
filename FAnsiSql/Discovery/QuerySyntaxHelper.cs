@@ -39,6 +39,12 @@ public abstract partial class QuerySyntaxHelper(
     /// <inheritdoc/>
     public virtual char[] IllegalNameChars { get; } = ['.', '(', ')'];
 
+    ///<inheritdoc/>
+    public virtual string False => "0"; // 0 works as false for everything except Postgres
+
+    ///<inheritdoc/>
+    public virtual string True => "1"; // 1 works as true for everything except Postgres
+
     /// <summary>
     /// Regex for identifying parameters in blocks of SQL (starts with @ or : (Oracle)
     /// </summary>

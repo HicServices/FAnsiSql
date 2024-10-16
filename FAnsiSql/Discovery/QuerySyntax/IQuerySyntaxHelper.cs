@@ -115,6 +115,15 @@ public interface IQuerySyntaxHelper
     /// </summary>
     int MaximumColumnLength { get; }
 
+    /// <summary>
+    /// Boolean false encoded appropriately for the DBMS (either 0 or FALSE depending)
+    /// </summary>
+    public string False { get; }
+
+    /// <summary>
+    /// Boolean true encoded appropriately for the DBMS (either 1 or TRUE depending)
+    /// </summary>
+    public string True { get; }
 
     bool SplitLineIntoSelectSQLAndAlias(string lineToSplit, out string selectSQL, out string? alias);
 

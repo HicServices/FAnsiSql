@@ -172,6 +172,18 @@ internal sealed class QuerySyntaxHelperTests
         });
     }
 
+    [TestCaseSource(typeof(All), nameof(All.DatabaseTypes))]
+    public void Test_BooleanWrapper(DatabaseType dbType)
+    {
+        Assert.Multiple(() =>
+        {
+            var syntaxHelper = ImplementationManager.GetImplementation(dbType).GetQuerySyntaxHelper();
+
+            Assert.That(syntaxHelper.True, Is.EqualTo(dbType == DatabaseType.PostgreSql ? "TRUE" : "1"));
+            Assert.That(syntaxHelper.False, Is.EqualTo(dbType == DatabaseType.PostgreSql ? "FALSE" : "0"));
+        });
+    }
+
     [TestCaseSource(typeof(All),nameof(All.DatabaseTypes))]
     public void Test_NameValidation(DatabaseType dbType)
     {
