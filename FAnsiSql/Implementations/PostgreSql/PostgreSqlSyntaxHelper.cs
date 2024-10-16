@@ -24,9 +24,11 @@ public sealed class PostgreSqlSyntaxHelper : QuerySyntaxHelper
 
     public override string CloseQualifier => "\"";
 
-    public override string False => "FALSE";
+    ///<inheritdoc/>
+    public override string False => "FALSE"; // 'FALSE' is the string representation of the boolean false in PostgreSql, unlike 0 for the others
 
-    public override string True => "TRUE";
+    ///<inheritdoc/>
+    public override string True => "TRUE"; // 'TRUE' is the string representation of the boolean true in PostgreSql, unlike 1 for the others
 
     public override bool SupportsEmbeddedParameters() => false;
 
