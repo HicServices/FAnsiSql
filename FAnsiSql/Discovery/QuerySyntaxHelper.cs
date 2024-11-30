@@ -64,7 +64,7 @@ public abstract partial class QuerySyntaxHelper(
 
     public ITypeTranslater TypeTranslater { get; private set; } = translater;
 
-    private readonly Dictionary<CultureInfo, TypeDeciderFactory> factories = [];
+    private readonly Dictionary<CultureInfo, TypeDeciderFactory> _factories = [];
 
     public IAggregateHelper AggregateHelper { get; private set; } = aggregateHelper;
     public IUpdateHelper UpdateHelper { get; set; } = updateHelper;
@@ -89,7 +89,7 @@ public abstract partial class QuerySyntaxHelper(
         if (string.IsNullOrWhiteSpace(query))
             return [];
 
-        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Cast<Match>().Select(static match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
+        var toReturn = new HashSet<string>(ParameterNameRegex.Matches(query).Select(static match => match.Groups[1].Value.Trim()), StringComparer.InvariantCultureIgnoreCase);
         return toReturn;
     }
 
@@ -178,7 +178,7 @@ public abstract partial class QuerySyntaxHelper(
             : //table valued functions do not support database name being in the column level selection list area of sql queries
             $"{EnsureFullyQualified(databaseName, schema, tableName)}.{EnsureWrapped(GetRuntimeName(columnName))}";
 
-    public virtual string Escape(string sql) => string.IsNullOrWhiteSpace(sql) ? sql : sql.Replace("'", "''");
+    public virtual string? Escape([NotNullIfNotNull(nameof(sql))] string? sql) => string.IsNullOrWhiteSpace(sql) ? sql : sql.Replace("'", "''");
     public abstract TopXResponse HowDoWeAchieveTopX(int x);
 
     public virtual string GetParameterDeclaration(string proposedNewParameterName, DatabaseTypeRequest request) => GetParameterDeclaration(proposedNewParameterName, TypeTranslater.GetSQLDBTypeForCSharpType(request));
@@ -224,7 +224,7 @@ public abstract partial class QuerySyntaxHelper(
     public abstract string GetScalarFunctionSql(MandatoryScalarFunctions function);
 
     /// <inheritdoc/>
-    public void SplitLineIntoOuterMostMethodAndContents(string lineToSplit, out string method, out string contents)
+    public void SplitLineIntoOuterMostMethodAndContents(string? lineToSplit, out string method, out string contents)
     {
         if (string.IsNullOrWhiteSpace(lineToSplit))
             throw new ArgumentException(
@@ -262,11 +262,7 @@ public abstract partial class QuerySyntaxHelper(
 
         //replace anything that isn't a digit, letter or underscore with emptiness (except spaces - these will go but first...)
         //also accept anything above ASCII 256
-        var r = HeaderNameCharRegex();
-
-        var adjustedHeader = r.Replace(header, "");
-
-        var sb = new StringBuilder(adjustedHeader);
+        var sb = new StringBuilder(HeaderNameCharRegex().Replace(header, ""));
 
         //Camel case after spaces
         for (var i = 0; i < sb.Length; i++)
@@ -275,13 +271,10 @@ public abstract partial class QuerySyntaxHelper(
                 //and that character is a lower case letter
                 sb[i + 1] = char.ToUpper(sb[i + 1]);
 
-        adjustedHeader = sb.ToString().Replace(" ", "");
+        sb.Replace(" ", "");
 
         //if it starts with a digit (illegal) put an underscore before it
-        if (StartsDigitsRe().IsMatch(adjustedHeader))
-            adjustedHeader = $"_{adjustedHeader}";
-
-        return adjustedHeader;
+        return char.IsAsciiDigit(sb[0]) ? $"_{sb}" : sb.ToString();
     }
 
     public string GetSensibleEntityNameFromString(string? potentiallyDodgyName)
@@ -302,7 +295,7 @@ public abstract partial class QuerySyntaxHelper(
     public abstract string GetAutoIncrementKeywordIfAny();
     public abstract Dictionary<string, string> GetSQLFunctionsDictionary();
 
-    public bool IsBasicallyNull(object value)
+    public bool IsBasicallyNull(object? value)
     {
         if (value is string stringValue)
             return string.IsNullOrWhiteSpace(stringValue);
@@ -328,18 +321,18 @@ public abstract partial class QuerySyntaxHelper(
         {
             culture ??= CultureInfo.InvariantCulture;
 
-            if (!factories.ContainsKey(culture))
-                factories.Add(culture, new TypeDeciderFactory(culture));
+            if (!_factories.ContainsKey(culture))
+                _factories.Add(culture, new TypeDeciderFactory(culture));
 
             var tt = TypeTranslater;
-            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
-            var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType.SQLType);
+            p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType?.SQLType);
+            var cSharpType = tt.GetCSharpTypeForSQLDBType(discoveredColumn.DataType?.SQLType);
 
             if (IsBasicallyNull(value))
                 p.Value = DBNull.Value;
-            else if (value is string strVal && factories[culture].IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan
+            else if (value is string strVal && _factories[culture].IsSupported(cSharpType)) //if the input is a string and it's for a hard type e.g. TimeSpan
             {
-                var decider = factories[culture].Create(cSharpType);
+                var decider = _factories[culture].Create(cSharpType);
                 var o = decider.Parse(strVal);
 
                 if (o is DateTime d) o = FormatDateTimeForDbParameter(d);
@@ -444,7 +437,7 @@ public abstract partial class QuerySyntaxHelper(
     protected virtual object FormatTimespanForDbParameter(TimeSpan timeSpan) => timeSpan;
 
     #region Equality Members
-    protected bool Equals(QuerySyntaxHelper other)
+    protected bool Equals(QuerySyntaxHelper? other)
     {
         if (other == null)
             return false;
@@ -473,7 +466,7 @@ public abstract partial class QuerySyntaxHelper(
 
 
         //sensible parameter names have no spaces or symbols!
-        var sensibleParameterNamesInclude = sensibleParameterNamesIncludeRe();
+        var sensibleParameterNamesInclude = SensibleParameterNamesIncludeRe();
 
         for (var i = 0; i < columns.Length; i++)
         {
@@ -490,7 +483,7 @@ public abstract partial class QuerySyntaxHelper(
     }
 
     [GeneratedRegex(@"^\w*$")]
-    private static partial Regex sensibleParameterNamesIncludeRe();
+    private static partial Regex SensibleParameterNamesIncludeRe();
 
     //whitespace followed by as and more whitespace
     //Then any word (optionally bounded by a table name qualifier)

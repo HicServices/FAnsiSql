@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
-using System.Linq;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using Npgsql;
@@ -77,11 +76,11 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
 
     public override IEnumerable<DiscoveredTableValuedFunction> ListTableValuedFunctions(DiscoveredDatabase parent, IQuerySyntaxHelper querySyntaxHelper,
         DbConnection connection, string database, DbTransaction? transaction = null) =>
-        Enumerable.Empty<DiscoveredTableValuedFunction>();
+        [];
 
     public override DiscoveredStoredprocedure[]
         ListStoredprocedures(DbConnectionStringBuilder builder, string database) =>
-        Array.Empty<DiscoveredStoredprocedure>();
+        [];
 
     public override IDiscoveredTableHelper GetTableHelper() => PostgreSqlTableHelper.Instance;
 
@@ -120,7 +119,7 @@ public sealed class PostgreSqlDatabaseHelper : DiscoveredDatabaseHelper
 
     protected override string GetCreateTableSqlLineForColumn(DatabaseColumnRequest col, string datatype, IQuerySyntaxHelper syntaxHelper) =>
         //Collations generally have to be in quotes (unless maybe they are very weird user generated ones?)
-        $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} {(string.IsNullOrWhiteSpace(col.Collation) ? "" : $"COLLATE \"{col.Collation.Trim('"')}\"")} {(col.AllowNulls && !col.IsPrimaryKey ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
+        $"{syntaxHelper.EnsureWrapped(col.ColumnName)} {datatype} {(col.Default != MandatoryScalarFunctions.None ? $"default {syntaxHelper.GetScalarFunctionSql(col.Default)}" : "")} {(string.IsNullOrWhiteSpace(col.Collation) ? "" : $"COLLATE \"{col.Collation.Trim('"')}\"")} {(col is { AllowNulls: true, IsPrimaryKey: false } ? " NULL" : " NOT NULL")} {(col.IsAutoIncrement ? syntaxHelper.GetAutoIncrementKeywordIfAny() : "")}";
 
     public override DirectoryInfo Detach(DiscoveredDatabase database) => throw new NotImplementedException();
 

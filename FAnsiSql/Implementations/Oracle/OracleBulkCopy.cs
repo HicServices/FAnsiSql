@@ -44,8 +44,12 @@ internal sealed class OracleBulkCopy(DiscoveredTable targetTable, IManagedConnec
         foreach (var (dataColumn, discoveredColumn) in mapping)
         {
             var p = _server.AddParameterWithValueToCommand(parameterNames[dataColumn], cmd, DBNull.Value);
+            if (discoveredColumn.DataType?.SQLType == null)
+                continue;
+
             p.DbType = tt.GetDbTypeForSQLDBType(discoveredColumn.DataType.SQLType);
 
+            // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
             switch (p.DbType)
             {
                 case DbType.DateTime:

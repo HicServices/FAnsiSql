@@ -21,7 +21,7 @@ public interface ITypeTranslater
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    string GetSQLDBTypeForCSharpType(DatabaseTypeRequest request);
+    string GetSQLDBTypeForCSharpType(DatabaseTypeRequest? request);
 
     /// <summary>
     /// Returns the System.Data.DbType (e.g. DbType.String) for the specified proprietary database type (e.g. "varchar(max)")
@@ -29,7 +29,7 @@ public interface ITypeTranslater
     /// <exception cref="NotSupportedException"></exception>
     /// <param name="sqlType"></param>
     /// <returns></returns>
-    DbType GetDbTypeForSQLDBType(string sqlType);
+    DbType GetDbTypeForSQLDBType(string? sqlType);
 
 
     /// <summary>
@@ -80,5 +80,5 @@ public interface ITypeTranslater
     /// <param name="sqlType"></param>
     /// <param name="destinationTypeTranslater"></param>
     /// <returns></returns>
-    string TranslateSQLDBType(string sqlType, ITypeTranslater destinationTypeTranslater);
+    string? TranslateSQLDBType(string? sqlType, ITypeTranslater destinationTypeTranslater);
 }

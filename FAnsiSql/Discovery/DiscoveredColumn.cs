@@ -1,4 +1,5 @@
-﻿using FAnsi.Discovery.QuerySyntax;
+﻿using System;
+using FAnsi.Discovery.QuerySyntax;
 using FAnsi.Naming;
 using TypeGuesser;
 
@@ -57,14 +58,13 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// </summary>
     public string? Format { get; set; }
 
-    private readonly string _name = name;
     private readonly IQuerySyntaxHelper _querySyntaxHelper = table.Database.Server.GetQuerySyntaxHelper();
 
     /// <summary>
     /// The unqualified name of the column e.g. "MyCol"
     /// </summary>
     /// <returns></returns>
-    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(_name);
+    public string GetRuntimeName() => _querySyntaxHelper.GetRuntimeName(name);
 
     /// <summary>
     /// The fully qualified name of the column e.g. [MyDb].dbo.[MyTable].[MyCol] or `MyDb`.`MyCol`
@@ -86,7 +86,7 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// Returns the name of the column
     /// </summary>
     /// <returns></returns>
-    public override string ToString() => _name;
+    public override string ToString() => name;
 
     /// <summary>
     /// Generates a <see cref="Guesser"/> primed with the <see cref="DataType"/> of this column.  This can be used to inspect new
@@ -100,7 +100,7 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
-    private bool Equals(DiscoveredColumn other) => string.Equals(_name, other._name) && Equals(Table, other.Table);
+    private bool Equals(DiscoveredColumn other) => string.Equals(name, other.ToString()) && Equals(Table, other.Table);
 
     /// <summary>
     /// Based on column name and Table
@@ -120,17 +120,11 @@ public sealed class DiscoveredColumn(DiscoveredTable table, string name, bool al
     /// Based on column name and Table
     /// </summary>
     /// <returns></returns>
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            return ((_name?.GetHashCode() ?? 0) * 397) ^ (Table?.GetHashCode() ?? 0);
-        }
-    }
+    public override int GetHashCode() => HashCode.Combine(name, Table);
 
     /// <summary>
     /// Returns the wrapped e.g. "[MyCol]" name of the column including escaping e.g. if you wanted to name a column "][nquisitor" (which would return "[]][nquisitor]").  Use <see cref="GetFullyQualifiedName()"/> to return the full name including table/database/schema.
     /// </summary>
     /// <returns></returns>
-    public string? GetWrappedName() => Table.GetQuerySyntaxHelper().EnsureWrapped(GetRuntimeName());
+    public string GetWrappedName() => Table.GetQuerySyntaxHelper().EnsureWrapped(GetRuntimeName());
 }

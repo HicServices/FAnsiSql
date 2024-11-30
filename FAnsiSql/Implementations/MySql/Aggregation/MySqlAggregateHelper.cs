@@ -8,21 +8,28 @@ namespace FAnsi.Implementations.MySql.Aggregation;
 public sealed class MySqlAggregateHelper : AggregateHelper
 {
     public static readonly MySqlAggregateHelper Instance = new();
-    private MySqlAggregateHelper() { }
-    private static string GetDateAxisTableDeclaration(IQueryAxis axis)
+
+    private MySqlAggregateHelper()
     {
+    }
+
+    private static string GetDateAxisTableDeclaration(IQueryAxis? axis)
+    {
+        ArgumentNullException.ThrowIfNull(axis);
+
         //if the axis is days then there are likely to be thousands of them but if we start adding thousands of years
         //mysql date falls over with overflow exceptions
         var thousands =
-            axis.AxisIncrement == AxisIncrement.Day ?
-                """
-                JOIN
-                (SELECT 0 thousands
-                UNION ALL SELECT  1000 UNION ALL SELECT  2000 UNION ALL SELECT  3000
-                UNION ALL SELECT  4000 UNION ALL SELECT  5000 UNION ALL SELECT  6000
-                UNION ALL SELECT  7000 UNION ALL SELECT  8000 UNION ALL SELECT  9000
-                ) thousands
-                """ : "";
+            axis.AxisIncrement == AxisIncrement.Day
+                ? """
+                  JOIN
+                  (SELECT 0 thousands
+                  UNION ALL SELECT  1000 UNION ALL SELECT  2000 UNION ALL SELECT  3000
+                  UNION ALL SELECT  4000 UNION ALL SELECT  5000 UNION ALL SELECT  6000
+                  UNION ALL SELECT  7000 UNION ALL SELECT  8000 UNION ALL SELECT  9000
+                  ) thousands
+                  """
+                : "";
 
         var plusThousands = axis.AxisIncrement == AxisIncrement.Day ? "+ thousands" : "";
 
@@ -68,7 +75,7 @@ public sealed class MySqlAggregateHelper : AggregateHelper
              """;
     }
 
-    public override string GetDatePartOfColumn(AxisIncrement increment, string columnSql)
+    public override string GetDatePartOfColumn(AxisIncrement? increment, string columnSql)
     {
         return increment switch
         {
@@ -85,8 +92,8 @@ public sealed class MySqlAggregateHelper : AggregateHelper
 
     protected override string BuildAxisAggregate(AggregateCustomLineCollection query)
     {
-        var countAlias = query.CountSelect.GetAliasFromText(query.SyntaxHelper);
-        var axisColumnAlias = query.AxisSelect.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
+        var countAlias = query.CountSelect?.GetAliasFromText(query.SyntaxHelper);
+        var axisColumnAlias = query.AxisSelect?.GetAliasFromText(query.SyntaxHelper) ?? "joinDt";
 
         WrapAxisColumnWithDatePartFunction(query, axisColumnAlias);
 
@@ -114,7 +121,7 @@ public sealed class MySqlAggregateHelper : AggregateHelper
             string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert < QueryComponent.SELECT)),
             GetDateAxisTableDeclaration(query.Axis),
 
-            GetDatePartOfColumn(query.Axis.AxisIncrement, "dateAxis.dt"),
+            GetDatePartOfColumn(query.Axis?.AxisIncrement, "dateAxis.dt"),
             countAlias,
 
             //the entire query
@@ -126,6 +133,9 @@ public sealed class MySqlAggregateHelper : AggregateHelper
 
     protected override string BuildPivotAndAxisAggregate(AggregateCustomLineCollection query)
     {
+        ArgumentNullException.ThrowIfNull(query.Axis);
+        ArgumentNullException.ThrowIfNull(query.AxisSelect);
+
         var axisColumnWithoutAlias = query.AxisSelect.GetTextWithoutAlias(query.SyntaxHelper);
         var part1 = GetPivotPart1(query);
 
@@ -168,11 +178,11 @@ public sealed class MySqlAggregateHelper : AggregateHelper
             string.Join(Environment.NewLine, query.Lines.Where(static l => l.LocationToInsert < QueryComponent.SELECT)),
             GetDateAxisTableDeclaration(query.Axis),
             part1,
-            query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement, "dateAxis.dt")),
+            query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis?.AxisIncrement, "dateAxis.dt")),
             string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert == QueryComponent.SELECT)),
 
             //the from including all table joins and where but no calendar table join
-            query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis.AxisIncrement, axisColumnWithoutAlias)),
+            query.SyntaxHelper.Escape(GetDatePartOfColumn(query.Axis?.AxisIncrement, axisColumnWithoutAlias)),
 
             //the order by (should be count so that heavy populated columns come first)
             string.Join(Environment.NewLine, query.Lines.Where(static c => c.LocationToInsert is >= QueryComponent.FROM and <= QueryComponent.WHERE).Select(x => query.SyntaxHelper.Escape(x.Text)))
@@ -231,9 +241,9 @@ public sealed class MySqlAggregateHelper : AggregateHelper
     /// <returns></returns>
     private static string GetPivotPart1(AggregateCustomLineCollection query)
     {
-        var pivotSqlWithoutAlias = query.PivotSelect.GetTextWithoutAlias(query.SyntaxHelper);
+        var pivotSqlWithoutAlias = query.PivotSelect?.GetTextWithoutAlias(query.SyntaxHelper);
 
-        var countSqlWithoutAlias = query.CountSelect.GetTextWithoutAlias(query.SyntaxHelper);
+        var countSqlWithoutAlias = query.CountSelect?.GetTextWithoutAlias(query.SyntaxHelper);
 
         query.SyntaxHelper.SplitLineIntoOuterMostMethodAndContents(countSqlWithoutAlias, out var aggregateMethod,
             out var aggregateParameter);
@@ -258,13 +268,15 @@ public sealed class MySqlAggregateHelper : AggregateHelper
 
         //theres an explicit topX so order by it verbatim instead
         var topXOrderByLine =
-            query.Lines.SingleOrDefault(static c => c.LocationToInsert == QueryComponent.OrderBy && c.Role == CustomLineRole.TopX);
+            query.Lines.SingleOrDefault(static c => c is
+                { LocationToInsert: QueryComponent.OrderBy, Role: CustomLineRole.TopX });
         if (topXOrderByLine != null)
             orderBy = topXOrderByLine.Text;
 
         //if theres a topX limit postfix line (See MySqlQuerySyntaxHelper.HowDoWeAchieveTopX) add that too
         var topXLimitLine =
-            query.Lines.SingleOrDefault(static c => c.LocationToInsert == QueryComponent.Postfix && c.Role == CustomLineRole.TopX);
+            query.Lines.SingleOrDefault(static c => c is
+                { LocationToInsert: QueryComponent.Postfix, Role: CustomLineRole.TopX });
         var topXLimitSqlIfAny = topXLimitLine != null ? topXLimitLine.Text : "";
 
         var havingSqlIfAny = string.Join(Environment.NewLine,

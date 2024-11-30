@@ -22,7 +22,7 @@ public sealed class MicrosoftSQLColumnHelper : IDiscoveredColumnHelper
 
     public string GetAlterColumnToSql(DiscoveredColumn column, string newType, bool allowNulls)
     {
-        if (column.DataType.SQLType != "bit" || newType == "bit")
+        if (column.DataType?.SQLType != "bit" || newType == "bit")
             return
                 $"ALTER TABLE {column.Table.GetFullyQualifiedName()} ALTER COLUMN {column.GetWrappedName()} {newType} {(allowNulls ? "NULL" : "NOT NULL")}";
 

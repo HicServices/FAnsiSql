@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using FAnsi.Discovery.TypeTranslation;
 using FAnsi.Implementations.MicrosoftSQL;
 using NUnit.Framework;
 using TypeGuesser;

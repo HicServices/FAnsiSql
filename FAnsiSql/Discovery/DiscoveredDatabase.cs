@@ -84,7 +84,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// Returns the wrapped e.g. "[MyDatabase]" name of the database including escaping e.g. if you wanted to name a database "][nquisitor" (which would return "[]][nquisitor]").
     /// </summary>
     /// <returns></returns>
-    public string? GetWrappedName() => _querySyntaxHelper.EnsureWrapped(GetRuntimeName());
+    public string GetWrappedName() => _querySyntaxHelper.EnsureWrapped(GetRuntimeName());
 
     /// <summary>
     /// <para>Creates an expectation (See <see cref="IMightNotExist"/>) that there is a table with the given name in the database.
@@ -127,7 +127,7 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// <returns></returns>
     public bool Exists(IManagedTransaction? transaction = null)
     {
-        return Server.DiscoverDatabases().Any(db => db.GetRuntimeName()?.Equals(GetRuntimeName(), StringComparison.InvariantCultureIgnoreCase) == true);
+        return Server.DiscoverDatabases().Any(db => db.GetRuntimeName().Equals(GetRuntimeName(), StringComparison.InvariantCultureIgnoreCase));
     }
 
     /// <summary>
@@ -303,11 +303,5 @@ public sealed class DiscoveredDatabase : IHasRuntimeName, IMightNotExist
     /// Based on Server and database name
     /// </summary>
     /// <returns></returns>
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            return ((Server != null ? Server.GetHashCode() : 0) * 397) ^ (_database != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(_database) : 0);
-        }
-    }
+    public override int GetHashCode() => HashCode.Combine(Server, _database);
 }

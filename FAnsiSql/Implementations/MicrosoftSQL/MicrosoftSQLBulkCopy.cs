@@ -121,33 +121,35 @@ public sealed partial class MicrosoftSQLBulkCopy : BulkCopy
             foreach (DataRow dr in dt.Rows)
                 try
                 {
-                    investigationOneLineAtATime.WriteToServer(new[] { dr }); //try one line
+                    investigationOneLineAtATime.WriteToServer([dr]); //try one line
                     line++;
                 }
                 catch (Exception exception)
                 {
-                    if (BcpColIdToString(investigationOneLineAtATime, exception as SqlException, out var result, out var badMapping))
-                    {
-                        if (badMapping is null || !dt.Columns.Contains(badMapping.SourceColumn))
-                            return new Exception(
-                                string.Format(
-                                    SR
-                                        .MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_,
-                                    line, result), e);
+                    if (!BcpColIdToString(investigationOneLineAtATime, exception as SqlException, out var result,
+                            out var badMapping))
+                        return new FileLoadException(
+                            string.Format(
+                                SR
+                                    .MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_,
+                                line, Environment.NewLine, string.Join(Environment.NewLine, dr.ItemArray), firstPass),
+                            exception);
 
-                        var sourceValue = dr[badMapping.SourceColumn];
-                        var destColumn = TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
+                    if (badMapping is null || !dt.Columns.Contains(badMapping.SourceColumn))
+                        return new Exception(
+                            string.Format(
+                                SR
+                                    .MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_,
+                                line, result), e);
 
-                        if (destColumn != null)
-                            return new FileLoadException(
-                                string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0__the_complaint_was_about_source_column____1____which_had_value____2____destination_data_type_was____3____4__5_, line, badMapping.SourceColumn, sourceValue, destColumn.DataType, Environment.NewLine, result), exception);
+                    var sourceValue = dr[badMapping.SourceColumn];
+                    var destColumn = TargetTableColumns.SingleOrDefault(c =>c.GetRuntimeName().Equals(badMapping.DestinationColumn));
 
-                        return new Exception(string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_, line, result), e);
-                    }
+                    if (destColumn != null)
+                        return new FileLoadException(
+                            string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0__the_complaint_was_about_source_column____1____which_had_value____2____destination_data_type_was____3____4__5_, line, badMapping.SourceColumn, sourceValue, destColumn.DataType, Environment.NewLine, result), exception);
 
-                    return new FileLoadException(
-                        string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_Second_Pass_Exception__Failed_to_load_data_row__0__the_following_values_were_rejected_by_the_database___1__2__3_, line, Environment.NewLine, string.Join(Environment.NewLine,dr.ItemArray), firstPass),
-                        exception);
+                    return new Exception(string.Format(SR.MicrosoftSQLBulkCopy_AttemptLineByLineInsert_BulkInsert_failed_on_data_row__0___1_, line, result), e);
                 }
 
             //it worked... how!?
