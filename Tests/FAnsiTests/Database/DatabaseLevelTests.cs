@@ -66,7 +66,7 @@ internal sealed class DatabaseLevelTests : DatabaseTests
             DatabaseType.MySql => Throws.TypeOf<OperationCanceledException>(),
             DatabaseType.MicrosoftSQLServer => Throws.TypeOf<TaskCanceledException>(),
             DatabaseType.PostgreSql => Throws.Nothing,
-            DatabaseType.Oracle => Throws.TypeOf<OracleException>(),
+            DatabaseType.Oracle => Throws.TypeOf<OperationCanceledException>(),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
