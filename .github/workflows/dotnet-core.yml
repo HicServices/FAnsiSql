@@ -42,7 +42,7 @@ jobs:
     - name: Install Sql Server
       run: |
         wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
+        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/22.04/mssql-server-2022.list)"
         sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
         sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
     - name: MySQL
