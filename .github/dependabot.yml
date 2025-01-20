@@ -13,3 +13,7 @@ updates:
   target-branch: main
   reviewers:
   - jas88
+- package-ecosystem: "dotnet-sdk"
+  directory: "/"
+  schedule:
+    interval: weekly

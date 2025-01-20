@@ -11,12 +11,11 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</description>
     <PackageTags>Ansi,SQL</PackageTags>
-    <TargetFramework>net8.0</TargetFramework>
     <AssemblyTitle>HIC.FAnsiSql</AssemblyTitle>
     <Company>Health Informatics Centre, University of Dundee</Company>
     <Product>HIC.FAnsiSql</Product>
     <Description>FAnsiSql is a database management/ETL library that allows you to perform common SQL operations without having to know which Database Management System (DBMS) you are targetting (e.g. Sql Server, My Sql, Oracle).</Description>
-    <Copyright>Copyright ©  2019-2024</Copyright>
+    <Copyright>Copyright ©  2019-2025</Copyright>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible>true</IsAotCompatible>
