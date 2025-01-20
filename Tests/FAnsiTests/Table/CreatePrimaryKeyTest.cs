@@ -92,7 +92,7 @@ internal sealed class CreatePrimaryKeyTest: DatabaseTests
         Assert.Multiple(() =>
         {
             Assert.That(ex?.Message.Contains("Failed to create primary key on table") ?? false);
-            Assert.That(ex?.InnerException, Is.Not.InstanceOf(typeof(AggregateException)));
+            Assert.That(ex?.InnerException, Is.Not.InstanceOf<AggregateException>());
             Assert.That(ex?.InnerException, Is.InstanceOf<DbException>());
         });
 

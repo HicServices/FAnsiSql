@@ -22,16 +22,16 @@ namespace FAnsiTests.TypeTranslation;
 /// </summary>
 public sealed class TypeTranslaterTests : DatabaseTests
 {
-    private readonly Dictionary<DatabaseType,ITypeTranslater> _translaters = [];
+    private readonly Dictionary<DatabaseType, ITypeTranslater> _translaters = [];
 
     [OneTimeSetUp]
     public void SetupDatabases()
     {
-        foreach (DatabaseType type in Enum.GetValues(typeof(DatabaseType)))
+        foreach (var type in Enum.GetValues<DatabaseType>())
             try
             {
                 var tt = ImplementationManager.GetImplementation(type).GetQuerySyntaxHelper().TypeTranslater;
-                _translaters.Add(type,tt);
+                _translaters.Add(type, tt);
             }
             catch (ImplementationNotFoundException)
             {
