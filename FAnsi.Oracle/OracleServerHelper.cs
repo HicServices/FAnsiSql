@@ -131,4 +131,33 @@ public sealed class OracleServerHelper : DiscoveredServerHelper
         while (r.Read())
             yield return (string)r["username"];
     }
+
+    public override bool IsConnectionAlive(DbConnection connection)
+    {
+        try
+        {
+            // Check for dangling transactions (fixes #30)
+            if (HasDanglingTransaction(connection))
+                return false;
+
+            // Try a simple command to verify connection is usable
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT 1 FROM DUAL";  // Oracle syntax
+            cmd.CommandTimeout = 1;
+            cmd.ExecuteScalar();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public override bool HasDanglingTransaction(DbConnection connection)
+    {
+        // Oracle doesn't have an easy way to detect uncommitted transactions at the session level
+        // OracleConnection does track transactions internally but property isn't public
+        // For now, rely on ADO.NET's internal tracking
+        return false;
+    }
 }

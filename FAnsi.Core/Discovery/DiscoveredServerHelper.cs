@@ -205,4 +205,39 @@ public abstract partial class DiscoveredServerHelper(DatabaseType databaseType) 
 
     [GeneratedRegex(@"\d+\.\d+(\.\d+)?(\.\d+)?", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex RVagueVersionRe();
+
+    /// <summary>
+    /// Validates that a connection is still alive and usable.
+    /// Override in database-specific implementations to provide DBMS-specific validation logic.
+    /// </summary>
+    /// <param name="connection">The connection to validate</param>
+    /// <returns>True if the connection is alive and usable</returns>
+    public virtual bool IsConnectionAlive(DbConnection connection)
+    {
+        try
+        {
+            // Check for dangling transactions (fixes #30)
+            if (HasDanglingTransaction(connection))
+                return false;
+
+            // Try a simple command to verify connection is usable
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT 1";
+            cmd.CommandTimeout = 1;
+            cmd.ExecuteScalar();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Checks if the connection has a dangling transaction from previous use.
+    /// Override in database-specific implementations to check the concrete connection type's Transaction property.
+    /// </summary>
+    /// <param name="connection">The connection to check</param>
+    /// <returns>True if the connection has an uncommitted transaction</returns>
+    public virtual bool HasDanglingTransaction(DbConnection connection) => false;
 }

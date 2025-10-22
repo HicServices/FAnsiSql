@@ -171,4 +171,26 @@ public sealed class MicrosoftSQLServerHelper : DiscoveredServerHelper
 
         return null;
     }
+
+    public override bool HasDanglingTransaction(DbConnection connection)
+    {
+        if (connection is SqlConnection sqlConn && sqlConn.State == ConnectionState.Open)
+        {
+            try
+            {
+                // Check for dangling transactions (fixes #30)
+                using var cmd = sqlConn.CreateCommand();
+                cmd.CommandText = "SELECT @@TRANCOUNT";
+                cmd.CommandTimeout = 1;
+                var result = cmd.ExecuteScalar();
+                return result != null && Convert.ToInt32(result) > 0;
+            }
+            catch
+            {
+                // If check fails, assume connection isn't usable
+                return true;
+            }
+        }
+        return false;
+    }
 }

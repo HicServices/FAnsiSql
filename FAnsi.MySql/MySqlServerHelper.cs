@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using FAnsi.Discovery;
 using FAnsi.Discovery.ConnectionStringDefaults;
@@ -118,5 +119,26 @@ public sealed class MySqlServerHelper : DiscoveredServerHelper
         using var r = cmd.ExecuteReader();
         while (r.Read())
             yield return (string)r["Database"];
+    }
+
+    public override bool HasDanglingTransaction(DbConnection connection)
+    {
+        // MySQL connections in a transaction have @@in_transaction set
+        if (connection is MySqlConnection && connection.State == ConnectionState.Open)
+        {
+            try
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = "SELECT @@in_transaction";
+                cmd.CommandTimeout = 1;
+                var result = cmd.ExecuteScalar();
+                return result != null && Convert.ToInt32(result) > 0;
+            }
+            catch
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

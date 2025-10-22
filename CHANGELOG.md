@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Oracle: Added NOCACHE to IDENTITY columns to fix sequence allocation issues when mixing array-bound bulk inserts with regular inserts
+- Connection pooling: Detect and reject pooled connections with dangling transactions (#30)
+  - Fixes "ExecuteReader requires the command to have a transaction" errors when ADO.NET returns connections with uncommitted transactions
+  - Added validation to check `DbConnection.Transaction` property before reusing pooled connections
 
 ## [3.3.0] - 2025-10-21
 

@@ -63,4 +63,18 @@ public interface IDiscoveredServerHelper
     string? GetExplicitUsernameIfAny(DbConnectionStringBuilder builder);
     string? GetExplicitPasswordIfAny(DbConnectionStringBuilder builder);
     Version? GetVersion(DiscoveredServer server);
+
+    /// <summary>
+    /// Validates that a connection is still alive and usable.
+    /// </summary>
+    /// <param name="connection">The connection to validate</param>
+    /// <returns>True if the connection is alive and usable</returns>
+    bool IsConnectionAlive(DbConnection connection);
+
+    /// <summary>
+    /// Checks if the connection has a dangling transaction from previous use.
+    /// </summary>
+    /// <param name="connection">The connection to check</param>
+    /// <returns>True if the connection has an uncommitted transaction</returns>
+    bool HasDanglingTransaction(DbConnection connection);
 }
